@@ -1,10 +1,10 @@
 //---------------------------------------------------------------------------------------
 //provided by subversion
 //---------------------------------------------------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/restructure_branch/src/integrand32.h $
-//$LastChangedDate: 2009-07-20 11:50:59 +0200 (Mon, 20 Jul 2009) $
-//$LastChangedRevision: 77 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 

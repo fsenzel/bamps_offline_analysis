@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/restructure_branch/src/psf.h $
-//$LastChangedDate: 2008-02-05 15:11:34 +0100 (Tue, 05 Feb 2008) $
-//$LastChangedRevision: 18 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
 

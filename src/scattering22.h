@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------------------------
 //provided by subversion
 //------------------------------------------------------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/restructure_branch/src/scattering22.h $
-//$LastChangedDate: 2010-07-23 17:05:12 +0200 (Fri, 23 Jul 2010) $
-//$LastChangedRevision: 153 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------
 #include "particle.h"

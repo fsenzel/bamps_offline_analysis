@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/restructure_branch/src/minijets.h $
-//$LastChangedDate: 2010-07-14 12:37:35 +0200 (Wed, 14 Jul 2010) $
-//$LastChangedRevision: 131 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
 

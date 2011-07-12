@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------------------------
 //provided by subversion
 //------------------------------------------------------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_box/main/branches/quark_branch/src/binning.cpp $
-//$LastChangedDate: 2008-02-22 15:28:55 +0100 (Fri, 22 Feb 2008) $
-//$LastChangedRevision: 21 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------
 

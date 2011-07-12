@@ -1,10 +1,10 @@
 //---------------------------------------------------------------------------------------
 //provided by subversion
 //---------------------------------------------------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/restructure_branch/src/random.cpp $
-//$LastChangedDate: 2009-07-19 15:31:52 +0200 (Sun, 19 Jul 2009) $
-//$LastChangedRevision: 75 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 

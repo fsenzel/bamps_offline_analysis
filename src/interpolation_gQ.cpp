@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------------------------
 //provided by subversion
 //------------------------------------------------------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_box/main/branches/quark_branch/src/interpolation_gQ.cpp $
-//$LastChangedDate: 2009-06-23 12:06:07 +0200 (Tue, 23 Jun 2009) $
-//$LastChangedRevision: 90 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------
 

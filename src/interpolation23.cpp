@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------------------------
 //provided by subversion
 //------------------------------------------------------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/restructure_branch/src/interpolation23.cpp $
-//$LastChangedDate: 2010-07-06 16:24:24 +0200 (Tue, 06 Jul 2010) $
-//$LastChangedRevision: 115 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------
 

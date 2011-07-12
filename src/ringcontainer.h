@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: svn+ssh://fochler@th.physik.uni-frankfurt.de/home/fochler/svnrepos/cascade_full/main/branches/LHC_initial_conditions/src/ringcontainer.h $
-//$LastChangedDate: 2010-12-27 18:48:53 +0100 (Mon, 27 Dec 2010) $
-//$LastChangedRevision: 256 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
 

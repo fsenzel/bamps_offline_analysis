@@ -1,10 +1,10 @@
 //---------------------------------------------------------------------------------------
 //provided by subversion
 //---------------------------------------------------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/restructure_branch/src/particle.cpp $
-//$LastChangedDate: 2010-07-19 21:11:09 +0200 (Mon, 19 Jul 2010) $
-//$LastChangedRevision: 144 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 

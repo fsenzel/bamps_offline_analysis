@@ -1,10 +1,10 @@
 //---------------------------------------------------------------------------------------
 //provided by subversion
 //---------------------------------------------------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/restructure_branch/src/ratesmanager.h $
-//$LastChangedDate: 2010-08-02 16:22:49 +0200 (Mon, 02 Aug 2010) $
-//$LastChangedRevision: 158 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 

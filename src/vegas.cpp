@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------------------------
 //provided by subversion
 //------------------------------------------------------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/restructure_branch/src/vegas.cpp $
-//$LastChangedDate: 2008-11-07 15:50:30 +0100 (Fri, 07 Nov 2008) $
-//$LastChangedRevision: 65 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------
 

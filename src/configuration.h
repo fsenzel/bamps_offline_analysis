@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/trunk/src/configuration.h $
-//$LastChangedDate: 2008-02-29 15:50:28 +0100 (Fri, 29 Feb 2008) $
-//$LastChangedRevision: 34 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
 

@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: svn+ssh://fochler@th.physik.uni-frankfurt.de/home/fochler/svnrepos/cascade_full/main/trunk/src/minijets.h $
-//$LastChangedDate: 2010-10-22 14:29:14 +0200 (Fri, 22 Oct 2010) $
-//$LastChangedRevision: 217 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
 

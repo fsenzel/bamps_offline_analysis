@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: file:///home/fochler/svnrepos/cascade_full/main/branches/LHC_initial_conditions/src/integrand_time.cpp $
-//$LastChangedDate: 2010-12-14 11:09:56 +0100 (Tue, 14 Dec 2010) $
-//$LastChangedRevision: 241 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
 
