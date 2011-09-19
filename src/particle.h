@@ -9,8 +9,8 @@
 //---------------------------------------------------------------------------------------
 
 /** @file
- * @brief declarations for the Particle class
- */
+* @brief Declarations for the Particle class
+*/
 
 /** @author Oliver Fochler */
 
@@ -18,155 +18,111 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-
-/**
- * @brief enum type for the flavor of a particle
- *
- * With this, the names given in the enum list can be used instead of integers (though their use is perfectly legal still).
- *
- * Mapped according to:
- * 0 = g (gluon)
- * 1 = u (up)
- * 2 = ub (anti-up)
- * 3 = d (down)
- * 4 = db (anti-down)
- * 5 = s (strange)
- * 6 = sb (anti-strange)
- * 7 = c (charm)
- * 8 = cb (anti-charm)
- * 88 = quark (generic)
- * 99 = anti-quark (generic)
- * 111 = allFlavors (any flavor)
- */
-enum FLAVOR_TYPE {gluon, up, anti_up, down, anti_down, strange, anti_strange, charm, anti_charm, quark = 88, anti_quark = 99, allFlavors = 111};
+#include "particleprototype.h"
 
 
 /**
- * @brief Provides properties of a particle needed in.the simulations.
- * @author Oliver Fochler
- *
- * This class encapsulates properties of particles that are needed for the simulation process, such as position and momentum variables.
- * Additionally it overloads the assignment operator and the copy constructor to ease usage.
- */
-class Particle
+* @brief Provides properties of a particle needed in.the simulations.
+* @author Oliver Fochler
+*
+* This class encapsulates properties of particles that are needed for the simulation process, such as position and momentum variables.
+* It is derived from ParticlePrototype (and extends it) that provides general properties of particles.
+*/
+class Particle : public ParticlePrototype
 {
-public:
-    Particle();
-    ~Particle() {};
-  
+  public:
+    /** @brief Provide standard constructor (for completeness) */
+    Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), N_EVENT( 0 ), HARD( true ), edge( -1 ), coll_id( -1 ),
+    collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), PYold( 0 ), PZold( 0 ), as22( 0 ), as23( 0 ), rate23v( 0 ),
+    rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ), cs22t( 0 ), cs23t( 0 ), lambda_scaled( 0 ), md2g_scaled_22( 0 ),
+    md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), md2q_scaled_23( 0 ), free( true ), init( true ), step( 0 ), tstep( 0 ),
+    taustep( 0 ),
+    T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
+    PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
+    X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
+    Eold( 0 ), rate( 0 ), ratev( 0 ) {};
+    
+    /** stuff special to offline reconstruction */
     double T_creation;
     double X_init, Y_init,Z_init, X_traveled;//fm
     double PX_init, PY_init,PZ_init, E_init;//GeV
     double X_lastInt, Y_lastInt, Z_lastInt, T_lastInt;
-  
-
-    /** @brief time-coordinate [fm/c] */
-    double T;
-    /** @brief X-coordinate [fm] */
-    double X;
-    /** @brief Y-coordinate [fm] */
-    double Y;
-    /** @brief Z-coordinate [fm] */
-    double Z;
-
-    /** @brief E, energy [GeV] */
-    double E;
-    /** @brief p_{x}, momentum in x direction [GeV/c] */
-    double PX;
-    /** @brief p_{x}, momentum in x direction [GeV/c] */
-    double PY;
-    /** @brief p_{x}, momentum in x direction [GeV/c] */
-    double PZ;
-
+    
+    double Eold;
+    double rate, ratev;
+    
+    
     /** @brief space time rapidity \eta */
     double eta;
-
-    /** @brief mass [GeV] */
-    double m;
-
+    
     /** @brief gluonic screening mass currently associated with the particle object, scaled by alpha_s as md2g / alpha_s [GeV^2] */
     double md2g;
     /** @brief quark screening mass currently associated with the particle object, scaled by alpha_s as md2g / alpha_s [GeV^2] */
     double md2q;
-
-    /** @brief flavor of the particle mapped to int according to FLAVOR_TYPE */
-    FLAVOR_TYPE FLAVOR;
-
-
-    /** @brief the cell the particle belongs to */
-    int cell_id;
-
-    /** @brief switch that indicates whether this particle has been annihilated within this timestep */
-    bool dead;
-
-    /** @brief unique particle ID */
-    int unique_id;
-    /** @brief counter for unique particle IDs (static) */
-    static long int unique_id_counter;
-    /** @brief counter for unique particle IDs of added particles (static) */
-    static long int unique_id_counter_added;
-
-    /** @brief TODO */
-    bool edge;
-
-    /** @brief TODO */
-    long coll_id;
-
+    
     /** @brief Pythia event number */
     int N_EVENT;
     /** @brief Pythia hard or soft scattering */
     bool HARD; // true/1 if parton comes from hard scattering
-
-
+    
+    /** @brief index of edge cell the particle belongs to, edge = -1 corresponds to no edge cell */
+    short int edge;
+    
+    /** @brief Unique ID of the last collision of the particle */
+    long coll_id;
+    
+    /** @brief Flag for free streaming, true for particles in regions with energy density < config::freezeOutEnergyDensity or for particles outside the grid */
+    bool free;
+    /** @brief Flag for discerning particles that are still within their initial formation time */
+    bool init;
+    
     /** @brief collision ordering time [fm] (geometric collisions) */
     double collisionTime;
     /** @brief collision partner (geometric collisions) */
     int collisionPartner;
-
-
-    /** @brief particle is projectile, special use for jet in box calculations */
-    bool isProjectile;
-
-    double Eold, PXold, PYold, PZold;
-//     double as22,as23;
-//     double rate23,rate32,rate22;//GeV
-//     double rate23v,rate32v,rate22v;//GeV
-    double rate, ratev;
-//     double cs22,cs23,cs22t,cs23t;
-//     double lambda_scaled;
-//     double md2g_scaled_22;
-//     double md2q_scaled_22;
-//     double md2g_scaled_23;
+    
+    /** @brief counter for unique particle IDs of added particles (static) */
+    static long int unique_id_counter_added;
+    
+    /** @brief Momentum prior to geometric collision, needed for particles in "edge cell"*/
+    double PXold;
+    /** @brief Momentum prior to geometric collision, needed for particles in "edge cell"*/
+    double PYold;
+    /** @brief Momentum prior to geometric collision, needed for particles in "edge cell"*/
+    double PZold;
+    
+    /** @brief Mean alpha_s for 2->2 interactions associated with this particle, averaged over cell in previous time step */ 
+    double as22;
+    /** @brief Mean alpha_s for 2->3 interactions associated with this particle, averaged over cell in previous time step */
+    double as23;
+    /** @brief Previous mean 2->3 rate (in GeV) associated with this particle, averaged over cell in the second to last time step */ 
+    double rate23v;
+    /** @brief Previous mean 3->2 rate (in GeV) associated with this particle, averaged over cell in the second to last time step */ 
+    double rate32v;
+    /** @brief Previous mean 2->2 rate (in GeV) associated with this particle, averaged over cell in the second to last time step */ 
+    double rate22v;
+    /** @brief Mean 2->2 cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
+    double cs22;
+    /** @brief Mean 2->3 cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
+    double cs23; 
+    /** @brief Mean 2->2 transport cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
+    double cs22t;
+    /** @brief Mean 2->3 transport cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
+    double cs23t;
+    /** @brief Mean lambda_scaled associated with this particle, averaged over cell in previous time step */
+    double lambda_scaled;
+    /** @brief Mean md2g (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
+    double md2g_scaled_22;
+    /** @brief Mean md2q (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
+    double md2q_scaled_22;
+    /** @brief Mean md2g (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
+    double md2g_scaled_23;
+    /** @brief Mean md2q (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
     double md2q_scaled_23;
-    bool free;
-    bool init;
-//     int step,tstep,taustep;//fm
-
-
-    // /** @brief assignment operator */
-    //Particle& operator=(Particle const &rhs);
-
-    /** @brief writes the 4-momentum vector to an array */
-    void getMomentumArray(double* const) const;
-    /** @brief writes the space-time vector to an array */
-    void getCoordinateArray(double* const) const;
-
+    
+    int step,tstep,taustep;//fm
+    
     static double getMass( const FLAVOR_TYPE _flav ) { return 0; }
-    static FLAVOR_TYPE mapToGenericFlavorType( const FLAVOR_TYPE _flav )
-    {
-      if ( _flav == gluon )
-      {
-        return gluon;
-      }
-      else if ( _flav == up || _flav == down || _flav == strange )
-      {
-        return quark;
-      }
-      else if ( _flav == anti_up || _flav == anti_down || _flav == anti_strange )
-      {
-        return anti_quark;
-      }      
-    }
     
     static int mapToPDGCodes( const FLAVOR_TYPE _flav )
     {
@@ -204,70 +160,9 @@ public:
           break;
       }      
     }
-
-private:
-
-};
-
-
-class scatteringInfoStorage22
-{
-public:
-    scatteringInfoStorage22() : iscat( 0 ), jscat( 0 ), time( 0 ), pix( 0 ), piy( 0 ), piz( 0 ), pjx( 0 ), pjy( 0 ), pjz( 0 ) {};
-    scatteringInfoStorage22( const int _iscat, const int _jscat, const double _time, const double _pix, const double _piy, const double _piz, const double _pjx, const double _pjy, const double _pjz ) :
-            iscat( _iscat ), jscat( _jscat ), time( _time ), pix( _pix ), piy( _piy ), piz( _piz ), pjx( _pjx), pjy( _pjy ), pjz( _pjz ) {};
-    ~scatteringInfoStorage22() {};
-
-    int iscat,jscat;
-    double time;
-    double pix,piy,piz,pjx,pjy,pjz;
-};
-
-
-
-class scatteringInfoStorage23
-{
-public:
-    scatteringInfoStorage23() : iscat( -1 ), jscat( -1 ), newp( -1 ), time( 0 ), pix( 0 ), piy( 0 ), piz( 0 ), pjx( 0 ), pjy( 0 ), pjz( 0 ),
-            newx( 0 ), newy( 0 ), newz( 0 ), newpx( 0 ), newpy( 0 ), newpz( 0 ) {};
-    scatteringInfoStorage23( const int _iscat, const int _jscat, const int _newp, const double _time, const double _pix, const double _piy, const double _piz,
-            const double _pjx, const double _pjy, const double _pjz,
-            const double _newx, const double _newy, const double _newz, const double _newpx, const double _newpy, const double _newpz ) :
-            iscat( _iscat ), jscat( _jscat ), newp( _newp ), time( _time ), pix( _pix ), piy( _piy ), piz( _piz ), pjx( _pjx ), pjy( _pjy ), pjz( _pjz ),
-            newx( _newx ), newy( _newy ), newz( _newz ), newpx( _newpx ), newpy( _newpy ), newpz( _newpz ) {};
-    ~scatteringInfoStorage23() {};
-
-    int iscat,jscat,newp;
-    double time;
-    double pix,piy,piz,pjx,pjy,pjz;
-    double newx,newy,newz,newpx,newpy,newpz;
-};
-
-
-
-class scatteringInfoStorage32
-{
-public:
-    scatteringInfoStorage32() : iscat( -1 ), jscat( -1 ), dead( -1 ), time( 0 ), pix( 0 ), piy( 0 ), piz( 0 ), pjx( 0 ), pjy( 0 ), pjz( 0 ) {};
-    scatteringInfoStorage32( const int _iscat, const int _jscat, const int _dead, const double _time, const double _pix, const double _piy, const double _piz, const double _pjx, const double _pjy, const double _pjz ) :
-            iscat( _iscat ), jscat( _jscat ), dead( _dead ), time( _time ), pix( _pix ), piy( _piy ), piz( _piz ), pjx( _pjx), pjy( _pjy ), pjz( _pjz ) {};
-    ~scatteringInfoStorage32() {};
-
-    int iscat,jscat,dead;
-    double time;
-    double pix,piy,piz,pjx,pjy,pjz;
-};
-
-
-
-class scatteringInfoStorageChange
-{
-public:
-    scatteringInfoStorageChange() : dead( -1 ), newp( -1 ) {};
-    scatteringInfoStorageChange( const int _dead, const int _newp ) : dead( _dead ), newp( _newp ) {};
-    ~scatteringInfoStorageChange() {};
-
-    int dead,newp;
+    
+    
+  private:
 };
 
 #endif

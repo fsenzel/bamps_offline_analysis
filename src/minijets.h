@@ -15,12 +15,13 @@
 #include <vector>
 #include <string>
 
+#include "initialstatemodel.h"
 #include "configuration.h"
 #include "particle.h"
 #include "vegas.h"
 #include "woodsaxon.h"
-#include "initialstatemodel.h"
 #include "integrand_time.h"
+
 
 
 
@@ -32,9 +33,6 @@ class miniJets : public initialStateModel
     
     void populateParticleVector( std::vector<Particle>& _particles );
     void populateParticleVector( std::vector<Particle>& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT );
-    
-    /** @brief nuclear density (Woods-Saxon distribution) static version */
-    static double densityA(double b, double z, const WoodSaxon& _w);   
         
   private:
     void samplePositions( std::vector<Particle>& _particles );
@@ -64,7 +62,6 @@ class miniJets : public initialStateModel
         
     /** @brief interpolation routine */
     void polint( const double xa[], const double ya[], const int n, const double x, double *y, double *dy ) const;
-    
     void setDataFilesProperties( const config& _config, STORED_TABLE_USAGE _storedTableUsage );
     
     /** @brief mass number of nucleus A */
@@ -81,7 +78,6 @@ class miniJets : public initialStateModel
     double P0;
     int numberOfTestparticles;
     
-    /** @brief minimum PT to be sampled (GeV) */
     double minimumPT;
     
     double gamma;
@@ -103,7 +99,6 @@ class miniJets : public initialStateModel
     std::string filename_samplingData_PT_fine;
     std::string filename_samplingData_maximumPT;
 };
-
 
 
 

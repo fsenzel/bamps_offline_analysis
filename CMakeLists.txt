@@ -1,24 +1,77 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules/")
 
-PROJECT(offline_cascade)
+######### Set project name  #########
+PROJECT(offlineBAMPS)
 
+######### Activate packaging, use as "make package_source"  #########
+INCLUDE(CMakeCustomPackageOptions.cmake)
+INCLUDE(CPack)
 
-SET(Boost_ADDITIONAL_VERSIONS "1.41" "1.41.0")
+######### This sets custom build flags and includes options for various compilers #########
+INCLUDE(SetCompilersAndBuildFlags.cmake)
+
+######### Find Boost libraries #########
 SET(BOOST_ROOT "$ENV{HOME}/usr")
 MESSAGE(STATUS "** Search Boost root: ${BOOST_ROOT}")
-FIND_PACKAGE(Boost 1.41 COMPONENTS system filesystem regex REQUIRED)
+FIND_PACKAGE(Boost 1.40 COMPONENTS serialization filesystem REQUIRED)
  MESSAGE(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
  MESSAGE(STATUS "** Boost Libraries: ${Boost_LIBRARY_DIRS}")
 
-FIND_PACKAGE(Cuba)
+######### Find Cuba library #########
+FIND_PACKAGE(Cuba REQUIRED)
 
-#INCLUDE_DIRECTORIES(${CUBA_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR} ${CUBA_INCLUDE_DIR})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+######### Find LHAPDF library #########
+#FIND_PACKAGE(LHAPDF REQUIRED)
+
+########## Find GSL library #########
+FIND_PACKAGE(GSL REQUIRED)
+
+######### Find svn and retrieve revision number #########
+FIND_PACKAGE(Subversion)
+IF(Subversion_FOUND)
+  Subversion_WC_INFO(${CMAKE_CURRENT_SOURCE_DIR} ER)
+  SET(SUBVERSION_REVISION ${ER_WC_REVISION})
+  SET(CPACK_PACKAGE_VERSION_PATCH "${SUBVERSION_REVISION}")
+ENDIF(Subversion_FOUND)
+
+######### This option controls whether linking to an installed version of the BAMPS lib should be tried  #########
+## instead of building the BAMPS library directly. 
+## Default: FALSE
+## Change on the command line via -DLINK_TO_BAMPS_LIB=TRUE
+SET ( LINK_TO_BAMPS_LIB FALSE CACHE BOOL "Whether to link to an installed version of the BAMPS lib instead of building it" )
+
+######### Try to find the BAMPS library in case direct linking is requested  #########
+IF ( LINK_TO_BAMPS_LIB )
+  FIND_PACKAGE( BAMPS )
+  IF ( NOT BAMPS_FOUND )
+    MESSAGE( STATUS "!! Using direct build of BAMPS library as fallback" )
+  ENDIF( NOT BAMPS_FOUND )
+ENDIF( LINK_TO_BAMPS_LIB )
 
 
+######### Handle doxygen files via CMake, adds custom target, use as "make doxygen" #########
+INCLUDE(ConfigureDoxygenTarget.cmake)
+
+######### Set include and link directories #########
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${Cuba_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIRS})
+
+
+######### Set the explicit path to the BAMPS library source directory #########
+SET( BAMPS_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/lib/ CACHE PATH "directory in which the BAMPS library source files reside" )
+
+######### Set an option to disable the generation of install targets for the BAMPS library #########
+OPTION( GENERATE_BAMPS_LIB_INSTALL_TARGETS "Whether to generate install targets for the BAMPS library or not" OFF )
+
+
+######### Add source directories  #########
 ADD_SUBDIRECTORY(src)
 
-INCLUDE(CMakeCustomPackageOptions.cmake)
-INCLUDE(CPack)
+## Only process lib/src/ subirectory in case LINK_TO_BAMPS_LIB is false OR the bamps library has not been found ##
+IF ( ( NOT LINK_TO_BAMPS_LIB ) OR ( NOT BAMPS_FOUND ) )
+##
+  ADD_SUBDIRECTORY(${BAMPS_LIBRARY_PATH})
+##
+ENDIF ( ( NOT LINK_TO_BAMPS_LIB ) OR ( NOT BAMPS_FOUND ) )

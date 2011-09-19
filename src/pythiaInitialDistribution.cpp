@@ -106,9 +106,9 @@ void pythiaInitialDistribution::setDataFilesProperties( STORED_TABLE_USAGE _stor
       // for p0=2.9 GeV
       nEntries_collisionTimes = 129;
 
-      if ( impactParameter == 0.0 )
+      if ( true )
       {
-        filename_samplingData_collisionTimes = "data/samplT_b0.dat";//b=0 fm
+        filename_samplingData_collisionTimes = "data/samplT.dat";
       }
       else
       {
@@ -221,7 +221,6 @@ void pythiaInitialDistribution::populateParticleVector(std::vector< Particle >& 
 
 
 
-
 // same as for miniJets
 void pythiaInitialDistribution::computeWoodSaxonParameters( const config& _config, WoodSaxon& _WoodSaxonParameter )
 {
@@ -289,7 +288,7 @@ void pythiaInitialDistribution::sampleMomenta( std::vector< Particle >& _particl
 
 void pythiaInitialDistribution::samplePositions( std::vector< Particle >& _particles )
 {
-  cout << "Sample particle positions for particles from PYTHIA." << endl;
+  cout << "Start sampling of particle positions for particles from PYTHIA." << endl;
   // particles are already read from file in momentum()
   int nmb_of_events = _particles.back().N_EVENT;
   int event_tmp = 0;
@@ -406,6 +405,7 @@ void pythiaInitialDistribution::samplePositions( std::vector< Particle >& _parti
       }
     }
   }
+  cout << "Finished sampling of particle positions for particles from PYTHIA." << endl;
 }
 
 

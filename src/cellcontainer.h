@@ -17,7 +17,7 @@
 
 #include "ratesmanager.h"
 #include "coordinateBins.h"
-
+#include "particle.h"
 
 
 class cornerCoordinates
