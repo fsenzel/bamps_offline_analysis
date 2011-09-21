@@ -18,7 +18,7 @@
 #define DEFAULT_EVENT_NUMBER_ESTIMATE 1000000
 #define DEFAULT_TEMPORARY_EVENT_NUMBER_ESTIMATE 100
 
-
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <map>
@@ -45,7 +45,7 @@
 
 
 enum offlineEventType { event_interaction22, event_interaction23, event_interaction32, event_interactionElastic, 
-                        event_particleIdSwap, event_endOfCascade };
+                        event_particleIdSwap, event_newTimestep, event_endOfCascade, event_dummy = 99 };
 
 class offlineDataGeneric
 {
@@ -121,6 +121,10 @@ class offlineOutputInterface
     template<class T>
     boost::shared_ptr<T> readOfflineDataFromArchive();
     
+    /** provide ability to undo read operation */
+    template<class T>
+    void undoLastReadOperation();
+    
   private:
     void checkAndCreateOutputDirectory( boost::filesystem::path& _dir );
     
@@ -153,7 +157,10 @@ class offlineOutputInterface
     tInputArchiveMap inputArchiveMap;
     /** read the stuff */
     
-    
+    /** save the last read position */
+    typedef std::map< type_index, std::streampos > tStreamPositionMap;
+    tStreamPositionMap lastStreamPositionMap;
+    /** save the last read position */
     
     typedef std::vector<tConstPointerToOfflineData> tTemporaryDataStorage;
     tTemporaryDataStorage temporaryStorage;

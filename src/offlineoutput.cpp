@@ -90,21 +90,22 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
 {
   tPointerToInputFilestream stream;
   tPointerToInputArchive archive;
- 
-  std::cout << type_index(typeid(T)).name() << std::endl;
   
 //   check whether an output archive for the given type of data has already been created, re-use if yes, create if no
   tInputArchiveMap::iterator it = inputArchiveMap.find( type_index(typeid(T)) );
   if( it != inputArchiveMap.end() )
   {
-//     stream = it->second;
+    tInputFileStreamMap::iterator itFile = inputMap.find( type_index(typeid(T)) );
+    if( itFile != inputMap.end() )
+    {
+      stream = itFile->second;    
+    }
     archive = it->second;
   }
   else
   {
     stream.reset( new boost::filesystem::ifstream() );
     std::string filename = outputDirectory.string() + "/" + filenamePrefix + additionalFilenameTag + T::filenameIdentifier + filenameSuffix;
-    std::cout << filename << std::endl;
     
     #if BINARY_OFFLINE_OUTPUT > 0
       stream->open( filename.c_str(), std::ios::binary );
@@ -115,9 +116,16 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
     inputMap.insert(std::make_pair( type_index(typeid(T)), stream));
     archive.reset( new tInputArchive( *stream ) );
     inputArchiveMap.insert(std::make_pair( type_index(typeid(T)), archive));
+    
+    lastStreamPositionMap.insert( std::make_pair( type_index(typeid(T)), 0 ));
   }
   
   // the actual reading
+  tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( type_index(typeid(T)) );
+  if( itLastPos != lastStreamPositionMap.end() )
+  {
+    itLastPos->second = stream->tellg();    
+  }
   offlineDataGeneric* _ptr = 0;
   (*archive) & _ptr;
   
@@ -137,6 +145,34 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
          
 template boost::shared_ptr<offlineDataInteraction22> offlineOutputInterface::readOfflineDataFromArchive<offlineDataInteraction22>();
 
+
+template<class T>
+void offlineOutputInterface::undoLastReadOperation()
+{
+  tPointerToInputFilestream stream;
+  
+  std::streampos lastStreamPosition;
+  tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( type_index(typeid(T)) );
+  if( itLastPos != lastStreamPositionMap.end() )
+  {
+    lastStreamPosition = itLastPos->second;    
+  }
+  else
+  {
+    std::string errMsg = "Attempting undo operation on stream that has not been initialized yet";
+    throw eOfflineOutput_error( errMsg );
+  }
+  
+//   check whether an output archive for the given type of data has already been created, re-use if yes, create if no
+  tInputFileStreamMap::iterator it = inputMap.find( type_index(typeid(T)) );
+  if( it != inputMap.end() )
+  {
+    stream = it->second;
+    stream->seekg( lastStreamPosition );
+  }
+}
+
+template void offlineOutputInterface::undoLastReadOperation<offlineDataInteraction22>();
 
 
 void offlineOutputInterface::registerOfflineDataForTemporaryStorage(const offlineEventType _eventType, tConstPointerToOfflineData _data)
