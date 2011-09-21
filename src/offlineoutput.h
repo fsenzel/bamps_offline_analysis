@@ -43,7 +43,7 @@
 #include "typeindex.h"
 #include "particle.h"
 
-
+class eOfflineOutput_error;
 enum offlineEventType { event_interaction22, event_interaction23, event_interaction32, event_interactionElastic, 
                         event_particleIdSwap, event_newTimestep, event_endOfCascade, event_dummy = 99 };
 
@@ -199,6 +199,91 @@ inline void offlineOutputInterface::checkAndCreateOutputDirectory(boost::filesys
   }
 }
 
+
+template<class T>
+boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
+{
+  tPointerToInputFilestream stream;
+  tPointerToInputArchive archive;
+  
+//   check whether an output archive for the given type of data has already been created, re-use if yes, create if no
+  tInputArchiveMap::iterator it = inputArchiveMap.find( type_index(typeid(T)) );
+  if( it != inputArchiveMap.end() )
+  {
+    tInputFileStreamMap::iterator itFile = inputMap.find( type_index(typeid(T)) );
+    if( itFile != inputMap.end() )
+    {
+      stream = itFile->second;    
+    }
+    archive = it->second;
+  }
+  else
+  {
+    stream.reset( new boost::filesystem::ifstream() );
+    std::string filename = outputDirectory.string() + "/" + filenamePrefix + additionalFilenameTag + T::filenameIdentifier + filenameSuffix;
+    
+    #if BINARY_OFFLINE_OUTPUT > 0
+      stream->open( filename.c_str(), std::ios::binary );
+    #else
+      stream->open( filename.c_str() );
+    #endif
+    
+    inputMap.insert(std::make_pair( type_index(typeid(T)), stream));
+    archive.reset( new tInputArchive( *stream ) );
+    inputArchiveMap.insert(std::make_pair( type_index(typeid(T)), archive));
+    
+    lastStreamPositionMap.insert( std::make_pair( type_index(typeid(T)), 0 ));
+  }
+  
+  // the actual reading
+  tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( type_index(typeid(T)) );
+  if( itLastPos != lastStreamPositionMap.end() )
+  {
+    itLastPos->second = stream->tellg();    
+  }
+  offlineDataGeneric* _ptr = 0;
+  (*archive) & _ptr;
+  
+  T* ptrToDerived = dynamic_cast<T*>(_ptr);
+  if ( ptrToDerived == 0 )
+  {
+    std::string errMsg = "Bad cast. Attempted dynamic_cast from ";
+    errMsg += type_index(typeid(offlineDataGeneric)).name();
+    errMsg += " to ";
+    errMsg += type_index(typeid(T)).name();
+    throw eOfflineOutput_error( errMsg );
+  }
+  
+  boost::shared_ptr<T> shrptr( ptrToDerived );
+  return shrptr;
+}
+
+
+template<class T>
+void offlineOutputInterface::undoLastReadOperation()
+{
+  tPointerToInputFilestream stream;
+  
+  std::streampos lastStreamPosition;
+  tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( type_index(typeid(T)) );
+  if( itLastPos != lastStreamPositionMap.end() )
+  {
+    lastStreamPosition = itLastPos->second;    
+  }
+  else
+  {
+    std::string errMsg = "Attempting undo operation on stream that has not been initialized yet";
+    throw eOfflineOutput_error( errMsg );
+  }
+  
+//   check whether an output archive for the given type of data has already been created, re-use if yes, create if no
+  tInputFileStreamMap::iterator it = inputMap.find( type_index(typeid(T)) );
+  if( it != inputMap.end() )
+  {
+    stream = it->second;
+    stream->seekg( lastStreamPosition );
+  }
+}
 
 
 class offlineDataEventType : public offlineDataGeneric
