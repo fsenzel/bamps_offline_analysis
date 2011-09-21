@@ -15,6 +15,7 @@
 #include "scattering23.h"
 #include "random.h"
 #include "binary_cross_sections.h"
+#include "offlineoutput.h"
 
 using namespace ns_casc;
 using namespace std;
@@ -40,7 +41,7 @@ namespace
   list<int> formGeomAdded;
 
   list<int> deadParticleList;
-  vector<coordinateSubBin> etaBins;
+  coordinateEtaBins etaBins;
 
   int gG, gQ;
 
@@ -60,91 +61,20 @@ namespace
 
 
 offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config ) :
-    theConfig( _config ), stoptime_last( 0 ), actiontype( 100 ), stoptime( 5.0 ), currentNumber( 0 ),
+    theConfig( _config ), stoptime_last( 0 ), stoptime( 5.0 ), currentNumber( 0 ),
     minActiveIndexEta( -1 ), maxActiveIndexEta( -1 ),
     rings( theConfig->getRingNumber(), theConfig->getCentralRingRadius(), theConfig->getDeltaR() ),
-    testpartcl( theConfig->getTestparticles() )
+    testpartcl( theConfig->getTestparticles() ),
+    offlineInterface( "offline_output" )
 {
-  string filename;
-
-  filename = theConfig->getPathdirCascadeData() + "/" + theConfig->getName() + "_action";
-  readac.open( filename.c_str() );
-  if ( !readac.good() )
-  {
-    cout << filename << endl;
-    string errMsg = "Error in reading " + filename;
-    throw eConfig_error( errMsg );
-  }
-
-  filename = theConfig->getPathdirCascadeData() + "/" + theConfig->getName() + "_cell";
-  readcell.open( filename.c_str() );
-  if ( !readcell.good() )
-  {
-    string errMsg = "Error in reading " + filename;
-    throw eConfig_error( errMsg );
-  }
-
-  filename = theConfig->getPathdirCascadeData() + "/" + theConfig->getName() + "_coll22";
-  read22.open( filename.c_str() );
-  if ( !read22.good() )
-  {
-    string errMsg = "Error in reading " + filename;
-    throw eConfig_error( errMsg );
-  }
-
-  filename = theConfig->getPathdirCascadeData() + "/" + theConfig->getName() + "_coll23";
-  read23.open( filename.c_str() );
-  if ( !read23.good() )
-  {
-    string errMsg = "Error in reading " + filename;
-    throw eConfig_error( errMsg );
-  }
-
-  filename = theConfig->getPathdirCascadeData() + "/" + theConfig->getName() + "_coll32";
-  read32.open( filename.c_str() );
-  if ( !read32.good() )
-  {
-    string errMsg = "Error in reading " + filename;
-    throw eConfig_error( errMsg );
-  }
-
-  filename = theConfig->getPathdirCascadeData() + "/" + theConfig->getName() + "_coll22e";
-  read22g.open( filename.c_str() );
-  if ( !read22g.good() )
-  {
-    string errMsg = "Error in reading " + filename;
-    throw eConfig_error( errMsg );
-  }
-
-  filename = theConfig->getPathdirCascadeData() + "/" + theConfig->getName() + "_change";
-  readch.open( filename.c_str() );
-  if ( !readch.good() )
-  {
-    string errMsg = "Error in reading " + filename;
-    throw eConfig_error( errMsg );
-  }
-
-  filename = theConfig->getPathdirCascadeData() + "/" + theConfig->getName() + "_rate";
-  readrate.open( filename.c_str() );
-  if ( !readrate.good() )
-  {
-    string errMsg = "Error in reading " + filename;
-    throw eConfig_error( errMsg );
-  }
+  offlineInterface.setAdditionalFilenameTag( theConfig->getName() );
 }
 
 
 
 offlineHeavyIonCollision::~offlineHeavyIonCollision()
 {
-  readac.close();
-  readcell.close();
-  read22.close();
-  read23.close();
-  read32.close();
-  read22g.close();
-  readch.close();
-  readrate.close();
+
 }
 
 
@@ -198,7 +128,6 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   edgeCell.clear();
 
   bool endOfDataFiles = false;
-  bool readCellStructure = false;
   bool doAnalysisStep = false;
   bool doMovieStep = false;
   bool doMovieStepMedium = false;
@@ -232,8 +161,6 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   int jumpMovieSteps = 0;
   double factor_dt = theConfig->getFactor_dt();
   cout << "factor for dt = " << factor_dt << endl;
-
-  etaBins.resize( IZ );
 
   aa.initialOutput();
   if ( theConfig->movieOutputJets )
@@ -344,7 +271,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     n_anti_quarks_temp = n_anti_up + n_anti_down + n_anti_strange;
 
     // evolution of gluonic medium to present time
-    dt_cascade = evolveMedium( simulationTime, readCellStructure, endOfDataFiles );
+    dt_cascade = evolveMedium( simulationTime, endOfDataFiles );
     if ( endOfDataFiles )
     {
       cout << "* End of data files reached. Aborting." << endl;
@@ -417,16 +344,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       cout << "** movie: " << nexttime << endl;
     }
     
-    // give added particles cell IDs
-    if ( readCellStructure )
-    {
       cell_ID( nexttime );
-    }
-    else
-    {
-      std::string errMsg = "error: cell structure not initialzed yet!";
-      throw eHIC_error( errMsg );
-    }
 
     // collide added particles with gluonic medium
     deadParticleList.clear();
@@ -467,10 +385,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
       nexttime = simulationTime + dt;
 
-      if ( readCellStructure )
-      {
-        cell_ID( nexttime );
-      }
+      cell_ID( nexttime );
 
       deadParticleList.clear();
       scattering( nexttime, again, aa );
@@ -530,22 +445,17 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
 
 
-double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& readCellStructure, bool& _endOfDataFiles )
+double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& _endOfDataFiles )
 {
-  const bool wcell = true;
-  bool stop;
+  bool stop = false;
   int iscat, jscat, kscat, dead;
-  double time, timei, timej, pxi, pyi, pzi, pxj, pyj, pzj;
-  int F1, F2, F3;
+  double time = 0;
+  double timei = 0;
+  double timej = 0;
+  double pxi, pyi, pzi, pxj, pyj, pzj;
+  FLAVOR_TYPE F1, F2, F3;
 //   int NinAct,NinFormInit,NinFormGeom,Ncell,Ngeom,Nfree1,Nfree2;
   double c;
-
-  unsigned long int currentFilePos = 0;
-  unsigned long int currentFilePosAc = 0;
-
-  time = timei = timej = 0.0;
-  stop = false;
-
 
   // give partcl from cascade the values for cell structurement which could have changed in collisions()
   for ( int k = 0; k < particles.size(); k++ )
@@ -557,15 +467,6 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
 
   if ( evolveToTime <= stoptime_last )
   {
-    readac.seekg( 0, ios::beg );
-    readcell.seekg( 0, ios::beg );
-    read22.seekg( 0, ios::beg );
-    read23.seekg( 0, ios::beg );
-    read32.seekg( 0, ios::beg );
-    read22g.seekg( 0, ios::beg );
-    readch.seekg( 0, ios::beg );
-    readrate.seekg( 0, ios::beg );
-
     for ( int i = 0; i < theConfig->getN_init(); i++ )
     {
       particles[i].init = true;
@@ -584,67 +485,47 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     number = theConfig->getN_init();
   }
 
-  while (( actiontype != 0 ) && ( !stop ) )
-  {
-    currentFilePosAc = readac.tellg();
-    readac >> actiontype;
+  offlineEventType actiontype = event_dummy;
 
-    if ( readac.eof() )
+  while (( actiontype != event_endOfCascade ) && ( !stop ) )
+  {
+    try
+    {
+      boost::shared_ptr< offlineDataEventType > ptrEventType = offlineInterface.readOfflineDataFromArchive< offlineDataEventType >();
+      actiontype = ptrEventType->event;
+    }    
+    catch ( boost::archive::archive_exception& err )
     {
       stop = true;
       _endOfDataFiles = true;
     }
     
-    //     cout << actiontype << "\t";
-    // build cell
-    if ( actiontype == 1 )
+    if ( actiontype == event_newTimestep )
     {
-      if ( wcell )
+      boost::shared_ptr< offlineDataCellConfiguration > ptrCellStructure = offlineInterface.readOfflineDataFromArchive< offlineDataCellConfiguration >();
+      etaBins = ptrCellStructure->etaBins;
+      timenow = ptrCellStructure->timenow;
+      timenext = ptrCellStructure->timenext;
+      randomShiftX = ptrCellStructure->randomShiftX;
+      randomShiftY = ptrCellStructure->randomShiftY;
+      randomShiftEta = ptrCellStructure->randomShiftEta;
+         
+      dt_cascade = timenext - timenow;
+
+      rateGluons_prev = rateGluons;
+      rateQuarks_prev = rateQuarks;
+      rateAntiQuarks_prev = rateAntiQuarks;
+      for ( int i = 0; i < IZ; i++ )
       {
-        readCellStructure = true;
-        readcell >> timenow >> randomShiftX >> randomShiftY >> randomShiftEta;
-        for ( int j = 0; j < etaBins.size(); j++ )
-        {
-          readcell >> etaBins[j].left >> etaBins[j].right;
-        }
-        readcell >> timenext;
+        rateGluons[i].assign( rings.size(), 0 );
+        rateQuarks[i].assign( rings.size(), 0 );
+        rateAntiQuarks[i].assign( rings.size(), 0 );
+      }
 
-        dt_cascade = timenext - timenow;
-
-        for ( int j = 0; j < etaBins.size(); j++ )
-        {
-          if ( etaBins[j].left > ( -infinity + 1.0 ) )
-          {
-            minActiveIndexEta = j;
-            break;
-          }
-        }
-        for ( int j = etaBins.size() - 1 ;j >= 0; j-- )
-        {
-          if ( etaBins[j].right < ( infinity - 1.0 ) )
-          {
-            maxActiveIndexEta = j;
-            break;
-          }
-        }
-
-        rateGluons_prev = rateGluons;
-        rateQuarks_prev = rateQuarks;
-        rateAntiQuarks_prev = rateAntiQuarks;
-        for ( int i = 0; i < IZ; i++ )
-        {
-          rateGluons[i].assign( rings.size(), 0 );
-          rateQuarks[i].assign( rings.size(), 0 );
-          rateAntiQuarks[i].assign( rings.size(), 0 );
-        }
-
-        for ( int i = minActiveIndexEta;i <= maxActiveIndexEta;i++ )
-        {
-          for ( int j = 0; j < rings.size(); j++ )
-          {
-            readrate >> rateGluons[i][j] >> rateQuarks[i][j] >> rateAntiQuarks[i][j];
-          }
-        }
+      boost::shared_ptr< offlineDataInteractionRates > ptrRates = offlineInterface.readOfflineDataFromArchive< offlineDataInteractionRates >();
+      rateGluons = ptrRates->gluonRates;
+      rateQuarks = ptrRates->quarkRates;
+      rateAntiQuarks = ptrRates->antiQuarkRates;
 
 //         cout << timenow << "\t" << timenext << "\t" << etabin[0] << "\t" << etabin[IZ] << "\t" << IZL << "\t" << IZR << "\t" << IZ << endl;
 
@@ -662,18 +543,22 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
 //           cell_ID(NinAct,Nfree1,NinFormInit,NinFormGeom);
 //           cout << "cell_ID() at evolveToTime=" << evolveToTime << "  timenext=" << timenext << " timenow=" << timenow << endl;
 //         }
-      }
     }
-// 2->2 in cells
-    else if ( actiontype == 22 )
+    else if ( actiontype == event_interaction22 )
     {
-      currentFilePos = read22.tellg();
-
-      read22 >> time >> iscat >> jscat;
-      read22 >> pxi >> pyi >> pzi;
-      read22 >> pxj >> pyj >> pzj;
-      read22 >> F1 >> F2;
-
+      boost::shared_ptr< offlineDataInteraction22 > ptrInteraction22 = offlineInterface.readOfflineDataFromArchive< offlineDataInteraction22 >();
+      time = ptrInteraction22->time;
+      iscat = ptrInteraction22->iscat;
+      jscat = ptrInteraction22->jscat;
+      pxi = ptrInteraction22->pix;
+      pyi = ptrInteraction22->piy;
+      pzi = ptrInteraction22->piz;
+      pxj = ptrInteraction22->pjx;
+      pyj = ptrInteraction22->pjy;
+      pzj = ptrInteraction22->pjz;
+      F1 = ptrInteraction22->F1;
+      F2 = ptrInteraction22->F2;
+      
       if ( time <= ( evolveToTime + 1.0e-6 ) )
       {
         particles[iscat].init = particles[jscat].init = false;
@@ -718,28 +603,35 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-//         read22.seekg(-(9*15+1), ios::cur); // gives problem, if in first line!
-        read22.seekg( currentFilePos );
-//         readac.seekg(-3, ios::cur);
-        readac.seekg( currentFilePosAc );
+        offlineInterface.undoLastReadOperation< offlineDataEventType >();
+        offlineInterface.undoLastReadOperation< offlineDataInteraction22 >();
       }
     }
-// 2->3
-    else if ( actiontype == 23 )
+    else if ( actiontype == event_interaction23 )
     {
-      currentFilePos = read23.tellg();
-
-      read23 >> time >> iscat >> jscat;
-      read23 >> pxi >> pyi >> pzi;
-      read23 >> pxj >> pyj >> pzj;
+      boost::shared_ptr< offlineDataInteraction23 > ptrInteraction23 = offlineInterface.readOfflineDataFromArchive< offlineDataInteraction23 >();
+      time = ptrInteraction23->time;
+      iscat = ptrInteraction23->iscat;
+      jscat = ptrInteraction23->jscat;
+      kscat = ptrInteraction23->newp;
+      pxi = ptrInteraction23->pix;
+      pyi = ptrInteraction23->piy;
+      pzi = ptrInteraction23->piz;
+      pxj = ptrInteraction23->pjx;
+      pyj = ptrInteraction23->pjy;
+      pzj = ptrInteraction23->pjz;
+      F1 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F1 );
+      F2 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F2 );
+      F3 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F3 );
+      particles[kscat].X = ptrInteraction23->newx;
+      particles[kscat].Y = ptrInteraction23->newy;
+      particles[kscat].Z = ptrInteraction23->newz;
+      particles[kscat].PX = ptrInteraction23->newpx;
+      particles[kscat].PY = ptrInteraction23->newpy;
+      particles[kscat].PZ = ptrInteraction23->newpz;
 
       if ( time <= evolveToTime + 1.0e-6 )
       {
-        read23 >> kscat;//production
-        read23 >> particles[kscat].X >> particles[kscat].Y >> particles[kscat].Z;
-        read23 >> particles[kscat].PX >> particles[kscat].PY >> particles[kscat].PZ;
-        read23 >> F1 >> F2 >> F3;
-
         particles[kscat].T = time;
         particles[kscat].FLAVOR = static_cast<FLAVOR_TYPE>( F3 );
         particles[kscat].E = sqrt( pow( particles[kscat].PX, 2 ) + pow( particles[kscat].PY, 2 ) + pow( particles[kscat].PZ, 2 ) );
@@ -789,21 +681,25 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-//         read23.seekg(-(9*15), ios::cur);
-        read23.seekg( currentFilePos );
-//         readac.seekg(-3, ios::cur);
-        readac.seekg( currentFilePosAc );
+        offlineInterface.undoLastReadOperation< offlineDataEventType >();
+        offlineInterface.undoLastReadOperation< offlineDataInteraction23 >();
       }
     }
-// 3->2
-    else if ( actiontype == 32 )
+    else if ( actiontype == event_interaction32 )
     {
-      currentFilePos = read32.tellg();
-
-      read32 >> time >> iscat >> jscat >> dead;
-      read32 >> pxi >> pyi >> pzi;
-      read32 >> pxj >> pyj >> pzj;
-      read32 >> F1 >> F2;
+      boost::shared_ptr< offlineDataInteraction32 > ptrInteraction32 = offlineInterface.readOfflineDataFromArchive< offlineDataInteraction32 >();
+      time = ptrInteraction32->time;
+      iscat = ptrInteraction32->iscat;
+      jscat = ptrInteraction32->jscat;
+      dead = ptrInteraction32->dead;
+      pxi = ptrInteraction32->pix;
+      pyi = ptrInteraction32->piy;
+      pzi = ptrInteraction32->piz;
+      pxj = ptrInteraction32->pjx;
+      pyj = ptrInteraction32->pjy;
+      pzj = ptrInteraction32->pjz;
+      F1 = ptrInteraction32->F1;
+      F2 = ptrInteraction32->F2;
 
       if ( time <= evolveToTime + 1.0e-6 )
       {
@@ -850,21 +746,24 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-//         read32.seekg(-(10*15+1), ios::cur);
-        read32.seekg( currentFilePos );
-//         readac.seekg(-3, ios::cur);
-        readac.seekg( currentFilePosAc );
+        offlineInterface.undoLastReadOperation< offlineDataEventType >();
+        offlineInterface.undoLastReadOperation< offlineDataInteraction32 >();
       }
     }
-// 2->2 geometrical
-    else if ( actiontype == 229 )
+    else if ( actiontype == event_interactionElastic )
     {
-      currentFilePos = read22g.tellg();
-
-      read22g >> timei >> timej >> iscat >> jscat;
-      read22g >> pxi >> pyi >> pzi;
-      read22g >> pxj >> pyj >> pzj;
-
+      boost::shared_ptr< offlineDataInteractionElastic > ptrInteractionElastic = offlineInterface.readOfflineDataFromArchive< offlineDataInteractionElastic >();
+      timei = ptrInteractionElastic->ct_i;
+      timej = ptrInteractionElastic->ct_j;
+      iscat = ptrInteractionElastic->iscat;
+      jscat = ptrInteractionElastic->jscat;
+      pxi = ptrInteractionElastic->pix;
+      pyi = ptrInteractionElastic->piy;
+      pzi = ptrInteractionElastic->piz;
+      pxj = ptrInteractionElastic->pjx;
+      pyj = ptrInteractionElastic->pjy;
+      pzj = ptrInteractionElastic->pjz;
+      
       if (( timei <= evolveToTime + 1.0e-6 ) || ( timej <= evolveToTime + 1.0e-6 ) )
       {
         particles[iscat].init = particles[jscat].init = false;
@@ -917,20 +816,17 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-//         read22g.seekg(-(10*15+1), ios::cur);
-        read22g.seekg( currentFilePos );
-//         readac.seekg(-4, ios::cur);
-        readac.seekg( currentFilePosAc );
+        offlineInterface.undoLastReadOperation< offlineDataEventType >();
+        offlineInterface.undoLastReadOperation< offlineDataInteractionElastic >();
       }
     }
-// change
-    else if ( actiontype == 1221 )
+    else if ( actiontype == event_particleIdSwap )
     {
-      readch >> iscat >> jscat;//iscat=dead,jscat=new
+      boost::shared_ptr< offlineDataParticleIdSwap > ptrSwap = offlineInterface.readOfflineDataFromArchive< offlineDataParticleIdSwap >();
+      iscat = ptrSwap->removedParticleID;
+      jscat = ptrSwap->replacingParticleID;
 
       particles[iscat] = particles[jscat];
-
-//       number--;//annihilation
     }
   }
 
@@ -949,7 +845,6 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
   // propagate particles_atTimeNow to current time
   for ( int i = 0; i < number; i++ )
   {
-//     if ( particles_atTimeNow[i].T < timenext )
     if ( particles_atTimeNow[i].T < evolveToTime )
     {
       c = ( evolveToTime - particles_atTimeNow[i].T ) / particles_atTimeNow[i].E;
@@ -959,10 +854,6 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       particles_atTimeNow[i].Z = particles_atTimeNow[i].Z + particles_atTimeNow[i].PZ * c;
     }
   }
-
-
-  if ( currentFilePos > int( 0.8* ULONG_MAX ) || currentFilePosAc > int( 0.8* ULONG_MAX ) )
-    cout << "Files are to big for long int data type(till " << ULONG_MAX << "): " << currentFilePos << "  " << currentFilePosAc << endl;
 
   stoptime_last = evolveToTime;
   return dt_cascade;

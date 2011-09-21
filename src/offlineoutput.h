@@ -339,11 +339,11 @@ class offlineDataInteraction23 : public offlineDataGeneric
     /** @brief Momentum (p_z) of new particle (particle 3) */
     double newpz;
     /** @brief Flavor of particle 1 AFTER the collison */
-    int F1; 
+    FLAVOR_TYPE F1; 
     /** @brief Flavor of particle 1 AFTER the collison */
-    int F2;
+    FLAVOR_TYPE F2;
     /** @brief Flavor of particle 3 AFTER the collison */
-    int F3;
+    FLAVOR_TYPE F3;
     
     friend class boost::serialization::access;
     template<class Archive>
@@ -411,9 +411,9 @@ class offlineDataInteraction32 : public offlineDataGeneric
     /** @brief Momentum (p_z) of particle 2 AFTER the collison */
     double pjz;
     /** @brief Flavor of particle 1 AFTER the collison */
-    int F1; 
+    FLAVOR_TYPE F1; 
     /** @brief Flavor of particle 1 AFTER the collison */
-    int F2;
+    FLAVOR_TYPE F2;
     
     friend class boost::serialization::access;
     template<class Archive>

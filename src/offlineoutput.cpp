@@ -144,6 +144,14 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
 }
          
 template boost::shared_ptr<offlineDataInteraction22> offlineOutputInterface::readOfflineDataFromArchive<offlineDataInteraction22>();
+template boost::shared_ptr<offlineDataInteraction23> offlineOutputInterface::readOfflineDataFromArchive<offlineDataInteraction23>();
+template boost::shared_ptr<offlineDataInteraction32> offlineOutputInterface::readOfflineDataFromArchive<offlineDataInteraction32>();
+template boost::shared_ptr<offlineDataInteractionElastic> offlineOutputInterface::readOfflineDataFromArchive<offlineDataInteractionElastic>();
+template boost::shared_ptr<offlineDataCellConfiguration> offlineOutputInterface::readOfflineDataFromArchive<offlineDataCellConfiguration>();
+template boost::shared_ptr<offlineDataInteractionRates> offlineOutputInterface::readOfflineDataFromArchive<offlineDataInteractionRates>();
+template boost::shared_ptr<offlineDataEventType> offlineOutputInterface::readOfflineDataFromArchive<offlineDataEventType>();
+template boost::shared_ptr<offlineDataParticleIdSwap> offlineOutputInterface::readOfflineDataFromArchive<offlineDataParticleIdSwap>();
+
 
 
 template<class T>
@@ -173,6 +181,14 @@ void offlineOutputInterface::undoLastReadOperation()
 }
 
 template void offlineOutputInterface::undoLastReadOperation<offlineDataInteraction22>();
+template void offlineOutputInterface::undoLastReadOperation<offlineDataInteraction23>();
+template void offlineOutputInterface::undoLastReadOperation<offlineDataInteraction32>();
+template void offlineOutputInterface::undoLastReadOperation<offlineDataInteractionElastic>();
+template void offlineOutputInterface::undoLastReadOperation<offlineDataInteractionRates>();
+template void offlineOutputInterface::undoLastReadOperation<offlineDataCellConfiguration>();
+template void offlineOutputInterface::undoLastReadOperation<offlineDataParticleIdSwap>();
+template void offlineOutputInterface::undoLastReadOperation<offlineDataEventType>();
+
 
 
 void offlineOutputInterface::registerOfflineDataForTemporaryStorage(const offlineEventType _eventType, tConstPointerToOfflineData _data)
