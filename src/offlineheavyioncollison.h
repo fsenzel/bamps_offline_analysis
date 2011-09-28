@@ -63,7 +63,6 @@ private:
   std::vector< std::vector<double> > rateAntiQuarks_prev;
 
   int currentNumber;
-  int minActiveIndexEta, maxActiveIndexEta;
 
   double stoptime;
   double stoptime_last;

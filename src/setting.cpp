@@ -32,7 +32,7 @@ void config::setting()
 
   double dummy;
 
-  filename = pathdirCascadeData + "/" + getName() + "_parameters.dat";
+  filename = pathdirOfflineData + "/" + getName() + "_parameters.dat";
   readinpara.open( filename.c_str() );
   if ( !readinpara.good() )
   {
@@ -66,7 +66,7 @@ void config::setting()
   particles.resize( N_init * 1.8 );
   particles_init.resize( N_init );
 
-  filename = pathdirCascadeData + "/" + getName() + "_initial.f1";
+  filename = pathdirOfflineData + "/" + getName() + "_initial.f1";
   fstream readinp( filename.c_str(), ios::in );
   if ( !readinp.good() )
   {

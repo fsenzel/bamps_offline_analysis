@@ -24,16 +24,6 @@ extern int numberAdded, number;
 extern int IX, IY, IZ;
 
 
-extern double dt_cascade;
-
-// ofstream printdens0("output/density.dat");
-// ofstream printcol("output/collisions.dat");
-
-// double md2g_min = 0.05 / gluon_alpha_s(0.1); // md2g = 0.05 corresponds to T = 100 MeV, / gluon_alpha_s(s) because it is compared to md2g/as
-// double md2g_min = 0.0001 / gluon_alpha_s( 0.1 );  // md2g is tabled for cross section above this value, cannot deal with smaller one -> however, checked that a smaller value actually does not occur
-// binning md2bins( 0.0, md2g_min*0.3, 200 );
-// binning sbins( 0.0, 4.0, 500 );
-
 int main( int argc, char *argv[] )
 {
   try
@@ -44,15 +34,7 @@ int main( int argc, char *argv[] )
     bool again;
     bool dodo = false;
     int nn_ana = 0;
-
-    double factor_dt = 0.8;
-    if ( argc == 3 )
-    {
-      factor_dt = atof( argv[2] );
-    }
-    cout << "factor for dt = " << factor_dt << endl;
-
-
+    
     //--------------------------------------------------------------
     // create and initialize the main objects needed for
     // configuration,execution and analysis of the simulation

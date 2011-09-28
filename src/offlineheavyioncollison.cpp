@@ -28,7 +28,7 @@ namespace
 {
   const int cellcut = 4;
   double dx, dy, dv, transLen;
-  double timenow, timenext, dt_cascade;
+  double timenow, timenext;
   double simulationTime;
 
   vector<cellContainer> cells;
@@ -62,10 +62,9 @@ namespace
 
 offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config ) :
     theConfig( _config ), stoptime_last( 0 ), stoptime( 5.0 ), currentNumber( 0 ),
-    minActiveIndexEta( -1 ), maxActiveIndexEta( -1 ),
-    rings( theConfig->getRingNumber(), theConfig->getCentralRingRadius(), theConfig->getDeltaR() ),
-    testpartcl( theConfig->getTestparticles() ),
-    offlineInterface( "offline_output" )
+    rings( _config->getRingNumber(), _config->getCentralRingRadius(), _config->getDeltaR() ),
+    testpartcl( _config->getTestparticles() ),
+    offlineInterface( _config->getPathdirOfflineDataChar() )
 {
   offlineInterface.setAdditionalFilenameTag( theConfig->getName() );
 }
@@ -160,7 +159,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   int nn_ana_movie = 0;
   int jumpMovieSteps = 0;
   double factor_dt = theConfig->getFactor_dt();
-  cout << "factor for dt = " << factor_dt << endl;
+  cout << "scale time steps dt by facot " << factor_dt << endl;
 
   aa.initialOutput();
   if ( theConfig->movieOutputJets )
@@ -270,8 +269,19 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     n_quarks_temp = n_up + n_down + n_strange;
     n_anti_quarks_temp = n_anti_up + n_anti_down + n_anti_strange;
 
-    // evolution of gluonic medium to present time
+    // evolution of the medium to present time
     dt_cascade = evolveMedium( simulationTime, endOfDataFiles );
+    
+    // specify time step
+    if ( theConfig->DtSpecified() )
+    {
+      dt = theConfig->getDt();
+    }
+    else
+    {
+      dt = dt_cascade * factor_dt;  // use time step from original medium evolution but make it slightly smaller
+    }
+    
     if ( endOfDataFiles )
     {
       cout << "* End of data files reached. Aborting." << endl;
@@ -279,8 +289,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       break;
     }
     cout << "# time = " << simulationTime << "    dt = " << dt << endl;
-//     cout << "##quarks " << simulationTime << "\t" << n_gluon << "\t" << n_quarks_temp << "\t" << n_anti_quarks_temp << "\t" << n_up << "\t"
-//       << n_down << "\t" << n_strange << "\t" << n_anti_up << "\t" << n_anti_down << "\t" << n_anti_strange << endl;
+
     p23_collected_gluon = 0;
     n23_collected_gluon = 0;
     p23_collected_quark = 0;
@@ -288,13 +297,11 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     lambdaJet_gluon = 0;
     lambdaJet_quark = 0;
       
-    
     if ( doMovieStepMedium && theConfig->movieOutputBackground )
     {
       aa.movieOutputMedium( nn_ana_movie - 1, jumpMovieSteps );
       doMovieStepMedium = false;
     }
-    
 
     //------------ make copies ---------------
     particles_atTimeNowCopy = particles_atTimeNow;
@@ -311,18 +318,6 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     ncoll32_backup = ncoll32;
     ncolle_backup = ncolle;
     //--------------------------
-
-    // specify time step
-    if ( theConfig->DtSpecified() )
-    {
-      dt = theConfig->getDt();
-    }
-    else
-    {
-      dt = dt_cascade;
-      dt = dt * factor_dt;  // make timestep smaller than in cascade
-    }
-
 
     nexttime = simulationTime + dt;
 
@@ -344,7 +339,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       cout << "** movie: " << nexttime << endl;
     }
     
-      cell_ID( nexttime );
+    cell_ID( nexttime );
 
     // collide added particles with gluonic medium
     deadParticleList.clear();
@@ -364,7 +359,6 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       doMovieStep = false;
       n_again++;
 
-//       dt_cascade = dt*KgQgQ/factor_dt; // use same dt for next time steps until cascade data defines new dt. *KgQgQ/factor_dt because dt_cascade is divided by that
       dt_cascade = dt / factor_dt; // use same dt for next time steps until cascade data defines new dt.
 
       particles_atTimeNow = particles_atTimeNowCopy;
@@ -381,8 +375,6 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       ncoll32 = ncoll32_backup;
       ncolle = ncolle_backup;
 
-//       cout << "again" << "\t" << time << endl;
-
       nexttime = simulationTime + dt;
 
       cell_ID( nexttime );
@@ -390,11 +382,6 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       deadParticleList.clear();
       scattering( nexttime, again, aa );
     }
-
-
-//     cout << "##rate " << simulationTime << "\t" << p23_collected_gluon / n23_collected_gluon << "\t" << n23_collected_gluon << "\t" 
-//     << p23_collected_quark / n23_collected_quark   << "\t"  << n23_collected_quark << "\t"
-//     << lambdaJet_gluon / n23_collected_gluon << "\t" << lambdaJet_quark / n23_collected_quark << endl;
 
     scatterEdgeParticles( edgeCell, edgeCellAdded, nexttime );
 
@@ -447,6 +434,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
 double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& _endOfDataFiles )
 {
+  double dt_cascade = 0;
   bool stop = false;
   int iscat, jscat, kscat, dead;
   double time = 0;
@@ -454,7 +442,6 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
   double timej = 0;
   double pxi, pyi, pzi, pxj, pyj, pzj;
   FLAVOR_TYPE F1, F2, F3;
-//   int NinAct,NinFormInit,NinFormGeom,Ncell,Ngeom,Nfree1,Nfree2;
   double c;
 
   // give partcl from cascade the values for cell structurement which could have changed in collisions()
@@ -526,23 +513,6 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       rateGluons = ptrRates->gluonRates;
       rateQuarks = ptrRates->quarkRates;
       rateAntiQuarks = ptrRates->antiQuarkRates;
-
-//         cout << timenow << "\t" << timenext << "\t" << etabin[0] << "\t" << etabin[IZ] << "\t" << IZL << "\t" << IZR << "\t" << IZ << endl;
-
-//         if((timenow-1.0e-6 < evolveToTime) && (timenext-1.0e-6 > evolveToTime)){
-//           for(int i=1;i<=number;i++){
-//             if(partcl[i].T < timenow){
-//               c=(timenow-partcl[i].T)/partcl[i].E;
-//               partcl[i].T=timenow;
-//               partcl[i].X=partcl[i].X+partcl[i].PX*c;
-//               partcl[i].Y=partcl[i].Y+partcl[i].PY*c;
-//               partcl[i].Z=partcl[i].Z+partcl[i].PZ*c;
-//             }
-//             partclAtTimeNow[i]=partcl[i];
-//           }
-//           cell_ID(NinAct,Nfree1,NinFormInit,NinFormGeom);
-//           cout << "cell_ID() at evolveToTime=" << evolveToTime << "  timenext=" << timenext << " timenow=" << timenow << endl;
-//         }
     }
     else if ( actiontype == event_interaction22 )
     {
@@ -928,7 +898,7 @@ void offlineHeavyIonCollision::cell_ID( double _time )
         throw eHIC_error( errMsg );
       }
 
-      if (( nz < minActiveIndexEta ) || ( nz > maxActiveIndexEta ) )
+      if (( nz < etaBins.min_index() ) || ( nz > etaBins.max_index() ) )
       {
         cell_id = -2;// -2:edge
         particles_atTimeNow[i].rate = 0.0;//GeV
@@ -958,11 +928,6 @@ void offlineHeavyIonCollision::cell_ID( double _time )
         if ( !particles_atTimeNow[i].edge ) // new member
         {
           edgeCell.push_back( i );
-//           particles_atTimeNow[i].edge = true;
-//           particles_atTimeNow[i].collisionTime = infinity;
-//           particles_atTimeNow[i].collisionPartner = -1;
-//           particles_atTimeNow[i].md2g = -1.0;
-//           particles_atTimeNow[i].md2q = -1.0;
         }
       }
     }
@@ -1038,7 +1003,7 @@ void offlineHeavyIonCollision::cell_ID( double _time )
         throw eHIC_error( errMsg );
       }
 
-      if (( nz < minActiveIndexEta ) || ( nz > maxActiveIndexEta ) )
+      if (( nz < etaBins.min_index() ) || ( nz > etaBins.max_index() ) )
       {
         cell_id = -2;// -2:edge
         addedParticles[i].rate = 0.0;//GeV
@@ -1085,7 +1050,6 @@ void offlineHeavyIonCollision::cell_ID( double _time )
       {
 //         nCharmOther++;
         formGeomAdded.push_back( i );
-//         cout << "charm quark in formGeomAdded: id=" << i << " t=" << addedParticles[i].T << " timenext=" << timenext << endl;
       }
 
       addedParticles[i].cell_id = -1;
@@ -1093,13 +1057,6 @@ void offlineHeavyIonCollision::cell_ID( double _time )
     }
   }
 
-//   string sep = "\t";
-//   cout << timenow << sep << timenext-timenow << sep << number << sep << NinFormInit+NinFormGeom << sep << NinFormInit << sep
-//              << NinFormGeom << sep << NinAct << sep << 0 << sep;
-//   cout << 0 << sep << Nfree1+0 << endl;
-
-
-//   cout << "Charm stat.: Cells=" << nCharmCells << "  Edge=" << nCharmEdge << "  Free=" << nCharmFree << " Init=" << nCharmInit << " Other=" << nCharmOther << "  Sum=" << nCharmInit+nCharmEdge+nCharmFree+nCharmCells+nCharmOther << endl;
 }
 
 
@@ -1109,39 +1066,33 @@ void offlineHeavyIonCollision::cell_ID( double _time )
 
 void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, analysis& aa )
 {
-  const double eta_left = -20.0;//-0.22;-10.0
-  const double eta_right = 20.0;// 0.22;10.0
-
-//   const double eta_left=-1.0;//-0.22;-10.0
-//   const double eta_right=1.0;// 0.22;10.0
-
   double xt;
   double ee;
-
+  
   int nGluons = 0;
   int nAllQuarks = 0;
   int nAllAntiQuarks = 0;
   int nGluonsAdded = 0;
   int nAllQuarksAdded = 0;
   int nAllAntiQuarksAdded = 0;
-
+  
   int IXY, id, nc;
-
+  
   double beta_rf[4];
   double dz, XT, pr, dvv, cc, xx, yy, zz, eta, vrr;
   bool free;
   list<int> formGeomCopy;
   vector<int> gluonList, allParticlesList;
   vector<int> gluonListAdded, allParticlesListAdded;
-
+  
   again = false;
-
+  
   IXY = IX * IY;
-
+  
   formGeomCopy = formGeom;
-
+  
   gG = 2 * ( pow( Ncolor, 2 ) - 1 );
-
+  
   if ( !formGeomCopy.empty() )
   {
     list<int>::iterator iIt;
@@ -1152,8 +1103,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
       cc = ( timenow - particles[id].T ) / sqrt( pow( particles[id].PXold, 2 ) + pow( particles[id].PYold, 2 ) + pow( particles[id].PZold, 2 ) );
       zz = particles[id].Z + particles[id].PZold * cc;
       eta = 0.5 * log(( timenow + zz ) / ( timenow - zz ) );
-
-      if (( eta < etaBins[minActiveIndexEta].left ) || ( eta > etaBins[maxActiveIndexEta].right ) )
+      
+      if (( eta < etaBins[etaBins.min_index()].left ) || ( eta > etaBins[etaBins.max_index()].right ) )
       {
         iIt = formGeomCopy.erase( iIt );
       }
@@ -1168,185 +1119,187 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
   int centralEtaIndex = static_cast<int>( etaBins.size() ) / 2;
   
   // go through cells
-  for ( int etaSliceIndex = minActiveIndexEta; etaSliceIndex <= maxActiveIndexEta; etaSliceIndex++ )
+  for ( int etaSliceIndex = etaBins.min_index(); etaSliceIndex <= etaBins.max_index(); etaSliceIndex++ )
   {
     //---------- populate the ring structure for averages ----------
-    if (( etaBins[etaSliceIndex].right < eta_right ) && ( etaBins[etaSliceIndex].left > eta_left ) )
+    dz = timenow * ( tanh( etaBins[etaSliceIndex].right ) - tanh( etaBins[etaSliceIndex].left ) );
+    
+    rings.clear();
+    rings.setLongitudinalGeometry( etaBins[etaSliceIndex].left, etaBins[etaSliceIndex].right, timenow );
+    
+    for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
     {
-      //---------- populate the ring structure for averages ----------
-      dz = timenow * ( tanh( etaBins[etaSliceIndex].right ) - tanh( etaBins[etaSliceIndex].left ) );
-      
-      rings.clear();
-      rings.setLongitudinalGeometry( etaBins[etaSliceIndex].left, etaBins[etaSliceIndex].right, timenow );
-      
-      for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
+      list<int>::const_iterator iIt;
+      for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
       {
-        list<int>::const_iterator iIt;
+        xt = sqrt( pow( particles_atTimeNow [( *iIt )].X, 2 )  + pow( particles_atTimeNow[( *iIt )].Y, 2 ) );
+        
+        rings.addParticle( particles_atTimeNow[( *iIt )] );
+        //           rings.addRates( particles_atTimeNow[(*iIt)] );
+      }
+    }
+    
+    list<int>::iterator iIt;
+    for ( iIt = formGeomCopy.begin(); iIt != formGeomCopy.end(); iIt++ )
+    {
+      int id = *iIt;
+      
+      ee = sqrt( pow( particles_atTimeNow[id].PXold, 2 ) + pow( particles_atTimeNow[id].PYold, 2 ) + pow( particles_atTimeNow[id].PZold, 2 ) );
+      cc = ( timenow - particles_atTimeNow[id].T ) / ee;
+      zz = particles_atTimeNow[id].Z + particles_atTimeNow[id].PZold * cc;
+      eta = 0.5 * log(( timenow + zz ) / ( timenow - zz ) );
+      
+      if (( eta >= etaBins[etaSliceIndex].left ) && ( eta <= etaBins[etaSliceIndex].right ) )
+      {
+        rings.addParticleInFormGeom( particles_atTimeNow[id], timenow );
+        iIt = formGeomCopy.erase( iIt );    // erase this particle such that it needs not be looped over for the next rapidity slab
+      }
+    }
+    
+    rings.prepareAverages( dz, testpartcl );
+    if ( etaSliceIndex == centralEtaIndex )
+    {
+      aa.centralRingsCopyFromCascade = rings;
+    }
+    //---------- populate the ring structure for averages ----------
+    
+    
+    if ( addedParticles.size() == 0 )
+    {
+      break;
+    }  
+    
+    // scatterings in cell or not?
+    dv = dx * dy * dz;
+    for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
+    {
+      if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
+      {
+        cells[j].resetStoredValues();
+        cellsAdded[j].resetStoredValues();
+        gluonList.clear();
+        allParticlesList.clear();
+        gluonList.reserve( cells[j].size() );
+        allParticlesList.reserve( cells[j].size() );
+        gluonListAdded.clear();
+        allParticlesListAdded.clear();
+        gluonListAdded.reserve( cellsAdded[j].size() );
+        allParticlesListAdded.reserve( cellsAdded[j].size() );
+        
+        //------------------------- check whether all particles in this cell are free --------------------
+        free = true;
         for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
         {
-          xt = sqrt( pow( particles_atTimeNow [( *iIt )].X, 2 )  + pow( particles_atTimeNow[( *iIt )].Y, 2 ) );
-
-          rings.addParticle( particles_atTimeNow[( *iIt )] );
-//           rings.addRates( particles_atTimeNow[(*iIt)] );
-        }
-      }
-
-      list<int>::iterator iIt;
-      for ( iIt = formGeomCopy.begin(); iIt != formGeomCopy.end(); iIt++ )
-      {
-        int id = *iIt;
-
-        ee = sqrt( pow( particles_atTimeNow[id].PXold, 2 ) + pow( particles_atTimeNow[id].PYold, 2 ) + pow( particles_atTimeNow[id].PZold, 2 ) );
-        cc = ( timenow - particles_atTimeNow[id].T ) / ee;
-        zz = particles_atTimeNow[id].Z + particles_atTimeNow[id].PZold * cc;
-        eta = 0.5 * log(( timenow + zz ) / ( timenow - zz ) );
-
-        if (( eta >= etaBins[etaSliceIndex].left ) && ( eta <= etaBins[etaSliceIndex].right ) )
-        {
-          rings.addParticleInFormGeom( particles_atTimeNow[id], timenow );
-          iIt = formGeomCopy.erase( iIt );    // erase this particle such that it needs not be looped over for the next rapidity slab
-        }
-      }
-
-      rings.prepareAverages( dz, testpartcl );
-      if ( etaSliceIndex == centralEtaIndex )
-      {
-        aa.centralRingsCopyFromCascade = rings;
-      }
-      //---------- populate the ring structure for averages ----------
-
-
-      // scatterings in cell or not?
-      dv = dx * dy * dz;
-      for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
-      {
-        if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
-        {
-          cells[j].resetStoredValues();
-          cellsAdded[j].resetStoredValues();
-          gluonList.clear();
-          allParticlesList.clear();
-          gluonList.reserve( cells[j].size() );
-          allParticlesList.reserve( cells[j].size() );
-          gluonListAdded.clear();
-          allParticlesListAdded.clear();
-          gluonListAdded.reserve( cellsAdded[j].size() );
-          allParticlesListAdded.reserve( cellsAdded[j].size() );
-
-          //------------------------- check whether all particles in this cell are free --------------------
-          free = true;
-          for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+          int id = *iIt;
+          xt = sqrt( pow( particles_atTimeNow[id].X, 2 ) + pow( particles_atTimeNow[id].Y, 2 ) );
+          
+          nc = rings.getIndexPure( xt );
+          
+          if ( nc < rings.size() )
           {
-            int id = *iIt;
-            xt = sqrt( pow( particles_atTimeNow[id].X, 2 ) + pow( particles_atTimeNow[id].Y, 2 ) );
-
-            nc = rings.getIndexPure( xt );
-
-            if ( nc < rings.size() )
-            {
-              if ( rings[nc].getEnergyDensity() < theConfig->getFreezeOutEnergyDensity() )
-              {
-                particles_atTimeNow[id].free = true;
-              }
-              else
-              {
-                particles_atTimeNow[id].free = false;
-              }
-            }
-            else
+            if ( rings[nc].getEnergyDensity() < theConfig->getFreezeOutEnergyDensity() )
             {
               particles_atTimeNow[id].free = true;
             }
-
-            if ( !particles_atTimeNow[id].free )
+            else
             {
-              free = false;
+              particles_atTimeNow[id].free = false;
             }
           }
-
-          for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
+          else
           {
-            int id = *iIt;
-            xt = sqrt( pow( addedParticles[id].X, 2 ) + pow( addedParticles[id].Y, 2 ) );
-
-            nc = rings.getIndexPure( xt );
-
-            if ( nc < rings.size() )
-            {
-              if ( rings[nc].getEnergyDensity() < theConfig->getFreezeOutEnergyDensity() )
-              {
-                addedParticles[id].free = true;
-              }
-              else
-              {
-                addedParticles[id].free = false;
-              }
-            }
-            else
+            particles_atTimeNow[id].free = true;
+          }
+          
+          if ( !particles_atTimeNow[id].free )
+          {
+            free = false;
+          }
+        }
+        
+        for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
+        {
+          int id = *iIt;
+          xt = sqrt( pow( addedParticles[id].X, 2 ) + pow( addedParticles[id].Y, 2 ) );
+          
+          nc = rings.getIndexPure( xt );
+          
+          if ( nc < rings.size() )
+          {
+            if ( rings[nc].getEnergyDensity() < theConfig->getFreezeOutEnergyDensity() )
             {
               addedParticles[id].free = true;
             }
-
-            if ( !addedParticles[id].free )
+            else
             {
-              free = false;
+              addedParticles[id].free = false;
             }
           }
-          //------------------------- check whether all particles in this cell are free --------------------
-
-          if ( free )
+          else
           {
+            addedParticles[id].free = true;
+          }
+          
+          if ( !addedParticles[id].free )
+          {
+            free = false;
+          }
+        }
+        //------------------------- check whether all particles in this cell are free --------------------
+        
+        if ( free )
+        {
+          list<int>::const_iterator iIt;
+          for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+          {
+            id = *iIt;
+            particles_atTimeNow[id].edge = false;
+          }
+          
+          for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
+          {
+            id = *iIt;
+            addedParticles[id].edge = false;
+            
+            cc = ( nexttime - addedParticles[id].T ) / addedParticles[id].E;
+            addedParticles[id].T = nexttime;
+            addedParticles[id].X = addedParticles[id].X + addedParticles[id].PX * cc;
+            addedParticles[id].Y = addedParticles[id].Y + addedParticles[id].PY * cc;
+            addedParticles[id].Z = addedParticles[id].Z + addedParticles[id].PZ * cc;
+          }
+          cells[j].rates.normalizeRates();
+          cellsAdded[j].rates.normalizeRates();
+        }
+        else
+        {
+          //             if (( cells[j].size() + cellsAdded[j].size() ) >= cellcut )     // enough particles in cell -> scatter
+          if ( true )
+          {
+            nGluons = 0;
+            nGluonsAdded = 0;
+            free = false;
+            vector<int> nQuarks( Nflavor, 0 );
+            vector<int> nAntiQuarks( Nflavor, 0 );
+            vector<int> nQuarksAdded( Nflavor, 0 );
+            vector<int> nAntiQuarksAdded( Nflavor, 0 );
+            
             list<int>::const_iterator iIt;
             for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
             {
               id = *iIt;
               particles_atTimeNow[id].edge = false;
-            }
-
-            for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
-            {
-              id = *iIt;
-              addedParticles[id].edge = false;
+              particles_atTimeNow[id].free = false;
+              allParticlesList.push_back( id );
               
-              cc = ( nexttime - addedParticles[id].T ) / addedParticles[id].E;
-              addedParticles[id].T = nexttime;
-              addedParticles[id].X = addedParticles[id].X + addedParticles[id].PX * cc;
-              addedParticles[id].Y = addedParticles[id].Y + addedParticles[id].PY * cc;
-              addedParticles[id].Z = addedParticles[id].Z + addedParticles[id].PZ * cc;
-            }
-            cells[j].rates.normalizeRates();
-            cellsAdded[j].rates.normalizeRates();
-          }
-          else
-          {
-//             if (( cells[j].size() + cellsAdded[j].size() ) >= cellcut )     // enough particles in cell -> scatter
-            if ( true )
-            {
-              nGluons = 0;
-              nGluonsAdded = 0;
-              free = false;
-              vector<int> nQuarks( Nflavor, 0 );
-              vector<int> nAntiQuarks( Nflavor, 0 );
-              vector<int> nQuarksAdded( Nflavor, 0 );
-              vector<int> nAntiQuarksAdded( Nflavor, 0 );
-
-              list<int>::const_iterator iIt;
-              for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+              if ( particles_atTimeNow[id].FLAVOR == 0 )
               {
-                id = *iIt;
-                particles_atTimeNow[id].edge = false;
-                particles_atTimeNow[id].free = false;
-                allParticlesList.push_back( id );
-
-                if ( particles_atTimeNow[id].FLAVOR == 0 )
+                nGluons++;
+                gluonList.push_back( *iIt );
+              }
+              else
+              {
+                switch ( particles_atTimeNow[id].FLAVOR )
                 {
-                  nGluons++;
-                  gluonList.push_back( *iIt );
-                }
-                else
-                {
-                  switch ( particles_atTimeNow[id].FLAVOR )
-                  {
                   case up:
                     ++nQuarks[0];
                     break;
@@ -1367,46 +1320,46 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                     break;
                   default:
                     break;
-                  }
-                }
-
-                xt = sqrt( pow( particles_atTimeNow[id].X, 2 ) + pow( particles_atTimeNow[id].Y, 2 ) );
-                nc = rings.getIndex( xt );
-
-                particles_atTimeNow[id].md2g = rings[nc].getAveraged_md2g();
-                particles_atTimeNow[id].md2q = rings[nc].getAveraged_md2q();
-                if ( particles_atTimeNow[id].FLAVOR == gluon )
-                {
-                  particles_atTimeNow[id].rate = rateGluons[etaSliceIndex][nc];
-                  particles_atTimeNow[id].ratev = rateGluons_prev[etaSliceIndex][nc];
-                }
-                else if ( particles_atTimeNow[id].FLAVOR == up || particles_atTimeNow[id].FLAVOR == down || particles_atTimeNow[id].FLAVOR == strange || particles_atTimeNow[id].FLAVOR == quark )
-                {
-                  particles_atTimeNow[id].rate = rateQuarks[etaSliceIndex][nc];
-                  particles_atTimeNow[id].ratev = rateQuarks_prev[etaSliceIndex][nc];
-                }
-                else
-                {
-                  particles_atTimeNow[id].rate = rateAntiQuarks[etaSliceIndex][nc];
-                  particles_atTimeNow[id].ratev = rateAntiQuarks_prev[etaSliceIndex][nc];
                 }
               }
-              for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
+              
+              xt = sqrt( pow( particles_atTimeNow[id].X, 2 ) + pow( particles_atTimeNow[id].Y, 2 ) );
+              nc = rings.getIndex( xt );
+              
+              particles_atTimeNow[id].md2g = rings[nc].getAveraged_md2g();
+              particles_atTimeNow[id].md2q = rings[nc].getAveraged_md2q();
+              if ( particles_atTimeNow[id].FLAVOR == gluon )
               {
-                id = *iIt;
-                addedParticles[id].edge = false;
-                addedParticles[id].free = false;
-                allParticlesListAdded.push_back( id );
-
-                if ( addedParticles[id].FLAVOR == 0 )
+                particles_atTimeNow[id].rate = rateGluons[etaSliceIndex][nc];
+                particles_atTimeNow[id].ratev = rateGluons_prev[etaSliceIndex][nc];
+              }
+              else if ( particles_atTimeNow[id].FLAVOR == up || particles_atTimeNow[id].FLAVOR == down || particles_atTimeNow[id].FLAVOR == strange || particles_atTimeNow[id].FLAVOR == quark )
+              {
+                particles_atTimeNow[id].rate = rateQuarks[etaSliceIndex][nc];
+                particles_atTimeNow[id].ratev = rateQuarks_prev[etaSliceIndex][nc];
+              }
+              else
+              {
+                particles_atTimeNow[id].rate = rateAntiQuarks[etaSliceIndex][nc];
+                particles_atTimeNow[id].ratev = rateAntiQuarks_prev[etaSliceIndex][nc];
+              }
+            }
+            for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
+            {
+              id = *iIt;
+              addedParticles[id].edge = false;
+              addedParticles[id].free = false;
+              allParticlesListAdded.push_back( id );
+              
+              if ( addedParticles[id].FLAVOR == 0 )
+              {
+                nGluonsAdded++;
+                gluonListAdded.push_back( *iIt );
+              }
+              else
+              {
+                switch ( addedParticles[id].FLAVOR )
                 {
-                  nGluonsAdded++;
-                  gluonListAdded.push_back( *iIt );
-                }
-                else
-                {
-                  switch ( addedParticles[id].FLAVOR )
-                  {
                   case up:
                     ++nQuarksAdded[0];
                     break;
@@ -1427,73 +1380,73 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                     break;
                   default:
                     break;
-                  }
                 }
-
-                xt = sqrt( pow( addedParticles[id].X, 2 ) + pow( addedParticles[id].Y, 2 ) );
-                nc = rings.getIndex( xt );
-
-                addedParticles[id].md2g = rings[nc].getAveraged_md2g();
-                addedParticles[id].md2q = rings[nc].getAveraged_md2q();
-                if ( addedParticles[id].FLAVOR == gluon )
-                {
-                  addedParticles[id].rate = rateGluons[etaSliceIndex][nc];
-                  addedParticles[id].ratev = rateGluons_prev[etaSliceIndex][nc];
-                }
-                else if ( addedParticles[id].FLAVOR == up || addedParticles[id].FLAVOR == down || addedParticles[id].FLAVOR == strange || addedParticles[id].FLAVOR == quark )
-                {
-                  addedParticles[id].rate = rateQuarks[etaSliceIndex][nc];
-                  addedParticles[id].ratev = rateQuarks_prev[etaSliceIndex][nc];
-                }
-                else
-                {
-                  addedParticles[id].rate = rateAntiQuarks[etaSliceIndex][nc];
-                  addedParticles[id].ratev = rateAntiQuarks_prev[etaSliceIndex][nc];
-                }
-              }
-
-              int n32 = 0;
-
-              scatt32_withAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, n32, again, aa, nexttime );
-              if ( again )
-              {
-                return;
-              }
-
-              double scaleFactor = 1;
-              if ( nGluons > n32 )
-              {
-                scaleFactor = static_cast<double>( nGluons ) / static_cast<double>( nGluons - n32 );
               }
               
-              analysisRingStructure tempRing( aa.rings.size(), aa.rings.getCentralRadius(), aa.rings.getDeltaR() );
-              scatt2223_withAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, scaleFactor, again, aa, nexttime, tempRing );
-              if ( etaSliceIndex == centralEtaIndex )
-              {
-                aa.rings += tempRing;
-              }
+              xt = sqrt( pow( addedParticles[id].X, 2 ) + pow( addedParticles[id].Y, 2 ) );
+              nc = rings.getIndex( xt );
               
-              if ( again )
+              addedParticles[id].md2g = rings[nc].getAveraged_md2g();
+              addedParticles[id].md2q = rings[nc].getAveraged_md2q();
+              if ( addedParticles[id].FLAVOR == gluon )
               {
-                return;
+                addedParticles[id].rate = rateGluons[etaSliceIndex][nc];
+                addedParticles[id].ratev = rateGluons_prev[etaSliceIndex][nc];
               }
-
-              if ( again )
+              else if ( addedParticles[id].FLAVOR == up || addedParticles[id].FLAVOR == down || addedParticles[id].FLAVOR == strange || addedParticles[id].FLAVOR == quark )
               {
-                return;
+                addedParticles[id].rate = rateQuarks[etaSliceIndex][nc];
+                addedParticles[id].ratev = rateQuarks_prev[etaSliceIndex][nc];
+              }
+              else
+              {
+                addedParticles[id].rate = rateAntiQuarks[etaSliceIndex][nc];
+                addedParticles[id].ratev = rateAntiQuarks_prev[etaSliceIndex][nc];
               }
             }
-            else  //if(nmb < cellcut)
+            
+            int n32 = 0;
+            
+            scatt32_withAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, n32, again, aa, nexttime );
+            if ( again )
+            {
+              return;
+            }
+            
+            double scaleFactor = 1;
+            if ( nGluons > n32 )
+            {
+              scaleFactor = static_cast<double>( nGluons ) / static_cast<double>( nGluons - n32 );
+            }
+            
+            analysisRingStructure tempRing( aa.rings.size(), aa.rings.getCentralRadius(), aa.rings.getDeltaR() );
+            scatt2223_withAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, scaleFactor, again, aa, nexttime, tempRing );
+            if ( etaSliceIndex == centralEtaIndex )
+            {
+              aa.rings += tempRing;
+            }
+            
+            if ( again )
+            {
+              return;
+            }
+            
+            if ( again )
+            {
+              return;
+            }
+          }
+          else  //if(nmb < cellcut)
             {
               for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
               {
                 int id = *iIt;
-
+                
                 particles_atTimeNow[id].free = false;
-
+                
                 xt = sqrt( pow( particles_atTimeNow[id].X, 2 ) + pow( particles_atTimeNow[id].Y, 2 ) );
                 nc = rings.getIndex( xt );
-
+                
                 if ( !particles_atTimeNow[id].edge )
                 {
                   //      edgecell.add(id);
@@ -1501,7 +1454,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                   particles_atTimeNow[id].md2g = rings[nc].getAveraged_md2g();
                   particles_atTimeNow[id].md2q = rings[nc].getAveraged_md2q();
                 }
-
+                
                 if ( particles_atTimeNow[id].FLAVOR == gluon )
                 {
                   particles_atTimeNow[id].ratev = rateGluons[etaSliceIndex][nc];
@@ -1516,15 +1469,15 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 }
                 particles_atTimeNow[id].rate = 0.0;
               }
-
+              
               for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
               {
                 int id = *iIt;
                 addedParticles[id].free = false;
-
+                
                 xt = sqrt( pow( addedParticles[id].X, 2 ) + pow( addedParticles[id].Y, 2 ) );
                 nc = rings.getIndex( xt );
-
+                
                 if ( !addedParticles[id].edge )
                 {
                   //      edgecell.add(id);
@@ -1532,7 +1485,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                   addedParticles[id].md2g = rings[nc].getAveraged_md2g();
                   addedParticles[id].md2q = rings[nc].getAveraged_md2q();
                 }
-
+                
                 if ( addedParticles[id].FLAVOR == gluon )
                 {
                   addedParticles[id].ratev = rateGluons[etaSliceIndex][nc];
@@ -1548,10 +1501,10 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 addedParticles[id].rate = 0.0;
               }
             }
-          }
-
         }
-        else if ( !cellsAdded[j].empty() ) // belongs to:  if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
+        
+      }
+      else if ( !cellsAdded[j].empty() ) // belongs to:  if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
         {
           for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
           {
@@ -1563,10 +1516,9 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
             addedParticles[iscat].Z = addedParticles[iscat].Z + addedParticles[iscat].PZ * cc;
           }
         }
-      }
     }
   }
-
+  
   formGeomCopy.clear();
 }
 
@@ -2383,7 +2335,7 @@ int offlineHeavyIonCollision::scatt23_utility( scattering23& scatt23_obj, cellCo
   tempParticle.unique_id = Particle::unique_id_counter_added;
   --Particle::unique_id_counter_added;
 
-//   int newIndex = -1;
+
 //   if ( sqrt( pow( tempParticle.PX, 2) + pow( tempParticle.PY, 2) ) > 3.0 )
 //   {
     addedParticles.push_back( tempParticle );

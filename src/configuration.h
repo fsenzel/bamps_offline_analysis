@@ -112,6 +112,8 @@ class config
   INITIAL_STATE_TYPE getInitialStateType() const { return initialStateType; }
   /** @brief Interface for config::pathdirOfflineData */
   string getPathdirOfflineData() const { return pathdirOfflineData; }
+  /** @brief Interface for config::pathdirOfflineData, returns pointer to char */
+  const char* getPathdirOfflineDataChar() const { return pathdirOfflineData.c_str(); }
   /** @brief Interface for config::pythiaParticleFile */
   string getPythiaParticleFile() const { return pythiaParticleFile; }
   /** @brief Interface for config::cgcParticleFile */
@@ -119,7 +121,6 @@ class config
   
   /** Stuff special to offline analysis */
   string getOutputName() const {return outputName;}
-  string getPathdirCascadeData() const {return pathdirCascadeData;}
   double getMinimumPT() const { return minimumPT; }
   int getNumberOfParticlesToAdd() const { return numberOfParticlesToAdd; }
   bool movieOutputJets;
@@ -232,7 +233,6 @@ class config
   double timeshift;
   int numberOfParticlesToAdd;
   double minimumPT; 
-  string pathdirCascadeData;
   double factor_dt;
   bool localCluster; // chose false for CSC and true for local queuing system, like housewifes, dwarfs etc., local system accesses personal filesystem, no need for transfering data from /local/ to working environment 
   double dx;
