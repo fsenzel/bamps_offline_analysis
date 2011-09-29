@@ -82,21 +82,6 @@ void additionalParticlesDistribution::prepareParticles( std::vector< Particle >&
   double dtt = 0;
   double eta_max = 5.0;
 
-//   vector<Particle>::iterator iIt;
-//   double y;
-//   for ( iIt = _particles.begin(); iIt != _particles.end(); )
-//   {
-//     y = log(( _particles[j].E+_particles[j].PZ ) / ( _particles[j].E-_particles[j].PZ ) ) / 2.0;
-//     if ( fabs( y ) > 20 )
-//     {
-//       iIt = _particles.erase( iIt );
-//     }
-//     else
-//     {
-//       ++iIt;
-//     }
-//   }
-
   double PT, y, cc;
   double shift;
   double sum = 0;

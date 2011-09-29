@@ -788,6 +788,111 @@ class offlineDataInteractionRates : public offlineDataGeneric
 };
 
 
+class offlineDataSimulationParameters : public offlineDataGeneric
+{
+  public:
+    offlineDataSimulationParameters() : seed(0), sqrtS(0), impactParameter(0),
+      massNumberNucleusA(0), atomicNumberNucleusA(0),massNumberNucleusB(0), atomicNumberNucleusB(0),
+      numberOfTestparticles(0), initialNumberOfParticles(0),firstTimeStep(0), timeShift(0),
+      freezeOutEnergyDensity(0), ringStructureSize(0), ringStructureCentralRadius(0),
+      ringStructureDeltaR(0), cellSizeDeltaX(0), cellSizeDeltaY(0),
+      transversalSize(0), gridSizeX(0), gridSizeY(0), gridSizeZ(0),
+      offlineDataGeneric() {};
+    offlineDataSimulationParameters( const uint32_t _seed, const double _sqrtS, const double _impactParameter,
+      const double _massNumberNucleusA, const double _atomicNumberNucleusA, const double _massNumberNucleusB,
+      const double _atomicNumberNucleusB, const int _numberOfTestparticles, const int _initialNumberOfParticles,
+      const double _firstTimeStep, const double _timeShift, const double _freezeOutEnergyDensity,
+      const int _ringStructureSize, const double _ringStructureCentralRadius, const double _ringStructureDeltaR,
+      const double _cellSizeDeltaX, const double _cellSizeDeltaY, const double _transversalSize,
+      const double _gridSizeX, const double _gridSizeY, const double _gridSizeZ ) : seed( _seed ), sqrtS(_sqrtS),
+      impactParameter(_impactParameter), massNumberNucleusA(_massNumberNucleusA), atomicNumberNucleusA(_atomicNumberNucleusA),
+      massNumberNucleusB(_massNumberNucleusB), atomicNumberNucleusB(_atomicNumberNucleusB),
+      numberOfTestparticles(_numberOfTestparticles), initialNumberOfParticles(_initialNumberOfParticles),
+      firstTimeStep(_firstTimeStep), timeShift(_timeShift), freezeOutEnergyDensity(_freezeOutEnergyDensity),
+      ringStructureSize(_ringStructureSize), ringStructureCentralRadius(_ringStructureCentralRadius),
+      ringStructureDeltaR(_ringStructureDeltaR), cellSizeDeltaX(_cellSizeDeltaX), cellSizeDeltaY(_cellSizeDeltaY),
+      transversalSize(_transversalSize), gridSizeX(_gridSizeX), gridSizeY(_gridSizeY), gridSizeZ(_gridSizeZ),      
+      offlineDataGeneric() {};
+    ~offlineDataSimulationParameters() {};
+
+    size_t getSize() const { return sizeof( offlineDataSimulationParameters ); }
+    std::string getFilenameIdentifier() const { return this->filenameIdentifier; }
+    static std::string filenameIdentifier;
+    
+    /** @brief initial seed of the original BAMPS run */
+    uint32_t seed;
+    /** @brief center of mass energy per NN pair [GeV] */
+    double sqrtS;
+    /** @brief impact parameter [fm] */
+    double impactParameter;
+    /** @brief Mass number of nucleus A  */
+    double massNumberNucleusA;
+    /** @brief Atomic number, i.e. number of protons, of nucleus A */
+    double atomicNumberNucleusA;
+    /** @brief Mass number of nucleus B  */
+    double massNumberNucleusB;
+    /** @brief Atomic number, i.e. number of protons, of nucleus B */
+    double atomicNumberNucleusB;
+    /** @brief number of test particles per real particle */
+    int numberOfTestparticles;
+    /** @brief total number of initial particles of the original BAMPS run */
+    int initialNumberOfParticles;
+    /** @brief the first time step*/
+    double firstTimeStep;
+    /** @brief intial time shift after the production of the particles*/
+    double timeShift;
+    /** @brief energy density for kinetic freeze out [GeV/fm^3] */
+    double freezeOutEnergyDensity;
+    /** @brief size of the ring structure (= number of rings) */
+    int ringStructureSize;
+    /** @brief central radius of the ring structure */
+    double ringStructureCentralRadius;
+    /** @brief delta R for the outer rings */
+    double ringStructureDeltaR;
+    /** @brief cell size in x-direction (dx) */
+    double cellSizeDeltaX;
+    /** @brief cell size in y-direction (dy) */
+    double cellSizeDeltaY;
+    /** @brief */
+    double transversalSize;
+    /** @brief number of cells in x-direction */
+    double gridSizeX;
+    /** @brief number of cells in y-direction */
+    double gridSizeY;
+    /** @brief number of cells in z-direction (= eta-direction) */
+    double gridSizeZ;
+    
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+      ar & boost::serialization::base_object<offlineDataGeneric>(*this);
+      ar & seed;
+      ar & sqrtS;
+      ar & impactParameter;
+      ar & massNumberNucleusA;
+      ar & atomicNumberNucleusA;
+      ar & massNumberNucleusB;
+      ar & atomicNumberNucleusB;
+      ar & numberOfTestparticles;
+      ar & initialNumberOfParticles;
+      ar & firstTimeStep;
+      ar & timeShift;
+      ar & freezeOutEnergyDensity;
+      ar & ringStructureSize;
+      ar & ringStructureCentralRadius;
+      ar & ringStructureDeltaR;
+      ar & cellSizeDeltaX;
+      ar & cellSizeDeltaY;
+      ar & transversalSize;
+      ar & gridSizeX;
+      ar & gridSizeY;
+      ar & gridSizeZ;
+    }
+};
+
+
+
 // "Export" the classes derived from offlineDataGeneric in case they need to be archived via boost:serialization
 // using pointers to the base class
 BOOST_CLASS_EXPORT_KEY( offlineDataInteraction22 )
@@ -800,6 +905,7 @@ BOOST_CLASS_EXPORT_KEY( offlineDataParticleNumbers )
 BOOST_CLASS_EXPORT_KEY( offlineDataCollisionNumbers )
 BOOST_CLASS_EXPORT_KEY( offlineDataInteractionRates )
 BOOST_CLASS_EXPORT_KEY( offlineDataEventType )
+BOOST_CLASS_EXPORT_KEY( offlineDataSimulationParameters )
 
 BOOST_CLASS_IMPLEMENTATION( offlineDataGeneric, boost::serialization::object_serializable)
 BOOST_CLASS_IMPLEMENTATION( offlineDataInteraction22, boost::serialization::object_serializable)
@@ -812,6 +918,7 @@ BOOST_CLASS_IMPLEMENTATION( offlineDataParticleNumbers, boost::serialization::ob
 BOOST_CLASS_IMPLEMENTATION( offlineDataCollisionNumbers, boost::serialization::object_serializable)
 BOOST_CLASS_IMPLEMENTATION( offlineDataInteractionRates, boost::serialization::object_serializable)
 BOOST_CLASS_IMPLEMENTATION( offlineDataEventType, boost::serialization::object_serializable)
+BOOST_CLASS_IMPLEMENTATION( offlineDataSimulationParameters, boost::serialization::object_serializable)
 
 BOOST_CLASS_TRACKING(offlineDataGeneric, boost::serialization::track_never)
 BOOST_CLASS_TRACKING(offlineDataInteraction22, boost::serialization::track_never)
@@ -824,6 +931,7 @@ BOOST_CLASS_TRACKING(offlineDataParticleNumbers, boost::serialization::track_nev
 BOOST_CLASS_TRACKING(offlineDataCollisionNumbers, boost::serialization::track_never)
 BOOST_CLASS_TRACKING(offlineDataInteractionRates, boost::serialization::track_never)
 BOOST_CLASS_TRACKING(offlineDataEventType, boost::serialization::track_never)
+BOOST_CLASS_TRACKING(offlineDataSimulationParameters, boost::serialization::track_never)
 
 
 /** @brief exception class for handling unexpected critical behaviour within simulations of heavy ion collisions  */

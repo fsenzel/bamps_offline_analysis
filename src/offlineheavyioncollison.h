@@ -22,7 +22,7 @@
 class offlineHeavyIonCollision
 {
 public:
-  offlineHeavyIonCollision( config* const _config );
+  offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface );
   ~offlineHeavyIonCollision();
 
   void init();
@@ -35,8 +35,8 @@ public:
   void scatterEdgeParticles( std::list< int >& _offlineParticleList, std::list< int >& _addedParticleList, const double nexttime );
 
 private:
-  /** @brief Interface for the output of data needed for later offline reconstruction */
-  offlineOutputInterface offlineInterface;
+  /** @brief Pointer to the interface for the output of data needed for later offline reconstruction */
+  offlineOutputInterface* offlineInterface;
   
   config * const theConfig;
   interpolation23 theI23;

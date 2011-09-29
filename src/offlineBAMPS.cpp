@@ -13,7 +13,7 @@
 #include "binning.h"
 #include "random.h"
 #include "offlineheavyioncollison.h"
-
+#include "offlineoutput.h"
 
 
 using namespace std;
@@ -39,10 +39,14 @@ int main( int argc, char *argv[] )
     // create and initialize the main objects needed for
     // configuration,execution and analysis of the simulation
     config theConfig( argc, argv );
-    theConfig.setting();
+    
+    offlineOutputInterface offlineInterface( theConfig.getPathdirOfflineDataChar() );
+    offlineInterface.setAdditionalFilenameTag( theConfig.getName() );    
+    
+    theConfig.readAndPrepareInitialSettings( &offlineInterface );
 
     analysis theAnalysis( &theConfig );
-    offlineHeavyIonCollision theHIC( &theConfig );
+    offlineHeavyIonCollision theHIC( &theConfig, &offlineInterface );
     //--------------------------------------------------------------
 
     //--------------------------------------------------------------

@@ -9,7 +9,6 @@ coordinateBins.cpp
 initialdistribution.cpp
 initialstatemodel.cpp
 integrand_time.cpp
-# interpolation_gQ.cpp
 minijets.cpp
 offlineBAMPS.cpp
 offlineheavyioncollison.cpp 
@@ -19,7 +18,6 @@ psf.cpp
 pythiaInitialDistribution.cpp
 ringcontainer.cpp
 ringstructure.cpp
-setting.cpp
 woodsaxon.cpp
 )
 

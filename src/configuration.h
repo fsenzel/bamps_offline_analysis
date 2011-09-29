@@ -24,6 +24,7 @@
 
 #include "globalsettings.h"
 #include "particle.h"
+#include "offlineoutput.h"
 
 
 /** @brief Enumeration type for possible initial state models */
@@ -120,6 +121,8 @@ class config
   string getCgcParticleFile() const {return cgcParticleFile;}
   
   /** Stuff special to offline analysis */
+  void readAndPrepareInitialSettings(offlineOutputInterface*const _offlineInterface);
+  
   string getOutputName() const {return outputName;}
   double getMinimumPT() const { return minimumPT; }
   int getNumberOfParticlesToAdd() const { return numberOfParticlesToAdd; }
@@ -135,8 +138,6 @@ class config
   bool DtSpecified() const {return dt_specified;}
   double getFactor_dt() const { return factor_dt; }
   double getTimefirst() const {return timefirst;}
-  
-  void setting();
   
   int getN_init() const { return N_init; }
   double get_dx() const { return dx; }

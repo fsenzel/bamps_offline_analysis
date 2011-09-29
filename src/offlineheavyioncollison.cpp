@@ -60,13 +60,12 @@ namespace
 }
 
 
-offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config ) :
+offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface ) :
     theConfig( _config ), stoptime_last( 0 ), stoptime( 5.0 ), currentNumber( 0 ),
     rings( _config->getRingNumber(), _config->getCentralRingRadius(), _config->getDeltaR() ),
     testpartcl( _config->getTestparticles() ),
-    offlineInterface( _config->getPathdirOfflineDataChar() )
+    offlineInterface( _offlineInterface )
 {
-  offlineInterface.setAdditionalFilenameTag( theConfig->getName() );
 }
 
 
@@ -478,7 +477,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
   {
     try
     {
-      boost::shared_ptr< offlineDataEventType > ptrEventType = offlineInterface.readOfflineDataFromArchive< offlineDataEventType >();
+      boost::shared_ptr< offlineDataEventType > ptrEventType = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >();
       actiontype = ptrEventType->event;
     }    
     catch ( boost::archive::archive_exception& err )
@@ -489,7 +488,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     
     if ( actiontype == event_newTimestep )
     {
-      boost::shared_ptr< offlineDataCellConfiguration > ptrCellStructure = offlineInterface.readOfflineDataFromArchive< offlineDataCellConfiguration >();
+      boost::shared_ptr< offlineDataCellConfiguration > ptrCellStructure = offlineInterface->readOfflineDataFromArchive< offlineDataCellConfiguration >();
       etaBins = ptrCellStructure->etaBins;
       timenow = ptrCellStructure->timenow;
       timenext = ptrCellStructure->timenext;
@@ -509,14 +508,14 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
         rateAntiQuarks[i].assign( rings.size(), 0 );
       }
 
-      boost::shared_ptr< offlineDataInteractionRates > ptrRates = offlineInterface.readOfflineDataFromArchive< offlineDataInteractionRates >();
+      boost::shared_ptr< offlineDataInteractionRates > ptrRates = offlineInterface->readOfflineDataFromArchive< offlineDataInteractionRates >();
       rateGluons = ptrRates->gluonRates;
       rateQuarks = ptrRates->quarkRates;
       rateAntiQuarks = ptrRates->antiQuarkRates;
     }
     else if ( actiontype == event_interaction22 )
     {
-      boost::shared_ptr< offlineDataInteraction22 > ptrInteraction22 = offlineInterface.readOfflineDataFromArchive< offlineDataInteraction22 >();
+      boost::shared_ptr< offlineDataInteraction22 > ptrInteraction22 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction22 >();
       time = ptrInteraction22->time;
       iscat = ptrInteraction22->iscat;
       jscat = ptrInteraction22->jscat;
@@ -573,13 +572,13 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-        offlineInterface.undoLastReadOperation< offlineDataEventType >();
-        offlineInterface.undoLastReadOperation< offlineDataInteraction22 >();
+        offlineInterface->undoLastReadOperation< offlineDataEventType >();
+        offlineInterface->undoLastReadOperation< offlineDataInteraction22 >();
       }
     }
     else if ( actiontype == event_interaction23 )
     {
-      boost::shared_ptr< offlineDataInteraction23 > ptrInteraction23 = offlineInterface.readOfflineDataFromArchive< offlineDataInteraction23 >();
+      boost::shared_ptr< offlineDataInteraction23 > ptrInteraction23 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction23 >();
       time = ptrInteraction23->time;
       iscat = ptrInteraction23->iscat;
       jscat = ptrInteraction23->jscat;
@@ -651,13 +650,13 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-        offlineInterface.undoLastReadOperation< offlineDataEventType >();
-        offlineInterface.undoLastReadOperation< offlineDataInteraction23 >();
+        offlineInterface->undoLastReadOperation< offlineDataEventType >();
+        offlineInterface->undoLastReadOperation< offlineDataInteraction23 >();
       }
     }
     else if ( actiontype == event_interaction32 )
     {
-      boost::shared_ptr< offlineDataInteraction32 > ptrInteraction32 = offlineInterface.readOfflineDataFromArchive< offlineDataInteraction32 >();
+      boost::shared_ptr< offlineDataInteraction32 > ptrInteraction32 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction32 >();
       time = ptrInteraction32->time;
       iscat = ptrInteraction32->iscat;
       jscat = ptrInteraction32->jscat;
@@ -716,13 +715,13 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-        offlineInterface.undoLastReadOperation< offlineDataEventType >();
-        offlineInterface.undoLastReadOperation< offlineDataInteraction32 >();
+        offlineInterface->undoLastReadOperation< offlineDataEventType >();
+        offlineInterface->undoLastReadOperation< offlineDataInteraction32 >();
       }
     }
     else if ( actiontype == event_interactionElastic )
     {
-      boost::shared_ptr< offlineDataInteractionElastic > ptrInteractionElastic = offlineInterface.readOfflineDataFromArchive< offlineDataInteractionElastic >();
+      boost::shared_ptr< offlineDataInteractionElastic > ptrInteractionElastic = offlineInterface->readOfflineDataFromArchive< offlineDataInteractionElastic >();
       timei = ptrInteractionElastic->ct_i;
       timej = ptrInteractionElastic->ct_j;
       iscat = ptrInteractionElastic->iscat;
@@ -786,13 +785,13 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-        offlineInterface.undoLastReadOperation< offlineDataEventType >();
-        offlineInterface.undoLastReadOperation< offlineDataInteractionElastic >();
+        offlineInterface->undoLastReadOperation< offlineDataEventType >();
+        offlineInterface->undoLastReadOperation< offlineDataInteractionElastic >();
       }
     }
     else if ( actiontype == event_particleIdSwap )
     {
-      boost::shared_ptr< offlineDataParticleIdSwap > ptrSwap = offlineInterface.readOfflineDataFromArchive< offlineDataParticleIdSwap >();
+      boost::shared_ptr< offlineDataParticleIdSwap > ptrSwap = offlineInterface->readOfflineDataFromArchive< offlineDataParticleIdSwap >();
       iscat = ptrSwap->removedParticleID;
       jscat = ptrSwap->replacingParticleID;
 
