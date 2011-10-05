@@ -29,7 +29,7 @@ public:
   initialDistribution( const config* const _config, const INITIAL_STATE_TYPE _initialStateType = miniJetsInitialState );
   ~initialDistribution() {};
 
-  void populateParticleVector( std::vector< Particle >& _particles, WoodSaxon& _wsParameter );
+  void populateParticleVector( std::vector< ParticleOffline >& _particles, WoodSaxon& _wsParameter );
   
 
 private:

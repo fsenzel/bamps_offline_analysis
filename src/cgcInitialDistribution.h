@@ -24,7 +24,7 @@ class cgcInitialDistribution : public initialStateModel
     cgcInitialDistribution( const config& _config);
     ~cgcInitialDistribution() {};
     
-    void populateParticleVector( std::vector<Particle>& _particles );
+    void populateParticleVector( std::vector<ParticleOffline>& _particles );
   
         
   private:

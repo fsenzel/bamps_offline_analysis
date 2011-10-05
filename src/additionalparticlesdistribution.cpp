@@ -43,7 +43,7 @@ additionalParticlesDistribution::additionalParticlesDistribution( const config* 
 
 
 
-void additionalParticlesDistribution::populateParticleVector( std::vector< Particle >& _particles, WoodSaxon& _wsParameter )
+void additionalParticlesDistribution::populateParticleVector( std::vector< ParticleOffline >& _particles, WoodSaxon& _wsParameter )
 {
   switch ( initialStateType )
   {
@@ -69,14 +69,14 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
 
   for ( int i = 0; i < _particles.size(); i++ )
   {
-    _particles[i].unique_id = Particle::unique_id_counter_added;
-    --Particle::unique_id_counter_added;
+    _particles[i].unique_id = ParticleOffline::unique_id_counter_added;
+    --ParticleOffline::unique_id_counter_added;
   }
 }
 
 
 
-void additionalParticlesDistribution::prepareParticles( std::vector< Particle >& _particles )
+void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOffline >& _particles )
 {
   double max = 0;
   double dtt = 0;

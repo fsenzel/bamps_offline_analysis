@@ -28,12 +28,12 @@ using std::ios;
 using std::ifstream;
 
 /** @brief definition of particles vector, defined extern in configuration.h */
-std::vector<Particle> ns_casc::particles;
-std::vector<Particle> ns_casc::particles_init;
-std::vector<Particle> ns_casc::particles_atTimeNow;
-std::vector<Particle> ns_casc::particles_atTimeNowCopy;
-std::vector<Particle> ns_casc::addedParticles;
-std::vector<Particle> ns_casc::addedParticlesCopy;
+std::vector<ParticleOffline> ns_casc::particles;
+std::vector<ParticleOffline> ns_casc::particles_init;
+std::vector<ParticleOffline> ns_casc::particles_atTimeNow;
+std::vector<ParticleOffline> ns_casc::particles_atTimeNowCopy;
+std::vector<ParticleOffline> ns_casc::addedParticles;
+std::vector<ParticleOffline> ns_casc::addedParticlesCopy;
 
 using namespace ns_casc;
 
@@ -294,55 +294,37 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
   
   particles.reserve( N_init * 1.8 );
   particles_init.reserve( N_init );
-  
   particles.resize( N_init * 1.8 );
   particles_init.resize( N_init );
 
-  std::string filename = pathdirOfflineData + "/" + getName() + "_initial.f1";
-  fstream readinp( filename.c_str(), ios::in );
-  if ( !readinp.good() )
-  {
-    string errMsg = "Error in reading " + filename;
-    throw eConfig_error( errMsg );
-  }
-
-//   double dummy;
-  int FLAVOR;
-  string line;
-  std::stringstream inStream;
-  int i = 0;
-  double dummy;
-  while( !readinp.eof() )
-  {
-    getline( readinp, line );
-    //only lines which are non empty and do not contain a # are taken into account
-    if (line.find("#",0) == string::npos && line.length() != 0)    
-    {
-      inStream.clear();
-      inStream.str(line);
-      inStream >> dummy >> particles_init[i].unique_id >> dummy >> FLAVOR 
-      >> particles_init[i].T >> particles_init[i].X >> particles_init[i].Y >> particles_init[i].Z
-      >> particles_init[i].E >> particles_init[i].PX >> particles_init[i].PY >> particles_init[i].PZ
-      >> particles_init[i].md2g >> particles_init[i].md2q;
-      
-      inStream.str("");
-      particles_init[i].FLAVOR = static_cast<FLAVOR_TYPE>( FLAVOR );
-      ++i;
-    }
-  }
-  readinp.close();
-
-  if ( particles_init.size() != N_init )
+  boost::shared_ptr< offlineDataInitialParticles > ptrInitialParticles = offlineInterface->readOfflineDataFromArchive< offlineDataInitialParticles >();
+  
+  if ( ptrInitialParticles->particleVector->size() != N_init )
   {
     string errMsg = "Wrong particle number";
     throw eConfig_error( errMsg );
   }
+  
+//   particles_init = *(ptrInitialParticles->particleVector);
+  for ( int i = 0; i < ptrInitialParticles->particleVector->size(); i++ )
+  {
+    particles_init[i].unique_id = (*(ptrInitialParticles->particleVector))[i].unique_id;
+    particles_init[i].FLAVOR = (*(ptrInitialParticles->particleVector))[i].FLAVOR;
+    particles_init[i].m = (*(ptrInitialParticles->particleVector))[i].m;
+    particles_init[i].T = (*(ptrInitialParticles->particleVector))[i].T;
+    particles_init[i].X = (*(ptrInitialParticles->particleVector))[i].X;
+    particles_init[i].Y = (*(ptrInitialParticles->particleVector))[i].Y;
+    particles_init[i].Z = (*(ptrInitialParticles->particleVector))[i].Z;
+    particles_init[i].E = (*(ptrInitialParticles->particleVector))[i].E;
+    particles_init[i].PX = (*(ptrInitialParticles->particleVector))[i].PX;
+    particles_init[i].PY = (*(ptrInitialParticles->particleVector))[i].PY;
+    particles_init[i].PZ = (*(ptrInitialParticles->particleVector))[i].PZ;
+    particles_init[i].md2g = (*(ptrInitialParticles->particleVector))[i].md2g;
+    particles_init[i].md2q = (*(ptrInitialParticles->particleVector))[i].md2q;
+  }
 
   for ( int i = 0; i < particles_init.size(); i++ )
-  {
-    // compute energy from momenta again, to get higher precision than the numbers from file (otherwise energy conservation is not fullfilled to the last decimal place
-    particles_init[i].E = sqrt( pow( particles_init[i].PX, 2.0 ) + pow( particles_init[i].PY, 2.0 ) + pow( particles_init[i].PZ, 2.0 ) + pow( particles_init[i].m, 2.0 ) );
-    
+  {   
     particles[i].init = true;
     particles[i].free = false;
 

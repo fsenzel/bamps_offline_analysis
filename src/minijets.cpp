@@ -331,7 +331,7 @@ void miniJets::generateSamplingDataSets()
 
 
 
-void miniJets::populateParticleVector( std::vector< Particle >& _particles )
+void miniJets::populateParticleVector( std::vector< ParticleOffline >& _particles )
 {
   /**
   * Reserve memory for the Particle vector. Due to possible particle creation this size should be chosen somewhat larger
@@ -353,7 +353,7 @@ void miniJets::populateParticleVector( std::vector< Particle >& _particles )
 }
 
 
-void miniJets::populateParticleVector( std::vector< Particle >& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT )
+void miniJets::populateParticleVector( std::vector< ParticleOffline >& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT )
 {
   minimumPT = _minimumPT;
   numberOfParticlesToGenerate = _numberOfParticlesToGenerate;
@@ -403,7 +403,7 @@ void miniJets::computeWoodSaxonParameters( const config& _config, WoodSaxon& _Wo
 
 
 
-void miniJets::sampleMomenta( std::vector< Particle >& _particles )
+void miniJets::sampleMomenta( std::vector< ParticleOffline >& _particles )
 {
   sample_PXY( _particles );
   sample_PZE( _particles );
@@ -413,7 +413,7 @@ void miniJets::sampleMomenta( std::vector< Particle >& _particles )
 
 
 
-void miniJets::samplePositions( std::vector< Particle >& _particles )
+void miniJets::samplePositions( std::vector< ParticleOffline >& _particles )
 {
   sample_T( _particles );
   sample_XYZ( _particles );
@@ -421,7 +421,7 @@ void miniJets::samplePositions( std::vector< Particle >& _particles )
 
 
 
-void miniJets::sample_T( std::vector< Particle >& _particles ) const
+void miniJets::sample_T( std::vector< ParticleOffline >& _particles ) const
 {
   const int ord = 4;
   int nn;
@@ -471,7 +471,7 @@ void miniJets::sample_T( std::vector< Particle >& _particles ) const
 
 
 
-void miniJets::sample_XYZ( std::vector< Particle >& _particles ) const
+void miniJets::sample_XYZ( std::vector< ParticleOffline >& _particles ) const
 {
   double X, Y, Z, T;
   double vt, gv, gvt, tc1, tc2, tc3, xx, bA, bB, zA, zB, fds, fd;
@@ -568,7 +568,7 @@ void miniJets::sample_XYZ( std::vector< Particle >& _particles ) const
 
 
 
-void miniJets::sample_PXY( std::vector< Particle >& _particles ) const
+void miniJets::sample_PXY( std::vector< ParticleOffline >& _particles ) const
 {
   const int ord = 4;
   int count, nn;
@@ -673,7 +673,7 @@ void miniJets::sample_PXY( std::vector< Particle >& _particles ) const
 
 
 
-void miniJets::sample_PZE( std::vector< Particle >& _particles ) const
+void miniJets::sample_PZE( std::vector< ParticleOffline >& _particles ) const
 {
   int count, nn;
   double *xx, *yy;
@@ -763,8 +763,8 @@ void miniJets::sample_PZE( std::vector< Particle >& _particles ) const
     _particles[index+1].PZ = 0.5 * PT * ( exp( Y2 ) - exp( -Y2 ) );
     _particles[index].E = sqrt( pow( _particles[index].PZ, 2 ) + pow( PT, 2 ) );
     _particles[index+1].E = sqrt( pow( _particles[index+1].PZ, 2 ) + pow( PT, 2 ) );
-    _particles[index].m = Particle::getMass( _particles[index].FLAVOR );
-    _particles[index+1].m = Particle::getMass( _particles[index+1].FLAVOR );
+    _particles[index].m = ParticleOffline::getMass( _particles[index].FLAVOR );
+    _particles[index+1].m = ParticleOffline::getMass( _particles[index+1].FLAVOR );
   }
 
   delete[] xx;
@@ -784,7 +784,7 @@ void miniJets::sample_PZE( std::vector< Particle >& _particles ) const
 #define qaqs(t,u) (4./9.*((1.+u*u)/(t*t)+u*u+t*t)-8./27.*u*u/t)
 #define qaqd(t,u) (4./9.*(t*t+u*u))
 
-void miniJets::sample_FLAV( std::vector< Particle >& _particles ) const
+void miniJets::sample_FLAV( std::vector< ParticleOffline >& _particles ) const
 {
   double XT, PT2, Y1, Y2, x1, x2, s, t, u;
   double F1[9], F2[9];

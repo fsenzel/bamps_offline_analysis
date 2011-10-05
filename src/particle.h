@@ -21,8 +21,10 @@
 #include "particleprototype.h"
 
 
+
+
 /**
-* @brief Provides properties of a particle needed in.the simulations.
+* @brief Provides properties of a particle needed in the simulations.
 * @author Oliver Fochler
 *
 * This class encapsulates properties of particles that are needed for the simulation process, such as position and momentum variables.
@@ -36,21 +38,7 @@ class Particle : public ParticlePrototype
     collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), PYold( 0 ), PZold( 0 ), as22( 0 ), as23( 0 ), rate23v( 0 ),
     rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ), cs22t( 0 ), cs23t( 0 ), lambda_scaled( 0 ), md2g_scaled_22( 0 ),
     md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), md2q_scaled_23( 0 ), free( true ), init( true ), step( 0 ), tstep( 0 ),
-    taustep( 0 ),
-    T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
-    PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
-    X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
-    Eold( 0 ), rate( 0 ), ratev( 0 ) {};
-    
-    /** stuff special to offline reconstruction */
-    double T_creation;
-    double X_init, Y_init,Z_init, X_traveled;//fm
-    double PX_init, PY_init,PZ_init, E_init;//GeV
-    double X_lastInt, Y_lastInt, Z_lastInt, T_lastInt;
-    
-    double Eold;
-    double rate, ratev;
-    
+    taustep( 0 ) {};
     
     /** @brief space time rapidity \eta */
     double eta;
@@ -80,9 +68,6 @@ class Particle : public ParticlePrototype
     double collisionTime;
     /** @brief collision partner (geometric collisions) */
     int collisionPartner;
-    
-    /** @brief counter for unique particle IDs of added particles (static) */
-    static long int unique_id_counter_added;
     
     /** @brief Momentum prior to geometric collision, needed for particles in "edge cell"*/
     double PXold;
@@ -124,6 +109,40 @@ class Particle : public ParticlePrototype
     
     static double getMass( const FLAVOR_TYPE _flav ) { return 0; }
     
+    
+  private:
+};
+
+
+
+/**
+* @brief Provides properties of a particle needed in the offline reconstruction of BAMPS events.
+* @author Oliver Fochler
+*
+* This class extends the Particle class that is used in the standard BAMPS simulations to include some
+* variables that are needed for the offline reconstruction.
+*/
+class ParticleOffline : public Particle
+{
+  public:
+    /** @brief Provide standard constructor (for completeness) */
+    ParticleOffline() : Particle(), T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
+    PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
+    X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
+    Eold( 0 ), rate( 0 ), ratev( 0 ) {};
+    
+    /** @brief counter for unique particle IDs of added particles (static) */
+    static long int unique_id_counter_added;
+    
+    /** stuff special to offline reconstruction */
+    double T_creation;
+    double X_init, Y_init,Z_init, X_traveled;//fm
+    double PX_init, PY_init,PZ_init, E_init;//GeV
+    double X_lastInt, Y_lastInt, Z_lastInt, T_lastInt;
+    
+    double Eold;
+    double rate, ratev;
+    
     static int mapToPDGCodes( const FLAVOR_TYPE _flav )
     {
       switch ( _flav )
@@ -160,7 +179,6 @@ class Particle : public ParticlePrototype
           break;
       }      
     }
-    
     
   private:
 };

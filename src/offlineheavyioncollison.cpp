@@ -269,15 +269,16 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     n_anti_quarks_temp = n_anti_up + n_anti_down + n_anti_strange;
 
     // evolution of the medium to present time
-    dt_cascade = evolveMedium( simulationTime, endOfDataFiles );
+    double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
     
     // specify time step
     if ( theConfig->DtSpecified() )
     {
       dt = theConfig->getDt();
     }
-    else
+    else if ( dt_cascade_from_data >= 0 )
     {
+      dt_cascade = dt_cascade_from_data;
       dt = dt_cascade * factor_dt;  // use time step from original medium evolution but make it slightly smaller
     }
     
@@ -433,7 +434,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
 double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& _endOfDataFiles )
 {
-  double dt_cascade = 0;
+  double dt_cascade = -1;
   bool stop = false;
   int iscat, jscat, kscat, dead;
   double time = 0;
@@ -1680,13 +1681,13 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
 
         if ( pt_addedParticle > 10.0 )
         {
-          if ( Particle::mapToGenericFlavorType( F2 ) == gluon )
+          if ( ParticleOffline::mapToGenericFlavorType( F2 ) == gluon )
           {
             ++n23_collected_gluon;
             p23_collected_gluon += probab23;
             lambdaJet_gluon += lambda_scaled;
           }
-          else if ( Particle::mapToGenericFlavorType( F2 ) == quark )
+          else if ( ParticleOffline::mapToGenericFlavorType( F2 ) == quark )
           {
             ++n23_collected_quark;
             p23_collected_quark += probab23;
@@ -2298,7 +2299,7 @@ int offlineHeavyIonCollision::scatt23_utility( scattering23& scatt23_obj, cellCo
     addedParticles[jscat].E = sqrt( pow( P2[1], 2 ) + pow( P2[2], 2 ) + pow( P2[3], 2 ) );
   }
 
-  Particle tempParticle;
+  ParticleOffline tempParticle;
   tempParticle.FLAVOR = gluon;
   tempParticle.PX = P3[1];
   tempParticle.PY = P3[2];
@@ -2331,8 +2332,8 @@ int offlineHeavyIonCollision::scatt23_utility( scattering23& scatt23_obj, cellCo
   tempParticle.collisionPartner = -1;
   tempParticle.rate = particles[iscat].rate;    //GeV
   tempParticle.ratev = particles[iscat].ratev;    //GeV
-  tempParticle.unique_id = Particle::unique_id_counter_added;
-  --Particle::unique_id_counter_added;
+  tempParticle.unique_id = ParticleOffline::unique_id_counter_added;
+  --ParticleOffline::unique_id_counter_added;
 
 
 //   if ( sqrt( pow( tempParticle.PX, 2) + pow( tempParticle.PY, 2) ) > 3.0 )

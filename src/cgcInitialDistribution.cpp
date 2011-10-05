@@ -45,10 +45,10 @@ cgcInitialDistribution::cgcInitialDistribution( const config& _config )
 
 
 
-void cgcInitialDistribution::populateParticleVector( std::vector< Particle >& _particles )
+void cgcInitialDistribution::populateParticleVector( std::vector< ParticleOffline >& _particles )
 {
   /**
-  * Reserve memory for the Particle vector. Due to possible particle creation this size should be chosen somewhat larger
+  * Reserve memory for the ParticleOffline vector. Due to possible particle creation this size should be chosen somewhat larger
   * than the initial number of particles. Doing this, push_back operations to add new particles won't lead to internal
   * memory re-allocation in the vector, which could possibly be time consuming.
   * However push_back operations are always possible, even when the reserved size is used up (as long as there is physical

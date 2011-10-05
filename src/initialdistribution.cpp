@@ -37,7 +37,7 @@ initialDistribution::initialDistribution( const config* const _config, const INI
 
 
 
-void initialDistribution::populateParticleVector( std::vector< Particle >& _particles, WoodSaxon& _wsParameter )
+void initialDistribution::populateParticleVector( std::vector< ParticleOffline >& _particles, WoodSaxon& _wsParameter )
 {
   switch ( initialStateType )
   {
@@ -67,10 +67,10 @@ void initialDistribution::populateParticleVector( std::vector< Particle >& _part
       break;
   }
   
-  Particle::unique_id_counter = 0;
+  ParticleOffline::unique_id_counter = 0;
   for ( int i = 0; i < _particles.size(); i++ )
   {
-    _particles[i].unique_id = Particle::unique_id_counter;
-    ++Particle::unique_id_counter;
+    _particles[i].unique_id = ParticleOffline::unique_id_counter;
+    ++ParticleOffline::unique_id_counter;
   }
 }

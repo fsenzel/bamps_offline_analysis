@@ -1548,7 +1548,7 @@ v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg ):
 
 
 
-void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, string additionalNameTag, const double _outputTime, const v2Type _v2type )
+void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, string additionalNameTag, const double _outputTime, const v2Type _v2type )
 {
   double eta, pp, pt, v2, xt;
   double sinAlpha, alpha;
@@ -1679,7 +1679,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
 
     if (( pt <= _pt_max && pt >= _pt_min ) &&  
       ( _flavTypeToComputeFor == flavor || 
-      ( _flavTypeToComputeFor == Particle::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) ) ) ) )
+      ( _flavTypeToComputeFor == ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) ) ) ) )
     {
       if ( fabs( eta ) <= 2.0 )
       {
@@ -2021,7 +2021,7 @@ void analysis::volumeMidrap( const int step ) const
 }
 
 
-void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, const int step )
+void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
 {
   double pt, y;
   vector<double> * _ptBinsAll;
@@ -2125,7 +2125,7 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
     pt = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
     y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
 
-    genFlavor = Particle::mapToGenericFlavorType( _particles[j].FLAVOR );
+    genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
     if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
       ( _flavTypeToComputeFor == quark && ( genFlavor == quark || genFlavor == anti_quark ) ) )
     {
@@ -2238,7 +2238,7 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
 
 
 
-void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, const int step )
+void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
 {
   double pt;
 
@@ -2291,7 +2291,7 @@ void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vect
   {
     pt = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
 
-    genFlavor = Particle::mapToGenericFlavorType( _particles[j].FLAVOR );
+    genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
     if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
       ( _flavTypeToComputeFor == quark && ( genFlavor == quark || genFlavor == anti_quark ) ) )
     {
@@ -2317,7 +2317,7 @@ void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vect
 
 
 
-void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, const int step )
+void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
 {
   double y;
   vector<double> * _yBins;
@@ -2385,7 +2385,7 @@ void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Pa
 
 
 
-void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, const int step )
+void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
 {
   double Et, y;
   vector<double> * _EtBins;
@@ -2413,7 +2413,7 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
     Et = sqrt( pow( _particles[j].PX, 2) + pow( _particles[j].PY, 2) );
     y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
     
-    if ( Particle::mapToGenericFlavorType( _particles[j].FLAVOR ) == _flavTypeToComputeFor )
+    if ( ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR ) == _flavTypeToComputeFor )
     {
       if ( y <= maxY && y >= minY)
       {
@@ -2755,7 +2755,7 @@ void analysis::particleOutput( const int step )
 
 
 
-void analysis::writePartclMovie( vector< Particle >& _particles, const int n_particles, fstream& _oscar, const int step, const int jumpSteps )
+void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const int n_particles, fstream& _oscar, const int step, const int jumpSteps )
 {
   const string sep = "  ";
   const int width = 14;
@@ -2850,7 +2850,7 @@ void analysis::writePartclMovie( vector< Particle >& _particles, const int n_par
         else // write particle to file
         {
           _oscar << ::std::setw( 11 ) << i+1;
-          _oscar << ::std::setw( 12 ) << Particle::mapToPDGCodes( _particles[i].FLAVOR ); //PDG group codes
+          _oscar << ::std::setw( 12 ) << ParticleOffline::mapToPDGCodes( _particles[i].FLAVOR ); //PDG group codes
           nCount_selected = 1;
 
           _oscar << ::std::scientific << ::std::uppercase << ::std::setprecision( 6 )
@@ -3248,7 +3248,7 @@ int analysisRingStructure::getIndexPure( const double _xt ) const
 
 
 
-int analysisRingStructure::getIndex( const Particle& _particle ) const
+int analysisRingStructure::getIndex( const ParticleOffline& _particle ) const
 {
   double xt = sqrt( pow( _particle.X, 2 ) + pow( _particle.Y, 2 ) );
   

@@ -66,7 +66,7 @@ public:
   int size() const { return particleList.size(); }
   void setCoordinates( const int _index, const double _dx, const int _nx, const double _sizeX, const double _dy, const int _ny, const double _sizeY );
   void prepareAverages();
-  void writeAveragesToParticle( Particle& _particle ) const;
+  void writeAveragesToParticle( ParticleOffline& _particle ) const;
 
 
   double volume;

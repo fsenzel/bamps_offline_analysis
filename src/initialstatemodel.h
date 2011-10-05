@@ -23,7 +23,7 @@ class initialStateModel
 {
 public:
   /** @brief Pure virtual function. Any derived class must at least specify this routine. */
-  virtual void populateParticleVector( std::vector<Particle>& _particles ) = 0;
+  virtual void populateParticleVector( std::vector<ParticleOffline>& _particles ) = 0;
 };
 
 #endif // INITIALSTATEMODEL_H

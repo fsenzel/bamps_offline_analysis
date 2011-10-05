@@ -185,10 +185,10 @@ void pythiaInitialDistribution::generateSamplingDataSets()
 
 
 
-void pythiaInitialDistribution::populateParticleVector( std::vector< Particle >& _particles )
+void pythiaInitialDistribution::populateParticleVector( std::vector< ParticleOffline >& _particles )
 {
   /**
-  * Reserve memory for the Particle vector. Due to possible particle creation this size should be chosen somewhat larger
+  * Reserve memory for the ParticleOffline vector. Due to possible particle creation this size should be chosen somewhat larger
   * than the initial number of particles. Doing this, push_back operations to add new particles won't lead to internal
   * memory re-allocation in the vector, which could possibly be time consuming.
   * However push_back operations are always possible, even when the reserved size is used up (as long as there is physical
@@ -208,7 +208,7 @@ void pythiaInitialDistribution::populateParticleVector( std::vector< Particle >&
 
 
 
-void pythiaInitialDistribution::populateParticleVector(std::vector< Particle >& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT)
+void pythiaInitialDistribution::populateParticleVector(std::vector< ParticleOffline >& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT)
 {
   minimumPT = _minimumPT;
   numberOfParticlesToGenerate = _numberOfParticlesToGenerate;
@@ -260,7 +260,7 @@ void pythiaInitialDistribution::computeWoodSaxonParameters( const config& _confi
 
 
 
-void pythiaInitialDistribution::sampleMomenta( std::vector< Particle >& _particles )
+void pythiaInitialDistribution::sampleMomenta( std::vector< ParticleOffline >& _particles )
 {
 
   std::ifstream readPythiaParticles( filename_pythiaParticleFile.c_str() );
@@ -286,7 +286,7 @@ void pythiaInitialDistribution::sampleMomenta( std::vector< Particle >& _particl
 
 
 
-void pythiaInitialDistribution::samplePositions( std::vector< Particle >& _particles )
+void pythiaInitialDistribution::samplePositions( std::vector< ParticleOffline >& _particles )
 {
   cout << "Start sampling of particle positions for particles from PYTHIA." << endl;
   // particles are already read from file in momentum()
@@ -333,7 +333,7 @@ void pythiaInitialDistribution::samplePositions( std::vector< Particle >& _parti
   // start insert for non vanishing b=Bimp
   if ( impactParameter != 0.0 ) // soft particles are deleted for b!=0, because treatment of these is written for b=0 and would cause an error
   {
-    std::vector<Particle>::iterator iIt;
+    std::vector<ParticleOffline>::iterator iIt;
     //!! delete particles
     for ( iIt = _particles.begin(); iIt != _particles.end(); )
     {
@@ -414,7 +414,7 @@ void pythiaInitialDistribution::samplePositions( std::vector< Particle >& _parti
 // sampling of the collision times //
 //---------------------------------//
 // sample collision times for only one particle with id=number
-void pythiaInitialDistribution::sample_T_one_partcl( std::vector< Particle >& _particles, const int number ) const
+void pythiaInitialDistribution::sample_T_one_partcl( std::vector< ParticleOffline >& _particles, const int number ) const
 {
   const int ord = 4;
   int nn;
@@ -467,7 +467,7 @@ void pythiaInitialDistribution::sample_T_one_partcl( std::vector< Particle >& _p
 // sampling of the position of one parton at the given time//
 //---------------------------------------------------------------//
 // sample position for only one particle with id=number
-void pythiaInitialDistribution::sample_XYZ_one_partcl( std::vector< Particle >& _particles, const int number, bool& soft ) const
+void pythiaInitialDistribution::sample_XYZ_one_partcl( std::vector< ParticleOffline >& _particles, const int number, bool& soft ) const
 {
   double X, Y, Z, T;
   double vt, gv, gvt, tc1, tc2, tc3, xx, bA, bB, zA, zB, fds, fd;

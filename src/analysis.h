@@ -75,7 +75,7 @@ class analysisRingStructure
     
     int getIndex( const double _xt ) const;
     int getIndexPure( const double _xt ) const;
-    int getIndex( const Particle& _particle ) const;
+    int getIndex( const ParticleOffline& _particle ) const;
     int size() const { return numberOfRings; }
     double getCentralRadius() const { return centralRingRadius; }
     double getDeltaR() const { return deltaR; }
@@ -141,7 +141,7 @@ public:
   
   void printCentralDensities( const double _time );
   
-  void writePartclMovie( vector< Particle >& _particles, const int n_particles, fstream& _oscar, const int step, const int jumpSteps );
+  void writePartclMovie( vector< ParticleOffline >& _particles, const int n_particles, fstream& _oscar, const int step, const int jumpSteps );
   
   void collectPtData( const int step );
   void collectPtDataInitial();
@@ -183,10 +183,10 @@ private:
   string filename_prefix;
   
   void writePartclMovie( const int step ) const;
-  void yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< Particle >& _particles, const int n_particles, const int step );
-  void transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< Particle >& _particles, const int n_particles, const int step );
-  void ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< Particle >& _particles, const int n_particles, const int step );
-  void ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< Particle >& _particles, const int n_particles, const int step );
+  void yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
+  void transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
+  void ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
+  void ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
   void particleOutput( const int step );
   void jetTrackerOutput();
   
@@ -250,7 +250,7 @@ class v2RAA
 public:
   v2RAA( config * const c, string name_arg, string filename_prefix_arg );
   
-  void computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, std::vector< Particle >& _particles, const int n_particles, string additionalNameTag, const double _outputTime, const v2Type _v2type );
+  void computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, std::vector< ParticleOffline >& _particles, const int n_particles, string additionalNameTag, const double _outputTime, const v2Type _v2type );
 
 private:
   

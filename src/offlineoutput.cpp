@@ -32,6 +32,7 @@ std::string  offlineDataParticleNumbers::filenameIdentifier = "particleNumbers";
 std::string  offlineDataCollisionNumbers::filenameIdentifier = "collisionNumbers";
 std::string  offlineDataInteractionRates::filenameIdentifier = "interactionRates";
 std::string  offlineDataSimulationParameters::filenameIdentifier = "simulationParameters";
+std::string  offlineDataInitialParticles::filenameIdentifier = "initialParticles";
 
 
 offlineOutputInterface::~offlineOutputInterface()
@@ -115,3 +116,4 @@ BOOST_CLASS_EXPORT_IMPLEMENT( offlineDataCollisionNumbers )
 BOOST_CLASS_EXPORT_IMPLEMENT( offlineDataInteractionRates )
 BOOST_CLASS_EXPORT_IMPLEMENT( offlineDataEventType )
 BOOST_CLASS_EXPORT_IMPLEMENT( offlineDataSimulationParameters )
+BOOST_CLASS_EXPORT_IMPLEMENT( offlineDataInitialParticles )

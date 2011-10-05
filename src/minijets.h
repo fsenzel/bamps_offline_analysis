@@ -31,23 +31,23 @@ class miniJets : public initialStateModel
     miniJets( const config& _config, WoodSaxon& _WoodSaxonParameter, STORED_TABLE_USAGE _storedTableUsage = computeNewTables );
     ~miniJets() {};
     
-    void populateParticleVector( std::vector<Particle>& _particles );
-    void populateParticleVector( std::vector<Particle>& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT );
+    void populateParticleVector( std::vector<ParticleOffline>& _particles );
+    void populateParticleVector( std::vector<ParticleOffline>& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT );
         
   private:
-    void samplePositions( std::vector<Particle>& _particles );
-    void sampleMomenta( std::vector<Particle>& _particles );
+    void samplePositions( std::vector<ParticleOffline>& _particles );
+    void sampleMomenta( std::vector<ParticleOffline>& _particles );
     /** @brief PT-sampling according to the calculated d(sigma)/d(PT) => PX, PY */
-    void sample_PXY( std::vector<Particle>& _particles ) const;
+    void sample_PXY( std::vector<ParticleOffline>& _particles ) const;
     /** @brief Sampling of Y1 and Y2 at given PT => PZ, E */
-    void sample_PZE( std::vector<Particle>& _particles ) const;
+    void sample_PZE( std::vector<ParticleOffline>& _particles ) const;
     /** @brief sampling of the flavors of the parton pair at given PT,Y1 and Y2 */
-    void sample_FLAV( std::vector<Particle>& _particles ) const;
+    void sample_FLAV( std::vector<ParticleOffline>& _particles ) const;
     
     /** @brief sampling of the collision times */
-    void sample_T( std::vector<Particle>& _particles ) const;
+    void sample_T( std::vector<ParticleOffline>& _particles ) const;
     /** @brief sampling of the positions of the parton pair at the given time */
-    void sample_XYZ( std::vector<Particle>& _particles ) const;
+    void sample_XYZ( std::vector<ParticleOffline>& _particles ) const;
     
     void computeWoodSaxonParameters( const config& _config, WoodSaxon& _WoodSaxonParameter );
     void generateSamplingDataSets();

@@ -892,6 +892,77 @@ class offlineDataSimulationParameters : public offlineDataGeneric
 };
 
 
+namespace boost {
+  namespace serialization {
+    
+    template<class Archive>
+    void serialize(Archive & ar, ParticlePrototype & g, const unsigned int version)
+    {
+      ar & g.unique_id;
+      ar & g.cell_id;
+      ar & g.FLAVOR;
+      ar & g.m;
+      ar & g.T;
+      ar & g.X;
+      ar & g.Y;
+      ar & g.Z;
+      ar & g.E;
+      ar & g.PX;
+      ar & g.PY;
+      ar & g.PZ;
+    }
+    
+    
+    template<class Archive>
+    void serialize(Archive & ar, Particle & g, const unsigned int version)
+    {
+      ar & boost::serialization::base_object<ParticlePrototype>(g);
+      ar & g.md2g;
+      ar & g.md2q;
+    }
+    
+  }
+}
+
+
+class offlineDataInitialParticles : public offlineDataGeneric
+{
+  public:
+    offlineDataInitialParticles() : pointerToParticleVector(0), offlineDataGeneric() {};
+    offlineDataInitialParticles( const std::vector< Particle >* const _particles ) : pointerToParticleVector(_particles), offlineDataGeneric() {};
+    ~offlineDataInitialParticles() {};
+
+    size_t getSize() const { return sizeof( offlineDataInteractionRates ); }
+    std::string getFilenameIdentifier() const { return this->filenameIdentifier; }
+    static std::string filenameIdentifier;
+                                 
+    typedef boost::shared_ptr< const std::vector<Particle> > tPointerToParticleVector;
+    /** @brief A shared pointer to the particle vector that is read from the archive */
+    tPointerToParticleVector particleVector;
+    
+    friend class boost::serialization::access;
+    template<class Archive>
+    void save(Archive & ar, const unsigned int version) const  // split save / load operations to prevent memory leaks when loading
+    {
+      ar & boost::serialization::base_object<offlineDataGeneric>(*this);
+      ar & pointerToParticleVector;
+    }
+    template<class Archive>
+    void load(Archive & ar, const unsigned int version) // split save / load operations to prevent memory leaks when loading
+    {
+      ar & boost::serialization::base_object<offlineDataGeneric>(*this);
+      ar & pointerToParticleVector;
+      particleVector.reset( pointerToParticleVector );  
+      // The outside world can only use this shared pointer to access the restored data, thus when this object goes 
+      // out of scope, the memory is automatically released. This would not be the case when only providing the bare
+      // pointer.
+    }
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+    
+  private:
+    /** @brief A pointer to the particle vector that needs to be archived (for input / save operations) */
+    const std::vector<Particle>* pointerToParticleVector;
+};
 
 // "Export" the classes derived from offlineDataGeneric in case they need to be archived via boost:serialization
 // using pointers to the base class
@@ -906,6 +977,7 @@ BOOST_CLASS_EXPORT_KEY( offlineDataCollisionNumbers )
 BOOST_CLASS_EXPORT_KEY( offlineDataInteractionRates )
 BOOST_CLASS_EXPORT_KEY( offlineDataEventType )
 BOOST_CLASS_EXPORT_KEY( offlineDataSimulationParameters )
+BOOST_CLASS_EXPORT_KEY( offlineDataInitialParticles )
 
 BOOST_CLASS_IMPLEMENTATION( offlineDataGeneric, boost::serialization::object_serializable)
 BOOST_CLASS_IMPLEMENTATION( offlineDataInteraction22, boost::serialization::object_serializable)
@@ -919,6 +991,7 @@ BOOST_CLASS_IMPLEMENTATION( offlineDataCollisionNumbers, boost::serialization::o
 BOOST_CLASS_IMPLEMENTATION( offlineDataInteractionRates, boost::serialization::object_serializable)
 BOOST_CLASS_IMPLEMENTATION( offlineDataEventType, boost::serialization::object_serializable)
 BOOST_CLASS_IMPLEMENTATION( offlineDataSimulationParameters, boost::serialization::object_serializable)
+BOOST_CLASS_IMPLEMENTATION( offlineDataInitialParticles, boost::serialization::object_serializable)
 
 BOOST_CLASS_TRACKING(offlineDataGeneric, boost::serialization::track_never)
 BOOST_CLASS_TRACKING(offlineDataInteraction22, boost::serialization::track_never)
@@ -932,6 +1005,7 @@ BOOST_CLASS_TRACKING(offlineDataCollisionNumbers, boost::serialization::track_ne
 BOOST_CLASS_TRACKING(offlineDataInteractionRates, boost::serialization::track_never)
 BOOST_CLASS_TRACKING(offlineDataEventType, boost::serialization::track_never)
 BOOST_CLASS_TRACKING(offlineDataSimulationParameters, boost::serialization::track_never)
+BOOST_CLASS_TRACKING(offlineDataInitialParticles, boost::serialization::track_never)
 
 
 /** @brief exception class for handling unexpected critical behaviour within simulations of heavy ion collisions  */

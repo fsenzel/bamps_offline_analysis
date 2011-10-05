@@ -69,7 +69,7 @@ void ringContainer::clear()
 
 
 
-void ringContainer::addParticle( const Particle& _particle )
+void ringContainer::addParticle( const ParticleOffline& _particle )
 {
   ++numberOfParticles;
   if ( _particle.FLAVOR == gluon )
@@ -124,7 +124,7 @@ void ringContainer::addParticle( const Particle& _particle )
 
 
 
-void ringContainer::addParticleInFormGeom( const Particle& _particle, const double _time )
+void ringContainer::addParticleInFormGeom( const ParticleOffline& _particle, const double _time )
 {
   ++numberOfParticles;
   if ( _particle.FLAVOR == gluon )
@@ -183,7 +183,7 @@ void ringContainer::addParticleInFormGeom( const Particle& _particle, const doub
 
 
 
-void ringContainer::addRates( const Particle& _particle )
+void ringContainer::addRates( const ParticleOffline& _particle )
 {
   rates.addParticleBasedRates( _particle, GeV );;
   ++numberOfCollectedRateObjects;

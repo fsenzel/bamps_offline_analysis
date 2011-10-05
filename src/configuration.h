@@ -43,12 +43,12 @@ namespace ns_casc
   * scope (it's in configuration.cpp).
   * All files that include this header can then access the vector.
   */
-  extern std::vector<Particle> particles;
-  extern std::vector<Particle> particles_init;
-  extern std::vector<Particle> particles_atTimeNow;
-  extern std::vector<Particle> particles_atTimeNowCopy;
-  extern std::vector<Particle> addedParticles;
-  extern std::vector<Particle> addedParticlesCopy;
+  extern std::vector<ParticleOffline> particles;
+  extern std::vector<ParticleOffline> particles_init;
+  extern std::vector<ParticleOffline> particles_atTimeNow;
+  extern std::vector<ParticleOffline> particles_atTimeNowCopy;
+  extern std::vector<ParticleOffline> addedParticles;
+  extern std::vector<ParticleOffline> addedParticlesCopy;
 }
 //--------------------------------------------------------//
 
