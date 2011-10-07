@@ -125,6 +125,9 @@ class offlineOutputInterface
     template<class T>
     void undoLastReadOperation();
     
+    template<class T>
+    void temporaryStoreData( tPointerToOfflineData _data );
+    
   private:
     void checkAndCreateOutputDirectory( boost::filesystem::path& _dir );
     
@@ -160,6 +163,9 @@ class offlineOutputInterface
     /** save the last read position */
     typedef std::map< type_index, std::streampos > tStreamPositionMap;
     tStreamPositionMap lastStreamPositionMap;
+    
+    typedef std::map< type_index, tPointerToOfflineData > tOfflineDataMap;
+    tOfflineDataMap backupLastReadData;     
     /** save the last read position */
     
     typedef std::vector<tConstPointerToOfflineData> tTemporaryDataStorage;
@@ -235,27 +241,37 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
     lastStreamPositionMap.insert( std::make_pair( type_index(typeid(T)), 0 ));
   }
   
-  // the actual reading
-  tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( type_index(typeid(T)) );
-  if( itLastPos != lastStreamPositionMap.end() )
+  tOfflineDataMap::iterator itBackupData = backupLastReadData.find( type_index(typeid(T)) );
+  if( itBackupData != backupLastReadData.end() )
   {
-    itLastPos->second = stream->tellg();    
+    boost::shared_ptr< T > shrptr = boost::static_pointer_cast< T >( itBackupData->second );
+    backupLastReadData.erase( itBackupData );
+    return shrptr;
   }
-  offlineDataGeneric* _ptr = 0;
-  (*archive) & _ptr;
-  
-  T* ptrToDerived = dynamic_cast<T*>(_ptr);
-  if ( ptrToDerived == 0 )
+  else
   {
-    std::string errMsg = "Bad cast. Attempted dynamic_cast from ";
-    errMsg += type_index(typeid(offlineDataGeneric)).name();
-    errMsg += " to ";
-    errMsg += type_index(typeid(T)).name();
-    throw eOfflineOutput_error( errMsg );
+    // the actual reading
+    tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( type_index(typeid(T)) );
+    if( itLastPos != lastStreamPositionMap.end() )
+    {
+      itLastPos->second = stream->tellg();    
+    }
+    offlineDataGeneric* _ptr = 0;
+    (*archive) & _ptr;
+    
+    T* ptrToDerived = dynamic_cast<T*>(_ptr);
+    if ( ptrToDerived == 0 )
+    {
+      std::string errMsg = "Bad cast. Attempted dynamic_cast from ";
+      errMsg += type_index(typeid(offlineDataGeneric)).name();
+      errMsg += " to ";
+      errMsg += type_index(typeid(T)).name();
+      throw eOfflineOutput_error( errMsg );
+    }
+    
+    boost::shared_ptr<T> shrptr( ptrToDerived );
+    return shrptr;
   }
-  
-  boost::shared_ptr<T> shrptr( ptrToDerived );
-  return shrptr;
 }
 
 
@@ -284,6 +300,23 @@ void offlineOutputInterface::undoLastReadOperation()
     stream->seekg( lastStreamPosition );
   }
 }
+
+
+template<class T>
+void offlineOutputInterface::temporaryStoreData(tPointerToOfflineData _data)
+{
+  tOfflineDataMap::iterator itBackupData = backupLastReadData.find( type_index(typeid(T)) );
+  if( itBackupData != backupLastReadData.end() )
+  {
+    std::string errMsg = "Attempting to store temporary data into a storage that is already in use";
+    throw eOfflineOutput_error( errMsg );
+  }
+  else
+  {    
+    backupLastReadData.insert(std::make_pair( type_index(typeid(T)), _data));
+  }
+}
+
 
 
 class offlineDataEventType : public offlineDataGeneric

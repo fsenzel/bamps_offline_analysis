@@ -573,8 +573,9 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-        offlineInterface->undoLastReadOperation< offlineDataEventType >();
-        offlineInterface->undoLastReadOperation< offlineDataInteraction22 >();
+        boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interaction22) );
+        offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
+        offlineInterface->temporaryStoreData< offlineDataInteraction22 >( ptrInteraction22 );
       }
     }
     else if ( actiontype == event_interaction23 )
@@ -651,8 +652,9 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-        offlineInterface->undoLastReadOperation< offlineDataEventType >();
-        offlineInterface->undoLastReadOperation< offlineDataInteraction23 >();
+        boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interaction23) );
+        offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
+        offlineInterface->temporaryStoreData< offlineDataInteraction23 >( ptrInteraction23 );
       }
     }
     else if ( actiontype == event_interaction32 )
@@ -716,8 +718,9 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-        offlineInterface->undoLastReadOperation< offlineDataEventType >();
-        offlineInterface->undoLastReadOperation< offlineDataInteraction32 >();
+        boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interaction32) );
+        offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
+        offlineInterface->temporaryStoreData< offlineDataInteraction32 >( ptrInteraction32 );
       }
     }
     else if ( actiontype == event_interactionElastic )
@@ -786,8 +789,9 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       else
       {
         stop = true;
-        offlineInterface->undoLastReadOperation< offlineDataEventType >();
-        offlineInterface->undoLastReadOperation< offlineDataInteractionElastic >();
+        boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interactionElastic) );
+        offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
+        offlineInterface->temporaryStoreData< offlineDataInteractionElastic >( ptrInteractionElastic );
       }
     }
     else if ( actiontype == event_particleIdSwap )
