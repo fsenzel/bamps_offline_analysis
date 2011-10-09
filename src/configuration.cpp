@@ -128,8 +128,6 @@ int config::getNameLength() const
 */
 void config::readInputfile()
 {  
-  extern double Mcharm;       // GeV, mass of charm quark
-  extern double Mbottom;       // GeV, mass of charm quark
   extern double Kggccb;       // K factor for gg -> ccb cross section
   extern double KgQgQ;        // K factor for gc -> gc cross section
   extern double kappa_gQgQ;   // kappa factor for debye mass, usually 0.2 (Peshier,Gossiaux,Aichelin)

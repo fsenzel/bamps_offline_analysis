@@ -85,9 +85,9 @@ void offlineHeavyIonCollision::init()
   int Nbefore = addedParticles.size();
   for ( int j = 0; j < addedParticles.size(); j++ )
   {
-    if ( addedParticles[j].FLAVOR > ( Nflavor * 2 ) )
+    if ( addedParticles[j].FLAVOR > ( Particle::N_light_flavor * 2 ) )
     {
-      while ( addedParticles.back().FLAVOR > ( Nflavor * 2 ) )
+      while ( addedParticles.back().FLAVOR > ( Particle::N_light_flavor * 2 ) )
       {
         addedParticles.pop_back();
       }
@@ -95,7 +95,7 @@ void offlineHeavyIonCollision::init()
       addedParticles.pop_back();
     }
   }
-  cout << "#### " << addedParticles.size() << " out of " << Nbefore << " added ( N_f = " << Nflavor << " )." << endl;
+  cout << "#### " << addedParticles.size() << " out of " << Nbefore << " added ( N_f = " << Particle::N_light_flavor << " )." << endl;
   numberAdded = addedParticles.size();
 
   addedStuff.prepareParticles( addedParticles );
@@ -1282,10 +1282,10 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
             nGluons = 0;
             nGluonsAdded = 0;
             free = false;
-            vector<int> nQuarks( Nflavor, 0 );
-            vector<int> nAntiQuarks( Nflavor, 0 );
-            vector<int> nQuarksAdded( Nflavor, 0 );
-            vector<int> nAntiQuarksAdded( Nflavor, 0 );
+            vector<int> nQuarks( Particle::N_light_flavor, 0 );
+            vector<int> nAntiQuarks( Particle::N_light_flavor, 0 );
+            vector<int> nQuarksAdded( Particle::N_light_flavor, 0 );
+            vector<int> nAntiQuarksAdded( Particle::N_light_flavor, 0 );
             
             list<int>::const_iterator iIt;
             for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
@@ -1337,7 +1337,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 particles_atTimeNow[id].rate = rateGluons[etaSliceIndex][nc];
                 particles_atTimeNow[id].ratev = rateGluons_prev[etaSliceIndex][nc];
               }
-              else if ( particles_atTimeNow[id].FLAVOR == up || particles_atTimeNow[id].FLAVOR == down || particles_atTimeNow[id].FLAVOR == strange || particles_atTimeNow[id].FLAVOR == quark )
+              else if ( particles_atTimeNow[id].FLAVOR == up || particles_atTimeNow[id].FLAVOR == down || particles_atTimeNow[id].FLAVOR == strange || particles_atTimeNow[id].FLAVOR == light_quark )
               {
                 particles_atTimeNow[id].rate = rateQuarks[etaSliceIndex][nc];
                 particles_atTimeNow[id].ratev = rateQuarks_prev[etaSliceIndex][nc];
@@ -1397,7 +1397,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 addedParticles[id].rate = rateGluons[etaSliceIndex][nc];
                 addedParticles[id].ratev = rateGluons_prev[etaSliceIndex][nc];
               }
-              else if ( addedParticles[id].FLAVOR == up || addedParticles[id].FLAVOR == down || addedParticles[id].FLAVOR == strange || addedParticles[id].FLAVOR == quark )
+              else if ( addedParticles[id].FLAVOR == up || addedParticles[id].FLAVOR == down || addedParticles[id].FLAVOR == strange || addedParticles[id].FLAVOR == light_quark )
               {
                 addedParticles[id].rate = rateQuarks[etaSliceIndex][nc];
                 addedParticles[id].ratev = rateQuarks_prev[etaSliceIndex][nc];
@@ -1463,7 +1463,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 {
                   particles_atTimeNow[id].ratev = rateGluons[etaSliceIndex][nc];
                 }
-                else if ( particles_atTimeNow[id].FLAVOR == up || particles_atTimeNow[id].FLAVOR == down || particles_atTimeNow[id].FLAVOR == strange || particles_atTimeNow[id].FLAVOR == quark )
+                else if ( particles_atTimeNow[id].FLAVOR == up || particles_atTimeNow[id].FLAVOR == down || particles_atTimeNow[id].FLAVOR == strange || particles_atTimeNow[id].FLAVOR == light_quark )
                 {
                   particles_atTimeNow[id].ratev = rateQuarks[etaSliceIndex][nc];
                 }
@@ -1494,7 +1494,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 {
                   addedParticles[id].ratev = rateGluons[etaSliceIndex][nc];
                 }
-                else if ( addedParticles[id].FLAVOR == up || addedParticles[id].FLAVOR == down || addedParticles[id].FLAVOR == strange || addedParticles[id].FLAVOR == quark )
+                else if ( addedParticles[id].FLAVOR == up || addedParticles[id].FLAVOR == down || addedParticles[id].FLAVOR == strange || addedParticles[id].FLAVOR == light_quark )
                 {
                   addedParticles[id].ratev = rateQuarks[etaSliceIndex][nc];
                 }
@@ -1550,8 +1550,8 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
 
   const int nTotal = _cell.particleList.size();
   int nGluons = 0;
-  vector<int> nQuarks( Nflavor, 0 );
-  vector<int> nAntiQuarks( Nflavor, 0 );
+  vector<int> nQuarks( Particle::N_light_flavor, 0 );
+  vector<int> nAntiQuarks( Particle::N_light_flavor, 0 );
 
   list<int>::const_iterator iIt;
   list<int>::const_iterator jIt;
@@ -1691,7 +1691,7 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
             p23_collected_gluon += probab23;
             lambdaJet_gluon += lambda_scaled;
           }
-          else if ( ParticleOffline::mapToGenericFlavorType( F2 ) == quark )
+          else if ( ParticleOffline::mapToGenericFlavorType( F2 ) == light_quark )
           {
             ++n23_collected_quark;
             p23_collected_quark += probab23;

@@ -297,7 +297,7 @@ int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, c
   NinEtaBin = int( initialArea / ( _dx * _dy ) * _NperCell );
 
   int estimatedMaxNumber = particles.size() * 1.3;
-  if ( ns_casc::Nflavor == 0 )
+  if ( Particle::N_light_flavor == 0 )
   {
     estimatedMaxNumber *= 1.4;  // ugly fix, empirical value
   }

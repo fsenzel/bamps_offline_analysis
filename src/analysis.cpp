@@ -518,10 +518,10 @@ analysis::~analysis()
 void analysis::collectPtDataInitial()
 {
   ptDistribution( gluon, addedParticles, numberAdded, 0 );
-  ptDistribution( quark, addedParticles, numberAdded, 0 );
+  ptDistribution( light_quark, addedParticles, numberAdded, 0 );
   ptDistribution( allFlavors, addedParticles, numberAdded, 0 );
   ptSoftDistribution( gluon, particles, number, 0 );
-  ptSoftDistribution( quark, particles, number, 0 );
+  ptSoftDistribution( light_quark, particles, number, 0 );
   ptSoftDistribution( allFlavors, particles, number, 0 );
 }
 
@@ -532,10 +532,10 @@ void analysis::collectPtData( const int step )
   //are issued starting with 0
   //0 is reserved for initial output, thus step is incremented
   ptDistribution( gluon, addedParticles, numberAdded, step + 1 );
-  ptDistribution( quark, addedParticles, numberAdded, step + 1 );
+  ptDistribution( light_quark, addedParticles, numberAdded, step + 1 );
   ptDistribution( allFlavors, addedParticles, numberAdded, step + 1 );
   ptSoftDistribution( gluon, particles, number, step + 1 );
-  ptSoftDistribution( quark, particles, number, step + 1 );
+  ptSoftDistribution( light_quark, particles, number, step + 1 );
   ptSoftDistribution( allFlavors, particles, number, step + 1 );
 }
 
@@ -571,8 +571,8 @@ void analysis::collectEtData( const int step )
   //are issued starting with 0
   //0 is reserved for initial output, thus step is incremented
   transverseEnergyDistribution( gluon, particles, number, step + 1 );
-  transverseEnergyDistribution( quark, particles, number, step + 1 );
-  transverseEnergyDistribution( anti_quark, particles, number, step + 1 );
+  transverseEnergyDistribution( light_quark, particles, number, step + 1 );
+  transverseEnergyDistribution( light_quark, particles, number, step + 1 );
 }
 
 
@@ -606,10 +606,10 @@ void analysis::finalOutput( const double _stoptime )
   onePartclCorrelations();
   twoPartclCorrelations();
   printPtSpectra( gluon );
-  printPtSpectra( quark );
+  printPtSpectra( light_quark );
   printPtSpectra( allFlavors );
   printSoftPtSpectra( gluon );
-  printSoftPtSpectra( quark );
+  printSoftPtSpectra( light_quark );
   printSoftPtSpectra( allFlavors );
   
   particleOutput( nTimeSteps );
@@ -746,7 +746,7 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
     _ptBinsDY2 = ptBinsDY2_gluons;
     _ptBinsDY1 = ptBinsDY1_gluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _ptBinsAll = ptBinsAll_quarks;
     _ptBinsDY5 = ptBinsDY5_quarks;
@@ -829,7 +829,7 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   {
     type = "gluon";
   }
-  else if ( _flavTypeToComputeFor == quark || _flavTypeToComputeFor == anti_quark )
+  else if ( _flavTypeToComputeFor == light_quark || _flavTypeToComputeFor == anti_light_quark )
   {
     type = "quark";
   }
@@ -993,7 +993,7 @@ void analysis::printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   {
     _ptBinsSoftAll = ptBinsSoftAll_gluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _ptBinsSoftAll = ptBinsSoftAll_quarks;
   }
@@ -1036,7 +1036,7 @@ void analysis::printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   {
     type = "gluon";
   }
-  else if ( _flavTypeToComputeFor == quark || _flavTypeToComputeFor == anti_quark )
+  else if ( _flavTypeToComputeFor == light_quark || _flavTypeToComputeFor == anti_light_quark )
   {
     type = "quark";
   }
@@ -1517,10 +1517,10 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   theV2RAA.computeFor( anti_up, particles_atTimeNow, number, "background", _outputTime, v2background );
   theV2RAA.computeFor( anti_down, particles_atTimeNow, number, "background", _outputTime, v2background );
   theV2RAA.computeFor( anti_strange, particles_atTimeNow, number, "background", _outputTime, v2background );
-  theV2RAA.computeFor( quark, particles_atTimeNow, number, "background", _outputTime, v2background );
+  theV2RAA.computeFor( light_quark, particles_atTimeNow, number, "background", _outputTime, v2background );
   
   theV2RAA.computeFor( gluon, addedParticles, numberAdded, "jets", _outputTime, v2jets );
-  theV2RAA.computeFor( quark, addedParticles, numberAdded, "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( light_quark, addedParticles, numberAdded, "jets", _outputTime, v2jets );
   theV2RAA.computeFor( up, addedParticles, numberAdded, "jets", _outputTime, v2jets );
   theV2RAA.computeFor( down, addedParticles, numberAdded, "jets", _outputTime, v2jets );
   theV2RAA.computeFor( strange, addedParticles, numberAdded, "jets", _outputTime, v2jets );
@@ -1565,7 +1565,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     n_bins = n_g;
     type = "gluon";
   }
-  else if ( _flavTypeToComputeFor == quark || _flavTypeToComputeFor == anti_quark )
+  else if ( _flavTypeToComputeFor == light_quark || _flavTypeToComputeFor == anti_light_quark )
   {
     n_bins = n_g;
     type = "quark";
@@ -2040,7 +2040,7 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
     _ptBinsDY2 = ptBinsDY2_gluons;
     _ptBinsDY1 = ptBinsDY1_gluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _ptBinsAll = ptBinsAll_quarks;
     _ptBinsDY5 = ptBinsDY5_quarks;
@@ -2127,7 +2127,7 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
 
     genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
     if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
-      ( _flavTypeToComputeFor == quark && ( genFlavor == quark || genFlavor == anti_quark ) ) )
+      ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
       //------------------------ y in [-inf,inf] -----------------------
       if ( pt <= maxPT && pt >= minPT )
@@ -2248,7 +2248,7 @@ void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vect
   {
     _ptBinsSoftAll = ptBinsSoftAll_gluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _ptBinsSoftAll = ptBinsSoftAll_quarks;
   }
@@ -2293,7 +2293,7 @@ void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vect
 
     genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
     if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
-      ( _flavTypeToComputeFor == quark && ( genFlavor == quark || genFlavor == anti_quark ) ) )
+      ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
       //------------------------ y in [-inf,inf] -----------------------
       if ( pt <= maxPTSoft && pt >= 0 )
@@ -2394,11 +2394,11 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
   {
     _EtBins = transverseEnergyGluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _EtBins = transverseEnergyQuarks;
   }
-  else if ( _flavTypeToComputeFor == anti_quark )
+  else if ( _flavTypeToComputeFor == anti_light_quark )
   {
     _EtBins = transverseEnergyAntiQuarks;
   }

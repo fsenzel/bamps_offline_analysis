@@ -311,11 +311,11 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
   if ( numberOfParticles > 0 )
   {
     double gG = 2 * ( pow( ns_casc::Ncolor, 2 ) - 1 );
-    double gQ = 2.0 * ns_casc::Ncolor * ns_casc::Nflavor;
+    double gQ = 2.0 * ns_casc::Ncolor * Particle::N_light_flavor;
 
     double invEg = inverseE_gluons / ( gG * _Ntest );
     double invEq;
-    if ( ns_casc::Nflavor == 0 )
+    if ( Particle::N_light_flavor == 0 )
     {
       invEq = 0;
     }
@@ -323,7 +323,7 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
     {
       invEq = inverseE_quarks / ( 2.0 * gQ * _Ntest );
     }
-    md2g = pow( 0.197, 3 ) * 16 * M_PI / volume * ( ns_casc::Ncolor * invEg + ns_casc::Nflavor * invEq );
+    md2g = pow( 0.197, 3 ) * 16 * M_PI / volume * ( ns_casc::Ncolor * invEg + Particle::N_light_flavor * invEq );
     md2q = pow( 0.197, 3 ) * 2 * M_PI / volume * 8.0 / 3.0 * ( invEg + invEq );
 
     gamma = 1 / sqrt( 1.0 - pow( getAveraged_v_z(), 2 ) - pow( getAveraged_v_r(), 2 ) );
