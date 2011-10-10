@@ -572,7 +572,7 @@ void analysis::collectEtData( const int step )
   //0 is reserved for initial output, thus step is incremented
   transverseEnergyDistribution( gluon, particles, number, step + 1 );
   transverseEnergyDistribution( light_quark, particles, number, step + 1 );
-  transverseEnergyDistribution( light_quark, particles, number, step + 1 );
+  transverseEnergyDistribution( anti_light_quark, particles, number, step + 1 );
 }
 
 
