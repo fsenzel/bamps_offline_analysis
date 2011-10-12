@@ -361,156 +361,79 @@ analysis::~analysis()
   oscarBackground.close();
   oscarJets.close();
   jetTrackerOutput();
-  
-  for ( int j = 0; j < nTimeSteps + 2; j++ )          //+2 because of initial and final timesteps
-  {
-    ptBinsDY1_gluons[j].clear();
-    ptBinsDY2_gluons[j].clear();
-    ptBinsDY3_gluons[j].clear();
-    ptBinsDY4_gluons[j].clear();
-    ptBinsDY5_gluons[j].clear();
-    ptBinsAll_gluons[j].clear();
 
-    ptBinsDY1_quarks[j].clear();
-    ptBinsDY2_quarks[j].clear();
-    ptBinsDY3_quarks[j].clear();
-    ptBinsDY4_quarks[j].clear();
-    ptBinsDY5_quarks[j].clear();
-    ptBinsAll_quarks[j].clear();
-    
-    ptBinsDY1_ups[j].clear();
-    ptBinsDY2_ups[j].clear();
-    ptBinsDY3_ups[j].clear();
-    ptBinsDY4_ups[j].clear();
-    ptBinsDY5_ups[j].clear();
-    ptBinsAll_ups[j].clear();
-    
-    ptBinsDY1_downs[j].clear();
-    ptBinsDY2_downs[j].clear();
-    ptBinsDY3_downs[j].clear();
-    ptBinsDY4_downs[j].clear();
-    ptBinsDY5_downs[j].clear();
-    ptBinsAll_downs[j].clear();
-    
-    ptBinsDY1_stranges[j].clear();
-    ptBinsDY2_stranges[j].clear();
-    ptBinsDY3_stranges[j].clear();
-    ptBinsDY4_stranges[j].clear();
-    ptBinsDY5_stranges[j].clear();
-    ptBinsAll_stranges[j].clear();
-    
-    ptBinsDY1_anti_ups[j].clear();
-    ptBinsDY2_anti_ups[j].clear();
-    ptBinsDY3_anti_ups[j].clear();
-    ptBinsDY4_anti_ups[j].clear();
-    ptBinsDY5_anti_ups[j].clear();
-    ptBinsAll_anti_ups[j].clear();
-    
-    ptBinsDY1_anti_downs[j].clear();
-    ptBinsDY2_anti_downs[j].clear();
-    ptBinsDY3_anti_downs[j].clear();
-    ptBinsDY4_anti_downs[j].clear();
-    ptBinsDY5_anti_downs[j].clear();
-    ptBinsAll_anti_downs[j].clear();
-    
-    ptBinsDY1_anti_stranges[j].clear();
-    ptBinsDY2_anti_stranges[j].clear();
-    ptBinsDY3_anti_stranges[j].clear();
-    ptBinsDY4_anti_stranges[j].clear();
-    ptBinsDY5_anti_stranges[j].clear();
-    ptBinsAll_anti_stranges[j].clear();
+  delete[] ptBinsDY1_gluons;
+  delete[] ptBinsDY2_gluons;
+  delete[] ptBinsDY3_gluons;
+  delete[] ptBinsDY4_gluons;
+  delete[] ptBinsDY5_gluons;
+  delete[] ptBinsAll_gluons;
+  
+  delete[] ptBinsDY1_quarks;
+  delete[] ptBinsDY2_quarks;
+  delete[] ptBinsDY3_quarks;
+  delete[] ptBinsDY4_quarks;
+  delete[] ptBinsDY5_quarks;
+  delete[] ptBinsAll_quarks;
+  
+  delete[] ptBinsDY1_ups;
+  delete[] ptBinsDY2_ups;
+  delete[] ptBinsDY3_ups;
+  delete[] ptBinsDY4_ups;
+  delete[] ptBinsDY5_ups;
+  delete[] ptBinsAll_ups;
+  
+  delete[] ptBinsDY1_downs;
+  delete[] ptBinsDY2_downs;
+  delete[] ptBinsDY3_downs;
+  delete[] ptBinsDY4_downs;
+  delete[] ptBinsDY5_downs;
+  delete[] ptBinsAll_downs;
+  
+  delete[] ptBinsDY1_stranges;
+  delete[] ptBinsDY2_stranges;
+  delete[] ptBinsDY3_stranges;
+  delete[] ptBinsDY4_stranges;
+  delete[] ptBinsDY5_stranges;
+  delete[] ptBinsAll_stranges;
+  
+  delete[] ptBinsDY1_anti_ups;
+  delete[] ptBinsDY2_anti_ups;
+  delete[] ptBinsDY3_anti_ups;
+  delete[] ptBinsDY4_anti_ups;
+  delete[] ptBinsDY5_anti_ups;
+  delete[] ptBinsAll_anti_ups;
+  
+  delete[] ptBinsDY1_anti_downs;
+  delete[] ptBinsDY2_anti_downs;
+  delete[] ptBinsDY3_anti_downs;
+  delete[] ptBinsDY4_anti_downs;
+  delete[] ptBinsDY5_anti_downs;
+  delete[] ptBinsAll_anti_downs;
+  
+  delete[] ptBinsDY1_anti_stranges;
+  delete[] ptBinsDY2_anti_stranges;
+  delete[] ptBinsDY3_anti_stranges;
+  delete[] ptBinsDY4_anti_stranges;
+  delete[] ptBinsDY5_anti_stranges;
+  delete[] ptBinsAll_anti_stranges;
 
-    ptBinsDY1_all[j].clear();
-    ptBinsDY2_all[j].clear();
-    ptBinsDY3_all[j].clear();
-    ptBinsDY4_all[j].clear();
-    ptBinsDY5_all[j].clear();
-    ptBinsAll_all[j].clear();
-    
-    ptBinsSoftAll_gluons[j].clear();
-    ptBinsSoftAll_quarks[j].clear();
-    ptBinsSoftAll_ups[j].clear();
-    ptBinsSoftAll_downs[j].clear();
-    ptBinsSoftAll_stranges[j].clear();
-    ptBinsSoftAll_anti_ups[j].clear();
-    ptBinsSoftAll_anti_downs[j].clear();
-    ptBinsSoftAll_anti_stranges[j].clear();
-    ptBinsSoftAll_all[j].clear();
-  }
-
-
-  delete [] ptBinsDY1_gluons;
-  delete [] ptBinsDY2_gluons;
-  delete [] ptBinsDY3_gluons;
-  delete [] ptBinsDY4_gluons;
-  delete [] ptBinsDY5_gluons;
-  delete [] ptBinsAll_gluons;
+  delete[] ptBinsDY1_all;
+  delete[] ptBinsDY2_all;
+  delete[] ptBinsDY3_all;
+  delete[] ptBinsDY4_all;
+  delete[] ptBinsDY5_all;
+  delete[] ptBinsAll_all;
   
-  delete [] ptBinsDY1_quarks;
-  delete [] ptBinsDY2_quarks;
-  delete [] ptBinsDY3_quarks;
-  delete [] ptBinsDY4_quarks;
-  delete [] ptBinsDY5_quarks;
-  delete [] ptBinsAll_quarks;
-  
-  delete [] ptBinsDY1_ups;
-  delete [] ptBinsDY2_ups;
-  delete [] ptBinsDY3_ups;
-  delete [] ptBinsDY4_ups;
-  delete [] ptBinsDY5_ups;
-  delete [] ptBinsAll_ups;
-  
-  delete [] ptBinsDY1_downs;
-  delete [] ptBinsDY2_downs;
-  delete [] ptBinsDY3_downs;
-  delete [] ptBinsDY4_downs;
-  delete [] ptBinsDY5_downs;
-  delete [] ptBinsAll_downs;
-  
-  delete [] ptBinsDY1_stranges;
-  delete [] ptBinsDY2_stranges;
-  delete [] ptBinsDY3_stranges;
-  delete [] ptBinsDY4_stranges;
-  delete [] ptBinsDY5_stranges;
-  delete [] ptBinsAll_stranges;
-  
-  delete [] ptBinsDY1_anti_ups;
-  delete [] ptBinsDY2_anti_ups;
-  delete [] ptBinsDY3_anti_ups;
-  delete [] ptBinsDY4_anti_ups;
-  delete [] ptBinsDY5_anti_ups;
-  delete [] ptBinsAll_anti_ups;
-  
-  delete [] ptBinsDY1_anti_downs;
-  delete [] ptBinsDY2_anti_downs;
-  delete [] ptBinsDY3_anti_downs;
-  delete [] ptBinsDY4_anti_downs;
-  delete [] ptBinsDY5_anti_downs;
-  delete [] ptBinsAll_anti_downs;
-  
-  delete [] ptBinsDY1_anti_stranges;
-  delete [] ptBinsDY2_anti_stranges;
-  delete [] ptBinsDY3_anti_stranges;
-  delete [] ptBinsDY4_anti_stranges;
-  delete [] ptBinsDY5_anti_stranges;
-  delete [] ptBinsAll_anti_stranges;
-
-  delete [] ptBinsDY1_all;
-  delete [] ptBinsDY2_all;
-  delete [] ptBinsDY3_all;
-  delete [] ptBinsDY4_all;
-  delete [] ptBinsDY5_all;
-  delete [] ptBinsAll_all;
-  
-  delete [] ptBinsSoftAll_gluons;
-  delete [] ptBinsSoftAll_quarks;
-  delete [] ptBinsSoftAll_ups;
-  delete [] ptBinsSoftAll_downs;
-  delete [] ptBinsSoftAll_stranges;
-  delete [] ptBinsSoftAll_anti_ups;
-  delete [] ptBinsSoftAll_anti_downs;
-  delete [] ptBinsSoftAll_anti_stranges;
-  delete [] ptBinsSoftAll_all;
+  delete[] ptBinsSoftAll_gluons;
+  delete[] ptBinsSoftAll_quarks;
+  delete[] ptBinsSoftAll_ups;
+  delete[] ptBinsSoftAll_downs;
+  delete[] ptBinsSoftAll_stranges;
+  delete[] ptBinsSoftAll_anti_ups;
+  delete[] ptBinsSoftAll_anti_downs;
+  delete[] ptBinsSoftAll_anti_stranges;
+  delete[] ptBinsSoftAll_all;
 }
 
 

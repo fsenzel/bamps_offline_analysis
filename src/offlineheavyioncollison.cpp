@@ -13,6 +13,7 @@
 #include "cellcontainer.h"
 #include "scattering22.h"
 #include "scattering23.h"
+#include "prefactors23.h"
 #include "random.h"
 #include "binary_cross_sections.h"
 #include "offlineoutput.h"
@@ -1166,12 +1167,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
       aa.centralRingsCopyFromCascade = rings;
     }
     //---------- populate the ring structure for averages ----------
-    
-    
-    if ( addedParticles.size() == 0 )
-    {
-      break;
-    }  
     
     // scatterings in cell or not?
     dv = dx * dy * dz;
