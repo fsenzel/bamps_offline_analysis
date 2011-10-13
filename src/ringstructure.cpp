@@ -108,7 +108,7 @@ int ringStructure::getIndexPure( const double _xt ) const
 
 
 
-int ringStructure::getIndex( const Particle& _particle ) const
+int ringStructure::getIndex( const ParticleOffline& _particle ) const
 {
   double xt = sqrt( pow( _particle.X, 2 ) + pow( _particle.Y, 2 ) );
   
@@ -133,14 +133,14 @@ ringContainer& ringStructure::operator[]( const int index )
 
 
 
-void ringStructure::addRates( const Particle& _particle )
+void ringStructure::addRates( const ParticleOffline& _particle )
 {
   double xt = sqrt( pow( _particle.X, 2 ) + pow( _particle.Y, 2) );
   addRates( xt, _particle );
 }
 
 
-void ringStructure::addRates( const double _xt, const Particle& _particle )
+void ringStructure::addRates( const double _xt, const ParticleOffline& _particle )
 {
   int index = getIndexPure( _xt );
   if ( index < static_cast<int>( rings.size() ) )
@@ -150,14 +150,14 @@ void ringStructure::addRates( const double _xt, const Particle& _particle )
 }
 
 
-void ringStructure::addParticle( const Particle& _particle )
+void ringStructure::addParticle( const ParticleOffline& _particle )
 {
   double xt = sqrt( pow( _particle.X, 2 ) + pow( _particle.Y, 2) );
   addParticle( xt, _particle );
 }
 
 
-void ringStructure::addParticle( const double _xt, const Particle& _particle )
+void ringStructure::addParticle( const double _xt, const ParticleOffline& _particle )
 {
   int index = getIndexPure( _xt );
   if ( index < static_cast<int>( rings.size() ) )

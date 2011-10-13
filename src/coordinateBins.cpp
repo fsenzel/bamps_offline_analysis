@@ -120,7 +120,7 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   const double eta_max = 8.0;
   const double n_eta = 2 * static_cast<int>( eta_max / delta_eta_fine );
 
-  _dNdEta.reshape( n_eta, -eta_max, +eta_max );
+  _dNdEta.reshape( n_eta, -eta_max, + eta_max );
 
   for ( int i = 0; i < particles.size(); i++ )
   {    
@@ -201,7 +201,7 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   {
     nMax = NinEtaBin / 2;
   }
-  while ( nRest >= nMax )
+  while ( nRest >= nMax && index < _max_index_limit - 1 )
   {
     ++index;
     nsum1 = 0;
@@ -250,7 +250,7 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
     nMax = NinEtaBin / 2;
   }
 
-  while ( nRest >= nMax && npl > _dNdEta.min_index() )
+  while ( nRest >= nMax && npl >= _dNdEta.min_index() && index > _min_index_limit + 1 )
   {
     index--;
     nsum2 = 0;
@@ -286,18 +286,18 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
     throw eCoordBins_error( errMsg );
   }
 
-  _dt = 0.2 * _dt;
+  _dt = 0.1 * _dt;
 }
 
 
 
-int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param )
+int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param, const int _nTest )
 {
   double initialArea = 4 * ( _param.RA - _b / 2 ) * sqrt(( _param.RA - _b / 2 ) * ( _param.RA + _b / 2 ) );
   NinEtaBin = int( initialArea / ( _dx * _dy ) * _NperCell );
 
   int estimatedMaxNumber = particles.size() * 1.3;
-  if ( ns_casc::Nflavor == 0 )
+  if ( Particle::N_light_flavor == 0 )
   {
     estimatedMaxNumber *= 1.4;  // ugly fix, empirical value
   }
@@ -311,6 +311,8 @@ int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, c
        << "\t" << "particle number in one Etabin=" << NinEtaBin << endl;
   if ( particles.size() <= ( 8 * NinEtaBin ) )
   {
+    cout << "N = " << particles.size() << "  NinEtaBin = " << NinEtaBin << "  IZ = " << _IZ << endl;
+    cout << "recommended number of test particles > " << ( ( 8 * NinEtaBin * _nTest ) / particles.size() ) << endl;
     std::string errMsg = "insufficient number of test particles";
     throw eCoordBins_error( errMsg );
   }

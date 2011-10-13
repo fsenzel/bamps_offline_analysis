@@ -16,24 +16,28 @@
 #include "scattering23.h"
 #include "scattering22.h"
 #include "scattering32.h"
+#include "offlineoutput.h"
 
 
 class offlineHeavyIonCollision
 {
 public:
-  offlineHeavyIonCollision( config* const _config );
+  offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface );
   ~offlineHeavyIonCollision();
 
   void init();
   void mainFramework( analysis& aa );
 
-  double evolveMedium( const double evolveToTime, bool& readCellStructure, bool& _endOfDataFiles );
+  double evolveMedium( const double evolveToTime, bool& _endOfDataFiles );
   void scattering( const double nexttime, bool& again, analysis& aa );
   void cell_ID( double time );
 
   void scatterEdgeParticles( std::list< int >& _offlineParticleList, std::list< int >& _addedParticleList, const double nexttime );
 
 private:
+  /** @brief Pointer to the interface for the output of data needed for later offline reconstruction */
+  offlineOutputInterface* offlineInterface;
+  
   config * const theConfig;
   interpolation23 theI23;
 
@@ -50,15 +54,6 @@ private:
   //--------------------------------------------------------------------------
 
   ringStructure rings;
-
-  std::ifstream readac;
-  std::ifstream readcell;
-  std::ifstream read22;
-  std::ifstream read23;
-  std::ifstream read32;
-  std::ifstream read22g;
-  std::ifstream readch;
-  std::ifstream readrate;
   
   std::vector< std::vector<double> > rateGluons;
   std::vector< std::vector<double> > rateQuarks;
@@ -68,11 +63,9 @@ private:
   std::vector< std::vector<double> > rateAntiQuarks_prev;
 
   int currentNumber;
-  int minActiveIndexEta, maxActiveIndexEta;
 
   double stoptime;
   double stoptime_last;
-  int actiontype;
 
   WoodSaxon WoodSaxonParameter;
 

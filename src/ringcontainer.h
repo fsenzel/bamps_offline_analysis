@@ -27,9 +27,9 @@ public:
   void clear();
   void relocate( const double _minR, const double _maxR );
   
-  void addParticle( const Particle& _particle );
-  void addParticleInFormGeom( const Particle& _particle, const double _time );
-  void addRates( const Particle& _particle );
+  void addParticle( const ParticleOffline& _particle );
+  void addParticleInFormGeom( const ParticleOffline& _particle, const double _time );
+  void addRates( const ParticleOffline& _particle );
   
   double getAveraged_md2g() const; 
   double getAveraged_md2q() const;

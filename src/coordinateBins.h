@@ -14,6 +14,8 @@
 
 #include <stdexcept>
 #include <vector>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/access.hpp>
 
 #include "woodsaxon.h"
 
@@ -39,6 +41,14 @@ public:
   int content;
 
 private:
+  friend class boost::serialization::access;
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int version)
+  {
+    ar & left;
+    ar & right;
+    ar & content;
+  }
 };
 
 
@@ -87,6 +97,23 @@ protected:
   int _max_index_active;
 
   bool _negative_indices;
+ 
+private:
+  
+  friend class boost::serialization::access;
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int version)
+  {
+    ar & bins;
+    ar & _min_real;
+    ar & _max_real;
+    ar & _delta_x;
+    ar & _min_index_limit;
+    ar & _max_index_limit;
+    ar & _min_index_active;
+    ar & _max_index_active;
+    ar & _negative_indices;  
+  } 
 };
 
 
@@ -100,7 +127,7 @@ public:
   
   void populateEtaBins( coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine
  );
-  int constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param );
+  int constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param, const int _nTest );
   int getCentralIndex() const;
   int getIndex( const double _eta ) const;
   
@@ -108,6 +135,14 @@ public:
 
 private:
   int NinEtaBin;
+  
+  friend class boost::serialization::access;
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int version)
+  {
+    ar & boost::serialization::base_object<coordinateBins>(*this);
+    ar & NinEtaBin;
+  } 
 };
 
 

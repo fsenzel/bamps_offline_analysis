@@ -30,21 +30,21 @@ class pythiaInitialDistribution : public initialStateModel
     pythiaInitialDistribution( const config& _config, WoodSaxon& _WoodSaxonParameter, STORED_TABLE_USAGE _storedTableUsage = computeNewTables );
     ~pythiaInitialDistribution() {};
     
-    void populateParticleVector( std::vector<Particle>& _particles );
-    void populateParticleVector( std::vector<Particle>& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT );
+    void populateParticleVector( std::vector<ParticleOffline>& _particles );
+    void populateParticleVector( std::vector<ParticleOffline>& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT );
 
     
         
   private:
-    void samplePositions( std::vector<Particle>& _particles );
-    void sampleMomenta( std::vector<Particle>& _particles );
+    void samplePositions( std::vector<ParticleOffline>& _particles );
+    void sampleMomenta( std::vector<ParticleOffline>& _particles );
     
     void setDataFilesProperties( STORED_TABLE_USAGE _storedTableUsage );
     
     /** @brief sampling of the collision time of one particle */
-    void sample_T_one_partcl( std::vector<Particle>& _particles, const int ) const;
+    void sample_T_one_partcl( std::vector<ParticleOffline>& _particles, const int ) const;
     /** @brief sampling of the positions of one parton at the given time */
-    void sample_XYZ_one_partcl( std::vector<Particle>& _particles, const int number, bool& soft ) const;
+    void sample_XYZ_one_partcl( std::vector<ParticleOffline>& _particles, const int number, bool& soft ) const;
     
     void computeWoodSaxonParameters( const config& _config, WoodSaxon& _WoodSaxonParameter );
     void generateSamplingDataSets();

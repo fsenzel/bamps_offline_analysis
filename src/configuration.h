@@ -9,193 +9,249 @@
 //---------------------------------------------
 
 
+/** @file
+ * @brief This file provides global objects and a configuration interface
+ */
+
+
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
 #include <string>
-#include <stdexcept>
 #include <vector>
+#include <stdexcept>
 #include <stdint.h>
 
+#include "globalsettings.h"
 #include "particle.h"
+#include "offlineoutput.h"
 
 
-/** @brief namespace for global cascade paramters, objects etc. */
+/** @brief Enumeration type for possible initial state models */
+enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState };
+
+/** @brief Enumeration type for different variants of computing the mean free path of high-pt particles */
+enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeMfpInterpolation };
+
+
+/** @brief This extends the namespace ns_casc (see globalsettings.h) to hold a global particle vector */
 namespace ns_casc
-{
-  //-- global parameters -----------------------------//
-  /** @brief (lambda_QCD)^2 in GeV^2, global parameter*/
-  const double lambda2 = 0.04;
-  
-  /** @brief number of colors, global parameter */
-  const int Ncolor = 3;
-  
-  /** @brief number of active flavors, see particle.h, global parameter */
-  const int Nflavor = 3;
-  
-  /** @brief K-factor */
-  const double K = 2.0;                
-
-  /** @brief lower cutoff for some t-chanel processes */
-  const double tcut = -0.1;
-
-  
-  const int first = 2; 
-  
-  /**
-  * @brief auxiliary variable, denotes "a large number"
-  *
-  * yeah, I know that is's not really infinity, but what the heck
-  */
-  const double infinity = 300000;
-  //--------------------------------------------------//
-  
- 
-  /** @brief vector to hold all particles in the simulation, GLOBAL 
+{  
+  /** @brief Vector to hold all particles in the simulation, GLOBAL 
   *
   * Declared as extern here. There MUST be ONE definition in a cpp-file that includes this header in the global 
   * scope (it's in configuration.cpp).
   * All files that include this header can then access the vector.
   */
-  extern std::vector<Particle> particles;
-  extern std::vector<Particle> particles_init;
-  extern std::vector<Particle> particles_atTimeNow;
-  extern std::vector<Particle> particles_atTimeNowCopy;
-  extern std::vector<Particle> addedParticles;
-  extern std::vector<Particle> addedParticlesCopy;
+  extern std::vector<ParticleOffline> particles;
+  extern std::vector<ParticleOffline> particles_init;
+  extern std::vector<ParticleOffline> particles_atTimeNow;
+  extern std::vector<ParticleOffline> particles_atTimeNowCopy;
+  extern std::vector<ParticleOffline> addedParticles;
+  extern std::vector<ParticleOffline> addedParticlesCopy;
 }
+//--------------------------------------------------------//
+
+using std::string;
 
 
 extern double dt;
 
 
-
-
-using std::string;
-
+/**
+ * @brief Interface for settings made at runtime
+ *
+ * This class provides an interface for settings made by the user at runtime. These need to be specified in a configuration
+ * file whose name is passed to the program as the first (and only) command line parameter. This file is read when the constructor
+ * of the class config is called.
+ */
 class config
 {
  public:
+  /** @brief Constructor that internally reads the provided input file */
   config(const int argc, const char * const argv[]);
+  /** @brief Standard constructor */
   ~config() {};
-  
-  void setting();
 
+  /** @brief Interface for config::name */
   string getName() const {return name;}
-  string getOutputName() const {return outputName;}
-//   string getPythiaParticleFileCharm() const {return pythiaParticleFileCharm;}
-//   int getPythiaParticleFileCharmTestparticles() const {return pythiaParticleFileCharmTestparticles;}
+  /** @brief Interface for the length of config::name */
   int getNameLength() const;
+  /** @brief Interface for config::runtime */
   double getRuntime() const {return runtime;}
-  double getDt() const {return delta_t;}
-  bool DtSpecified() const {return dt_specified;}
-  double getSqrtS() const {return sqrtS;}
-  int getTestparticles() const {return testparticles;}
-  double getImpactParameter() const {return impact;}
-  int getOutputLevel() const {return outputLevel;}
-  bool isLocalCluster() const {return localCluster;}
-//   double getKIniCharm() const {return KIniCharm;}
-  double getTimefirst() const {return timefirst;}
+  /** @brief Interface for config::A */
   double getA() const {return A;}
+  /** @brief Interface for config::Aatomic */
   double getAatomic() const {return Aatomic;}
+  /** @brief Interface for config::B */
   double getB() const {return B;}
+  /** @brief Interface for config::Batomic */
   double getBatomic() const {return Batomic;}
+  /** @brief Interface for config::sqrtS */
+  double getSqrtS() const {return sqrtS;}
+  /** @brief Interface for config::impact */
+  double getImpactParameter() const {return impact;}
+  /** @brief Interface for config::P0 */
   double getPtCutoff() const {return P0;}
-  double getTimeshift() const {return timeshift;}
-  string getPathdirCascadeData() const {return pathdirCascadeData;}
-  uint32_t getSeed() const {return seed;}
+  /** @brief Interface for config::testparticles */
+  int getTestparticles() const {return testparticles;}
+  /** @brief Interface for config::seed */
+  long getSeed() const {return seed;}
+  /** @brief Interface for config::interpolationSwitch */
+  JET_MFP_COMPUTATION_TYPE getJetMfpComputationType() const {return jetMfpComputationSwitch;}
+  /** @brief Interface for config::interpolationSwitch */
+  double getMFPInterpolationBorder() const {return interpolationBorder;}
+  /** @brief Interface for config::outputForOfflineReconstruction */
+  bool doOutputForOfflineReconstruction() const {return outputForOfflineReconstruction;}
+  /** @brief Interface for config::detailedParticleOutput */
+  bool doDetailedParticleOutput() const {return detailedParticleOutput;}
+  /** @brief Interface for config::movieOutput */
+  bool doMovieOutput() const {return movieOutput;}
+  /** @brief Interface for config::freezeOutEnergyDensity */
+  double getFreezeOutEnergyDensity() const { return freezeOutEnergyDensity; }
+  /** @brief Interface for config::initialStateType */
+  INITIAL_STATE_TYPE getInitialStateType() const { return initialStateType; }
+  /** @brief Interface for config::pathdirOfflineData */
+  string getPathdirOfflineData() const { return pathdirOfflineData; }
+  /** @brief Interface for config::pathdirOfflineData, returns pointer to char */
+  const char* getPathdirOfflineDataChar() const { return pathdirOfflineData.c_str(); }
+  /** @brief Interface for config::pythiaParticleFile */
+  string getPythiaParticleFile() const { return pythiaParticleFile; }
+  /** @brief Interface for config::cgcParticleFile */
+  string getCgcParticleFile() const {return cgcParticleFile;}
+  
+  /** Stuff special to offline analysis */
+  void readAndPrepareInitialSettings(offlineOutputInterface*const _offlineInterface);
+  
+  string getOutputName() const {return outputName;}
   double getMinimumPT() const { return minimumPT; }
   int getNumberOfParticlesToAdd() const { return numberOfParticlesToAdd; }
-  double getFreezeOutEnergyDensity() const { return freezeOutEnergyDensity; }
-  double getFactor_dt() const { return factor_dt; }
-  int getN_init() const { return N_init; }
+  bool movieOutputJets;
+  bool movieOutputBackground;
+  bool isLocalCluster() const {return localCluster;}
+  double getTimeshift() const {return timeshift;}
   int getRingNumber() const { return ringNumber; }
   double getCentralRingRadius() const { return centralRingRadius; }
   double getDeltaR() const { return deltaR; }
+  string outputName;  //name of this job - assigned to output files
+  double getDt() const {return delta_t;}
+  bool DtSpecified() const {return dt_specified;}
+  double getFactor_dt() const { return factor_dt; }
+  double getTimefirst() const {return timefirst;}
+  
+  int getN_init() const { return N_init; }
   double get_dx() const { return dx; }
   double get_dy() const { return dy; }
   double getTransLen() const { return transLen; }
-
-  bool movieOutputJets;
-  bool movieOutputBackground;
-  
-  string getPythiaParticleFile() const { return pythiaParticleFile; }
+ 
 
  private:
+  /** @brief Read and evaluate the input file that has been specified as a commandline argument */
   void readInputfile();
 
-  string inputFile, pathdirCascadeData;
+  /** @brief Write out all input parameters */
+  void writeInput();
+  
 
+  /** @brief Name of the input file */
+  string inputFile;
+  /** @brief Path to which the output needed for offline analysis is written */
+  string pathdirOfflineData;
+
+  /** @brief Total simulated runtime in fm/c */
+  double runtime;
+
+  /** @brief Mass number of nucleus A  */
+  double A;  
+  /** @brief Atomic number, i.e. number of protons, of nucleus A */
+  double Aatomic;
+  /** @brief Mass number of nucleus B  */
+  double B;
+  /** @brief Atomic number, i.e. number of protons, of nucleus B */
+  double Batomic;
+  
+  /** @brief Center of mass energy per NN pair in GeV */
+  double sqrtS;      
+  /** @brief Impact parameter in fm */
+  double impact;
+
+  /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
+  double P0;
+ 
+  /** @brief Number of testparticles per real particle */
+  int testparticles;
+  
+  /** @brief Initial seed for the random number generator. seed = 0 forces the random generation of a seed */
+  long seed;
+
+  /** @brief How to compute the mean free path high energy particles?
+   *
+   * 0 = computeMfpDefault = default, i.e. no special treatment
+   * 1 = computeMfpIteration = iterative computation
+   * 2 = computeMfpInterpolation = use tabulated mfp data and interpolation functions
+   */
+  JET_MFP_COMPUTATION_TYPE jetMfpComputationSwitch;
+  /** @brief X where interpolation of MFP is done for E > X*T */
+  double interpolationBorder; 
+  
+  /** @brief Specify whether data needed for later offline reconstruction should be written */
+  bool outputForOfflineReconstruction;
+  /** @brief Specify whether detailed particle output should be written */
+  bool detailedParticleOutput;
+  /** @brief Specify whether movie output should be written */
+  bool movieOutput;
+  
+  /** @brief Which type of initial state to use */
+  INITIAL_STATE_TYPE initialStateType;
+                     
+  /** @brief Relative or full path (including filename) of PYTHIA output file with particle data
+   * Declare as "-" if particle momenta should be sampled via glauber method
+   */
+  string pythiaParticleFile;
+  /** @brief Relative or full path (including filename) of color glass condensate output file with particle data
+   * Declare as "-" if particle momenta should be sampled via glauber method
+   */
+  string cgcParticleFile;
+      
+  /** @brief Energy density for freeze out (in GeV/fm^3)
+   * Particles in regions with energy densities below this threshold will be freely streaming
+   */
+  double freezeOutEnergyDensity;                      
+  
+  /** @brief The name of the BAMPS job that is processed (input file names) */
+  string name;
+  
+  
+  /** Stuff special to the offline analysis */
+  /** @brief Initial seed used in the full BAMPS run */
+  uint32_t originalSeed;
+  
+  double delta_t;   // if dt is specified in input file, use this delta t. If not get it from cascade data.
+  bool dt_specified;
+  
   double centralRingRadius, deltaR;
   int ringNumber;
-  double timefirst,timeshift;
-  double A;          //mass number of nucleus A  
-  double Aatomic;    //atomic number, i.e. number of protons, of nucleus A   
-  double B;          //mass number of nucleus B
-  double Batomic;    //atomic number of nucleus B 
-  
-  double sqrtS;      //c.m. energy per NN pair, GeV
-  double impact;     //impact parameter in fm
-  double P0;         //lower PT-cutoff, GeV
-  int testparticles; //number of testparticles per real particle
-  
+  double timeshift;
+  int numberOfParticlesToAdd;
+  double minimumPT; 
+  double factor_dt;
+  bool localCluster; // chose false for CSC and true for local queuing system, like housewifes, dwarfs etc., local system accesses personal filesystem, no need for transfering data from /local/ to working environment 
   double dx;
   double dy;
   double transLen;
-  
-  int getJobID();
-  
-  bool dt_specified;
-  
-  int numberOfParticlesToAdd;
-  double minimumPT; 
-  double freezeOutEnergyDensity;
-  double factor_dt;
-
-  double runtime;    //total simulated runtime in fm/c
-  
-  double delta_t;   // if dt is specified in input file, use this delta t. If not get it from cascade data.
-
-  
-  uint32_t originalSeed;    //initial seed used in the full BAMPS run
-  uint32_t seed;            //seed used in the offline run
-  
   int N_init;
-
-  int outputLevel;   //1 = minimal (30M), 2 = with <name>_step?.f1 (110M), 3 = with reconstruction files (71M)
-                     //4 = all (151M), all sizes are approx. for a run to 5.2 fm/c, uncompressed
-                     //5 = only charm quark data
-                     //6 = movie
-                     //7 = v2 and R_AA
-                     //8 = hydro: T_mu,nu
-  
-  
-  string name;        //name of the BAMPS job that is processed (input file names)
-  string outputName;  //name of this job - assigned to output files
-  
-  string pythiaParticleFile; //filepath to PYTHIA output file with particle data,  declare as "-" if particle momenta should be sampled via glauber method
-//   string pythiaParticleFileCharm; // filepath to PYTHIA output file with particle data (can contain both charm quarks and gluons, the latter one being rejected) if using minijet or CGC for initial conditions, since both cannot sample charm quarks.  Declare as "-" if PYTHIA is used as initial model (contains already charm quarks). Usually one can use same PYTHIA particle files as for the case where PYTHIA is model for initial conditions
-//   
-//   int pythiaParticleFileCharmTestparticles; // number of testparticles used in particle data file, if it differs from global testparticle number take that into account
-//   
-//   string cgcParticleFile; //filepath to color glass condensate output file with particle data,  declare as "-" if particle momenta should be sampled via glauber method
-//   
-//   double KIniCharm; // K factor for initial charm for pythia charm file, K=2 means twice as much initial charm
-//                     // This is different from the definition in the cascade. In cascade the initial charm from pythia is multiplied by this factor. Here we already increased the initial charm in Pythia with this factor and use it here only for the right scaling of the output. 
-  
-  bool localCluster; // chose false for CSC and true for local queuing system, like housewifes, dwarfs etc.
-                                // local system accesses personal filesystem, no need for transfering data from /local/ to working environment
-                                
+  double timefirst;
 };
 
 
-/** @brief exception class for handling unexpected critical behaviour within the configuration  */
+
+/** @brief exception class for handling unexpected critical behaviour within the configuration of the BAMPS run  */
 class eConfig_error : public std::runtime_error
 {
-public:
-  explicit eConfig_error( const std::string& what ) : std::runtime_error( what ) {};
-
-  virtual ~eConfig_error() throw() {};
+  public:
+    explicit eConfig_error(const std::string& what) : std::runtime_error(what) {};
+    
+    virtual ~eConfig_error() throw() {};
 };
 
 

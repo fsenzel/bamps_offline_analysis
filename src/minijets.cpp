@@ -14,7 +14,6 @@
 #include <iostream>
 #include <fstream>
 #include <list>
-#include <stdio.h>
 
 #include "configuration.h"
 #include "minijets.h"
@@ -43,7 +42,6 @@ miniJets::miniJets( const config& _config, WoodSaxon& _WoodSaxonParameter, STORE
     nEntries_PT( 0 ),
     nEntries_PT_fine( 0 ),
     numberOfParticlesToGenerate( 0 ),
-    minimumPT( 0 ),
     numberOfTestparticles( _config.getTestparticles() ),
     A( _config.getA() ),
     Aatomic( _config.getAatomic() ),
@@ -55,9 +53,10 @@ miniJets::miniJets( const config& _config, WoodSaxon& _WoodSaxonParameter, STORE
   P0 = _config.getPtCutoff();
   computeWoodSaxonParameters( _config, _WoodSaxonParameter );
   WoodSaxonParameter = _WoodSaxonParameter;
-
+  
   setDataFilesProperties( _config, _storedTableUsage );
 }
+
 
 
 void miniJets::setDataFilesProperties( const config& _config, STORED_TABLE_USAGE _storedTableUsage )
@@ -65,7 +64,7 @@ void miniJets::setDataFilesProperties( const config& _config, STORED_TABLE_USAGE
   bool correct_p0 = false;
   if (  ( FPT_COMP_E(_config.getPtCutoff(), 1.4 ) && sqrtS_perNN ==  200.0 ) ||
         ( FPT_COMP_E(_config.getPtCutoff(), 3.3 ) && sqrtS_perNN == 5500.0 ) ||
-        ( FPT_COMP_E(_config.getPtCutoff(), 2.9 ) && sqrtS_perNN == 2760.0 )     )
+        ( FPT_COMP_E(_config.getPtCutoff(), 3.5 ) && sqrtS_perNN == 2760.0 )     )
   {
     correct_p0 = true;
   }
@@ -86,25 +85,98 @@ void miniJets::setDataFilesProperties( const config& _config, STORED_TABLE_USAGE
       filename_samplingData_PT = "data/samplPT.dat";
       filename_samplingData_PT_fine = "data/samplPT_fine.dat";
       filename_samplingData_maximumPT = "data/maxPT.dat";
-      filename_samplingData_collisionTimes = "data/samplT_b0.dat";//b=0 fm 
     }
-    else if (sqrtS_perNN == 2760.0 && impactParameter == 0.0) // LHC, 2.76 TeV
+    else if(sqrtS_perNN == 2760.0) // LHC, 2.76 TeV
     {  
-      // for p0=2.9 GeV
+      // for p0=3.5 GeV
       nEntries_collisionTimes = 129;
-      nEntries_PT = 94;
       nEntries_PT_fine = 24;
-      
-      numberOfParticlesToGenerate = 11686 * _config.getTestparticles(); 
       
       filename_samplingData_PT = "data/samplPT.dat";
       filename_samplingData_PT_fine = "data/samplPT_fine.dat";
       filename_samplingData_maximumPT = "data/maxPT.dat";
-      filename_samplingData_collisionTimes = "data/samplT_b0.dat";//b=0 fm
-    }
-    else if (sqrtS_perNN = 2760.0 && impactParameter == 8.2 )
-    {
       
+      if ( FPT_COMP_E(_config.getImpactParameter(), 0.0 ) )
+      {
+        nEntries_PT = 122;
+        numberOfParticlesToGenerate = 4832 * _config.getTestparticles(); 
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 2.0 ) )
+      {
+        nEntries_PT = 107;
+        numberOfParticlesToGenerate =  5576 * _config.getTestparticles(); 
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 3.0 ) )
+      {
+        nEntries_PT = 96;
+        numberOfParticlesToGenerate = 4978 * _config.getTestparticles();    
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 4.5 ) )
+      {
+        nEntries_PT = 125;
+        numberOfParticlesToGenerate = 3918 * _config.getTestparticles();      
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 5.4 ) )
+      {
+        nEntries_PT = 112;
+        numberOfParticlesToGenerate = 3264 * _config.getTestparticles();           
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 6.1 ) )
+      {
+        nEntries_PT = 92;
+        numberOfParticlesToGenerate = 2758 * _config.getTestparticles();       
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 6.9 ) )
+      {
+        nEntries_PT = 91;
+        numberOfParticlesToGenerate = 2202 * _config.getTestparticles(); 
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 7.7 ) )
+      {
+        nEntries_PT = 96;
+        numberOfParticlesToGenerate = 1684 * _config.getTestparticles(); 
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 8.3 ) )
+      {
+        nEntries_PT = 79;
+        numberOfParticlesToGenerate = 1344 * _config.getTestparticles(); 
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 9.1 ) )
+      {
+        nEntries_PT = 96;
+        numberOfParticlesToGenerate = 952 * _config.getTestparticles();  
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 10.3 ) )
+      {
+        nEntries_PT = 101;
+        numberOfParticlesToGenerate = 496 * _config.getTestparticles();        
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 11.4 ) )
+      {
+        nEntries_PT = 96;
+        numberOfParticlesToGenerate = 226 * _config.getTestparticles();          
+      }      
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 12.3 ) )
+      {
+        nEntries_PT = 74;
+        numberOfParticlesToGenerate = 102 * _config.getTestparticles();       
+      }
+      else if ( FPT_COMP_E(_config.getImpactParameter(), 13.2 ) )
+      {
+        nEntries_PT = 76;
+        numberOfParticlesToGenerate = 38 * _config.getTestparticles();       
+      }
+      else
+      {
+        cout << "======= Generating data sets for sampling of initial state =======" << endl;
+        generateSamplingDataSets();
+        cout << "======= data sets generated =======" << endl;
+        
+        filename_samplingData_collisionTimes = "data/samplT.dat";
+        filename_samplingData_PT = "data/samplPT.dat";
+        filename_samplingData_PT_fine = "data/samplPT_fine.dat";
+        filename_samplingData_maximumPT = "data/maxPT.dat";
+      }
     }
     else if(sqrtS_perNN == 200.0) // RHIC 200 MeV
     {  
@@ -242,6 +314,8 @@ void miniJets::setDataFilesProperties( const config& _config, STORED_TABLE_USAGE
 
 
 
+
+
 void miniJets::generateSamplingDataSets()
 {
   double Tab = generateTimeDistribution( nEntries_collisionTimes );
@@ -257,7 +331,7 @@ void miniJets::generateSamplingDataSets()
 
 
 
-void miniJets::populateParticleVector( std::vector< Particle >& _particles )
+void miniJets::populateParticleVector( std::vector< ParticleOffline >& _particles )
 {
   /**
   * Reserve memory for the Particle vector. Due to possible particle creation this size should be chosen somewhat larger
@@ -279,7 +353,7 @@ void miniJets::populateParticleVector( std::vector< Particle >& _particles )
 }
 
 
-void miniJets::populateParticleVector( std::vector< Particle >& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT )
+void miniJets::populateParticleVector( std::vector< ParticleOffline >& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT )
 {
   minimumPT = _minimumPT;
   numberOfParticlesToGenerate = _numberOfParticlesToGenerate;
@@ -288,6 +362,7 @@ void miniJets::populateParticleVector( std::vector< Particle >& _particles, cons
   sampleMomenta( _particles );
   samplePositions( _particles );
 }
+
 
 
 void miniJets::computeWoodSaxonParameters( const config& _config, WoodSaxon& _WoodSaxonParameter )
@@ -328,7 +403,7 @@ void miniJets::computeWoodSaxonParameters( const config& _config, WoodSaxon& _Wo
 
 
 
-void miniJets::sampleMomenta( std::vector< Particle >& _particles )
+void miniJets::sampleMomenta( std::vector< ParticleOffline >& _particles )
 {
   sample_PXY( _particles );
   sample_PZE( _particles );
@@ -338,7 +413,7 @@ void miniJets::sampleMomenta( std::vector< Particle >& _particles )
 
 
 
-void miniJets::samplePositions( std::vector< Particle >& _particles )
+void miniJets::samplePositions( std::vector< ParticleOffline >& _particles )
 {
   sample_T( _particles );
   sample_XYZ( _particles );
@@ -346,7 +421,7 @@ void miniJets::samplePositions( std::vector< Particle >& _particles )
 
 
 
-void miniJets::sample_T( std::vector< Particle >& _particles ) const
+void miniJets::sample_T( std::vector< ParticleOffline >& _particles ) const
 {
   const int ord = 4;
   int nn;
@@ -396,7 +471,7 @@ void miniJets::sample_T( std::vector< Particle >& _particles ) const
 
 
 
-void miniJets::sample_XYZ( std::vector< Particle >& _particles ) const
+void miniJets::sample_XYZ( std::vector< ParticleOffline >& _particles ) const
 {
   double X, Y, Z, T;
   double vt, gv, gvt, tc1, tc2, tc3, xx, bA, bB, zA, zB, fds, fd;
@@ -493,7 +568,7 @@ void miniJets::sample_XYZ( std::vector< Particle >& _particles ) const
 
 
 
-void miniJets::sample_PXY( std::vector< Particle >& _particles ) const
+void miniJets::sample_PXY( std::vector< ParticleOffline >& _particles ) const
 {
   const int ord = 4;
   int count, nn;
@@ -506,13 +581,7 @@ void miniJets::sample_PXY( std::vector< Particle >& _particles ) const
   xx = new double[count];
   yy = new double[count];
 
-  cout << filename_samplingData_PT << endl;
   std::fstream file_samplPT( filename_samplingData_PT.c_str(), std::ios::in );  //samplPT.dat gives PT and cross section for jet between P0 and PT
-  if ( !file_samplPT.good() )
-  {
-    cout << "file_samplePT not good  " << filename_samplingData_PT << endl;
-    system("pwd");
-  }
   for ( int i = 0; i < count; i++ )
   {
     file_samplPT >> xx[i] >> yy[i];
@@ -537,61 +606,56 @@ void miniJets::sample_PXY( std::vector< Particle >& _particles ) const
 
   for ( int index = 0; index < _particles.size(); index += 2 )
   {
-    do
-    {
-      sample_y = ran2(); //a cross section is randomly chosen (within [0,1], i.e. relative to total c.s.)
+    sample_y = ran2(); //a cross section is randomly chosen (within [0,1], i.e. relative to total c.s.)
 
+    nn = 0;
+    while ( yy[++nn] < sample_y );
+    nn = nn - ord / 2;
+
+    if ( nn < 0 )
+    {
       nn = 0;
-      while ( yy[++nn] < sample_y );
+    }
+    else if (( nn + ord - 1 > count - 1 ) || ( yy[nn+ord-1] == 1.0 ) )
+    {
+      while ( yy[++nn] < 1.0 );
+      nn = nn - ord + 1;
+    }
+
+    for ( int j = 1; j <= ord; j++ )
+    {
+      ya[j] = yy[nn+j-1];
+      xa[j] = xx[nn+j-1];
+    }
+
+    //interpolates between the values given in samplPT.dat and returns the PT corresponding to sample_y
+    polint( ya, xa, ord, sample_y, &PT, &dpt );
+
+    //---- for high-pt sample with higher resolution ----
+    if ( PT > xxFine[0] )
+    {
+      sample_y = ran2();
+      nn = 0;
+      while ( yyFine[++nn] < sample_y );
       nn = nn - ord / 2;
 
       if ( nn < 0 )
       {
         nn = 0;
       }
-      else if (( nn + ord - 1 > count - 1 ) || ( yy[nn+ord-1] == 1.0 ) )
+      else if (( nn + ord - 1 > count - 1 ) || ( yyFine[nn+ord-1] == 1.0 ) )
       {
-        while ( yy[++nn] < 1.0 );
+        while ( yyFine[++nn] < 1.0 );
         nn = nn - ord + 1;
       }
-
       for ( int j = 1; j <= ord; j++ )
       {
-        ya[j] = yy[nn+j-1];
-        xa[j] = xx[nn+j-1];
+        ya[j] = yyFine[nn + j-1];
+        xa[j] = xxFine[nn + j-1];
       }
-
-      //interpolates between the values given in samplPT.dat and returns the PT corresponding to sample_y
       polint( ya, xa, ord, sample_y, &PT, &dpt );
-
-      //---- for high-pt sample with higher resolution ----
-      if ( PT > xxFine[0] )
-      {
-        sample_y = ran2();
-        nn = 0;
-        while ( yyFine[++nn] < sample_y );
-        nn = nn - ord / 2;
-
-        if ( nn < 0 )
-        {
-          nn = 0;
-        }
-        else if (( nn + ord - 1 > count - 1 ) || ( yyFine[nn+ord-1] == 1.0 ) )
-        {
-          while ( yyFine[++nn] < 1.0 );
-          nn = nn - ord + 1;
-        }
-        for ( int j = 1; j <= ord; j++ )
-        {
-          ya[j] = yyFine[nn + j-1];
-          xa[j] = xxFine[nn + j-1];
-        }
-        polint( ya, xa, ord, sample_y, &PT, &dpt );
-      }
-      //---------------------------------------------------
-
     }
-    while ( PT < minimumPT );
+    //---------------------------------------------------
 
     theta = 2.0 * M_PI * ran2();
     _particles[index].PX = PT * cos( theta );
@@ -609,7 +673,7 @@ void miniJets::sample_PXY( std::vector< Particle >& _particles ) const
 
 
 
-void miniJets::sample_PZE( std::vector< Particle >& _particles ) const
+void miniJets::sample_PZE( std::vector< ParticleOffline >& _particles ) const
 {
   int count, nn;
   double *xx, *yy;
@@ -695,13 +759,12 @@ void miniJets::sample_PZE( std::vector< Particle >& _particles ) const
     }
     while ( fgs < fg );
 
-
     _particles[index].PZ = 0.5 * PT * ( exp( Y1 ) - exp( -Y1 ) );
     _particles[index+1].PZ = 0.5 * PT * ( exp( Y2 ) - exp( -Y2 ) );
     _particles[index].E = sqrt( pow( _particles[index].PZ, 2 ) + pow( PT, 2 ) );
     _particles[index+1].E = sqrt( pow( _particles[index+1].PZ, 2 ) + pow( PT, 2 ) );
-    _particles[index].m = Particle::getMass( _particles[index].FLAVOR );
-    _particles[index+1].m = Particle::getMass( _particles[index+1].FLAVOR );
+    _particles[index].m = ParticleOffline::getMass( _particles[index].FLAVOR );
+    _particles[index+1].m = ParticleOffline::getMass( _particles[index+1].FLAVOR );
   }
 
   delete[] xx;
@@ -721,7 +784,7 @@ void miniJets::sample_PZE( std::vector< Particle >& _particles ) const
 #define qaqs(t,u) (4./9.*((1.+u*u)/(t*t)+u*u+t*t)-8./27.*u*u/t)
 #define qaqd(t,u) (4./9.*(t*t+u*u))
 
-void miniJets::sample_FLAV( std::vector< Particle >& _particles ) const
+void miniJets::sample_FLAV( std::vector< ParticleOffline >& _particles ) const
 {
   double XT, PT2, Y1, Y2, x1, x2, s, t, u;
   double F1[9], F2[9];
@@ -1103,9 +1166,8 @@ double miniJets::generateTimeDistribution( int& _count )
   ftime.setB( impactParameter );
   ftime.setWoodSaxonParameter( WoodSaxonParameter );
 
-  filename_samplingData_collisionTimes = filename_samplingData_collisionTimes + "_generated";
   std::fstream file_samplT( filename_samplingData_collisionTimes.c_str(), std::ios::out | std::ios::trunc );
-  std::fstream file_tdist( "data/tdist_generated.dat", std::ios::out | std::ios::trunc );
+  std::fstream file_tdist( "data/tdist.dat", std::ios::out | std::ios::trunc );
   file_samplT.precision( 10 );
   file_tdist.precision( 10 );
   string sep = "\t";
@@ -1191,16 +1253,12 @@ double miniJets::generatePtDistribution( int& count, int& count_fine )
   std::list<double> fine;
   std::list<double> finePT;
   double fineStart = 0;
-  
-  filename_samplingData_PT = filename_samplingData_PT + "_generated";
-  filename_samplingData_PT_fine = filename_samplingData_PT_fine + "_generated";
-  filename_samplingData_maximumPT = filename_samplingData_maximumPT + "_generated";
-  
+
   std::ofstream file_samplPT( filename_samplingData_PT.c_str(), std::ios::out | std::ios::trunc );
   std::ofstream file_samplPT_fine( filename_samplingData_PT_fine.c_str(), std::ios::out | std::ios::trunc );
-  std::ofstream file_ptdist( "data/ptdist_generated.dat", std::ios::out | std::ios::trunc );
+  std::ofstream file_ptdist( "data/ptdist.dat", std::ios::out | std::ios::trunc );
   std::ofstream file_maxPT( filename_samplingData_maximumPT.c_str(), std::ios::out | std::ios::trunc );
-  std::ofstream file_maxYPT( "data/maxYPT_generated.dat", std::ios::out | std::ios::trunc );
+  std::ofstream file_maxYPT( "data/maxYPT.dat", std::ios::out | std::ios::trunc );
   file_samplPT.precision( 12 );
   file_ptdist.precision( 12 );
   file_maxPT.precision( 12 );
@@ -1319,8 +1377,6 @@ double integrand_distPT::operator()( const double x[], double wgt ) const
 
   return double( V*csjet( sqrtS, pt, Y1, Y2 ) );
 }
-
-
 
 
 //----------------------------------------------------------//
@@ -1491,15 +1547,4 @@ double miniJets::densityA( double b, double z ) const
 {
   return gamma*n0A / ( exp(( sqrt( b*b + pow( double( gamma*z ), 2.0 ) ) - RA ) / dA ) + 1.0 );
 }
-
-
-double miniJets::densityA( double b, double z, const WoodSaxon& _w )
-{
-  double gamma = _w.gamma;
-  double n0A = _w.n0A;
-  double RA = _w.RA;
-  double dA = _w.dA;
-
-  return gamma*n0A / ( exp(( sqrt( b*b + pow( double( gamma*z ), 2.0 ) ) - RA ) / dA ) + 1.0 );
-}
-// kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;
+// kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;

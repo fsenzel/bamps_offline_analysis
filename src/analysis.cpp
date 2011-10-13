@@ -361,156 +361,79 @@ analysis::~analysis()
   oscarBackground.close();
   oscarJets.close();
   jetTrackerOutput();
-  
-  for ( int j = 0; j < nTimeSteps + 2; j++ )          //+2 because of initial and final timesteps
-  {
-    ptBinsDY1_gluons[j].clear();
-    ptBinsDY2_gluons[j].clear();
-    ptBinsDY3_gluons[j].clear();
-    ptBinsDY4_gluons[j].clear();
-    ptBinsDY5_gluons[j].clear();
-    ptBinsAll_gluons[j].clear();
 
-    ptBinsDY1_quarks[j].clear();
-    ptBinsDY2_quarks[j].clear();
-    ptBinsDY3_quarks[j].clear();
-    ptBinsDY4_quarks[j].clear();
-    ptBinsDY5_quarks[j].clear();
-    ptBinsAll_quarks[j].clear();
-    
-    ptBinsDY1_ups[j].clear();
-    ptBinsDY2_ups[j].clear();
-    ptBinsDY3_ups[j].clear();
-    ptBinsDY4_ups[j].clear();
-    ptBinsDY5_ups[j].clear();
-    ptBinsAll_ups[j].clear();
-    
-    ptBinsDY1_downs[j].clear();
-    ptBinsDY2_downs[j].clear();
-    ptBinsDY3_downs[j].clear();
-    ptBinsDY4_downs[j].clear();
-    ptBinsDY5_downs[j].clear();
-    ptBinsAll_downs[j].clear();
-    
-    ptBinsDY1_stranges[j].clear();
-    ptBinsDY2_stranges[j].clear();
-    ptBinsDY3_stranges[j].clear();
-    ptBinsDY4_stranges[j].clear();
-    ptBinsDY5_stranges[j].clear();
-    ptBinsAll_stranges[j].clear();
-    
-    ptBinsDY1_anti_ups[j].clear();
-    ptBinsDY2_anti_ups[j].clear();
-    ptBinsDY3_anti_ups[j].clear();
-    ptBinsDY4_anti_ups[j].clear();
-    ptBinsDY5_anti_ups[j].clear();
-    ptBinsAll_anti_ups[j].clear();
-    
-    ptBinsDY1_anti_downs[j].clear();
-    ptBinsDY2_anti_downs[j].clear();
-    ptBinsDY3_anti_downs[j].clear();
-    ptBinsDY4_anti_downs[j].clear();
-    ptBinsDY5_anti_downs[j].clear();
-    ptBinsAll_anti_downs[j].clear();
-    
-    ptBinsDY1_anti_stranges[j].clear();
-    ptBinsDY2_anti_stranges[j].clear();
-    ptBinsDY3_anti_stranges[j].clear();
-    ptBinsDY4_anti_stranges[j].clear();
-    ptBinsDY5_anti_stranges[j].clear();
-    ptBinsAll_anti_stranges[j].clear();
+  delete[] ptBinsDY1_gluons;
+  delete[] ptBinsDY2_gluons;
+  delete[] ptBinsDY3_gluons;
+  delete[] ptBinsDY4_gluons;
+  delete[] ptBinsDY5_gluons;
+  delete[] ptBinsAll_gluons;
+  
+  delete[] ptBinsDY1_quarks;
+  delete[] ptBinsDY2_quarks;
+  delete[] ptBinsDY3_quarks;
+  delete[] ptBinsDY4_quarks;
+  delete[] ptBinsDY5_quarks;
+  delete[] ptBinsAll_quarks;
+  
+  delete[] ptBinsDY1_ups;
+  delete[] ptBinsDY2_ups;
+  delete[] ptBinsDY3_ups;
+  delete[] ptBinsDY4_ups;
+  delete[] ptBinsDY5_ups;
+  delete[] ptBinsAll_ups;
+  
+  delete[] ptBinsDY1_downs;
+  delete[] ptBinsDY2_downs;
+  delete[] ptBinsDY3_downs;
+  delete[] ptBinsDY4_downs;
+  delete[] ptBinsDY5_downs;
+  delete[] ptBinsAll_downs;
+  
+  delete[] ptBinsDY1_stranges;
+  delete[] ptBinsDY2_stranges;
+  delete[] ptBinsDY3_stranges;
+  delete[] ptBinsDY4_stranges;
+  delete[] ptBinsDY5_stranges;
+  delete[] ptBinsAll_stranges;
+  
+  delete[] ptBinsDY1_anti_ups;
+  delete[] ptBinsDY2_anti_ups;
+  delete[] ptBinsDY3_anti_ups;
+  delete[] ptBinsDY4_anti_ups;
+  delete[] ptBinsDY5_anti_ups;
+  delete[] ptBinsAll_anti_ups;
+  
+  delete[] ptBinsDY1_anti_downs;
+  delete[] ptBinsDY2_anti_downs;
+  delete[] ptBinsDY3_anti_downs;
+  delete[] ptBinsDY4_anti_downs;
+  delete[] ptBinsDY5_anti_downs;
+  delete[] ptBinsAll_anti_downs;
+  
+  delete[] ptBinsDY1_anti_stranges;
+  delete[] ptBinsDY2_anti_stranges;
+  delete[] ptBinsDY3_anti_stranges;
+  delete[] ptBinsDY4_anti_stranges;
+  delete[] ptBinsDY5_anti_stranges;
+  delete[] ptBinsAll_anti_stranges;
 
-    ptBinsDY1_all[j].clear();
-    ptBinsDY2_all[j].clear();
-    ptBinsDY3_all[j].clear();
-    ptBinsDY4_all[j].clear();
-    ptBinsDY5_all[j].clear();
-    ptBinsAll_all[j].clear();
-    
-    ptBinsSoftAll_gluons[j].clear();
-    ptBinsSoftAll_quarks[j].clear();
-    ptBinsSoftAll_ups[j].clear();
-    ptBinsSoftAll_downs[j].clear();
-    ptBinsSoftAll_stranges[j].clear();
-    ptBinsSoftAll_anti_ups[j].clear();
-    ptBinsSoftAll_anti_downs[j].clear();
-    ptBinsSoftAll_anti_stranges[j].clear();
-    ptBinsSoftAll_all[j].clear();
-  }
-
-
-  delete [] ptBinsDY1_gluons;
-  delete [] ptBinsDY2_gluons;
-  delete [] ptBinsDY3_gluons;
-  delete [] ptBinsDY4_gluons;
-  delete [] ptBinsDY5_gluons;
-  delete [] ptBinsAll_gluons;
+  delete[] ptBinsDY1_all;
+  delete[] ptBinsDY2_all;
+  delete[] ptBinsDY3_all;
+  delete[] ptBinsDY4_all;
+  delete[] ptBinsDY5_all;
+  delete[] ptBinsAll_all;
   
-  delete [] ptBinsDY1_quarks;
-  delete [] ptBinsDY2_quarks;
-  delete [] ptBinsDY3_quarks;
-  delete [] ptBinsDY4_quarks;
-  delete [] ptBinsDY5_quarks;
-  delete [] ptBinsAll_quarks;
-  
-  delete [] ptBinsDY1_ups;
-  delete [] ptBinsDY2_ups;
-  delete [] ptBinsDY3_ups;
-  delete [] ptBinsDY4_ups;
-  delete [] ptBinsDY5_ups;
-  delete [] ptBinsAll_ups;
-  
-  delete [] ptBinsDY1_downs;
-  delete [] ptBinsDY2_downs;
-  delete [] ptBinsDY3_downs;
-  delete [] ptBinsDY4_downs;
-  delete [] ptBinsDY5_downs;
-  delete [] ptBinsAll_downs;
-  
-  delete [] ptBinsDY1_stranges;
-  delete [] ptBinsDY2_stranges;
-  delete [] ptBinsDY3_stranges;
-  delete [] ptBinsDY4_stranges;
-  delete [] ptBinsDY5_stranges;
-  delete [] ptBinsAll_stranges;
-  
-  delete [] ptBinsDY1_anti_ups;
-  delete [] ptBinsDY2_anti_ups;
-  delete [] ptBinsDY3_anti_ups;
-  delete [] ptBinsDY4_anti_ups;
-  delete [] ptBinsDY5_anti_ups;
-  delete [] ptBinsAll_anti_ups;
-  
-  delete [] ptBinsDY1_anti_downs;
-  delete [] ptBinsDY2_anti_downs;
-  delete [] ptBinsDY3_anti_downs;
-  delete [] ptBinsDY4_anti_downs;
-  delete [] ptBinsDY5_anti_downs;
-  delete [] ptBinsAll_anti_downs;
-  
-  delete [] ptBinsDY1_anti_stranges;
-  delete [] ptBinsDY2_anti_stranges;
-  delete [] ptBinsDY3_anti_stranges;
-  delete [] ptBinsDY4_anti_stranges;
-  delete [] ptBinsDY5_anti_stranges;
-  delete [] ptBinsAll_anti_stranges;
-
-  delete [] ptBinsDY1_all;
-  delete [] ptBinsDY2_all;
-  delete [] ptBinsDY3_all;
-  delete [] ptBinsDY4_all;
-  delete [] ptBinsDY5_all;
-  delete [] ptBinsAll_all;
-  
-  delete [] ptBinsSoftAll_gluons;
-  delete [] ptBinsSoftAll_quarks;
-  delete [] ptBinsSoftAll_ups;
-  delete [] ptBinsSoftAll_downs;
-  delete [] ptBinsSoftAll_stranges;
-  delete [] ptBinsSoftAll_anti_ups;
-  delete [] ptBinsSoftAll_anti_downs;
-  delete [] ptBinsSoftAll_anti_stranges;
-  delete [] ptBinsSoftAll_all;
+  delete[] ptBinsSoftAll_gluons;
+  delete[] ptBinsSoftAll_quarks;
+  delete[] ptBinsSoftAll_ups;
+  delete[] ptBinsSoftAll_downs;
+  delete[] ptBinsSoftAll_stranges;
+  delete[] ptBinsSoftAll_anti_ups;
+  delete[] ptBinsSoftAll_anti_downs;
+  delete[] ptBinsSoftAll_anti_stranges;
+  delete[] ptBinsSoftAll_all;
 }
 
 
@@ -518,10 +441,10 @@ analysis::~analysis()
 void analysis::collectPtDataInitial()
 {
   ptDistribution( gluon, addedParticles, numberAdded, 0 );
-  ptDistribution( quark, addedParticles, numberAdded, 0 );
+  ptDistribution( light_quark, addedParticles, numberAdded, 0 );
   ptDistribution( allFlavors, addedParticles, numberAdded, 0 );
   ptSoftDistribution( gluon, particles, number, 0 );
-  ptSoftDistribution( quark, particles, number, 0 );
+  ptSoftDistribution( light_quark, particles, number, 0 );
   ptSoftDistribution( allFlavors, particles, number, 0 );
 }
 
@@ -532,10 +455,10 @@ void analysis::collectPtData( const int step )
   //are issued starting with 0
   //0 is reserved for initial output, thus step is incremented
   ptDistribution( gluon, addedParticles, numberAdded, step + 1 );
-  ptDistribution( quark, addedParticles, numberAdded, step + 1 );
+  ptDistribution( light_quark, addedParticles, numberAdded, step + 1 );
   ptDistribution( allFlavors, addedParticles, numberAdded, step + 1 );
   ptSoftDistribution( gluon, particles, number, step + 1 );
-  ptSoftDistribution( quark, particles, number, step + 1 );
+  ptSoftDistribution( light_quark, particles, number, step + 1 );
   ptSoftDistribution( allFlavors, particles, number, step + 1 );
 }
 
@@ -571,8 +494,8 @@ void analysis::collectEtData( const int step )
   //are issued starting with 0
   //0 is reserved for initial output, thus step is incremented
   transverseEnergyDistribution( gluon, particles, number, step + 1 );
-  transverseEnergyDistribution( quark, particles, number, step + 1 );
-  transverseEnergyDistribution( anti_quark, particles, number, step + 1 );
+  transverseEnergyDistribution( light_quark, particles, number, step + 1 );
+  transverseEnergyDistribution( anti_light_quark, particles, number, step + 1 );
 }
 
 
@@ -606,10 +529,10 @@ void analysis::finalOutput( const double _stoptime )
   onePartclCorrelations();
   twoPartclCorrelations();
   printPtSpectra( gluon );
-  printPtSpectra( quark );
+  printPtSpectra( light_quark );
   printPtSpectra( allFlavors );
   printSoftPtSpectra( gluon );
-  printSoftPtSpectra( quark );
+  printSoftPtSpectra( light_quark );
   printSoftPtSpectra( allFlavors );
   
   particleOutput( nTimeSteps );
@@ -746,7 +669,7 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
     _ptBinsDY2 = ptBinsDY2_gluons;
     _ptBinsDY1 = ptBinsDY1_gluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _ptBinsAll = ptBinsAll_quarks;
     _ptBinsDY5 = ptBinsDY5_quarks;
@@ -829,7 +752,7 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   {
     type = "gluon";
   }
-  else if ( _flavTypeToComputeFor == quark || _flavTypeToComputeFor == anti_quark )
+  else if ( _flavTypeToComputeFor == light_quark || _flavTypeToComputeFor == anti_light_quark )
   {
     type = "quark";
   }
@@ -993,7 +916,7 @@ void analysis::printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   {
     _ptBinsSoftAll = ptBinsSoftAll_gluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _ptBinsSoftAll = ptBinsSoftAll_quarks;
   }
@@ -1036,7 +959,7 @@ void analysis::printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   {
     type = "gluon";
   }
-  else if ( _flavTypeToComputeFor == quark || _flavTypeToComputeFor == anti_quark )
+  else if ( _flavTypeToComputeFor == light_quark || _flavTypeToComputeFor == anti_light_quark )
   {
     type = "quark";
   }
@@ -1517,10 +1440,10 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   theV2RAA.computeFor( anti_up, particles_atTimeNow, number, "background", _outputTime, v2background );
   theV2RAA.computeFor( anti_down, particles_atTimeNow, number, "background", _outputTime, v2background );
   theV2RAA.computeFor( anti_strange, particles_atTimeNow, number, "background", _outputTime, v2background );
-  theV2RAA.computeFor( quark, particles_atTimeNow, number, "background", _outputTime, v2background );
+  theV2RAA.computeFor( light_quark, particles_atTimeNow, number, "background", _outputTime, v2background );
   
   theV2RAA.computeFor( gluon, addedParticles, numberAdded, "jets", _outputTime, v2jets );
-  theV2RAA.computeFor( quark, addedParticles, numberAdded, "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( light_quark, addedParticles, numberAdded, "jets", _outputTime, v2jets );
   theV2RAA.computeFor( up, addedParticles, numberAdded, "jets", _outputTime, v2jets );
   theV2RAA.computeFor( down, addedParticles, numberAdded, "jets", _outputTime, v2jets );
   theV2RAA.computeFor( strange, addedParticles, numberAdded, "jets", _outputTime, v2jets );
@@ -1548,7 +1471,7 @@ v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg ):
 
 
 
-void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, string additionalNameTag, const double _outputTime, const v2Type _v2type )
+void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, string additionalNameTag, const double _outputTime, const v2Type _v2type )
 {
   double eta, pp, pt, v2, xt;
   double sinAlpha, alpha;
@@ -1565,7 +1488,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     n_bins = n_g;
     type = "gluon";
   }
-  else if ( _flavTypeToComputeFor == quark || _flavTypeToComputeFor == anti_quark )
+  else if ( _flavTypeToComputeFor == light_quark || _flavTypeToComputeFor == anti_light_quark )
   {
     n_bins = n_g;
     type = "quark";
@@ -1679,7 +1602,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
 
     if (( pt <= _pt_max && pt >= _pt_min ) &&  
       ( _flavTypeToComputeFor == flavor || 
-      ( _flavTypeToComputeFor == Particle::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) ) ) ) )
+      ( _flavTypeToComputeFor == ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) ) ) ) )
     {
       if ( fabs( eta ) <= 2.0 )
       {
@@ -2021,330 +1944,7 @@ void analysis::volumeMidrap( const int step ) const
 }
 
 
-
-
-// extern ofstream printdens0;
-// // velosity, density, energy density, temperature, fugacity,
-// // entropy, special average of particle energy in Landau Frame
-// // transverse energy |y|< 0.5
-// void density( const double stoptime, coord *partcls, const int ng )
-// {
-//   const int circle = 10;
-//   const double radius = 1.5;//fm
-//   const double dr = 1.0;//fm
-//   const double deta = 0.4;
-//   int nc;
-//   double eta, xt, Pr, c, c1, e1;
-//   double v[circle], nm[circle], densn[circle], vt_e[circle], vt_l[circle];
-//   double T00[circle], Trr[circle], T0r[circle];
-//   double dense[circle], temp[circle], fuga[circle], s[circle];
-//   double pze2[circle], pze2_f[circle], e_sp[circle];
-//   double vz[circle];
-//   const double du = 0.1;
-//   const int nu = int( 2.0 / 0.1 );
-//   int np;
-//   double gama, pv, pz1, sum1, sum2;
-//   double disn[nu], dise[nu];
-//   double rap, et, net;
-//
-//   static bool first = true;
-//
-// //   ofstream print("dist2.dat");
-//
-//   for ( int i = 0;i < nu;i++ ) disn[i] = dise[i] = 0.0;
-//
-//   for ( int j = 0;j < circle;j++ )
-//   {
-//     nm[j] = densn[j] = vt_e[j] = vt_l[j] = 0.0;
-//     T00[j] = Trr[j] = T0r[j] = 0.0;
-//     dense[j] = temp[j] = fuga[j] = s[j] = 0.0;
-//     e_sp[j] = pze2[j] = pze2_f[j] = 0.0;
-//     vz[j] = 0.0;
-//   }
-//
-//   v[0] = M_PI * radius * radius * stoptime * 2.0 * tanh( deta / 2.0 );//fm^3
-//   c = v[0];
-//   for ( int j = 1;j < circle;j++ )
-//   {
-//     v[j] = M_PI * ( radius + j * dr ) * ( radius + j * dr ) * stoptime * 2.0 * tanh( deta / 2.0 ) - c;//fm^3
-//     c = c + v[j];
-//   }
-//
-//   for ( int i = 1;i <= ng;i++ )
-//   {
-//     if ( !partcls[i].init )
-//     {
-//       eta = 0.5 * log(( partcls[i].T + partcls[i].Z ) / ( partcls[i].T - partcls[i].Z ) );
-//
-//       if ( fabs( eta ) < deta / 2.0 )
-//       {
-//         xt = sqrt( partcls[i].X * partcls[i].X + partcls[i].Y * partcls[i].Y );//fm
-//         if ( xt < radius ) nc = 0;
-//         else nc = int(( xt - radius ) / dr ) + 1;
-//
-//         if ( nc < circle )
-//         {
-//           Pr = ( partcls[i].X * partcls[i].PX + partcls[i].Y * partcls[i].PY ) / xt;//GeV
-//
-//           nm[nc] += 1.0;
-//           vt_e[nc] += Pr / partcls[i].E;
-//           if ( eta > 0.0 ) vz[nc] += partcls[i].PZ / partcls[i].E;
-//           else vz[nc] += -partcls[i].PZ / partcls[i].E;
-//           pze2_f[nc] += partcls[i].PZ * partcls[i].PZ / partcls[i].E / partcls[i].E;
-//
-//           T00[nc] += partcls[i].E;//GeV
-//           Trr[nc] += Pr * Pr / partcls[i].E;//GeV
-//           T0r[nc] += Pr;//GeV
-//         }
-//       }
-//     }
-//   }
-//
-//   for ( int j = 0;j < circle;j++ )
-//   {
-//     if ( nm[j] > 0.0 )
-//     {
-//       pze2_f[j] = pze2_f[j] / nm[j];
-//
-//       c = T00[j] - Trr[j];
-//       c1 = T0r[j] * T0r[j] - T00[j] * Trr[j];
-//
-//       dense[j] = ( c + sqrt( c * c - 4.0 * c1 ) ) / 2.0 / theConfig->getTestparticles() / v[j];//GeV/fm^3
-//       vt_l[j] = ( T00[j] - ( c + sqrt( c * c - 4.0 * c1 ) ) / 2.0 ) / T0r[j];
-//       c = vt_e[j];
-//       vt_e[j] = vt_e[j] / nm[j];
-//       vz[j] = vz[j] / nm[j];
-//       densn[j] = ( nm[j] - c * vt_l[j] ) / theConfig->getTestparticles() / v[j] / sqrt( 1.0 - vt_l[j] * vt_l[j] );
-//       //1/fm^3
-//       temp[j] = dense[j] / ( 3.0 * densn[j] );//GeV
-// //       fuga[j]=0.007684*densn[j]*M_PI*M_PI/16.0/pow(temp[j],3);
-//       fuga[j] = 0.007684 * densn[j] * pow( M_PI, 2 ) / 40.0 / pow( temp[j], 3 );
-// //       s[j]=16.0/M_PI/M_PI*pow(temp[j],3)*(4.0*fuga[j]-fuga[j]*log(fuga[j]));//GeV^3
-//       s[j] = 40.0 / M_PI / M_PI * pow( temp[j], 3 ) * ( 4.0 * fuga[j] - fuga[j] * log( fuga[j] ) );//GeV^3
-//     }
-//   }
-//
-//   sum1 = 0.0;
-//   for ( int i = 1;i <= ng;i++ )
-//   {
-//     if ( !partcls[i].init )
-//     {
-//       eta = 0.5 * log(( partcls[i].T + partcls[i].Z ) / ( partcls[i].T - partcls[i].Z ) );
-//
-//       if ( fabs( eta ) < deta / 2.0 )
-//       {
-//         xt = sqrt( partcls[i].X * partcls[i].X + partcls[i].Y * partcls[i].Y );//fm
-//         if ( xt < radius ) nc = 0;
-//         else nc = int(( xt - radius ) / dr ) + 1;
-//
-//         if ( nc < circle )
-//         {
-//           Pr = ( partcls[i].X * partcls[i].PX + partcls[i].Y * partcls[i].PY ) / xt;//GeV
-// //      e1=(partcls[i].E-Pr*vt_l[nc])/sqrt(1.0-vt_l[nc]*vt_l[nc]);//GeV
-//           gama = 1.0 / sqrt( 1.0 - vt_l[nc] * vt_l[nc] - vz[nc] * vz[nc] );
-//           if ( eta > 0.0 )
-//           {
-//             pv = Pr * vt_l[nc] + partcls[i].PZ * vz[nc];//GeV
-//             pz1 = partcls[i].PZ + gama * gama / ( gama + 1.0 ) * vz[nc] * pv -
-//                   gama * vz[nc] * partcls[i].E;
-//           }
-//           else
-//           {
-//             pv = Pr * vt_l[nc] - partcls[i].PZ * vz[nc];//GeV
-//             pz1 = partcls[i].PZ - gama * gama / ( gama + 1.0 ) * vz[nc] * pv +
-//                   gama * vz[nc] * partcls[i].E;
-//           }
-//           e1 = gama * ( partcls[i].E-pv );//GeV
-//
-// //  c=partcls[i].PZ*partcls[i].PZ/e1/e1;
-//           c = pz1 * pz1 / e1 / e1;
-//           pze2[nc] += c;
-//           e_sp[nc] += e1 * ( 1.0 / 3.0 - c );//GeV
-//
-//           if ( nc == 0 )
-//           {
-// //    c=partcls[i].PZ/e1;
-//             c = pz1 / e1;
-//             np = int(( c + 1.0 ) / du );
-//             if (( np >= 0 ) && ( np < nu ) )
-//             {
-// //      disn[np] += 1.0;
-// //      dise[np] += e1;
-//             }
-//             sum1 += e1;
-//           }
-//         }
-//       }
-//     }
-//   }
-//
-//   for ( int j = 0;j < circle;j++ )
-//   {
-//     if ( nm[j] > 0.0 )
-//     {
-//       pze2[j] = pze2[j] / nm[j];
-//       e_sp[j] = e_sp[j] / nm[j] / ( 1.0 / 3.0 - pze2[j] );
-//     }
-//   }
-//
-//   temp[0] = sum1 / nm[0] / 3.0;
-//   dense[0] = sum1 / v[0] / theConfig->getTestparticles() / sqrt( 1.0 - vt_l[0] * vt_l[0] - vz[0] * vz[0] );//GeV/fm^3
-//   densn[0] = nm[0] / v[0] / theConfig->getTestparticles() / sqrt( 1.0 - vt_l[0] * vt_l[0] - vz[0] * vz[0] );//1/fm^3
-// //   fuga[0]=0.007684*densn[0]*M_PI*M_PI/16.0/pow(temp[0],3);
-//   fuga[0] = 0.007684 * densn[0] * pow( M_PI, 2 ) / 40.0 / pow( temp[0], 3 );
-// //   s[0]=16.0/M_PI/M_PI*pow(temp[0],3)*(4.0*fuga[0]-fuga[0]*log(fuga[0]));//GeV^3
-//   s[0] = 40.0 / M_PI / M_PI * pow( temp[0], 3 ) * ( 4.0 * fuga[0] - fuga[0] * log( fuga[0] ) );//GeV^3
-//
-// //   cout << sum1/nm[0] << "\t" << temp[0] << endl;
-//
-// //   sum1=sum2=0.0;
-// //   c=-1.0+du/2.0;
-// //   for(int i=0;i<nu;i++){
-// //     print.width(15);
-// //     print << c;
-// //     print.width(15);
-// //     print << disn[i]/nm[0]/du;
-// //     print.width(15);
-// //     print << dise[i]/nm[0]/du/temp[0] << endl;
-//
-// //     sum1 += (1.0/3.0-c*c)*disn[i];
-// //     sum2 += (1.0/3.0-c*c)*dise[i];
-//
-// //     c += du;
-// //   }
-// //   cout << sum1/nm[0] << "\t" << sum2/nm[0]/temp[0] << "\t";
-// //   cout << sum2/temp[0]/sum1 << endl;
-//
-//   et = net = 0.0;
-//   for ( int i = 1;i <= ng;i++ )
-//   {
-//     rap = 0.5 * log(( partcls[i].E+partcls[i].PZ ) / ( partcls[i].E-partcls[i].PZ ) );
-//
-//     if ( fabs( rap ) < 1.0 )
-//     {
-//       net += 1.0;
-//       et += sqrt( partcls[i].PX * partcls[i].PX +
-//                   partcls[i].PY * partcls[i].PY );
-//     }
-//   }
-//
-// //   printdens0.width(15);
-// //   printdens0 << stoptime;
-// //   printdens0.width(15);
-// //   printdens0 << nm[0];
-// //   printdens0.width(15);
-// //   printdens0 << nm[1];
-// //   printdens0.width(15);
-// //   printdens0 << nm[2];
-// //   printdens0.width(15);
-// //   printdens0 << nm[3];
-// //   printdens0.width(15);
-// //   printdens0 << nm[4];
-// //   printdens0.width(15);
-// //   printdens0 << nm[5];
-// //   printdens0.width(15);
-// //   printdens0 << pze2[0];
-// //   printdens0.width(15);
-// //   printdens0 << pze2[1];
-// //   printdens0.width(15);
-// //   printdens0 << pze2[2];
-// //   printdens0.width(15);
-// //   printdens0 << pze2[3];
-// //   printdens0.width(15);
-// //   printdens0 << pze2[4];
-// //   printdens0.width(15);
-// //   printdens0 << pze2[5] << endl;
-//
-// //   if(first)
-// //   {
-// //     printdens0 << "#";
-// //     printdens0.width(14);
-// //     printdens0 << "time";
-// //     printdens0.width(15);
-// //     printdens0 << "nm[0]";
-// //     printdens0.width(15);
-// //     printdens0 << "densn[0]";//1/fm^3
-// //     printdens0.width(15);
-// //     printdens0 << "dense[0]";//GeV/fm^3
-// //     printdens0.width(15);
-// //     printdens0 << "vt_l[0]";
-// //     printdens0.width(15);
-// //     printdens0 << "vt_e[0]";
-// //     printdens0.width(15);
-// //     printdens0 << "vz[0]";
-// //     printdens0.width(15);
-// //     printdens0 << "temp[0]";//GeV
-// //     printdens0.width(15);
-// //     printdens0 << "fuga[0]";
-// //     printdens0.width(15);
-// //     printdens0 << "s[0]";//GeV^3
-// //     printdens0.width(15);
-// //     printdens0 << "pze2_f[0]";
-// //     printdens0.width(15);
-// //     printdens0 << "pze2[0]";
-// //     printdens0.width(15);
-// //     printdens0 << "et/2.0/theConfig->getTestparticles()";//GeV
-// //     printdens0.width(15);
-// //     printdens0 << "net/2.0/theConfig->getTestparticles()";
-// //     printdens0.width(15);
-// //     printdens0 << "e_sp[0]" << endl;//GeV
-// //     first = false;
-// //   }
-// //   printdens0.width(15);
-// //   printdens0 << stoptime;
-// //   printdens0.width(15);
-// //   printdens0 << nm[0];
-// //   printdens0.width(15);
-// //   printdens0 << densn[0];//1/fm^3
-// //   printdens0.width(15);
-// //   printdens0 << dense[0];//GeV/fm^3
-// //   printdens0.width(15);
-// //   printdens0 << vt_l[0];
-// //   printdens0.width(15);
-// //   printdens0 << vt_e[0];
-// //   printdens0.width(15);
-// //   printdens0 << vz[0];
-// //   printdens0.width(15);
-// //   printdens0 << temp[0];//GeV
-// //   printdens0.width(15);
-// //   printdens0 << fuga[0];
-// //   printdens0.width(15);
-// //   printdens0 << s[0];//GeV^3
-// //   printdens0.width(15);
-// //   printdens0 << pze2_f[0];
-// //   printdens0.width(15);
-// //   printdens0 << pze2[0];
-// //   printdens0.width(15);
-// //   printdens0 << et/2.0/theConfig->getTestparticles();//GeV
-// //   printdens0.width(15);
-// //   printdens0 << net/2.0/theConfig->getTestparticles();
-// //   printdens0.width(15);
-// //   printdens0 << e_sp[0] << endl;//GeV
-//
-//
-// //   if(first)
-// //   {
-// //     printdens0 << "#";
-// //     printdens0.width(14);
-// //     printdens0 << "time";
-// //     printdens0.width(15);
-// //     printdens0 << "energy density in circle 0,1,..." << endl;//GeV
-// //     first = false;
-// //   }
-// //   printdens0.width(15);
-// //   printdens0 << stoptime;
-// //   for(int j=0;j<circle;j++)
-// //   {
-// //     printdens0.width(15);
-// //     printdens0 << dense[j];
-// //   }
-// //   printdens0 << endl;//GeV
-//
-//
-// }
-
-
-void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, const int step )
+void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
 {
   double pt, y;
   vector<double> * _ptBinsAll;
@@ -2363,7 +1963,7 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
     _ptBinsDY2 = ptBinsDY2_gluons;
     _ptBinsDY1 = ptBinsDY1_gluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _ptBinsAll = ptBinsAll_quarks;
     _ptBinsDY5 = ptBinsDY5_quarks;
@@ -2448,9 +2048,9 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
     pt = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
     y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
 
-    genFlavor = Particle::mapToGenericFlavorType( _particles[j].FLAVOR );
+    genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
     if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
-      ( _flavTypeToComputeFor == quark && ( genFlavor == quark || genFlavor == anti_quark ) ) )
+      ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
       //------------------------ y in [-inf,inf] -----------------------
       if ( pt <= maxPT && pt >= minPT )
@@ -2561,7 +2161,7 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
 
 
 
-void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, const int step )
+void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
 {
   double pt;
 
@@ -2571,7 +2171,7 @@ void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vect
   {
     _ptBinsSoftAll = ptBinsSoftAll_gluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _ptBinsSoftAll = ptBinsSoftAll_quarks;
   }
@@ -2614,9 +2214,9 @@ void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vect
   {
     pt = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
 
-    genFlavor = Particle::mapToGenericFlavorType( _particles[j].FLAVOR );
+    genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
     if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
-      ( _flavTypeToComputeFor == quark && ( genFlavor == quark || genFlavor == anti_quark ) ) )
+      ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
       //------------------------ y in [-inf,inf] -----------------------
       if ( pt <= maxPTSoft && pt >= 0 )
@@ -2640,7 +2240,7 @@ void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vect
 
 
 
-void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, const int step )
+void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
 {
   double y;
   vector<double> * _yBins;
@@ -2708,7 +2308,7 @@ void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Pa
 
 
 
-void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle>& _particles, const int n_particles, const int step )
+void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
 {
   double Et, y;
   vector<double> * _EtBins;
@@ -2717,11 +2317,11 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
   {
     _EtBins = transverseEnergyGluons;
   }
-  else if ( _flavTypeToComputeFor == quark )
+  else if ( _flavTypeToComputeFor == light_quark )
   {
     _EtBins = transverseEnergyQuarks;
   }
-  else if ( _flavTypeToComputeFor == anti_quark )
+  else if ( _flavTypeToComputeFor == anti_light_quark )
   {
     _EtBins = transverseEnergyAntiQuarks;
   }
@@ -2736,7 +2336,7 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
     Et = sqrt( pow( _particles[j].PX, 2) + pow( _particles[j].PY, 2) );
     y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
     
-    if ( Particle::mapToGenericFlavorType( _particles[j].FLAVOR ) == _flavTypeToComputeFor )
+    if ( ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR ) == _flavTypeToComputeFor )
     {
       if ( y <= maxY && y >= minY)
       {
@@ -3078,7 +2678,7 @@ void analysis::particleOutput( const int step )
 
 
 
-void analysis::writePartclMovie( vector< Particle >& _particles, const int n_particles, fstream& _oscar, const int step, const int jumpSteps )
+void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const int n_particles, fstream& _oscar, const int step, const int jumpSteps )
 {
   const string sep = "  ";
   const int width = 14;
@@ -3173,7 +2773,7 @@ void analysis::writePartclMovie( vector< Particle >& _particles, const int n_par
         else // write particle to file
         {
           _oscar << ::std::setw( 11 ) << i+1;
-          _oscar << ::std::setw( 12 ) << Particle::mapToPDGCodes( _particles[i].FLAVOR ); //PDG group codes
+          _oscar << ::std::setw( 12 ) << ParticleOffline::mapToPDGCodes( _particles[i].FLAVOR ); //PDG group codes
           nCount_selected = 1;
 
           _oscar << ::std::scientific << ::std::uppercase << ::std::setprecision( 6 )
@@ -3571,7 +3171,7 @@ int analysisRingStructure::getIndexPure( const double _xt ) const
 
 
 
-int analysisRingStructure::getIndex( const Particle& _particle ) const
+int analysisRingStructure::getIndex( const ParticleOffline& _particle ) const
 {
   double xt = sqrt( pow( _particle.X, 2 ) + pow( _particle.Y, 2 ) );
   

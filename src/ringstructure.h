@@ -39,19 +39,19 @@ public:
   
   int getIndex( const double _xt ) const;
   int getIndexPure( const double _xt ) const;
-  int getIndex( const Particle& _particle ) const;
+  int getIndex( const ParticleOffline& _particle ) const;
   int size() const { return numberOfRings; }
   double getCentralRadius() const { return centralRingRadius; }
   double getDeltaR() const { return deltaR; }
   
   void clear();  
   
-  void addParticle( const double _xt, const Particle& _particle );
-  void addParticle( const Particle& _particle );
-  void addParticleInFormGeom( const double _xt, const Particle& _particle, const double _time ) { rings[ getIndex( _xt ) ].addParticleInFormGeom( _particle, _time ); }
-  void addParticleInFormGeom( const Particle& _particle, const double _time ) { rings[ getIndex( _particle ) ].addParticleInFormGeom( _particle, _time ); }
-  void addRates( const double _xt, const Particle& _particle );
-  void addRates( const Particle& _particle );
+  void addParticle( const double _xt, const ParticleOffline& _particle );
+  void addParticle( const ParticleOffline& _particle );
+  void addParticleInFormGeom( const double _xt, const ParticleOffline& _particle, const double _time ) { rings[ getIndex( _xt ) ].addParticleInFormGeom( _particle, _time ); }
+  void addParticleInFormGeom( const ParticleOffline& _particle, const double _time ) { rings[ getIndex( _particle ) ].addParticleInFormGeom( _particle, _time ); }
+  void addRates( const double _xt, const ParticleOffline& _particle );
+  void addRates( const ParticleOffline& _particle );
   
   void prepareAverages( const double _dz, const int _Ntest );
   

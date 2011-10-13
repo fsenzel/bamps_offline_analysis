@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL$
-//$LastChangedDate$
-//$LastChangedRevision$
-//$LastChangedBy$
+//$HeadURL: file:///home/bamps/svn/full/branches/restructureOutput/src/initialdistribution.h $
+//$LastChangedDate: 2011-07-12 17:55:28 +0200 (Tue, 12 Jul 2011) $
+//$LastChangedRevision: 2 $
+//$LastChangedBy: fochler $
 //---------------------------------------------
 //---------------------------------------------
 
@@ -20,20 +20,19 @@
 #include "particle.h"
 #include "woodsaxon.h"
 
+// enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState };
 
-class additionalParticlesDistribution
+
+class initialDistribution
 {
 public:
-  additionalParticlesDistribution( const config*const _config, const INITIAL_STATE_TYPE _initialStateType = miniJetsInitialState );
-  ~additionalParticlesDistribution() {};
+  initialDistribution( const config* const _config, const INITIAL_STATE_TYPE _initialStateType = miniJetsInitialState );
+  ~initialDistribution() {};
 
   void populateParticleVector( std::vector< ParticleOffline >& _particles, WoodSaxon& _wsParameter );
-  void prepareParticles( std::vector< ParticleOffline >& _particles );
- 
+  
 
 private:
-  int numberOfParticlesToAdd;
-  double minimumPT;
   const config * const configObject;
   WoodSaxon WoodSaxonParameter;
   double A;          //mass number of nucleus A

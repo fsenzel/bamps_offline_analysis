@@ -158,7 +158,7 @@ void cellContainer::prepareAverages()
 
 
 
-void cellContainer::writeAveragesToParticle( Particle& _particle ) const
+void cellContainer::writeAveragesToParticle( ParticleOffline& _particle ) const
 {
   if ( !averagesPrepared )
   {

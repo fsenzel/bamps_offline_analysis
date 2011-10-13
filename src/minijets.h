@@ -15,12 +15,13 @@
 #include <vector>
 #include <string>
 
+#include "initialstatemodel.h"
 #include "configuration.h"
 #include "particle.h"
 #include "vegas.h"
 #include "woodsaxon.h"
-#include "initialstatemodel.h"
 #include "integrand_time.h"
+
 
 
 
@@ -30,26 +31,23 @@ class miniJets : public initialStateModel
     miniJets( const config& _config, WoodSaxon& _WoodSaxonParameter, STORED_TABLE_USAGE _storedTableUsage = computeNewTables );
     ~miniJets() {};
     
-    void populateParticleVector( std::vector<Particle>& _particles );
-    void populateParticleVector( std::vector<Particle>& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT );
-    
-    /** @brief nuclear density (Woods-Saxon distribution) static version */
-    static double densityA(double b, double z, const WoodSaxon& _w);   
+    void populateParticleVector( std::vector<ParticleOffline>& _particles );
+    void populateParticleVector( std::vector<ParticleOffline>& _particles, const int _numberOfParticlesToGenerate, const double _minimumPT );
         
   private:
-    void samplePositions( std::vector<Particle>& _particles );
-    void sampleMomenta( std::vector<Particle>& _particles );
+    void samplePositions( std::vector<ParticleOffline>& _particles );
+    void sampleMomenta( std::vector<ParticleOffline>& _particles );
     /** @brief PT-sampling according to the calculated d(sigma)/d(PT) => PX, PY */
-    void sample_PXY( std::vector<Particle>& _particles ) const;
+    void sample_PXY( std::vector<ParticleOffline>& _particles ) const;
     /** @brief Sampling of Y1 and Y2 at given PT => PZ, E */
-    void sample_PZE( std::vector<Particle>& _particles ) const;
+    void sample_PZE( std::vector<ParticleOffline>& _particles ) const;
     /** @brief sampling of the flavors of the parton pair at given PT,Y1 and Y2 */
-    void sample_FLAV( std::vector<Particle>& _particles ) const;
+    void sample_FLAV( std::vector<ParticleOffline>& _particles ) const;
     
     /** @brief sampling of the collision times */
-    void sample_T( std::vector<Particle>& _particles ) const;
+    void sample_T( std::vector<ParticleOffline>& _particles ) const;
     /** @brief sampling of the positions of the parton pair at the given time */
-    void sample_XYZ( std::vector<Particle>& _particles ) const;
+    void sample_XYZ( std::vector<ParticleOffline>& _particles ) const;
     
     void computeWoodSaxonParameters( const config& _config, WoodSaxon& _WoodSaxonParameter );
     void generateSamplingDataSets();
@@ -64,7 +62,6 @@ class miniJets : public initialStateModel
         
     /** @brief interpolation routine */
     void polint( const double xa[], const double ya[], const int n, const double x, double *y, double *dy ) const;
-    
     void setDataFilesProperties( const config& _config, STORED_TABLE_USAGE _storedTableUsage );
     
     /** @brief mass number of nucleus A */
@@ -81,7 +78,6 @@ class miniJets : public initialStateModel
     double P0;
     int numberOfTestparticles;
     
-    /** @brief minimum PT to be sampled (GeV) */
     double minimumPT;
     
     double gamma;
@@ -103,7 +99,6 @@ class miniJets : public initialStateModel
     std::string filename_samplingData_PT_fine;
     std::string filename_samplingData_maximumPT;
 };
-
 
 
 
