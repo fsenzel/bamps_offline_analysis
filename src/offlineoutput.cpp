@@ -2,8 +2,8 @@
 //provided by subversion
 //---------------------------------------------
 //$HeadURL: file:///home/bamps/svn/full/branches/restructureOutput/src/offlineoutput.cpp $
-//$LastChangedDate: 2011-08-25 16:15:11 +0200 (Thu, 25 Aug 2011) $
-//$LastChangedRevision: 104 $
+//$LastChangedDate: 2011-09-30 15:00:38 +0200 (Fri, 30 Sep 2011) $
+//$LastChangedRevision: 177 $
 //$LastChangedBy: fochler $
 //---------------------------------------------
 //---------------------------------------------
@@ -85,7 +85,7 @@ void offlineOutputInterface::submitOfflineDataForOutput( const offlineDataGeneri
   // the actual output
   (*archive) & _data;
 }
-         
+
 
 void offlineOutputInterface::registerOfflineDataForTemporaryStorage(const offlineEventType _eventType, tConstPointerToOfflineData _data)
 {
@@ -98,7 +98,16 @@ void offlineOutputInterface::outputAndResetTemporaryStorage()
 {
   for ( tTemporaryDataStorage::const_iterator it = temporaryStorage.begin(); it != temporaryStorage.end(); it++ )
   {
-    this->submitOfflineDataForOutput( (*it).get() ); //submit a pointer to the object stored at the iterator it
+    //check whether the given data is actually just an offlineEventType and give it some special treatment 
+    if ( type_index(typeid(*((*it).get()))) == type_index( typeid(offlineDataEventType) ) )
+    {
+      const offlineDataEventType* _tmpPtr = dynamic_cast<const offlineDataEventType*>( (*it).get() );
+      submitOfflineDataForOutput( _tmpPtr->event );
+    }
+    else
+    {
+      this->submitOfflineDataForOutput( (*it).get() ); //submit a pointer to the object stored at the iterator it
+    }
   }
   
   temporaryStorage.clear();

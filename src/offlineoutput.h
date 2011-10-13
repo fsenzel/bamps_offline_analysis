@@ -18,6 +18,8 @@
 #define DEFAULT_EVENT_NUMBER_ESTIMATE 1000000
 #define DEFAULT_TEMPORARY_EVENT_NUMBER_ESTIMATE 100
 
+#define BAMPS_RECONSTRUCT_ACTIVATE_READOUT
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -26,14 +28,17 @@
 
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
 #include <boost/serialization/export.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/level.hpp>
 #include <boost/smart_ptr.hpp>
+
+#ifdef BAMPS_RECONSTRUCT_ACTIVATE_READOUT
+  #include <boost/archive/text_iarchive.hpp>
+  #include <boost/archive/binary_iarchive.hpp>
+#endif 
 
 // #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
@@ -117,6 +122,7 @@ class offlineOutputInterface
     void resetTemporaryStorage() { temporaryStorage.clear(); }
     void outputAndResetTemporaryStorage();
     
+    #ifdef BAMPS_RECONSTRUCT_ACTIVATE_READOUT
     /** read the stuff */
     template<class T>
     boost::shared_ptr<T> readOfflineDataFromArchive();
@@ -127,6 +133,7 @@ class offlineOutputInterface
     
     template<class T>
     void temporaryStoreData( tPointerToOfflineData _data );
+    #endif
     
   private:
     void checkAndCreateOutputDirectory( boost::filesystem::path& _dir );
@@ -145,6 +152,7 @@ class offlineOutputInterface
     tArchiveMap archiveMap;
     
     
+    #ifdef BAMPS_RECONSTRUCT_ACTIVATE_READOUT
     /** read the stuff */
     typedef boost::shared_ptr<boost::filesystem::ifstream> tPointerToInputFilestream;
     typedef std::map< type_index, tPointerToInputFilestream > tInputFileStreamMap;
@@ -167,6 +175,7 @@ class offlineOutputInterface
     typedef std::map< type_index, tPointerToOfflineData > tOfflineDataMap;
     tOfflineDataMap backupLastReadData;     
     /** save the last read position */
+    #endif
     
     typedef std::vector<tConstPointerToOfflineData> tTemporaryDataStorage;
     tTemporaryDataStorage temporaryStorage;
@@ -205,7 +214,7 @@ inline void offlineOutputInterface::checkAndCreateOutputDirectory(boost::filesys
   }
 }
 
-
+#ifdef BAMPS_RECONSTRUCT_ACTIVATE_READOUT
 template<class T>
 boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
 {
@@ -316,7 +325,7 @@ void offlineOutputInterface::temporaryStoreData(tPointerToOfflineData _data)
     backupLastReadData.insert(std::make_pair( type_index(typeid(T)), _data));
   }
 }
-
+#endif
 
 
 class offlineDataEventType : public offlineDataGeneric
