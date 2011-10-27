@@ -1,3 +1,13 @@
+//---------------------------------------------
+//provided by subversion
+//---------------------------------------------
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//---------------------------------------------
+//---------------------------------------------
+
 
 #ifndef BINNING2_H
 #define BINNING2_H

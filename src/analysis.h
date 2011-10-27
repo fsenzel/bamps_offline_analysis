@@ -1,3 +1,14 @@
+//---------------------------------------------
+//provided by subversion
+//---------------------------------------------
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//---------------------------------------------
+//---------------------------------------------
+
+
 #ifndef ANALYSIS_H
 #define ANALYSIS_H
 

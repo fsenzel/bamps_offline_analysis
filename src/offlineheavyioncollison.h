@@ -1,3 +1,14 @@
+//---------------------------------------------
+//provided by subversion
+//---------------------------------------------
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//---------------------------------------------
+//---------------------------------------------
+
+
 #ifndef OFFLINEHEAVYIONCOLLISON_H
 #define OFFLINEHEAVYIONCOLLISON_H
 

@@ -1,3 +1,14 @@
+//---------------------------------------------
+//provided by subversion
+//---------------------------------------------
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//---------------------------------------------
+//---------------------------------------------
+
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>

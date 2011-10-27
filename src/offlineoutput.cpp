@@ -1,12 +1,13 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: file:///home/bamps/svn/full/branches/restructureOutput/src/offlineoutput.cpp $
-//$LastChangedDate: 2011-09-30 15:00:38 +0200 (Fri, 30 Sep 2011) $
-//$LastChangedRevision: 177 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
+
 
 #include <typeinfo>
 #include <iostream>

@@ -1,3 +1,14 @@
+//---------------------------------------------
+//provided by subversion
+//---------------------------------------------
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//---------------------------------------------
+//---------------------------------------------
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>

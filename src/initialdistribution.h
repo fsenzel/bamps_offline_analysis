@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: file:///home/bamps/svn/full/branches/restructureOutput/src/initialdistribution.h $
-//$LastChangedDate: 2011-07-12 17:55:28 +0200 (Tue, 12 Jul 2011) $
-//$LastChangedRevision: 2 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
 

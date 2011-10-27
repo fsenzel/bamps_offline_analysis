@@ -1,3 +1,13 @@
+//---------------------------------------------
+//provided by subversion
+//---------------------------------------------
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//---------------------------------------------
+//---------------------------------------------
+
 
 /** @file 
  *  Providing type_index based on C++0x proposition from gcc 4.6

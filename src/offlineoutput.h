@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: file:///home/bamps/svn/full/branches/restructureOutput/src/offlineoutput.h $
-//$LastChangedDate: 2011-08-25 17:42:35 +0200 (Thu, 25 Aug 2011) $
-//$LastChangedRevision: 107 $
-//$LastChangedBy: fochler $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
 
