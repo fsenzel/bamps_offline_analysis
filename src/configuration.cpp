@@ -75,6 +75,7 @@ config::config(const int argc, const char * const argv[])
   movieOutputBackground = false;
   movieOutputJets = false;
   factor_dt = 0.8;
+  dt_specified = false;
   //these values are used in case no input file is specified 
   //or in case the input file lacks certain statements
   //-----------------------------------------------------------

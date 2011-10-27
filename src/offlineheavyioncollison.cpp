@@ -17,6 +17,7 @@
 #include "random.h"
 #include "binary_cross_sections.h"
 #include "offlineoutput.h"
+#include "FPT_compare.h"
 
 using namespace ns_casc;
 using namespace std;
@@ -107,6 +108,7 @@ void offlineHeavyIonCollision::init()
 void offlineHeavyIonCollision::mainFramework( analysis& aa )
 {
   double dt_cascade = 0;
+  double dt_backup = 0;
   double nexttime;
   int ncoll_backup = 0;
   int ncoll22_backup = 0;
@@ -322,22 +324,33 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
     nexttime = simulationTime + dt;
 
-    // ask if it is time for analysis
-    if ( nexttime >= aa.tstep[nn_ana] )
+    if ( nexttime >= aa.tstep_movie[nn_ana_movie] || nexttime >= aa.tstep[nn_ana] )
     {
-      nexttime = aa.tstep[nn_ana];
-      dt = nexttime - simulationTime;
-      doAnalysisStep = true;
-      cout << "profile " << nexttime << endl;
-    }
-    
-    // ask if it is time for movie output
-    if ( nexttime >= aa.tstep_movie[nn_ana_movie] )
-    {
-      nexttime = aa.tstep_movie[nn_ana_movie];
-      dt = nexttime - simulationTime;
-      doMovieStep = true;
-      cout << "** movie: " << nexttime << endl;
+      dt_backup = dt;
+      
+      if ( nexttime >= aa.tstep[nn_ana] ) // ask if it is time for analysis
+      {
+        nexttime = aa.tstep[nn_ana];
+        dt = nexttime - simulationTime;
+        doAnalysisStep = true;
+        cout << "profile " << nexttime << endl;
+      }
+      if ( nexttime >= aa.tstep_movie[nn_ana_movie] ) // ask if it is time for movie output
+      {
+        nexttime = aa.tstep_movie[nn_ana_movie];
+        dt = nexttime - simulationTime;
+        doMovieStep = true;
+        cout << "** movie: " << nexttime << endl;
+      }
+      
+      if ( doAnalysisStep && doMovieStep )
+      {
+        if ( !FPT_COMP_E(aa.tstep[nn_ana],aa.tstep_movie[nn_ana_movie]) )
+        {
+          string errMsg( "time steps for movie output and general analysis output do not match" );
+          throw eHIC_error( errMsg );
+        }
+      }      
     }
     
     cell_ID( nexttime );
@@ -396,6 +409,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       aa.collectEtData( nn_ana );
       nn_ana++;
       doAnalysisStep = false;
+      dt = dt_backup;
     }
     
     if ( doMovieStep )
@@ -409,13 +423,14 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       nn_ana_movie++;
       doMovieStep = false;
       doMovieStepMedium = true;
+      dt = dt_backup;
     }
     aa.printCentralDensities( simulationTime );
 
     // analyse timesteps
     dt_sum += dt;
     n_dt++;
-
+    
     simulationTime = nexttime;
   }
   while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
