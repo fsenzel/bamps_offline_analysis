@@ -26,6 +26,8 @@
 #include "particle.h"
 #include "offlineoutput.h"
 
+#define HELP_MESSAGE_REQUESTED 1
+
 
 /** @brief Enumeration type for possible initial state models */
 enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState };
@@ -69,14 +71,15 @@ class config
 {
  public:
   /** @brief Constructor that internally reads the provided input file */
-  config(const int argc, const char * const argv[]);
+  config(const int argc, char* argv[]);
   /** @brief Standard constructor */
   ~config() {};
 
+  /** @brief processes command line arguments and settings provided via a configuration file */
+  void readAndProcessProgramOptions(const int argc, char* argv[]);
+
   /** @brief Interface for config::name */
   string getName() const {return name;}
-  /** @brief Interface for the length of config::name */
-  int getNameLength() const;
   /** @brief Interface for config::runtime */
   double getRuntime() const {return runtime;}
   /** @brief Interface for config::A */
@@ -146,11 +149,13 @@ class config
  
 
  private:
-  /** @brief Read and evaluate the input file that has been specified as a commandline argument */
-  void readInputfile();
-
+  /** ----- auxiliary routines ----- */  
   /** @brief Write out all input parameters */
-  void writeInput();
+  void printUsedConfigurationParameters();
+  
+  /** @brief Do some checks on user-provided options and parameters */
+  void checkOptionsForSanity();
+  /** ------------------------------ */
   
 
   /** @brief Name of the input file */
@@ -220,6 +225,9 @@ class config
   
   /** @brief The name of the BAMPS job that is processed (input file names) */
   string name;
+
+  /** @brief Directory to which general output should be written */
+  string standardOutputDirectoryName;
   
   
   /** Stuff special to the offline analysis */

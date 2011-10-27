@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules/")
 
 ######### Set project name  #########
@@ -14,7 +14,7 @@ INCLUDE(SetCompilersAndBuildFlags.cmake)
 ######### Find Boost libraries #########
 SET(BOOST_ROOT "$ENV{HOME}/usr")
 MESSAGE(STATUS "** Search Boost root: ${BOOST_ROOT}")
-FIND_PACKAGE(Boost 1.40 COMPONENTS serialization filesystem REQUIRED)
+FIND_PACKAGE(Boost 1.40 COMPONENTS serialization filesystem program_options REQUIRED)
  MESSAGE(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
  MESSAGE(STATUS "** Boost Libraries: ${Boost_LIBRARY_DIRS}")
 
