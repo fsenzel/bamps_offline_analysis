@@ -93,11 +93,11 @@ analysis::analysis( config* const c ):
   {
     string jobID( temp );
 
-    filename_prefix = "/local/" + jobID + "/" + theConfig->getOutputName();
+    filename_prefix = "/local/" + jobID + "/" + theConfig->getJobName();
   }
   else
   {
-    filename_prefix = "./output/" + theConfig->getOutputName();
+    filename_prefix = "./output/" + theConfig->getJobName();
   }
   //--------------------------------------
 
@@ -2659,11 +2659,11 @@ void analysis::particleOutput( const int step )
   if ( temp != NULL )
   {
     string jobID( temp );
-    filename = "/local/" + jobID + "/" + theConfig->getOutputName() + "_" + name + ".f1";
+    filename = "/local/" + jobID + "/" + theConfig->getJobName() + "_" + name + ".f1";
   }
   else
   {
-    filename = "./output/" + theConfig->getOutputName() + "_" + name + ".f1";
+    filename = "./output/" + theConfig->getJobName() + "_" + name + ".f1";
   }
   fstream file( filename.c_str(), ios::out | ios::trunc );
 
@@ -3059,11 +3059,11 @@ void analysis::jetTrackerOutput()
   if ( temp != NULL )
   {
     string jobID( temp );
-    filename = "/local/" + jobID + "/" + theConfig->getOutputName() + ".f4";
+    filename = "/local/" + jobID + "/" + theConfig->getJobName() + ".f4";
   }
   else
   {
-    filename = "./output/" + theConfig->getOutputName() + ".f4";
+    filename = "./output/" + theConfig->getJobName() + ".f4";
   }
   fstream file( filename.c_str(), ios::out | ios::trunc );
   

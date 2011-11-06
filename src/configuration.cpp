@@ -67,9 +67,7 @@ config::config( const int argc, char* argv[] )
   seed = 0;
   jetMfpComputationSwitch = computeMfpDefault;
   interpolationBorder = 50;
-  outputForOfflineReconstruction = true;
-  detailedParticleOutput = false;
-  movieOutput = false;
+    outputSwitch_detailedParticleOutput = false;
   freezeOutEnergyDensity = 1.0;
   pathdirOfflineData = "offline_data";
   pythiaParticleFile = "-";
@@ -289,7 +287,7 @@ void config::checkOptionsForSanity()
 */
 void config::printUsedConfigurationParameters()
 {
-  string filename = standardOutputDirectoryName + "/" + outputName + "_used_configuration";
+  string filename = standardOutputDirectoryName + "/" + jobName + "_used_configuration";
   boost::filesystem::path outputFile( filename );
   boost::filesystem::ofstream output( outputFile, ios::trunc );
   
