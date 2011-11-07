@@ -59,43 +59,50 @@ initParam iparam;
 * @param[in] argc number of command line arguments, passed from the calling process
 * @param[in] argv[] command line arguments, passed from the calling process
 */
-config::config( const int argc, char* argv[] )
+config::config( const int argc, char* argv[] ) :
+// ---- general options ----
+ jobName("default"),
+ seed(0),
+// ---- collision parameters ---- 
+ A(197),
+ Aatomic(79),
+ B(197),
+ Batomic(79),
+ sqrtS(200),
+ impact(0),
+// ---- simulation parameters ---- 
+ runtime(0.5),
+ testparticles(35),
+ freezeOutEnergyDensity(0.6),
+// ---- initial state options ----
+ initialStateType(miniJetsInitialState),
+ pythiaParticleFile("-"),
+ cgcParticleFile("-"),
+ P0(1.4),
+// ---- output options ----
+ outputSwitch_progressLog( true ),
+ outputSwitch_detailedParticleOutput(false),
+ outputSwitch_movieOutputJets(false),
+ outputSwitch_movieOutputBackground(false),
+ standardOutputDirectoryName("output"),
+// ---- miscellaneous options ----
+ switch_repeatTimesteps(true),
+ jetMfpComputationSwitch(computeMfpDefault),
+ interpolationBorder(50),
+ localCluster(false),
+// ---- offline reconstruction options ----
+ pathdirOfflineData("offline_data"),
+ originalName("default"),
+ originalSeed(0),
+ switch_fixed_dt(false),
+ fixed_dt(-0.1),
+ factor_dt(0.8),
+ numberOfParticlesToAdd(0),
+ minimumPT(10.0)
 {
-  //--set default values---------------------------------------
-  name = "default";
-  runtime = 5.0; 
-  seed = 0;
-  jetMfpComputationSwitch = computeMfpDefault;
-  interpolationBorder = 50;
-    outputSwitch_detailedParticleOutput = false;
-  freezeOutEnergyDensity = 1.0;
-  pathdirOfflineData = "offline_data";
-  pythiaParticleFile = "-";
-  cgcParticleFile = "-";
-  initialStateType = miniJetsInitialState;
-  localCluster = true;
-  movieOutputBackground = false;
-  movieOutputJets = false;
-  factor_dt = 0.8;
-  dt_specified = false;
-  //these values are used in case no input file is specified 
-  //or in case the input file lacks certain statements
-  //-----------------------------------------------------------
-  
   // process command line arguments and parameters provided via an input file
   readAndProcessProgramOptions( argc, argv );
   
-//   Particle::set_N_light_flavor( N_light_flavors_input );
-//   Particle::set_N_heavy_flavor( N_heavy_flavors_input );
-//   cout << "N_f = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << endl;
-//   
-//   checkOptionsForSanity();
-//   
-//   if( Particle::N_heavy_flavor > 0 )
-//   {
-//     processHeavyQuarkOptions();
-//   }
-
   printUsedConfigurationParameters();
 }
 
@@ -120,91 +127,83 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   po::positional_options_description pos_options;
   pos_options.add("config-file", 1);
   
-//   // Group some general options  
-//   po::options_description general_options("General options");
-//   general_options.add_options()
-//   ("general.jobname", po::value< string >( &jobName )->default_value( jobName ), "name of the simulation job, assigned to output files")
-//   ("general.seed", po::value<long>( &seed )->default_value( seed ), "inital seed for random number generator (0 = pick random seed)")
-//   ;
-//   
-//   // Group some collision parameters
-//   po::options_description collision_parameters("Parameters of the heavy ion collision");
-//   collision_parameters.add_options()
-//   ("collision.A_mass", po::value<double>( &A )->default_value( A ), "mass number of nucleus A" )
-//   ("collision.A_atomic", po::value<double>( &Aatomic )->default_value( Aatomic ), "atomic number (number of protons) of nucleus A" )
-//   ("collision.B_mass", po::value<double>( &B )->default_value( B ), "mass number of nucleus B" )
-//   ("collision.B_atomic", po::value<double>( &Batomic )->default_value( Batomic ), "atomic number (number of protons) of nucleus B" )
-//   ("collision.impact", po::value<double>( &impact )->default_value( impact ), "impact parameter (fm)")
-//   ("collision.sqrt_s", po::value<double>( &sqrtS )->default_value( sqrtS ), "center of mass energy per nucleon-nucleon pair (GeV)")
-//   ;
-//   
-//   // Group some simulation parameters
-//   po::options_description simulation_parameters("Paramters for the BAMPS simulation");
-//   simulation_parameters.add_options()
-//   ("simulation.time", po::value<double>( &runtime )->default_value( runtime ), "simulated time of the system evolution (fm/c)")
-//   ("simulation.N_test", po::value<int>( &testparticles )->default_value( testparticles ), "number of test particles per real parton")
-//   ("simulation.e_freeze", po::value<double>( &freezeOutEnergyDensity )->default_value( freezeOutEnergyDensity ), "freeze out energy density (GeV/fm^3)")
-//   ("simulation.Nf_light", po::value<int>( &N_light_flavors_input )->default_value( N_light_flavors_input ), "number of light quark flavors")
-//   ("simulation.Nf_heavy", po::value<int>( &N_heavy_flavors_input )->default_value( N_heavy_flavors_input ), "number of heavy quark flavors")
-//   ;
-//   
-//   // Group some options related to the initial state
-//   po::options_description initial_state_options("Options and parameters for the initial state used by the BAMPS simulation");
-//   initial_state_options.add_options()
-//   ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc)")
-//   ("initial_state.minijet_P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for minijet initial conditions")
-//   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
-//   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
-//   ;
-//   
-//   // Group some options related to the program output  
-//   po::options_description output_options("Options for the output generated by the BAMPS simulation");
-//   output_options.add_options()
-//   ("output.directory", po::value<string>( &standardOutputDirectoryName )->default_value( standardOutputDirectoryName ), "directory to which general output should be written")
-//   ("output.offline", po::value<bool>( &outputSwitch_offlineReconstructionData )->default_value( outputSwitch_offlineReconstructionData ), "write data for later reconstruction via \"offline\" routines")
-//   ("output.offline_output_dir", po::value<string>( &pathdirOfflineData )->default_value( pathdirOfflineData ), "directory to which the output for \"offline\" data is written (if output.offline true)")
-//   ("output.progress_log", po::value<bool>( &outputSwitch_progressLog )->default_value( outputSwitch_progressLog ), "write progress information" )
-//   ("output.particles", po::value<bool>( &outputSwitch_detailedParticleOutput )->default_value( outputSwitch_detailedParticleOutput ), "write detailed particle output")
-//   ("output.movie", po::value<bool>( &outputSwitch_movieOutput )->default_value( outputSwitch_movieOutput ), "write movie output")
-//   ("output.v2", po::value<bool>( &outputSwitch_v2FinalData )->default_value( outputSwitch_v2FinalData ), "v2 output")
-//   ("output.v2_intermediate", po::value<bool>( &outputSwitch_v2DataIntermediateSteps )->default_value( outputSwitch_v2DataIntermediateSteps ), "v2 output at intermediate steps")
-//   ("output.v2_etabins", po::value<int>( &v2outputEtaBins )->default_value( v2outputEtaBins ), "number of eta bins used for v2 and RAA output")
-//   ;
-//   
-//   // Group miscellaneous options
-//   po::options_description misc_options("Miscellaneous options");
-//   misc_options.add_options()
-//   ("misc.repeat_timesteps", po::value<bool>( &switch_repeatTimesteps )->default_value( switch_repeatTimesteps ), "repeat timesteps in cases where the probability has been > 1" ) 
-//   ("misc.interpolation_border", po::value<double>( &interpolationBorder )->default_value( interpolationBorder ), "X where interpolation of MFP is done for E > X*T")
-//   ("misc.local_cluster", po::value<bool>( &localCluster )->default_value( localCluster ), "true if job needs to run on local ITP cluster, false otherwise")
-//   ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "special treatment for the mean free path of high energy particles")
-//   ;
-//   
-//   // Group heavy quark options
-//   po::options_description heavy_quark_options("Heavy quark options");
-//   heavy_quark_options.add_options()
-//   ("heavy_quark.charm_mass", po::value<double>( &Mcharm_input )->default_value( Mcharm_input ), "charm mass (GeV)")
-//   ("heavy_quark.bottom_mass", po::value<double>( &Mbottom_input )->default_value( Mbottom_input ), "bottom mass (GeV)")
-//   ("heavy_quark.Kfactor_ggQQbar", po::value<double>( &KggQQbar )->default_value( KggQQbar ), "K factor for process g + g -> Q + Qbar")
-//   ("heavy_quark.Kfactor_gQgQ", po::value<double>( &KgQgQ )->default_value( KgQgQ ), "K factor for process g + Q -> g + Q")
-//   ("heavy_quark.kappa_gQgQ", po::value<double>( &kappa_gQgQ )->default_value( kappa_gQgQ ), "multiplying factor kappa for the Debye mass in  g + Q -> g + Q processes")
-//   ("heavy_quark.running_coupling", po::value<bool>( &couplingRunningForGQ )->default_value( couplingRunningForGQ ), "Running coupling for g+Q -> g+Q processes")
-//   ("heavy_quark.iso_xsection", po::value<bool>( &isotropicCrossSecGQ )->default_value( isotropicCrossSecGQ ), "switch for isotropic cross section in g+Q -> g+Q processes")
-//   ("heavy_quark.const_xsection", po::value<bool>( &constantCrossSecGQ )->default_value( constantCrossSecGQ ), "switch for constant cross section for g+Q -> g+Q processes")
-//   ("heavy_quark.const_xsection_value", po::value<double>( &constantCrossSecValueGQ )->default_value( constantCrossSecValueGQ ), "value for constant g+Q -> g+Q cross section (mb)")
-//   ;
+  // Group some general options  
+  po::options_description general_options("General options");
+  general_options.add_options()
+  ("general.jobname", po::value< string >( &jobName )->default_value( jobName ), "name of the simulation job, assigned to output files")
+  ("general.seed", po::value<long>( &seed )->default_value( seed ), "inital seed for random number generator (0 = pick random seed)")
+  ;
   
+  // Group some collision parameters
+  po::options_description collision_parameters("Parameters of the heavy ion collision");
+  collision_parameters.add_options()
+  ("collision.A_mass", po::value<double>( &A )->default_value( A ), "mass number of nucleus A" )
+  ("collision.A_atomic", po::value<double>( &Aatomic )->default_value( Aatomic ), "atomic number (number of protons) of nucleus A" )
+  ("collision.B_mass", po::value<double>( &B )->default_value( B ), "mass number of nucleus B" )
+  ("collision.B_atomic", po::value<double>( &Batomic )->default_value( Batomic ), "atomic number (number of protons) of nucleus B" )
+  ("collision.impact", po::value<double>( &impact )->default_value( impact ), "impact parameter (fm)")
+  ("collision.sqrt_s", po::value<double>( &sqrtS )->default_value( sqrtS ), "center of mass energy per nucleon-nucleon pair (GeV)")
+  ;
+  
+  // Group some simulation parameters
+  po::options_description simulation_parameters("Paramters for the BAMPS simulation");
+  simulation_parameters.add_options()
+  ("simulation.time", po::value<double>( &runtime )->default_value( runtime ), "simulated time of the system evolution (fm/c)")
+  ("simulation.N_test", po::value<int>( &testparticles )->default_value( testparticles ), "number of test particles per real parton")
+  ("simulation.e_freeze", po::value<double>( &freezeOutEnergyDensity )->default_value( freezeOutEnergyDensity ), "freeze out energy density (GeV/fm^3)")
+  ;
+  
+  // Group some options related to the initial state
+  po::options_description initial_state_options("Options and parameters for the initial state used by the BAMPS simulation");
+  initial_state_options.add_options()
+  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc)")
+  ("initial_state.minijet_P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for minijet initial conditions")
+  ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
+  ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
+  ;
+  
+  // Group some options related to the program output  
+  po::options_description output_options("Options for the output generated by the BAMPS simulation");
+  output_options.add_options()
+  ("output.directory", po::value<string>( &standardOutputDirectoryName )->default_value( standardOutputDirectoryName ), "directory to which general output should be written")
+  ("output.progress_log", po::value<bool>( &outputSwitch_progressLog )->default_value( outputSwitch_progressLog ), "write progress information" )
+  ("output.particles", po::value<bool>( &outputSwitch_detailedParticleOutput )->default_value( outputSwitch_detailedParticleOutput ), "write detailed particle output")
+  ("output.movie_jets", po::value<bool>( &outputSwitch_movieOutputJets )->default_value( outputSwitch_movieOutputJets ), "write movie output for added high-pt particles")
+  ("output.movie_medium", po::value<bool>( &outputSwitch_movieOutputBackground )->default_value( outputSwitch_movieOutputBackground ), "write movie output for medium particles")
+  ;
+  
+  // Group miscellaneous options
+  po::options_description misc_options("Miscellaneous options");
+  misc_options.add_options()
+  ("misc.repeat_timesteps", po::value<bool>( &switch_repeatTimesteps )->default_value( switch_repeatTimesteps ), "repeat timesteps in cases where the probability has been > 1" ) 
+  ("misc.interpolation_border", po::value<double>( &interpolationBorder )->default_value( interpolationBorder ), "X where interpolation of MFP is done for E > X*T")
+  ("misc.local_cluster", po::value<bool>( &localCluster )->default_value( localCluster ), "true if job needs to run on local ITP cluster, false otherwise")
+  ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "special treatment for the mean free path of high energy particles")
+  ;
+
+  // Group offline reconstruction options
+  po::options_description offline_options("Offline reconstruction options");
+  offline_options.add_options()
+  ("offline.name", po::value<string>( &originalName )->default_value( originalName ), "name of the original BAMPS run that is to be reconstructed")
+  ("offline.offline_data_dir", po::value<string>( &pathdirOfflineData )->default_value( pathdirOfflineData ), "directory from which the \"offline\" data is read")
+  ("offline.use_fixed_dt", po::value<bool>( &switch_fixed_dt )->default_value( switch_fixed_dt ), "Indicates whether a fixed dt (provided via fixed_dt) should be used. Use time steps from the original run if not" ) 
+  ("offline.fixed_dt", po::value<double>( &fixed_dt )->default_value( fixed_dt ), "fixed dt (time steps) at which the reconstructed medium is \"sampled\" [optional]")
+  ("offline.factor_dt", po::value<double>( &factor_dt )->default_value( factor_dt ), "factor with which time steps from the original run should be scaled for use in sampling of the reconstructed medium (should be <1)")
+  ("offline.nAdded", po::value<int>( &numberOfParticlesToAdd)->default_value( numberOfParticlesToAdd ), "number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background" )
+  ("offline.minPT_added", po::value<double>( &minimumPT )->default_value( minimumPT ), "minimum p_T [GeV] of the added particles")
+  ;
+
   // Group options that are meant to be provided via the command line
   po::options_description command_line_options;
   command_line_options.add(usage_information).add(hidden_options);
   
-//   // Group options that are meant to be provided via a configuration file
-//   po::options_description config_file_options;
-//   config_file_options.add(general_options).add(collision_parameters).add(simulation_parameters).add(initial_state_options).add(output_options).add(misc_options).add(heavy_quark_options);
-//   
-//   // Group options that are to be printed in a detailed help message
-//   po::options_description visible_options;
-//   visible_options.add(usage_information).add(general_options).add(collision_parameters).add(simulation_parameters).add(initial_state_options).add(output_options).add(misc_options).add(heavy_quark_options);
+  // Group options that are meant to be provided via a configuration file
+  po::options_description config_file_options;
+  config_file_options.add(general_options).add(collision_parameters).add(simulation_parameters).add(initial_state_options).add(output_options).add(misc_options).add(offline_options);
+  
+  // Group options that are to be printed in a detailed help message
+  po::options_description visible_options;
+  visible_options.add(usage_information).add(general_options).add(collision_parameters).add(simulation_parameters).add(initial_state_options).add(output_options).add(misc_options).add(offline_options);
   
   
   // vm stores all the parameters that are obtained from the command line or the configuration file 
@@ -222,9 +221,9 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   }
   if (vm.count("detailed-help"))
   {
-//     cout << "Usage: cascade [options] [configuration file]" << endl;
-//     cout << visible_options << "\n";
-//     throw( HELP_MESSAGE_REQUESTED );
+    cout << "Usage: cascade [options] [configuration file]" << endl;
+    cout << visible_options << "\n";
+    throw( HELP_MESSAGE_REQUESTED );
   }
   
   // check whether a configuration file name has been provided and parse this file if applicable
@@ -235,8 +234,8 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
     {
       cout << "Using configuration from: " << vm["config-file"].as< string >() << endl;
       boost::filesystem::ifstream configFile( configFileName );
-//       po::store( po::parse_config_file(configFile, config_file_options), vm);
-//       notify(vm);
+      po::store( po::parse_config_file(configFile, config_file_options), vm);
+      notify(vm);
     }
     else
     {
@@ -245,32 +244,38 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
     }
   }
   
-//   // some special conversions from integer type values to enum values
-//   if ( vm.count("initial_state.type") )
-//   {
-//     if ( vm["initial_state.type"].as<int>() < 3 && vm["initial_state.type"].as<int>() >= 0 )
-//     {
-//       initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
-//     }
-//     else
-//     {
-//       string errMsg = "parameter \"initial_state.type\" out of range";
-//       throw eConfig_error( errMsg );
-//     }
-//   }
-//   
-//   if ( vm.count("misc.jet_mfp_computation") )
-//   {
-//     if ( vm["misc.jet_mfp_computation"].as<int>() < 3 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
-//     {
-//       jetMfpComputationSwitch = static_cast<JET_MFP_COMPUTATION_TYPE>( vm["misc.jet_mfp_computation"].as<int>() );
-//     }
-//     else
-//     {
-//       string errMsg = "parameter \"misc.jet_mfp_computation\" out of range";
-//       throw eConfig_error( errMsg );      
-//     }
-//   }
+  // automatically set switch_fixed_dt when fixed_dt is set 
+  if ( vm.count("offline.fixed_dt") )
+  {
+    switch_fixed_dt = true;
+  }
+
+  // some special conversions from integer type values to enum values
+  if ( vm.count("initial_state.type") )
+  {
+    if ( vm["initial_state.type"].as<int>() < 3 && vm["initial_state.type"].as<int>() >= 0 )
+    {
+      initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
+    }
+    else
+    {
+      string errMsg = "parameter \"initial_state.type\" out of range";
+      throw eConfig_error( errMsg );
+    }
+  }
+  
+  if ( vm.count("misc.jet_mfp_computation") )
+  {
+    if ( vm["misc.jet_mfp_computation"].as<int>() < 3 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
+    {
+      jetMfpComputationSwitch = static_cast<JET_MFP_COMPUTATION_TYPE>( vm["misc.jet_mfp_computation"].as<int>() );
+    }
+    else
+    {
+      string errMsg = "parameter \"misc.jet_mfp_computation\" out of range";
+      throw eConfig_error( errMsg );      
+    }
+  }
   
 }
 
@@ -291,65 +296,57 @@ void config::printUsedConfigurationParameters()
   boost::filesystem::path outputFile( filename );
   boost::filesystem::ofstream output( outputFile, ios::trunc );
   
-//   output << "[general]" << endl;
-//   output << "jobname = " << jobName << endl;
-//   output << "seed = " << seed << endl;
-//   output << endl;
-//   
-//   output << "[collision]" << endl;
-//   output << "A_mass = " << A << endl;
-//   output << "A_atomic = " << Aatomic << endl;
-//   output << "B_mass = " << B << endl;
-//   output << "B_atomic = " << Batomic << endl;
-//   output << "impact = " << impact << endl;
-//   output << "sqrt_s = " << sqrtS << endl;
-//   output << endl;
-//   
-//   output << "[simulation]" << endl;
-//   output << "time = " << runtime << endl;
-//   output << "N_test = " << testparticles << endl;
-//   output << "e_freeze = " << freezeOutEnergyDensity << endl;
-//   output << "Nf_light = " << N_light_flavors_input << endl;
-//   output << "Nf_heavy = " << N_heavy_flavors_input << endl;
-//   output << endl;
-//   
-//   output << "[initial_state]" << endl;
-//   output << "type = " << static_cast<int>(initialStateType) << endl;
-//   output << "minijet_P0 = " << P0 << endl;
-//   output << "pythia_file = " << pythiaParticleFile << endl;
-//   output << "cgc_file = " << cgcParticleFile << endl;
-//   output << endl;
-//   
-//   output << "[output]" << endl;
-//   output << "directory = " << standardOutputDirectoryName << endl;
-//   output << "offline = " << static_cast<int>(outputSwitch_offlineReconstructionData) << endl;
-//   output << "offline_output_dir = " << pathdirOfflineData << endl;
-//   output << "progress_log = " << static_cast<int>(outputSwitch_progressLog) << endl;
-//   output << "particles = " << static_cast<int>(outputSwitch_detailedParticleOutput) << endl;
-//   output << "movie = " << static_cast<int>( outputSwitch_movieOutput ) << endl;
-//   output << "v2 = " << static_cast<int>( outputSwitch_v2FinalData ) << endl;
-//   output << "v2_intermediate = " << static_cast<int>( outputSwitch_v2DataIntermediateSteps ) << endl;
-//   output << "v2_etabins = " << v2outputEtaBins << endl;
-//   output << endl;
-//   
-//   output << "[misc]" << endl;
-//   output << "repeat_timesteps = " << static_cast<int>( switch_repeatTimesteps ) << endl;
-//   output << "interpolation_border = " << interpolationBorder  << endl;
-//   output << "local_cluster = " << static_cast<int>( localCluster ) << endl;
-//   output << "jet_mfp_computation = " << static_cast<int>( jetMfpComputationSwitch ) << endl;
-//   output << endl;
-//  
-//   output << "[heavy_quark]" << endl;
-//   output << "charm_mass = " << Mcharm_input << endl;
-//   output << "bottom_mass = " << Mbottom_input << endl;
-//   output << "Kfactor_ggQQbar = " << KggQQbar << endl;
-//   output << "Kfactor_gQgQ = " << KgQgQ << endl;
-//   output << "kappa_gQgQ = "<< kappa_gQgQ << endl;
-//   output << "running_coupling = " << static_cast<int>(couplingRunningForGQ) << endl;
-//   output << "iso_xsection = " << static_cast<int>(isotropicCrossSecGQ) << endl;
-//   output << "const_xsection = " << static_cast<int>(constantCrossSecGQ) << endl; 
-//   output << "const_xsection_value = " << constantCrossSecValueGQ << endl;
-//   output << endl;
+  output << "[general]" << endl;
+  output << "jobname = " << jobName << endl;
+  output << "seed = " << seed << endl;
+  output << endl;
+  
+  output << "[collision]" << endl;
+  output << "A_mass = " << A << endl;
+  output << "A_atomic = " << Aatomic << endl;
+  output << "B_mass = " << B << endl;
+  output << "B_atomic = " << Batomic << endl;
+  output << "impact = " << impact << endl;
+  output << "sqrt_s = " << sqrtS << endl;
+  output << endl;
+  
+  output << "[simulation]" << endl;
+  output << "time = " << runtime << endl;
+  output << "N_test = " << testparticles << endl;
+  output << "e_freeze = " << freezeOutEnergyDensity << endl;
+  output << endl;
+  
+  output << "[initial_state]" << endl;
+  output << "type = " << static_cast<int>(initialStateType) << endl;
+  output << "minijet_P0 = " << P0 << endl;
+  output << "pythia_file = " << pythiaParticleFile << endl;
+  output << "cgc_file = " << cgcParticleFile << endl;
+  output << endl;
+  
+  output << "[output]" << endl;
+  output << "directory = " << standardOutputDirectoryName << endl;
+  output << "progress_log = " << static_cast<int>(outputSwitch_progressLog) << endl;
+  output << "particles = " << static_cast<int>(outputSwitch_detailedParticleOutput) << endl;
+  output << "movie_jets = " << static_cast<int>( outputSwitch_movieOutputJets ) << endl;
+  output << "movie_medium = " << static_cast<int>( outputSwitch_movieOutputBackground ) << endl;
+  output << endl;
+  
+  output << "[misc]" << endl;
+  output << "repeat_timesteps = " << static_cast<int>( switch_repeatTimesteps ) << endl;
+  output << "interpolation_border = " << interpolationBorder  << endl;
+  output << "local_cluster = " << static_cast<int>( localCluster ) << endl;
+  output << "jet_mfp_computation = " << static_cast<int>( jetMfpComputationSwitch ) << endl;
+  output << endl;
+
+  output << "[offline]" << endl;
+  output << "name = " << pathdirOfflineData << endl;
+  output << "offline_data_dir = " << pathdirOfflineData << endl;
+  output << "use_fixed_dt = " << static_cast<int>( switch_fixed_dt ) << endl;
+  output << "fixed_dt = " << fixed_dt  << endl;
+  output << "factor_dt = " << factor_dt << endl;
+  output << "nAdded = " << numberOfParticlesToAdd << endl;
+  output << "minPT_added = " << minimumPT  << endl;
+  output << endl;
 }
 
 
