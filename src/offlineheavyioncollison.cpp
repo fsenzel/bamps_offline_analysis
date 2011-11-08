@@ -351,7 +351,10 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
         nexttime = aa.tstep_movie[nn_ana_movie];
         dt = nexttime - simulationTime;
         doMovieStep = true;
-        cout << "** movie: " << nexttime << endl;
+        if ( theConfig->doOutput_movieOutputJets() || theConfig->doOutput_movieOutputBackground() )
+        {
+          cout << "** movie: " << nexttime << endl;
+        }
       }
       
       if ( doAnalysisStep && doMovieStep )

@@ -187,7 +187,7 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   ("offline.name", po::value<string>( &originalName )->default_value( originalName ), "name of the original BAMPS run that is to be reconstructed")
   ("offline.offline_data_dir", po::value<string>( &pathdirOfflineData )->default_value( pathdirOfflineData ), "directory from which the \"offline\" data is read")
   ("offline.use_fixed_dt", po::value<bool>( &switch_fixed_dt )->default_value( switch_fixed_dt ), "Indicates whether a fixed dt (provided via fixed_dt) should be used. Use time steps from the original run if not" ) 
-  ("offline.fixed_dt", po::value<double>( &fixed_dt )->default_value( fixed_dt ), "fixed dt (time steps) at which the reconstructed medium is \"sampled\" [optional]")
+  ("offline.fixed_dt", po::value<double>( &fixed_dt ), "fixed dt (time steps) at which the reconstructed medium is \"sampled\" [optional]")
   ("offline.factor_dt", po::value<double>( &factor_dt )->default_value( factor_dt ), "factor with which time steps from the original run should be scaled for use in sampling of the reconstructed medium (should be <1)")
   ("offline.nAdded", po::value<int>( &numberOfParticlesToAdd)->default_value( numberOfParticlesToAdd ), "number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background" )
   ("offline.minPT_added", po::value<double>( &minimumPT )->default_value( minimumPT ), "minimum p_T [GeV] of the added particles")
@@ -248,6 +248,15 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   if ( vm.count("offline.fixed_dt") )
   {
     switch_fixed_dt = true;
+  }
+
+  if ( switch_fixed_dt )
+  {
+    if ( !(fixed_dt > 0) )
+    {
+      string errMsg = "Error: When \"offline.switch_fixed_dt = 1\" is specified, a value (>0) for \"offline.fixed_dt\" needs to be given.";
+      throw eConfig_error( errMsg );
+    }   
   }
 
   // some special conversions from integer type values to enum values
@@ -339,7 +348,7 @@ void config::printUsedConfigurationParameters()
   output << endl;
 
   output << "[offline]" << endl;
-  output << "name = " << pathdirOfflineData << endl;
+  output << "name = " << originalName << endl;
   output << "offline_data_dir = " << pathdirOfflineData << endl;
   output << "use_fixed_dt = " << static_cast<int>( switch_fixed_dt ) << endl;
   output << "fixed_dt = " << fixed_dt  << endl;
