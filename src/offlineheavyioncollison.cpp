@@ -175,11 +175,11 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   cout << "scale time steps dt by facot " << factor_dt << endl;
 
   aa.initialOutput();
-  if ( theConfig->movieOutputJets )
+  if ( theConfig->doOutput_movieOutputJets() )
   {
     aa.movieOutput( 0, jumpMovieSteps );
   }
-  if ( theConfig->movieOutputBackground )
+  if ( theConfig->doOutput_movieOutputBackground() )
   {
     aa.movieOutputMedium( 0, jumpMovieSteps );
   }
@@ -286,9 +286,9 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
     
     // specify time step
-    if ( theConfig->DtSpecified() )
+    if ( theConfig->useFixed_dt() )
     {
-      dt = theConfig->getDt();
+      dt = theConfig->getFixed_dt();
     }
     else if ( dt_cascade_from_data >= 0 )
     {
@@ -311,7 +311,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     lambdaJet_gluon = 0;
     lambdaJet_quark = 0;
       
-    if ( doMovieStepMedium && theConfig->movieOutputBackground )
+    if ( doMovieStepMedium && theConfig->doOutput_movieOutputBackground() )
     {
       aa.movieOutputMedium( nn_ana_movie - 1, jumpMovieSteps );
       doMovieStepMedium = false;
@@ -351,7 +351,10 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
         nexttime = aa.tstep_movie[nn_ana_movie];
         dt = nexttime - simulationTime;
         doMovieStep = true;
-        cout << "** movie: " << nexttime << endl;
+        if ( theConfig->doOutput_movieOutputJets() || theConfig->doOutput_movieOutputBackground() )
+        {
+          cout << "** movie: " << nexttime << endl;
+        }
       }
       
       if ( doAnalysisStep && doMovieStep )
@@ -427,7 +430,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     {
       aa.mfpJetsOutput( nn_ana_movie, jumpMovieSteps );
       
-      if ( theConfig->movieOutputJets )
+      if ( theConfig->doOutput_movieOutputJets() )
       {
         aa.movieOutput( nn_ana_movie, jumpMovieSteps );
       }

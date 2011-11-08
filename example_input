@@ -1,0 +1,14 @@
+[general]
+jobname = test
+seed = 0
+
+[simulation]
+time = 1.1
+
+[offline]
+name = original_name
+offline_data_dir = offline_data
+nAdded = 0
+
+[output]
+directory = output

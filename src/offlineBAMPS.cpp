@@ -52,7 +52,7 @@ int main( int argc, char *argv[] )
     config theConfig( argc, argv );
     
     offlineOutputInterface offlineInterface( theConfig.getPathdirOfflineDataChar() );
-    offlineInterface.setAdditionalFilenameTag( theConfig.getName() );    
+    offlineInterface.setAdditionalFilenameTag( theConfig.getOriginalName() );    
     
     theConfig.readAndPrepareInitialSettings( &offlineInterface );
 
