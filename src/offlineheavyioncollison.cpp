@@ -743,6 +743,9 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
         particles[jscat].PY = pyj;
         particles[jscat].PZ = pzj;
         particles[jscat].E = sqrt( pxj * pxj + pyj * pyj + pzj * pzj );
+        
+        particles[dead].dead = true;
+        
         number--;
       }
       else
@@ -1124,7 +1127,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
   IXY = IX * IY;
   
   formGeomCopy = formGeom;
-  
+
   gG = 2 * ( pow( Ncolor, 2 ) - 1 );
   
   if ( !formGeomCopy.empty() )
@@ -1156,10 +1159,10 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
   for ( int etaSliceIndex = etaBins.min_index(); etaSliceIndex <= etaBins.max_index(); etaSliceIndex++ )
   {
     //---------- populate the ring structure for averages ----------
-    dz = timenow * ( tanh( etaBins[etaSliceIndex].right ) - tanh( etaBins[etaSliceIndex].left ) );
+    dz = simulationTime * ( tanh( etaBins[etaSliceIndex].right ) - tanh( etaBins[etaSliceIndex].left ) );
     
     rings.clear();
-    rings.setLongitudinalGeometry( etaBins[etaSliceIndex].left, etaBins[etaSliceIndex].right, timenow );
+    rings.setLongitudinalGeometry( etaBins[etaSliceIndex].left, etaBins[etaSliceIndex].right, simulationTime );
     
     for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
     {
@@ -1167,9 +1170,12 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
       for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
       {
         xt = sqrt( pow( particles_atTimeNow [( *iIt )].X, 2 )  + pow( particles_atTimeNow[( *iIt )].Y, 2 ) );
-        
-        rings.addParticle( particles_atTimeNow[( *iIt )] );
-        //           rings.addRates( particles_atTimeNow[(*iIt)] );
+
+        if ( !particles_atTimeNow[( *iIt )].dead )
+        {
+          rings.addParticle( particles_atTimeNow[( *iIt )] );
+//           rings.addRates( particles_atTimeNow[(*iIt)] );
+        }
       }
     }
     
@@ -1178,14 +1184,19 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
     {
       int id = *iIt;
       
+      if ( particles_atTimeNow[id].dead )
+      {
+        continue; // jump to next particle in the list if this one is dead (should not happen)
+      }
+      
       ee = sqrt( pow( particles_atTimeNow[id].PXold, 2 ) + pow( particles_atTimeNow[id].PYold, 2 ) + pow( particles_atTimeNow[id].PZold, 2 ) );
-      cc = ( timenow - particles_atTimeNow[id].T ) / ee;
+      cc = ( simulationTime - particles_atTimeNow[id].T ) / ee;
       zz = particles_atTimeNow[id].Z + particles_atTimeNow[id].PZold * cc;
-      eta = 0.5 * log(( timenow + zz ) / ( timenow - zz ) );
+      eta = 0.5 * log(( simulationTime + zz ) / ( simulationTime - zz ) );
       
       if (( eta >= etaBins[etaSliceIndex].left ) && ( eta <= etaBins[etaSliceIndex].right ) )
       {
-        rings.addParticleInFormGeom( particles_atTimeNow[id], timenow );
+        rings.addParticleInFormGeom( particles_atTimeNow[id], simulationTime );
         iIt = formGeomCopy.erase( iIt );    // erase this particle such that it needs not be looped over for the next rapidity slab
       }
     }
@@ -1627,8 +1638,13 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
 
     for ( iIt =  _cell.particleList.begin(); iIt != _cell.particleList.end(); iIt++ )
     {
-      iscat = *iIt;  
-
+      iscat = *iIt;
+      
+      if ( particles_atTimeNow[iscat].dead )
+      {
+        continue; // jump to next particle from _cell.particleList
+      }
+      
       F1 = particles_atTimeNow[iscat].FLAVOR;
       particles_atTimeNow[iscat].getMomentumArray( P1 );
       F2 = addedParticles[jscat].FLAVOR;
