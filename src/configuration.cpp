@@ -428,10 +428,10 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
 
   for ( int i = 0; i < particles_init.size(); i++ )
   {   
+    particles[i] = particles_init[i];
+    
     particles[i].init = true;
     particles[i].free = false;
-
-    particles[i] = particles_init[i];
     
     if ( particles[i].T < timefirst )
     {
