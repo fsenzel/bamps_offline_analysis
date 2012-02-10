@@ -1,15 +1,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules/")
 
+######### This sets custom build flags and includes options for various compilers #########
+INCLUDE(SetCompilersAndBuildFlags.cmake)
+
 ######### Set project name  #########
 PROJECT(offlineBAMPS)
 
 ######### Activate packaging, use as "make package_source"  #########
 INCLUDE(CMakeCustomPackageOptions.cmake)
 INCLUDE(CPack)
-
-######### This sets custom build flags and includes options for various compilers #########
-INCLUDE(SetCompilersAndBuildFlags.cmake)
 
 ######### Find Boost libraries #########
 SET(BOOST_ROOT "$ENV{HOME}/usr")

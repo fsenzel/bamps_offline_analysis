@@ -49,6 +49,10 @@ SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/revision.h PROPERTIES GE
 ######### Build the executable #########
 ADD_EXECUTABLE(offlineBAMPS ${project_SRCS} )
 
+### activate interprocedural optimization if the compiler supports it
+IF (CMAKE_BUILD_TYPE STREQUAL "Release")
+  SET_PROPERTY(TARGET cascade PROPERTY INTERPROCEDURAL_OPTIMIZATION 1)  # -ipo option for intel compilers
+ENDIF()
 
 IF( LINK_TO_BAMPS_LIB AND BAMPS_FOUND )
   TARGET_LINK_LIBRARIES(offlineBAMPS ${BAMPS_LIBRARIES})    ## Link to static BAMPS library ##
