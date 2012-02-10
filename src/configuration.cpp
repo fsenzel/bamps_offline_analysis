@@ -202,32 +202,19 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   ("general.seed", po::value<long>( &seed )->default_value( seed ), "inital seed for random number generator (0 = pick random seed)")
   ;
   
-  // Group some collision parameters
-  po::options_description collision_parameters("Parameters of the heavy ion collision");
-  collision_parameters.add_options()
-  ("collision.A_mass", po::value<double>( &A )->default_value( A ), "mass number of nucleus A" )
-  ("collision.A_atomic", po::value<double>( &Aatomic )->default_value( Aatomic ), "atomic number (number of protons) of nucleus A" )
-  ("collision.B_mass", po::value<double>( &B )->default_value( B ), "mass number of nucleus B" )
-  ("collision.B_atomic", po::value<double>( &Batomic )->default_value( Batomic ), "atomic number (number of protons) of nucleus B" )
-  ("collision.impact", po::value<double>( &impact )->default_value( impact ), "impact parameter (fm)")
-  ("collision.sqrt_s", po::value<double>( &sqrtS )->default_value( sqrtS ), "center of mass energy per nucleon-nucleon pair (GeV)")
-  ;
-  
   // Group some simulation parameters
   po::options_description simulation_parameters("Paramters for the BAMPS simulation");
   simulation_parameters.add_options()
   ("simulation.time", po::value<double>( &runtime )->default_value( runtime ), "simulated time of the system evolution (fm/c)")
-  ("simulation.N_test", po::value<int>( &testparticles )->default_value( testparticles ), "number of test particles per real parton")
-  ("simulation.e_freeze", po::value<double>( &freezeOutEnergyDensity )->default_value( freezeOutEnergyDensity ), "freeze out energy density (GeV/fm^3)")
-  ("simulation.Nf_light", po::value<int>( &N_light_flavors_input )->default_value( N_light_flavors_input ), "number of light quark flavors")
-  ("simulation.Nf_heavy", po::value<int>( &N_heavy_flavors_input )->default_value( N_heavy_flavors_input ), "number of heavy quark flavors")
+  ("simulation.Nf_light", po::value<int>( &N_light_flavors_input )->default_value( N_light_flavors_input ), "number of light quark flavors for added particles")
+  ("simulation.Nf_heavy", po::value<int>( &N_heavy_flavors_input )->default_value( N_heavy_flavors_input ), "number of heavy quark flavors for added particles")
   ("simulation.scatt_offlineWithAdded", po::value<bool>( &scatt_offlineWithAddedParticles )->default_value( scatt_offlineWithAddedParticles ), "whether offline particles are allowed to scatter with added particles")
   ("simulation.scatt_amongOffline", po::value<bool>( &scatt_amongOfflineParticles )->default_value( scatt_amongOfflineParticles ), "whether offline particles are allowed to scatter with other offline particles")
   ("simulation.scatt_amongAdded", po::value<bool>( &scatt_amongAddedParticles )->default_value( scatt_amongAddedParticles ), "whether added particles are allowed to scatter with other added particles")
   ;
   
   // Group some options related to the initial state
-  po::options_description initial_state_options("Options and parameters for the initial state used by the BAMPS simulation");
+  po::options_description initial_state_options("Options and parameters for the initial state of added particles used by the BAMPS simulation");
   initial_state_options.add_options()
   ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo)")
   ("initial_state.minijet_P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for minijet initial conditions")
@@ -307,11 +294,11 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   
   // Group options that are meant to be provided via a configuration file
   po::options_description config_file_options;
-  config_file_options.add(general_options).add(collision_parameters).add(simulation_parameters).add(initial_state_options).add(output_options).add(misc_options).add(offline_options);
+  config_file_options.add(general_options).add(simulation_parameters).add(initial_state_options).add(output_options).add(heavy_quark_options).add(misc_options).add(offline_options);
   
   // Group options that are to be printed in a detailed help message
   po::options_description visible_options;
-  visible_options.add(usage_information).add(general_options).add(collision_parameters).add(simulation_parameters).add(initial_state_options).add(output_options).add(misc_options).add(offline_options);
+  visible_options.add(usage_information).add(general_options).add(simulation_parameters).add(initial_state_options).add(output_options).add(heavy_quark_options).add(misc_options).add(offline_options);
   
   
   // vm stores all the parameters that are obtained from the command line or the configuration file 
@@ -506,19 +493,8 @@ void config::printUsedConfigurationParameters()
   output << "seed = " << seed << endl;
   output << endl;
   
-  output << "[collision]" << endl;
-  output << "A_mass = " << A << endl;
-  output << "A_atomic = " << Aatomic << endl;
-  output << "B_mass = " << B << endl;
-  output << "B_atomic = " << Batomic << endl;
-  output << "impact = " << impact << endl;
-  output << "sqrt_s = " << sqrtS << endl;
-  output << endl;
-  
   output << "[simulation]" << endl;
   output << "time = " << runtime << endl;
-  output << "N_test = " << testparticles << endl;
-  output << "e_freeze = " << freezeOutEnergyDensity << endl;
   output << "Nf_light = " << N_light_flavors_input << endl;
   output << "Nf_heavy = " << N_heavy_flavors_input << endl;
   output << "scatt_offlineWithAdded = " << scatt_offlineWithAddedParticles << endl;
