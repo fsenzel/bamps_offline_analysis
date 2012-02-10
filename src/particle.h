@@ -107,9 +107,6 @@ class Particle : public ParticlePrototype
     
     int step,tstep,taustep;//fm
     
-    static double getMass( const FLAVOR_TYPE _flav ) { return 0; }
-    
-    
   private:
 };
 

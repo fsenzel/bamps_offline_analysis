@@ -74,10 +74,16 @@ config::config( const int argc, char* argv[] ) :
  runtime(0.5),
  testparticles(35),
  freezeOutEnergyDensity(0.6),
+ N_light_flavors_input(3),
+ N_heavy_flavors_input(0), 
+ scatt_offlineWithAddedParticles(true),
+ scatt_amongOfflineParticles(false),
+ scatt_amongAddedParticles(false),
 // ---- initial state options ----
  initialStateType(miniJetsInitialState),
  pythiaParticleFile("-"),
  cgcParticleFile("-"),
+ mcatnloParticleFile("-"),
  P0(1.4),
 // ---- output options ----
  outputSwitch_progressLog( true ),
@@ -85,6 +91,36 @@ config::config( const int argc, char* argv[] ) :
  outputSwitch_movieOutputJets(false),
  outputSwitch_movieOutputBackground(false),
  standardOutputDirectoryName("output"),
+ v2RAAoutput(true),
+ v2RAAoutputIntermediateSteps(false),
+ v2RAAoutputEtaBins(6),
+ dndyOutput(false),
+// ---- heavy quark options ----
+ KggQQbar(1.0),
+ KgQgQ(1.0),
+ kappa_gQgQ(1.0),
+ couplingRunning(false),
+ isotropicCrossSecGQ(false),
+ constantCrossSecGQ(false),
+ constantCrossSecValueGQ(10.0),
+ Mcharm_input(1.5),
+ Mbottom_input(4.8),
+ hadronization_hq(true),
+ mesonDecay(true),
+ numberElectronStat(20),
+ muonsInsteadOfElectrons(false),
+ studyNonPromptJpsiInsteadOfElectrons(false),
+ N_psi_input(0),
+ isotropicCrossSecJpsi(false),
+ constantCrossSecJpsi(false),
+ constantCrossSecValueJpsi(10.0),
+ Mjpsi_input(3.1),
+ TdJpsi(0.32),
+ jpsi_sigmaAbs(2.8),
+ jpsi_agN(0.1),
+ shadowing_model(eps08),
+ jpsi_formationTime(0.0),
+ hqCorrelationsOutput(false),
 // ---- miscellaneous options ----
  switch_repeatTimesteps(true),
  jetMfpComputationSwitch(computeMfpDefault),
@@ -103,6 +139,38 @@ config::config( const int argc, char* argv[] ) :
   // process command line arguments and parameters provided via an input file
   readAndProcessProgramOptions( argc, argv );
   
+  // default value of standardOutputDirectoryName is dependent on whether the calculation is performed at the CSC
+  // However, it can be changed by hand in the config file
+  //create the names of the output files for Fuchs CSC (old cluster) and LOEWE CSC
+  char * csc_check_fuchs = getenv("PBS_JOBID");
+  char * csc_check_loewe = getenv("SLURM_JOB_ID");
+  if( csc_check_fuchs != NULL )
+  {
+    string jobID( csc_check_fuchs );
+    standardOutputDirectoryName = "/local/" + jobID;
+  }
+  else if( csc_check_loewe != NULL )
+  {
+    string jobID( csc_check_loewe );
+    standardOutputDirectoryName = "/local/" + jobID;
+  }
+  
+  boost::filesystem::path outputDirectory( standardOutputDirectoryName );
+  checkAndCreateOutputDirectory( outputDirectory );
+  
+  Particle::set_N_light_flavor( N_light_flavors_input );
+  Particle::set_N_heavy_flavor( N_heavy_flavors_input );
+  cout << "N_f = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << endl;
+  
+  Particle::set_N_psi( N_psi_input );
+  
+  checkOptionsForSanity();
+  
+  if( Particle::N_heavy_flavor > 0 )
+  {
+    processHeavyQuarkOptions();
+  }
+
   printUsedConfigurationParameters();
 }
 
@@ -151,15 +219,21 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   ("simulation.time", po::value<double>( &runtime )->default_value( runtime ), "simulated time of the system evolution (fm/c)")
   ("simulation.N_test", po::value<int>( &testparticles )->default_value( testparticles ), "number of test particles per real parton")
   ("simulation.e_freeze", po::value<double>( &freezeOutEnergyDensity )->default_value( freezeOutEnergyDensity ), "freeze out energy density (GeV/fm^3)")
+  ("simulation.Nf_light", po::value<int>( &N_light_flavors_input )->default_value( N_light_flavors_input ), "number of light quark flavors")
+  ("simulation.Nf_heavy", po::value<int>( &N_heavy_flavors_input )->default_value( N_heavy_flavors_input ), "number of heavy quark flavors")
+  ("simulation.scatt_offlineWithAdded", po::value<bool>( &scatt_offlineWithAddedParticles )->default_value( scatt_offlineWithAddedParticles ), "whether offline particles are allowed to scatter with added particles")
+  ("simulation.scatt_amongOffline", po::value<bool>( &scatt_amongOfflineParticles )->default_value( scatt_amongOfflineParticles ), "whether offline particles are allowed to scatter with other offline particles")
+  ("simulation.scatt_amongAdded", po::value<bool>( &scatt_amongAddedParticles )->default_value( scatt_amongAddedParticles ), "whether added particles are allowed to scatter with other added particles")
   ;
   
   // Group some options related to the initial state
   po::options_description initial_state_options("Options and parameters for the initial state used by the BAMPS simulation");
   initial_state_options.add_options()
-  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc)")
+  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo)")
   ("initial_state.minijet_P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for minijet initial conditions")
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
+  ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
   ;
   
   // Group some options related to the program output  
@@ -170,6 +244,40 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   ("output.particles", po::value<bool>( &outputSwitch_detailedParticleOutput )->default_value( outputSwitch_detailedParticleOutput ), "write detailed particle output")
   ("output.movie_jets", po::value<bool>( &outputSwitch_movieOutputJets )->default_value( outputSwitch_movieOutputJets ), "write movie output for added high-pt particles")
   ("output.movie_medium", po::value<bool>( &outputSwitch_movieOutputBackground )->default_value( outputSwitch_movieOutputBackground ), "write movie output for medium particles")
+  ("output.v2RAA", po::value<bool>( &v2RAAoutput )->default_value( v2RAAoutput ), "write v2 and RAA output for added particles")
+  ("output.v2RAAoutputIntermediateSteps", po::value<bool>( &v2RAAoutputIntermediateSteps )->default_value( v2RAAoutputIntermediateSteps ), "whether v2 and RAA output are printed at each analyisis time step (otherwise just at beginning and end)")
+  ("output.v2RAAoutputEtaBins", po::value<int>( &v2RAAoutputEtaBins )->default_value( v2RAAoutputEtaBins ), "how many eta bins are written out for v2 and RAA output")
+  ("output.dndyOutput", po::value<bool>( &dndyOutput )->default_value( dndyOutput ), "whether dndy output is written out")
+  ;
+  
+  // Group heavy quark options
+  po::options_description heavy_quark_options("Heavy quark options");
+  heavy_quark_options.add_options()
+  ("heavy_quark.charm_mass", po::value<double>( &Mcharm_input )->default_value( Mcharm_input ), "charm mass (GeV)")
+  ("heavy_quark.bottom_mass", po::value<double>( &Mbottom_input )->default_value( Mbottom_input ), "bottom mass (GeV)")
+  ("heavy_quark.Kfactor_ggQQbar", po::value<double>( &KggQQbar )->default_value( KggQQbar ), "K factor for process g + g -> Q + Qbar")
+  ("heavy_quark.Kfactor_gQgQ", po::value<double>( &KgQgQ )->default_value( KgQgQ ), "K factor for process g + Q -> g + Q")
+  ("heavy_quark.kappa_gQgQ", po::value<double>( &kappa_gQgQ )->default_value( kappa_gQgQ ), "multiplying factor kappa for the Debye mass in  g + Q -> g + Q processes")
+  ("heavy_quark.running_coupling", po::value<bool>( &couplingRunning )->default_value( couplingRunning ), "Running coupling for all heavy flavor processes")
+  ("heavy_quark.iso_xsection_gQ", po::value<bool>( &isotropicCrossSecGQ )->default_value( isotropicCrossSecGQ ), "switch for isotropic cross section in g+Q -> g+Q processes")
+  ("heavy_quark.const_xsection_gQ", po::value<bool>( &constantCrossSecGQ )->default_value( constantCrossSecGQ ), "switch for constant cross section for g+Q -> g+Q processes")
+  ("heavy_quark.const_xsection_gQ_value", po::value<double>( &constantCrossSecValueGQ )->default_value( constantCrossSecValueGQ ), "value for constant g+Q -> g+Q cross section (mb)")
+  ("heavy_quark.hadronization_hq", po::value<bool>( &hadronization_hq )->default_value( hadronization_hq ), "whether hadronization of heavy quarks to D and B mesons is carried out")
+  ("heavy_quark.mesonDecay", po::value<bool>( &mesonDecay )->default_value( mesonDecay ), "whether decay of heavy mesons from charm and bottom to electrons is performed")
+  ("heavy_quark.numberElectronStat", po::value<int>( &numberElectronStat )->default_value( numberElectronStat ), "one meson decays to numberElectronStat electrons")
+  ("heavy_quark.muonsInsteadOfElectrons", po::value<bool>( &muonsInsteadOfElectrons )->default_value( muonsInsteadOfElectrons ), "decay to muons should be performed instead of electrons")
+  ("heavy_quark.studyNonPromptJpsiInsteadOfElectrons", po::value<bool>( &studyNonPromptJpsiInsteadOfElectrons )->default_value( studyNonPromptJpsiInsteadOfElectrons ), "decay of B mesons to non prompt Jpsi should be performed instead to electrons")
+  ("heavy_quark.N_psi_input", po::value<int>( &N_psi_input )->default_value( N_psi_input ), "number of active psi states (1 = J/psi)")
+  ("heavy_quark.iso_xsection_jpsi", po::value<bool>( &isotropicCrossSecJpsi )->default_value( isotropicCrossSecJpsi ), "isotropic momentum sampling is employed for process Q + Qbar -> g + J/psi")
+  ("heavy_quark.const_xsection_jpsi", po::value<bool>( &constantCrossSecJpsi )->default_value( constantCrossSecJpsi ), "constant cross section is employed for process Q + Qbar -> g + J/psi")
+  ("heavy_quark.const_xsection_jpsi_value", po::value<double>( &constantCrossSecValueJpsi )->default_value( constantCrossSecValueJpsi ), "value of constant cross section for process Q + Qbar -> g + J/psi in mb")
+  ("heavy_quark.jpsi_mass", po::value<double>( &Mjpsi_input )->default_value( Mjpsi_input ), "J/psi mass (GeV)")
+  ("heavy_quark.TdJpsi", po::value<double>( &TdJpsi )->default_value( TdJpsi ), "dissociation temperature of J/psi")
+  ("heavy_quark.jpsi_sigmaAbs", po::value<double>( &jpsi_sigmaAbs )->default_value( jpsi_sigmaAbs ), "absorption cross section for initial J/psi in mb")
+  ("heavy_quark.jpsi_agN", po::value<double>( &jpsi_agN )->default_value( jpsi_agN ), "parameter for momentum broadening of initial J/psi")
+  ("heavy_quark.shadowing_model", po::value<int>( )->default_value( static_cast<int>(shadowing_model) ), "shadowing model used for initial J/psi")
+  ("heavy_quark.jpsi_formationTime", po::value<double>( &jpsi_formationTime )->default_value( jpsi_formationTime ), "formation time for initial J/psi in addition to the standard 1/M_T")
+  ("heavy_quark.hqCorrelationsOutput", po::value<bool>( &hqCorrelationsOutput )->default_value( hqCorrelationsOutput ), "whether correlation analysis of heavy quark pairs is done")
   ;
   
   // Group miscellaneous options
@@ -286,6 +394,19 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
     }
   }
   
+  if ( vm.count("heavy_quark.shadowing_model") )
+  {
+    if ( vm["heavy_quark.shadowing_model"].as<int>() < 3 && vm["heavy_quark.shadowing_model"].as<int>() >= 0 )
+    {
+      shadowing_model = static_cast<shadowModelJpsi>( vm["heavy_quark.shadowing_model"].as<int>() );
+    }
+    else
+    {
+      string errMsg = "parameter \"heavy_quark.shadowing_model\" out of range";
+      throw eConfig_error( errMsg );
+    }
+  }
+  
 }
 
 
@@ -294,6 +415,81 @@ void config::checkOptionsForSanity()
   // sanity checks of parameters and options can go here  
 }
 
+
+void config::processHeavyQuarkOptions()
+{
+  coupling::set_Nflavor( N_light_flavors_input );
+  
+  coupling::set_isRunning( couplingRunning );
+  Particle::setCharmMass( Mcharm_input );
+  cout << "Charm mass: " << Particle::Mcharm;
+  if( Particle::N_heavy_flavor > 1 )
+  {
+    Particle::setBottomMass( Mbottom_input );
+    cout << "  bottom mass: " << Particle::Mbottom;
+  }
+  cout << endl;
+  
+  if(constantCrossSecGQ)
+  {
+    cout << "Constant cross section of " << constantCrossSecValueGQ << " mb for gQ-> gQ." << endl;
+  }
+  else
+  {
+    cout << "pQCD cross section for gQ-> gQ with K = " << KgQgQ;
+    if(couplingRunning)
+    {
+      cout << " and running coupling";
+    }
+    else
+    {
+      cout << " and constant coupling";
+    }
+    cout << ", kappa_gQ = " << kappa_gQgQ << endl;
+  }
+  
+  if(isotropicCrossSecGQ)
+  {
+    cout << "Sample angle isotropic for gQ-> gQ." << endl;
+  }
+  
+  // no meson decay if hadronization is not switched on (no mesons present)
+  if( !hadronization_hq )
+    mesonDecay = false;
+  
+  if( mesonDecay )
+  {
+    if(muonsInsteadOfElectrons)
+      cout << "Decay of heavy mesons to muons and not to electrons. " << endl;
+    if(studyNonPromptJpsiInsteadOfElectrons)
+      cout << "Decay of B mesons to non prompt Jpsi and not to electrons. " << endl;
+    if( muonsInsteadOfElectrons && studyNonPromptJpsiInsteadOfElectrons )
+    {
+      string errMsg = "Decay to muons and non prompt Jpsi not possible.";
+      throw eConfig_error( errMsg );
+    }
+  }
+
+
+  // study Jpsi
+  if( Particle::N_psi > 0 )
+  {
+    Particle::setJpsiMass( Mjpsi_input );
+    
+    if(constantCrossSecJpsi)
+      cout << "Constant cross section of " << constantCrossSecValueJpsi << " mb for ccbar -> Jpsi + g." << endl;
+    else
+      cout << "Cross section from Peskin for ccbar -> Jpsi + g." << endl;
+
+    if(isotropicCrossSecJpsi)
+      cout << "Sample angle isotropic for ccbar -> Jpsi + g." << endl;
+    
+    cout << "TdJpsi = " << TdJpsi << endl;
+
+    if( jpsi_formationTime != 0.0 )
+      cout << "Jpsi formation time: " << jpsi_formationTime << endl;
+  }
+}
 
 
 /**
@@ -323,6 +519,11 @@ void config::printUsedConfigurationParameters()
   output << "time = " << runtime << endl;
   output << "N_test = " << testparticles << endl;
   output << "e_freeze = " << freezeOutEnergyDensity << endl;
+  output << "Nf_light = " << N_light_flavors_input << endl;
+  output << "Nf_heavy = " << N_heavy_flavors_input << endl;
+  output << "scatt_offlineWithAdded = " << scatt_offlineWithAddedParticles << endl;
+  output << "scatt_amongOffline = " << scatt_amongOfflineParticles << endl;
+  output << "scatt_amongAdded = " << scatt_amongAddedParticles << endl;
   output << endl;
   
   output << "[initial_state]" << endl;
@@ -330,6 +531,7 @@ void config::printUsedConfigurationParameters()
   output << "minijet_P0 = " << P0 << endl;
   output << "pythia_file = " << pythiaParticleFile << endl;
   output << "cgc_file = " << cgcParticleFile << endl;
+  output << "mcatnlo_file = " << mcatnloParticleFile << endl;
   output << endl;
   
   output << "[output]" << endl;
@@ -338,6 +540,38 @@ void config::printUsedConfigurationParameters()
   output << "particles = " << static_cast<int>(outputSwitch_detailedParticleOutput) << endl;
   output << "movie_jets = " << static_cast<int>( outputSwitch_movieOutputJets ) << endl;
   output << "movie_medium = " << static_cast<int>( outputSwitch_movieOutputBackground ) << endl;
+  output << "v2RAA = " << static_cast<int>( v2RAAoutput ) << endl;
+  output << "v2RAAoutputIntermediateSteps = " << static_cast<int>( v2RAAoutputIntermediateSteps ) << endl;
+  output << "v2RAAoutputEtaBins = " << static_cast<int>( v2RAAoutputEtaBins ) << endl;
+  output << "dndyOutput = " << static_cast<int>( dndyOutput ) << endl;
+  output << endl;
+  
+  output << "[heavy_quark]" << endl;
+  output << "charm_mass = " << Mcharm_input << endl;
+  output << "bottom_mass = " << Mbottom_input << endl;
+  output << "Kfactor_ggQQbar = " << KggQQbar << endl;
+  output << "Kfactor_gQgQ = " << KgQgQ << endl;
+  output << "kappa_gQgQ = " << kappa_gQgQ << endl;
+  output << "running_coupling = " << couplingRunning << endl;
+  output << "iso_xsection_gQ = " << isotropicCrossSecGQ << endl;
+  output << "const_xsection_gQ = " << constantCrossSecGQ << endl;
+  output << "const_xsection_gQ_value = " << constantCrossSecValueGQ << endl;
+  output << "hadronization_hq = " << hadronization_hq << endl;
+  output << "mesonDecay = " << mesonDecay << endl;
+  output << "numberElectronStat = " << numberElectronStat << endl;
+  output << "muonsInsteadOfElectrons = " << muonsInsteadOfElectrons << endl;
+  output << "studyNonPromptJpsiInsteadOfElectrons = " << studyNonPromptJpsiInsteadOfElectrons << endl;
+  output << "N_psi_input = " << N_psi_input << endl;
+  output << "iso_xsection_jpsi = " << isotropicCrossSecJpsi << endl;
+  output << "const_xsection_jpsi = " << constantCrossSecJpsi << endl;
+  output << "const_xsection_jpsi_value = " << constantCrossSecValueJpsi << endl;
+  output << "jpsi_mass = " << Mjpsi_input << endl;
+  output << "TdJpsi = " << TdJpsi << endl;
+  output << "jpsi_sigmaAbs = " << jpsi_sigmaAbs << endl;
+  output << "jpsi_agN = " << jpsi_agN << endl;
+  output << "shadowing_model = " << static_cast<int>( shadowing_model ) << endl;
+  output << "jpsi_formationTime = " << jpsi_formationTime << endl;
+  output << "hqCorrelationsOutput = " << hqCorrelationsOutput << endl;
   output << endl;
   
   output << "[misc]" << endl;

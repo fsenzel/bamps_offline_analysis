@@ -21,10 +21,13 @@
 #include <vector>
 #include <stdexcept>
 #include <stdint.h>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include "globalsettings.h"
 #include "particle.h"
 #include "offlineoutput.h"
+#include "interpolation_iniJpsi.h"
 
 #define HELP_MESSAGE_REQUESTED 1
 
@@ -115,6 +118,15 @@ class config
   
   /** @brief Interface for config::freezeOutEnergyDensity */
   double getFreezeOutEnergyDensity() const { return freezeOutEnergyDensity; }
+  
+  /** @brief Interface for config::scatt_offlineWithAddedParticles */
+  bool isScatt_offlineWithAddedParticles() const {return scatt_offlineWithAddedParticles;}
+  
+  /** @brief Interface for config::scatt_amongOfflineParticles */
+  bool isScatt_amongOfflineParticles() const {return scatt_amongOfflineParticles;}
+  
+  /** @brief Interface for config::scatt_amongAddedParticles */
+  bool isScatt_amongAddedParticles() const {return scatt_amongAddedParticles;}
   /** ------------------------------- */
   
   /** ---- initial state options ---- */ 
@@ -126,6 +138,9 @@ class config
 
   /** @brief Interface for config::cgcParticleFile */
   string getCgcParticleFile() const { return cgcParticleFile; }
+  
+  /** @brief Interface for config::mcatnloParticleFileCharm */
+  string getMcatnloParticleFile() const {return mcatnloParticleFile;}
   
   /** @brief Interface for config::P0 */
   double getPtCutoff() const { return P0; }
@@ -146,7 +161,91 @@ class config
  
   /** @brief Interface for config::standardOutputDirectoryName */
   string getStandardOutputDirectoryName() const { return standardOutputDirectoryName; }
+  
+  /** @brief Interface for config::v2RAAoutput */
+  bool isV2RAAoutput() const {return  v2RAAoutput;}
+  
+  /** @brief Interface for config::v2RAAoutputIntermediateSteps */
+  bool isV2RAAoutputIntermediateSteps() const {return v2RAAoutputIntermediateSteps;}
+  
+  /** @brief Interface for config::v2RAAoutputEtaBins */
+  int getV2RAAoutputEtaBins() const {return v2RAAoutputEtaBins;}
+  
+  /** @brief Interface for config::dndyOutput */
+  bool isDndyOutput() const {return  dndyOutput;}
   /** ------------------------------- */
+  
+  /** -------- heavy quark options ------- */ 
+  // open heavy flavor
+  /** @brief Interface for config::KggQQbar */
+  double getKggQQb() const {return KggQQbar;}
+  
+  /** @brief Interface for config::KgQgQ */
+  double getKgQgQ() const {return KgQgQ;}
+  
+  /** @brief Interface for config::kappa_gQgQ */
+  double getKappa_gQgQ() const {return kappa_gQgQ;}
+  
+  /** @brief Interface for config::couplingRunning */
+  bool isCouplingRunning() const {return couplingRunning;}
+  
+  /** @brief Interface for config::isotropicCrossSecGQ */
+  bool isIsotropicCrossSecGQ() const {return isotropicCrossSecGQ;}
+  
+  /** @brief Interface for config::constantCrossSecGQ */
+  bool isConstantCrossSecGQ() const {return constantCrossSecGQ;}
+  
+  /** @brief Interface for config::constantCrossSecValueGQ */
+  double getConstantCrossSecValueGQ() const {return constantCrossSecValueGQ; }
+
+
+  // hadronization of open heavy flavor
+  /** @brief Interface for config::hadronization_hq */
+  bool isHadronizationHQ() const {return hadronization_hq;}
+  
+  /** @brief Interface for config::mesonDecay */
+  bool isMesonDecay() const {return mesonDecay;}
+  
+  /** @brief Interface for config::numberElectronStat */
+  int getNumberElectronStat() const {return  numberElectronStat;}
+  
+  /** @brief Interface for config::muonsInsteadOfElectrons */
+  bool isMuonsInsteadOfElectrons() const {return muonsInsteadOfElectrons;}
+  
+  /** @brief Interface for config::studyNonPromptJpsiInsteadOfElectrons */
+  bool isStudyNonPromptJpsiInsteadOfElectrons() const {return studyNonPromptJpsiInsteadOfElectrons;}
+  
+  
+  // Jpsi
+  /** @brief Interface for config::isotropicCrossSecJpsi */
+  bool isIsotropicCrossSecJpsi() const {return  isotropicCrossSecJpsi;}
+  
+  /** @brief Interface for config::constantCrossSecJpsi */
+  bool isConstantCrossSecJpsi() const {return  constantCrossSecJpsi;}
+  
+  /** @brief Interface for config::constantCrossSecValueJpsi */
+  double getConstantCrossSecValueJpsi() const {return  constantCrossSecValueJpsi; }
+  
+  /** @brief Interface for config::TdJpsi */
+  double getTdJpsi() const {return  TdJpsi;}
+  
+  /** @brief Interface for config::jpsi_sigmaAbs */
+  double getSigmaAbs() const {return jpsi_sigmaAbs;} 
+  
+  /** @brief Interface for config::jpsi_agN */
+  double getJpsiagN() const {return jpsi_agN;} 
+  
+  /** @brief Interface for config::shadowing_model */
+  shadowModelJpsi getShadowingModel() const  {return shadowing_model;} 
+
+  /** @brief Interface for config::jpsi_formationTime */
+  double getJpsiFormationTime() const  {return jpsi_formationTime;} 
+  
+  
+  // heavy quark output
+  /** @brief Interface for config::hqCorrelationsOutput */
+  bool isHqCorrelationsOutput() const {return hqCorrelationsOutput;}
+  /** ------------------------------------ */
 
   /** -------- miscellaneous options ------- */ 
   bool repeatTimesteps() const { return switch_repeatTimesteps; }
@@ -214,8 +313,14 @@ class config
   /** @brief Write out all input parameters */
   void printUsedConfigurationParameters();
   
+  /** @brief Process some settings needed for heavy quark runs */
+  void processHeavyQuarkOptions();
+  
   /** @brief Do some checks on user-provided options and parameters */
   void checkOptionsForSanity();
+  
+  /** @brief Create output directory if necessary */
+  void checkAndCreateOutputDirectory( boost::filesystem::path& _dir );
   /** ------------------------------ */
   
   /** ------ general options ------- */  
@@ -257,6 +362,24 @@ class config
    * Particles in regions with energy densities below this threshold will be freely streaming
    */
   double freezeOutEnergyDensity;
+  
+  /** @brief number of active light flavors 
+   * ( 0: only gluons, 1: including up, 2: including down, 3: including strange)
+   */
+  int N_light_flavors_input;
+  /** @brief number of active heavy flavors 
+   * ( 0: no charm and bottom, 1: only charm, 2: charm and bottom), see particleprototype.h, global parameter 
+   */
+  int N_heavy_flavors_input;
+  
+  /** @brief Whether offline particles are allowed to scatter with added particles */
+  bool scatt_offlineWithAddedParticles;
+  
+  /** @brief Whether offline particles are allowed to scatter with other offline particles */
+  bool scatt_amongOfflineParticles;
+  
+  /** @brief Whether added particles are allowed to scatter with other added particles */
+  bool scatt_amongAddedParticles;
   /** ------------------------------- */
   
   /** ---- initial state options ---- */ 
@@ -272,6 +395,11 @@ class config
    * Declare as "-" if particle momenta should be sampled via glauber method
    */
   string cgcParticleFile; 
+  
+  /** @brief Relative or full path (including filename) of MC@NLO output file with particle data
+   * Declare as "-" if particle momenta should be sampled via glauber method
+   */
+  string mcatnloParticleFile;
   
   /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
   double P0;  
@@ -292,7 +420,103 @@ class config
   
   /** @brief Directory to which general output should be written */
   string standardOutputDirectoryName;
+  
+  /** @brief Whether v2 and RAA output are printed */
+  bool v2RAAoutput;
+  
+  /** @brief Whether v2 and RAA output are printed at each analyisis time step (otherwise just at beginning and end) */
+  bool v2RAAoutputIntermediateSteps;
+  
+  /** @brief How many eta bins are written out for v2 and RAA output (small number means small rapidity interval at mid rapidity) */
+  int v2RAAoutputEtaBins;
+  
+  /** @brief Whether dndy output is written out */
+  bool dndyOutput;
   /** ------------------------------- */
+  
+  /** -------- heavy quark options ------- */ 
+  // open heavy flavor
+  /** @brief K factor for process g + g -> Q + Qbar */
+  double KggQQbar;
+  
+  /** @brief K factor for process g + Q -> g + Q */
+  double KgQgQ;
+  
+  /** @brief Kappa for Debye screening for process g + Q -> g + Q, usually 0.2 (Peshier,Gossiaux) */
+  double kappa_gQgQ;
+  
+  /** @brief Whether a running coupling is employed for all process, for which running coupling is implemented (currently all processes involving heavy quarks) */
+  bool couplingRunning;
+  
+  /** @brief Whether an isotropic momentum sampling is employed for process g + Q -> g + Q */
+  bool isotropicCrossSecGQ;
+  
+  /** @brief Whether a constant cross section is employed for process g + Q -> g + Q */
+  bool constantCrossSecGQ;
+  
+  /** @brief Value of constant cross section for process g + Q -> g + Q in mb */
+  double constantCrossSecValueGQ;
+  
+  /** @brief Mass of charm quarks */
+  double Mcharm_input;
+  
+  /** @brief Mass of bottom quarks */
+  double Mbottom_input;
+  
+  
+  // hadronization of open heavy flavor
+  /** @brief Whether hadronization of heavy quarks to D and B mesons is carried out */
+  bool hadronization_hq;
+  
+  /** @brief Whether decay of heavy mesons from charm and bottom to electrons is performed */
+  bool mesonDecay;
+  
+  /** @brief To improve statistics one meson decays to numberElectronStat electrons */
+  int numberElectronStat;
+  
+  /** @brief Whether decay to muons should be performed instead of electrons */
+  bool muonsInsteadOfElectrons;
+  
+  /** @brief Whether decay of B mesons to non prompt Jpsi should be performed instead to electrons */
+  bool studyNonPromptJpsiInsteadOfElectrons;
+  
+  
+  // Jpsi
+  /** @brief How many psi states are allowed */
+  int N_psi_input;
+  
+  /** @brief Whether an isotropic momentum sampling is employed for process Q + Qbar -> g + J/psi */
+  bool isotropicCrossSecJpsi;
+  
+  /** @brief Whether a constant cross section is employed for process Q + Qbar -> g + J/psi */
+  bool constantCrossSecJpsi;
+  
+  /** @brief Value of constant cross section for process Q + Qbar -> g + J/psi in mb */
+  double constantCrossSecValueJpsi;
+  
+  /** @brief Mass of J/psi */
+  double Mjpsi_input;
+
+  /** @brief Dissociation temperature of J/psi */
+  double TdJpsi;
+  
+  /** @brief Absorption cross section for initial J/psi in mb */
+  double jpsi_sigmaAbs;
+  
+  /** @brief Parameter for momentum broadening of initial J/psi */
+  double jpsi_agN;
+  
+  /** @brief Shadowing model used for initial J/psi */
+  shadowModelJpsi shadowing_model;
+
+  /** @brief Formation time for initial J/psi in addition to the standard 1/M_T */
+  double jpsi_formationTime;
+  
+  
+  // heavy quark output
+  /** @brief Whether correlation analysis of heavy quark pairs is done */
+  bool hqCorrelationsOutput;
+  /** ------------------------------------ */
   
   /** -------- miscellaneous options ------- */ 
   /** @brief X where interpolation of MFP is done for E > X*T */
@@ -362,7 +586,29 @@ class config
   /** ----------------------------------------------- */
 };
 
-
+inline void config::checkAndCreateOutputDirectory(boost::filesystem::path& _dir)
+{
+  if ( boost::filesystem::exists( _dir ) )
+  {
+    if ( boost::filesystem::is_directory( _dir ) )
+    {
+      return;
+    }
+    else
+    {
+      boost::filesystem::path renamePath( _dir.string() + ".backup" );
+      std::cout << "File with name " << _dir.string() << " blocks the creation of an output folder for offline reconstruction." << std::endl;
+      std::cout << "It is renamed to " << renamePath.string() << std::endl;
+      boost::filesystem::rename( _dir, renamePath );
+      boost::filesystem::create_directory( _dir );       
+    }
+  }
+  else
+  {
+    std::cout << "Creating output folder: " << _dir.string() << std::endl;
+    boost::filesystem::create_directory( _dir );    
+  }
+}
 
 /** @brief exception class for handling unexpected critical behaviour within the configuration of the BAMPS run  */
 class eConfig_error : public std::runtime_error
