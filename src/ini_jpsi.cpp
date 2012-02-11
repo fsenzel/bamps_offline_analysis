@@ -9,17 +9,17 @@
 #include "configuration.h"
 
 using namespace std;
+using namespace ns_casc;
 
-extern coord *addedPartcl;
 extern int numberAdded;
 extern int Ntest;
 
 binning ptbins("output/ptbins.dat", 0.0, 5.0, 100);
 
-ini_jpsi::ini_jpsi( const double sqrtS_arg, const double Bimp_arg, const double sigmaAbs_arg, const double agN_arg, const shadowModelJpsi shadowing_model_arg )
-: sqrtS(sqrtS_arg), impact_parameter(Bimp_arg), sigmaAbs(sigmaAbs_arg), agN(agN_arg), shadowing_model(shadowing_model_arg)
+ini_jpsi::ini_jpsi( const double sqrtS_arg, const double Bimp_arg, const double sigmaAbs_arg, const double agN_arg, const shadowModelJpsi shadowing_model_arg, const double KInicharm_arg )
+: sqrtS(sqrtS_arg), impact_parameter(Bimp_arg), sigmaAbs(sigmaAbs_arg), agN(agN_arg), shadowing_model(shadowing_model_arg), KInicharm(KInicharm_arg)
 {
-  theInterpolation_dndptdy.init( sqrtS, impact_parameter, sigmaAbs, agN, shadowing_model );
+  theInterpolation_dndptdy.configure( sqrtS, impact_parameter, sigmaAbs, agN, shadowing_model );
 }
 
 void ini_jpsi::sample_jpsis()
@@ -65,11 +65,7 @@ void ini_jpsi::sample_jpsis()
         total_number_jpsi_one_Au_collision = 0.018879;
     }
   }
-  
-  
-   
-  double KInicharm = theConfig.getKIniCharm();
-  
+
   int number_jpsi = int(total_number_jpsi_one_Au_collision * KInicharm * Ntest);
   double remainder = total_number_jpsi_one_Au_collision * KInicharm * Ntest - number_jpsi; // int() above rounds down, but we want to take the remainder also into account
   if(ran2() < remainder)
@@ -134,9 +130,9 @@ void ini_jpsi::sample_one_jpsi( const int partclNmb )
 {
   double pt, y, phi;
 
-  addedPartcl[partclNmb].MASS = Mjpsi;
-  addedPartcl[partclNmb].N_EVENT = partclNmb;
-  addedPartcl[partclNmb].FLAVOR = 50;
+  addedParticles[partclNmb].m = Particle::getMass( jpsi );
+  addedParticles[partclNmb].N_EVENT = partclNmb;
+  addedParticles[partclNmb].FLAVOR = jpsi;
 
   // get y and pt
   sample_metropolis_dndptdy( pt, y );
@@ -145,24 +141,14 @@ void ini_jpsi::sample_one_jpsi( const int partclNmb )
   phi = ran2() * 2.0 * M_PI;
 
   // momenta and energy
-  addedPartcl[partclNmb].PX = pt * sin( phi );
-  addedPartcl[partclNmb].PY = pt * cos( phi );
-  addedPartcl[partclNmb].PZ = sqrt( ( pow( pt, 2.0 ) + pow( addedPartcl[partclNmb].MASS, 2.0 ) ) * pow( exp( y ) - exp( -y ) , 2.0 ) / 4.0 );
+  addedParticles[partclNmb].PX = pt * sin( phi );
+  addedParticles[partclNmb].PY = pt * cos( phi );
+  addedParticles[partclNmb].PZ = sqrt( ( pow( pt, 2.0 ) + pow( addedParticles[partclNmb].m, 2.0 ) ) * pow( exp( y ) - exp( -y ) , 2.0 ) / 4.0 );
   // consider also negativ pz. y is only sampled for positiv y since tables are only for positiv y and y is symmetric around 0. Here, substitute randomly pz by -pz:
   if ( ran2() < 0.5 )
-    addedPartcl[partclNmb].PZ = -addedPartcl[partclNmb].PZ;
+    addedParticles[partclNmb].PZ = -addedParticles[partclNmb].PZ;
 
-  addedPartcl[partclNmb].E = sqrt( pow( addedPartcl[partclNmb].PX, 2.0 ) + pow( addedPartcl[partclNmb].PY, 2.0 ) + pow( addedPartcl[partclNmb].PZ, 2.0 ) + pow( addedPartcl[partclNmb].MASS, 2.0 ) );
-  
-  // this is now done earlier, by changing the Jpsi mass to 3.6 in configuration.h
-//   // Kai has another definition of the J/psi's mass:
-//   const double M_jpsi = 3.6; // GeV
-//   // make Jpsi heavier by breaking energy conservation
-//   addedPartcl[partclNmb].MASS = M_jpsi;
-//   addedPartcl[partclNmb].E = sqrt( pow( addedPartcl[partclNmb].PX, 2.0 ) + pow( addedPartcl[partclNmb].PY, 2.0 ) + pow( addedPartcl[partclNmb].PZ, 2.0 ) + pow( addedPartcl[partclNmb].MASS, 2.0 ) );
-
- 
-
+  addedParticles[partclNmb].E = sqrt( pow( addedParticles[partclNmb].PX, 2.0 ) + pow( addedParticles[partclNmb].PY, 2.0 ) + pow( addedParticles[partclNmb].PZ, 2.0 ) + pow( addedParticles[partclNmb].m, 2.0 ) );
 }
 
 

@@ -9,7 +9,7 @@
 class ini_jpsi
 {
 public:
-    ini_jpsi(const double sqrtS_arg, const double Bimp_arg, const double sigmaAbs_arg, const double agN, const shadowModelJpsi shadowing_model );
+    ini_jpsi(const double sqrtS_arg, const double Bimp_arg, const double sigmaAbs_arg, const double agN, const shadowModelJpsi shadowing_model, const double KInicharm_arg  );
     void sample_jpsis();
 
   private:
@@ -20,6 +20,8 @@ public:
     
     double impact_parameter, sigmaAbs, sqrtS, agN;
     shadowModelJpsi shadowing_model;
+    
+    double KInicharm;
     
 };
 

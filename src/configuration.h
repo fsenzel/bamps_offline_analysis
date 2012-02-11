@@ -54,6 +54,7 @@ namespace ns_casc
   extern std::vector<ParticleOffline> particles_atTimeNowCopy;
   extern std::vector<ParticleOffline> addedParticles;
   extern std::vector<ParticleOffline> addedParticlesCopy;
+  extern std::vector<ParticleHFelectron> addedPartcl_electron;
 }
 //--------------------------------------------------------//
 

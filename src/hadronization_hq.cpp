@@ -1,7 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <iomanip>
-#include "hadronization.h"
+#include "hadronization_hq.h"
 #include "particle.h"
 #include "random.h"
 #include "binning.h"
@@ -9,36 +9,28 @@
 
 #include "Pythia.h"
 using namespace Pythia8; 
-
+using namespace ns_casc;
 using namespace std;
 
-extern coord *addedPartcl,  *addedPartcl_copy;
-extern coord_small *addedPartcl_electron;
 
 
-hadronization::hadronization( const int number_arg )
-{
-  number = number_arg;
-}
-
-void hadronization::heavyQuarkFragmentation()
+void hadronization_hq::heavyQuarkFragmentation()
 {
   double z;
   int flav;
 
   binning bins( "output/binsFragment.dat", 0.0, 1.0, 400 );
-
   for ( int i = 1; i <= number; i++ )
   {
-    addedPartcl_copy[i]=addedPartcl[i]; // copy all added particles, perform hadronization here (important to have a second instant for initial hadronization, simulating pp collisions)
+    addedParticlesCopy[i]=addedParticles[i]; // copy all added particles, perform hadronization here (important to have a second instant for initial hadronization, simulating pp collisions)
      
-    flav = addedPartcl_copy[i].FLAVOR;
+    flav = addedParticlesCopy[i].FLAVOR;
     if ( flav >= 7 && flav <= 10 )
     {
       z = getFragmentationZ( flav );
-      addedPartcl_copy[i].PX = addedPartcl_copy[i].PX * z;
-      addedPartcl_copy[i].PY = addedPartcl_copy[i].PY * z;
-      addedPartcl_copy[i].PZ = addedPartcl_copy[i].PZ * z;
+      addedParticlesCopy[i].PX = addedParticlesCopy[i].PX * z;
+      addedParticlesCopy[i].PY = addedParticlesCopy[i].PY * z;
+      addedParticlesCopy[i].PZ = addedParticlesCopy[i].PZ * z;
       
       // D+ = c dbar, D0 = c ubar, D0bar = cbar u, D- = cbar d
       // B+ = bbar u, B0 = bbar d, B0bar = b dbar, B- = b ubar 
@@ -49,49 +41,39 @@ void hadronization::heavyQuarkFragmentation()
       if( flav == 7 )
       {
         if( ran2() < fraction)
-          addedPartcl_copy[i].FLAVOR = 411;
+          addedParticlesCopy[i].FLAVOR = dmeson_plus;
         else
-          addedPartcl_copy[i].FLAVOR = 421;
+          addedParticlesCopy[i].FLAVOR = dmeson_zero;
       }
       else if( flav == 8 )
       {
         if( ran2() < fraction)
-          addedPartcl_copy[i].FLAVOR = -411;
+          addedParticlesCopy[i].FLAVOR = dmeson_minus;
         else
-          addedPartcl_copy[i].FLAVOR = -421;
+          addedParticlesCopy[i].FLAVOR = dmeson_zero_bar;
       }
       else if( flav == 9 )
       {
         if( ran2() < fraction)
-          addedPartcl_copy[i].FLAVOR = -511;
+          addedParticlesCopy[i].FLAVOR = bmeson_zero_bar;
         else
-          addedPartcl_copy[i].FLAVOR = -521;
+          addedParticlesCopy[i].FLAVOR = bmeson_minus;
       }
       else if( flav == 10 )
       {
         if( ran2() < fraction)
-          addedPartcl_copy[i].FLAVOR = 511;
+          addedParticlesCopy[i].FLAVOR = bmeson_zero;
         else
-          addedPartcl_copy[i].FLAVOR = 521;
+          addedParticlesCopy[i].FLAVOR = bmeson_plus;
       }
       
-      if( fabs(addedPartcl_copy[i].FLAVOR) == 411 ) 
-        addedPartcl_copy[i].MASS = 1.870; //D+-: 1869.62, 
-      else if( fabs(addedPartcl_copy[i].FLAVOR) == 421 ) 
-        addedPartcl_copy[i].MASS = 1.865; //D0: 1864.84
-      else if( fabs(addedPartcl_copy[i].FLAVOR) == 511 ) 
-        addedPartcl_copy[i].MASS = 5.280; //B0: 5279.50
-      else if( fabs(addedPartcl_copy[i].FLAVOR) == 521 ) 
-        addedPartcl_copy[i].MASS = 5.279; //B+-: 5279.17
-      else
-        cout << "error in hadronization::heavyQuarkFragmentation()" << endl;
+      addedParticlesCopy[i].m = ParticlePrototype::getMass( addedParticlesCopy[i].FLAVOR );        
         
-        
-      addedPartcl_copy[i].E = sqrt( pow( addedPartcl_copy[i].PX, 2.0 ) + pow( addedPartcl_copy[i].PY, 2.0 ) + pow( addedPartcl_copy[i].PZ, 2.0 ) + pow( addedPartcl_copy[i].MASS, 2.0 ) );
+      addedParticlesCopy[i].E = sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) + pow( addedParticlesCopy[i].m, 2.0 ) );
 
-//       cout << addedPartcl_copy[i].PZ  << endl;
+//       cout << addedParticlesCopy[i].PZ  << endl;
 
-      bins.add( addedPartcl_copy[i].PZ );
+      bins.add( addedParticlesCopy[i].PZ );
     }
   }
 
@@ -100,7 +82,7 @@ void hadronization::heavyQuarkFragmentation()
 
 
 // samples z with the metropolis algoritm according to fragmentation function getFragmentationFunction(z)
-double hadronization::getFragmentationZ(const int flav)
+double hadronization_hq::getFragmentationZ(const int flav)
 {
   double z;
   double z_new;
@@ -160,7 +142,7 @@ double hadronization::getFragmentationZ(const int flav)
 
 
 // use Peterson fragmentation, cf. Peterson et al. Phys. Rev. D 27, 105-111 (1983)
-double hadronization::getFragmentationFunction( const double z, const int flav )
+double hadronization_hq::getFragmentationFunction( const double z, const int flav )
 {
   double D, epsilon;
 //   const double m_q = 0.02;
@@ -171,7 +153,7 @@ double hadronization::getFragmentationFunction( const double z, const int flav )
   else if(flav == 9 || flav == 10)
     epsilon = epsilon_b;
   else
-    cout << "error in hadronization::getFragmentationFunction( const double z, const int flav )" << endl;
+    cout << "error in hadronization_hq::getFragmentationFunction( const double z, const int flav )" << endl;
 
   D = 1.0 / ( z * pow( 1.0 - 1.0 / z - epsilon / ( 1.0 - z ) , 2.0 ) );
 
@@ -182,9 +164,18 @@ double hadronization::getFragmentationFunction( const double z, const int flav )
 
 
 
-mesonDecay::mesonDecay( const int number_arg )
+mesonDecay::mesonDecay( const int number_arg, const int numberElectronStat_arg, const bool local_cluster_arg, const bool muonsInsteadOfElectrons_arg, const bool nonPromptJpsiInsteadOfElectrons_arg ) :
+  number(number_arg), numberElectronStat(numberElectronStat_arg), local_cluster(local_cluster_arg), muonsInsteadOfElectrons(muonsInsteadOfElectrons_arg), nonPromptJpsiInsteadOfElectrons(nonPromptJpsiInsteadOfElectrons_arg)
 {
-  number = number_arg;
+  /**
+  * Reserve memory for the Particle vector.
+  */
+  addedPartcl_electron.reserve( number * numberElectronStat );
+  /**
+  * Now the addedPartcl_electron vector is re-sized to hold the needed number of particles (this is NOT done when reserving memory!).
+  * The particles are initialised with the standard constructor, actual attributes such as momentum etc. MUST be set later!
+  */
+  addedPartcl_electron.resize( number * numberElectronStat );
 }
 
 // void mesonDecay::decayToElectronsToyModel()
@@ -196,39 +187,31 @@ mesonDecay::mesonDecay( const int number_arg )
 // 
 //   for ( int i = 1; i <= number; i++ )
 //   {
-//     if ( addedPartcl_copy[i].FLAVOR == 700 || addedPartcl_copy[i].FLAVOR == 800 ) // d meson
+//     if ( addedParticlesCopy[i].FLAVOR == 700 || addedParticlesCopy[i].FLAVOR == 800 ) // d meson
 //     {
-//       P[0] = addedPartcl_copy[i].E;
-//       P[1] = addedPartcl_copy[i].PX;
-//       P[2] = addedPartcl_copy[i].PY;
-//       P[3] = addedPartcl_copy[i].PZ;
-//       F = addedPartcl_copy[i].FLAVOR;
+//       P[0] = addedParticlesCopy[i].E;
+//       P[1] = addedParticlesCopy[i].PX;
+//       P[2] = addedParticlesCopy[i].PY;
+//       P[3] = addedParticlesCopy[i].PZ;
+//       F = addedParticlesCopy[i].FLAVOR;
 //       
 //       mesonToElectronToyModel( P, F );
 //       
-//       addedPartcl_copy[i].PX = P[1];
-//       addedPartcl_copy[i].PY = P[2];
-//       addedPartcl_copy[i].PZ = P[3];
-//       addedPartcl_copy[i].FLAVOR = 1000; // electron
-//       addedPartcl_copy[i].MASS = 0.000511; //electrons: 511 keV
-//       addedPartcl_copy[i].E = sqrt( pow( addedPartcl_copy[i].PX, 2.0 ) + pow( addedPartcl_copy[i].PY, 2.0 ) + pow( addedPartcl_copy[i].PZ, 2.0 ) + pow( addedPartcl_copy[i].MASS, 2.0 ) );
+//       addedParticlesCopy[i].PX = P[1];
+//       addedParticlesCopy[i].PY = P[2];
+//       addedParticlesCopy[i].PZ = P[3];
+//       addedParticlesCopy[i].FLAVOR = 1000; // electron
+//       addedParticlesCopy[i].m = 0.000511; //electrons: 511 keV
+//       addedParticlesCopy[i].E = sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) + pow( addedParticlesCopy[i].m, 2.0 ) );
 // 
-// //       cout << addedPartcl_copy[i].PZ  << endl;
+// //       cout << addedParticlesCopy[i].PZ  << endl;
 // 
-//       bins.add( addedPartcl_copy[i].PZ );
+//       bins.add( addedParticlesCopy[i].PZ );
 //     }
 //   }
 // 
 //   bins.print();
 // }
-
-void mesonDecay::mesonToElectronToyModel(double P[4], int & F)
-{
-  // ??
-}
-
-
-
 
 
 // use PYTHIA for Meson decay
@@ -237,25 +220,18 @@ void mesonDecay::decayToElectronsPythia()
   double p_tmp[4];
   int id, k_e;
   double mm,ee;
-  
-  const bool muonsInsteadOfElectrons = theConfig.isMuonsInsteadOfElectrons();
-  
-  const bool nonPromptJpsiInsteadOfElectrons = theConfig.isStudyNonPromptJpsiInsteadOfElectrons();
-
 
   binning bins( "output/binsDecay.dat", -3.0, 3.0, 400 );
   binning binsElec( "output/binsElectron.dat", 1000., 1002., 3 );
   binning binsTheta( "output/binsTheta.dat", 0., 3.15, 200 );
-  
 
-  
   string xmlpath;
   // give correct xml directory to pythia object, only possible via constructor
   char * csc_check_fuchs = getenv("PBS_JOBID");
   char * csc_check_loewe = getenv("SLURM_JOB_ID");
-  if( csc_check_fuchs != NULL && !theConfig.isLocalCluster() )
+  if( csc_check_fuchs != NULL && !local_cluster )
     xmlpath = "/home/aggreinerc/uphoff/full/pythia8140/xmldoc";
-  else if( csc_check_loewe != NULL && !theConfig.isLocalCluster() )
+  else if( csc_check_loewe != NULL && !local_cluster )
     xmlpath = "/home/hfftheo/uphoff/pythia/pythia8157/xmldoc";
   else
     xmlpath = "/home/uphoff/cascade/pythia/pythia8140/xmldoc";
@@ -287,33 +263,32 @@ void mesonDecay::decayToElectronsPythia()
     setPythiaDecayChannelsElectrons( pythia );
   
 //   pythia.particleData.listChanged();
-//   
 //   pythia.particleData.list(443);
   
 
   for ( int i = 1; i <= number; i++ )
   {
-    if ( fabs(addedPartcl_copy[i].FLAVOR) == 411 || fabs(addedPartcl_copy[i].FLAVOR) == 421 ||  fabs(addedPartcl_copy[i].FLAVOR) == 511 || fabs(addedPartcl_copy[i].FLAVOR) == 521 ) // d or b meson
+    if ( ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == dmeson_gen || ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == bmeson_gen ) // d or b meson
     {
-      // each d meson decays to theConfig.getNumberElectronStat() electrons
-      for(int k = 1; k <= theConfig.getNumberElectronStat(); k++)
+      // each d meson decays to numberElectronStat electrons
+      for(int k = 1; k <= numberElectronStat; k++)
       {      
-        k_e = ( i - 1 ) * theConfig.getNumberElectronStat() + k ;
+        k_e = ( i - 1 ) * numberElectronStat + k ;
         // do not copy all particle properties, just E, p, M, Flavor (see below))
-//         addedPartcl_electron[k_e]=addedPartcl_copy[i]; // copy all added particles, perform decay here (important to have a second instant for initial electrons, simulating pp collisions)
+//         addedPartcl_electron[k_e]=addedParticlesCopy[i]; // copy all added particles, perform decay here (important to have a second instant for initial electrons, simulating pp collisions)
         
         //Reset event record to allow for new event.
         event.reset();
         
-        id = addedPartcl_copy[i].FLAVOR;
+        id = addedParticlesCopy[i].FLAVOR;
 
         // mass from Pythia
         mm = pdt.mass(id);
         //calculate energy with new mass
-        ee = sqrt( pow( addedPartcl_copy[i].PX, 2.0 ) + pow( addedPartcl_copy[i].PY, 2.0 ) + pow( addedPartcl_copy[i].PZ, 2.0 ) + pow( mm, 2.0 ) );
+        ee = sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) + pow( mm, 2.0 ) );
         // Store the particle in the event record.
         // definition from event.h: int append(int id, int status, int color, int anticolor, double px, double py, double pz, double e, double m = 0.)
-        event.append(  id, 1, 0,   0, addedPartcl_copy[i].PX, addedPartcl_copy[i].PY,  addedPartcl_copy[i].PZ, ee, mm); // add particle to event, status=1 ensures that no message about non vanishing total charge pops up
+        event.append(  id, 1, 0,   0, addedParticlesCopy[i].PX, addedParticlesCopy[i].PY,  addedParticlesCopy[i].PZ, ee, mm); // add particle to event, status=1 ensures that no message about non vanishing total charge pops up
 
         // Generate events. Quit if failure.
         if (!pythia.next()) {
@@ -327,9 +302,9 @@ void mesonDecay::decayToElectronsPythia()
 //         }
         
         // for theta analysis
-        p_tmp[1] = addedPartcl_copy[i].PX;
-        p_tmp[2] = addedPartcl_copy[i].PY;
-        p_tmp[3] = addedPartcl_copy[i].PZ;
+        p_tmp[1] = addedParticlesCopy[i].PX;
+        p_tmp[2] = addedParticlesCopy[i].PY;
+        p_tmp[3] = addedParticlesCopy[i].PZ;
 	
         
         bool found_electron = false; // just for error checking if there are 2 electrons
@@ -342,29 +317,29 @@ void mesonDecay::decayToElectronsPythia()
             if( event[j].isFinal() && !found_electron && ( event[j].mother1()==1 || event[j].mother2()==1 ) )
             {
               if( event[j].id() > 0) // electron
-                addedPartcl_electron[k_e].FLAVOR = 1000; // electron
+                addedPartcl_electron[k_e].FLAVOR = electron;
               else
-                addedPartcl_electron[k_e].FLAVOR = 1001; // positron
+                addedPartcl_electron[k_e].FLAVOR = positron;
               
               addedPartcl_electron[k_e].PX = event[j].px();
               addedPartcl_electron[k_e].PY = event[j].py();
               addedPartcl_electron[k_e].PZ = event[j].pz();
               
-              addedPartcl_electron[k_e].MASS = event[j].m();
-              addedPartcl_electron[k_e].E = sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) + pow( addedPartcl_electron[k_e].PZ, 2.0 ) + pow( addedPartcl_electron[k_e].MASS, 2.0 ) );
+              addedPartcl_electron[k_e].m = event[j].m();
+              addedPartcl_electron[k_e].E = sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) + pow( addedPartcl_electron[k_e].PZ, 2.0 ) + pow( addedPartcl_electron[k_e].m, 2.0 ) );
               
               found_electron = true;
             }
             else if( event[j].isFinal() && found_electron && ( event[j].mother1()==1 || event[j].mother2()==1 ) )
             {
-              cout << "error in meson decay to electron. Additional electron found for particle ID " << addedPartcl_copy[i].FLAVOR << "  (411&421 D meson, 511&521 B meson)" << endl;
+              cout << "error in meson decay to electron. Additional electron found for particle ID " << addedParticlesCopy[i].FLAVOR << "  (411&421 D meson, 511&521 B meson)" << endl;
               // List event
 //               event.list();
             }
           }
         }
         
-        if( !found_electron && !( ( fabs(addedPartcl_copy[i].FLAVOR) == 411 || fabs(addedPartcl_copy[i].FLAVOR) == 421 ) &&   nonPromptJpsiInsteadOfElectrons ) )
+        if( !found_electron && !( ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == dmeson_gen && nonPromptJpsiInsteadOfElectrons ) )
         {
           cout << "error in meson decay to electron. No electron found" << endl;
           // List event

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void interpolation_iniJpsi_dndptdy::init( const double sqrtS_arg, const double Bimp_arg, const double sigmaAbs_arg, const double agN, const shadowModelJpsi shadowing_model ) 
+void interpolation_iniJpsi_dndptdy::configure( const double sqrtS_arg, const double Bimp_arg, const double sigmaAbs_arg, const double agN, const shadowModelJpsi shadowing_model ) 
 {
   string name;
   

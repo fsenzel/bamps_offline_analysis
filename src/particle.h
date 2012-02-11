@@ -34,11 +34,12 @@ class Particle : public ParticlePrototype
 {
   public:
     /** @brief Provide standard constructor (for completeness) */
-    Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), N_EVENT( 0 ), HARD( true ), edge( -1 ), coll_id( -1 ),
-    collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), PYold( 0 ), PZold( 0 ), as22( 0 ), as23( 0 ), rate23v( 0 ),
-    rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ), cs22t( 0 ), cs23t( 0 ), lambda_scaled( 0 ), md2g_scaled_22( 0 ),
-    md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), md2q_scaled_23( 0 ), free( true ), init( true ), step( 0 ), tstep( 0 ),
-    taustep( 0 ) {};
+    Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), temperature(0), flow_vr(0), flow_vz(0), 
+    N_EVENT( 0 ), HARD( true ), edge( -1 ), coll_id( -1 ), collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), 
+    PYold( 0 ), PZold( 0 ), as22( 0 ), as23( 0 ), rate23v( 0 ), rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ),
+    cs22t( 0 ), cs23t( 0 ), lambda_scaled( 0 ), md2g_scaled_22( 0 ),md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), 
+    md2q_scaled_23( 0 ), free( true ), init( true ), initially_produced( true ), jpsi_dissociation_number(-1), 
+    step( 0 ), tstep( 0 ), taustep( 0 ) {};
     
     /** @brief space time rapidity \eta */
     double eta;
@@ -47,6 +48,14 @@ class Particle : public ParticlePrototype
     double md2g;
     /** @brief quark screening mass currently associated with the particle object, scaled by alpha_s as md2g / alpha_s [GeV^2] */
     double md2q;
+    
+    /** @brief Temperature of the surrounding medium, needed for J/psi melting */
+    double temperature;
+    
+    /** @brief Radial flow of ring structure in which particle is located */
+    double flow_vr; 
+    /** @brief Longitudinal flow of ring structure in which particle is located */
+    double flow_vz;
     
     /** @brief Pythia event number */
     int N_EVENT;
@@ -63,6 +72,12 @@ class Particle : public ParticlePrototype
     bool free;
     /** @brief Flag for discerning particles that are still within their initial formation time */
     bool init;
+    
+    /** @brief Whether the particle was initially produced or later in a secondary process */
+    bool initially_produced;
+    
+    /** @brief Unique number of jpsi dissociation such that the same c+cbar do not reunite directly */
+    int jpsi_dissociation_number;
     
     /** @brief collision ordering time [fm] (geometric collisions) */
     double collisionTime;
@@ -178,6 +193,16 @@ class ParticleOffline : public Particle
     }
     
   private:
+};
+
+/**
+* @brief Provides basic properties of a particle, used for electrons from heavy flavor decays.
+* @author Oliver Fochler
+*
+* Use only basic properties of the ParticlePrototype class to minimize memory allocation. This is possible because heavy flavor electrons are not propagated through the medium. 
+*/
+class ParticleHFelectron : public ParticlePrototype
+{
 };
 
 #endif

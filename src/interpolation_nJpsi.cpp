@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void interpolation_nJpsi::init()
+void interpolation_nJpsi::configure()
 {
   // total numbers of tabulated points on the a, b "axes"
   n_i = 201; // T

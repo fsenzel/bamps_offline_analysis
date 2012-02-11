@@ -39,6 +39,7 @@ std::vector<ParticleOffline> ns_casc::particles_atTimeNow;
 std::vector<ParticleOffline> ns_casc::particles_atTimeNowCopy;
 std::vector<ParticleOffline> ns_casc::addedParticles;
 std::vector<ParticleOffline> ns_casc::addedParticlesCopy;
+std::vector<ParticleHFelectron> ns_casc::addedPartcl_electron;
 
 
 double dt = 0.1;

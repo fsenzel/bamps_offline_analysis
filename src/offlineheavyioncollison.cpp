@@ -96,19 +96,38 @@ void offlineHeavyIonCollision::init()
   addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
 
   int Nbefore = addedParticles.size();
-  for ( int j = 0; j < addedParticles.size(); j++ )
+  for(int j = 0; j < particles.size(); j++ )
   {
-    if ( addedParticles[j].FLAVOR > ( Particle::N_light_flavor * 2 ) )
+    // if this flavor is not active in the current run delete it or convert it to gluon for PYTHIA case to obtain the same initial energy density
+    if( ( particles[j].FLAVOR > 2 * Particle::N_light_flavor ) && ( ( particles[j].FLAVOR <= 2 * Particle::max_N_light_flavor ) || ( particles[j].FLAVOR > 2 * ( Particle::max_N_light_flavor + Particle::N_heavy_flavor ) ) ) )
     {
-      while ( addedParticles.back().FLAVOR > ( Particle::N_light_flavor * 2 ) )
+      if( theConfig->getInitialStateType() == pythiaInitialState )
       {
-        addedParticles.pop_back();
+        // transform non-active quarks to gluons
+        double ee = sqrt ( pow ( particles[j].PX , 2.0 ) +pow ( particles[j].PY , 2.0 ) +pow ( particles[j].PZ , 2.0 ) +pow ( particles[j].m , 2.0 ) );
+        double pp = sqrt ( pow ( particles[j].PX , 2.0 ) +pow ( particles[j].PY , 2.0 ) +pow ( particles[j].PZ , 2.0 ) );
+
+        // scaling in order to conserve the energy when making quarks massles
+        particles[j].PX = particles[j].PX * ee / pp;
+        particles[j].PY = particles[j].PY * ee / pp;
+        particles[j].PZ = particles[j].PZ * ee / pp;
+        particles[j].E = sqrt ( pow ( particles[j].PX , 2.0 ) + pow ( particles[j].PY , 2.0 ) + pow ( particles[j].PZ , 2.0 ) );
+        particles[j].m = 0.0;
+        particles[j].FLAVOR = gluon;   
       }
-      addedParticles[j] = addedParticles.back();
-      addedParticles.pop_back();
+      else
+      {
+        // delete last particle if also not active otherwise switch position with particle to be deleted
+        while( ( particles.back().FLAVOR > 2 * Particle::N_light_flavor ) && ( ( particles.back().FLAVOR <= 2 * Particle::max_N_light_flavor ) || ( particles.back().FLAVOR > 2 * ( Particle::max_N_light_flavor + Particle::N_heavy_flavor ) ) ) )
+        {
+          particles.pop_back();
+        }
+        particles[j] = particles.back();
+        particles.pop_back();
+      }
     }
   }
-  cout << "#### " << addedParticles.size() << " out of " << Nbefore << " added ( N_f = " << Particle::N_light_flavor << " )." << endl;
+  cout << "#### " << particles.size() << " out of " << Nbefore << " particles kept for simulation ( N_f = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << " )." << endl;
   numberAdded = addedParticles.size();
 
   addedStuff.prepareParticles( addedParticles );

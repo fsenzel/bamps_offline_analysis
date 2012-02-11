@@ -21,7 +21,7 @@
  */
 
 
-#include "interpolation1d.h"
+#include "interpolation_n_dimensions.h"
 
 using std::string;
 
@@ -29,7 +29,7 @@ using std::string;
 class interpolation_nJpsi : interpolation1d // based on interpolation2d
 {
   public:
-    void init();
+    void configure();
 
     double getN(const double T) const;
 

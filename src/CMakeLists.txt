@@ -6,9 +6,14 @@ cellcontainer.cpp
 cgcInitialDistribution.cpp
 configuration.cpp
 coordinateBins.cpp
+hadronization_hq.cpp
+ini_jpsi.cpp
 initialdistribution.cpp
 initialstatemodel.cpp
 integrand_time.cpp
+interpolation_iniJpsi.cpp
+interpolation_nJpsi.cpp
+meson_decay_data.cpp
 minijets.cpp
 offlineBAMPS.cpp
 offlineheavyioncollison.cpp 
@@ -20,6 +25,9 @@ ringcontainer.cpp
 ringstructure.cpp
 woodsaxon.cpp
 )
+
+include_directories(/home/uphoff/cascade/pythia/pythia8140/include/)
+link_directories(/home/uphoff/cascade/pythia/pythia8140/lib/archive/)
 
 
 ######### Include the header files of the BAMPS library #########
@@ -57,7 +65,8 @@ ELSE( LINK_TO_BAMPS_LIB AND BAMPS_FOUND )
   ADD_DEPENDENCIES(offlineBAMPS bamps)          ## Add dependency such that libbamps.a is always build first ##
 ENDIF( LINK_TO_BAMPS_LIB AND BAMPS_FOUND ) 
 
-TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES})
+# TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES})
+TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} libpythia8.a liblhapdfdummy.a)
 #TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${Cuba_LIBRARIES})
 
 #install(TARGETS offlineBAMPS ${INSTALL_TARGETS_DEFAULT_ARGS})
