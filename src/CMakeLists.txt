@@ -26,9 +26,6 @@ ringstructure.cpp
 woodsaxon.cpp
 )
 
-include_directories(/home/uphoff/cascade/pythia/pythia8140/include/)
-link_directories(/home/uphoff/cascade/pythia/pythia8140/lib/archive/)
-
 
 ######### Include the header files of the BAMPS library #########
 IF( LINK_TO_BAMPS_LIB AND BAMPS_FOUND )
@@ -46,17 +43,27 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 ADD_CUSTOM_TARGET(revisiontag ALL)
 
 # a command that is run when target "revisiontag" is executed, creates revision.h using cmake script
-ADD_CUSTOM_COMMAND(TARGET revisiontag
-  COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/getsvn.cmake)
+IF ( NOT DISABLE_BUILD_EXTRAS )
+  ADD_CUSTOM_COMMAND(TARGET revisiontag
+    COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/getsvn.cmake)
+ELSE ( NOT DISABLE_BUILD_EXTRAS )
+  ADD_CUSTOM_COMMAND(TARGET revisiontag
+    COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR} -DDISABLE_SVN_EXTRAS=TRUE -P ${CMAKE_CURRENT_SOURCE_DIR}/getsvn.cmake)
+ENDIF ( NOT DISABLE_BUILD_EXTRAS )
 
 # revision.h is a generated file
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/revision.h PROPERTIES GENERATED TRUE HEADER_FILE_ONLY TRUE)
 
-
+######### create a config.h #########
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 ######### Build the executable #########
 ADD_EXECUTABLE(offlineBAMPS ${project_SRCS} )
 
+### activate interprocedural optimization if the compiler supports it
+IF (CMAKE_BUILD_TYPE STREQUAL "Release")
+  SET_PROPERTY(TARGET offlineBAMPS PROPERTY INTERPROCEDURAL_OPTIMIZATION 1)  # -ipo option for intel compilers
+ENDIF()
 
 IF( LINK_TO_BAMPS_LIB AND BAMPS_FOUND )
   TARGET_LINK_LIBRARIES(offlineBAMPS ${BAMPS_LIBRARIES})    ## Link to static BAMPS library ##
@@ -65,10 +72,18 @@ ELSE( LINK_TO_BAMPS_LIB AND BAMPS_FOUND )
   ADD_DEPENDENCIES(offlineBAMPS bamps)          ## Add dependency such that libbamps.a is always build first ##
 ENDIF( LINK_TO_BAMPS_LIB AND BAMPS_FOUND ) 
 
-# TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES})
-TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} libpythia8.a liblhapdfdummy.a)
-#TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${Cuba_LIBRARIES})
 
+IF( LHAPDF_FOUND AND Pythia_FOUND )
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${LHAPDF_LIBRARIES} ${Pythia_LIBRARIES})
+ELSEIF( Pythia_Found ) 
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${Pythia_LIBRARIES} ${Pythia_LHAPDFDummy_LIBRARY})
+ELSEIF( LHAPDF_FOUND )
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${LHAPDF_LIBRARIES})
+ELSE( LHAPDF_FOUND AND Pythia_FOUND )
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES})
+  #TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${Cuba_LIBRARIES})
+ENDIF( LHAPDF_FOUND AND Pythia_FOUND )
+  
 #install(TARGETS offlineBAMPS ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 ADD_DEPENDENCIES(offlineBAMPS revisiontag)

@@ -1,0 +1,7 @@
+#cmakedefine Cuba_FOUND
+
+#cmakedefine LHAPDF_FOUND
+
+#cmakedefine Pythia_FOUND
+
+#define PYTHIA_XML_DIR "${Pythia_xmldoc_PATH}"

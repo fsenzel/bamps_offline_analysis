@@ -1,15 +1,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules/")
 
+######### This sets custom build flags and includes options for various compilers #########
+INCLUDE(SetCompilersAndBuildFlags.cmake)
+
 ######### Set project name  #########
 PROJECT(offlineBAMPS)
 
 ######### Activate packaging, use as "make package_source"  #########
 INCLUDE(CMakeCustomPackageOptions.cmake)
 INCLUDE(CPack)
-
-######### This sets custom build flags and includes options for various compilers #########
-INCLUDE(SetCompilersAndBuildFlags.cmake)
 
 ######### Find Boost libraries #########
 SET(BOOST_ROOT "$ENV{HOME}/usr")
@@ -22,18 +22,28 @@ FIND_PACKAGE(Boost 1.40 COMPONENTS serialization filesystem program_options REQU
 FIND_PACKAGE(Cuba REQUIRED)
 
 ######### Find LHAPDF library #########
-#FIND_PACKAGE(LHAPDF REQUIRED)
+FIND_PACKAGE(LHAPDF)
+
+######### Find Pythia8 library #########
+FIND_PACKAGE(Pythia)
 
 ########## Find GSL library #########
 FIND_PACKAGE(GSL REQUIRED)
 
+######### This option controls whether optional goodies (subversion revison number and doxygen generation) should be disabled #########
+## Default: FALSE
+## Change on the command line via -DDISABLE_BUILD_EXTRAS=TRUE
+SET ( DISABLE_BUILD_EXTRAS FALSE CACHE BOOL "Whether to disable some goodies [svn rev number and doxygen targets]" )
+
 ######### Find svn and retrieve revision number #########
-FIND_PACKAGE(Subversion)
-IF(Subversion_FOUND)
-  Subversion_WC_INFO(${CMAKE_CURRENT_SOURCE_DIR} ER)
-  SET(SUBVERSION_REVISION ${ER_WC_REVISION})
-  SET(CPACK_PACKAGE_VERSION_PATCH "${SUBVERSION_REVISION}")
-ENDIF(Subversion_FOUND)
+IF( NOT DISABLE_BUILD_EXTRAS )
+  FIND_PACKAGE(Subversion)
+  IF(Subversion_FOUND)
+    Subversion_WC_INFO(${CMAKE_CURRENT_SOURCE_DIR} ER)
+    SET(SUBVERSION_REVISION ${ER_WC_REVISION})
+    SET(CPACK_PACKAGE_VERSION_PATCH "${SUBVERSION_REVISION}")
+  ENDIF(Subversion_FOUND)
+ENDIF( NOT DISABLE_BUILD_EXTRAS )
 
 ######### This option controls whether linking to an installed version of the BAMPS lib should be tried  #########
 ## instead of building the BAMPS library directly. 
@@ -51,13 +61,21 @@ ENDIF( LINK_TO_BAMPS_LIB )
 
 
 ######### Handle doxygen files via CMake, adds custom target, use as "make doxygen" #########
-INCLUDE(ConfigureDoxygenTarget.cmake)
+IF( NOT DISABLE_BUILD_EXTRAS )
+  INCLUDE(ConfigureDoxygenTarget.cmake)
+ENDIF( NOT DISABLE_BUILD_EXTRAS )
+  
 
 ######### Set include and link directories #########
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${Cuba_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIRS})
-
+IF ( LHAPDF_FOUND )
+  INCLUDE_DIRECTORIES(${LHAPDF_INCLUDE_DIRS})
+ENDIF ( LHAPDF_FOUND )
+IF ( Pythia_FOUND )
+  INCLUDE_DIRECTORIES(${Pythia_INCLUDE_DIRS})
+ENDIF ( Pythia_FOUND )
 
 ######### Set the explicit path to the BAMPS library source directory #########
 SET( BAMPS_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/lib/ CACHE PATH "directory in which the BAMPS library source files reside" )

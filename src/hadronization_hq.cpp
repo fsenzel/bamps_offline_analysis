@@ -7,6 +7,8 @@
 #include "binning.h"
 #include "configuration.h"
 
+#include "config.h"
+
 #include "Pythia.h"
 using namespace Pythia8; 
 using namespace ns_casc;
@@ -229,12 +231,7 @@ void mesonDecay::decayToElectronsPythia()
   // give correct xml directory to pythia object, only possible via constructor
   char * csc_check_fuchs = getenv("PBS_JOBID");
   char * csc_check_loewe = getenv("SLURM_JOB_ID");
-  if( csc_check_fuchs != NULL && !local_cluster )
-    xmlpath = "/home/aggreinerc/uphoff/full/pythia8140/xmldoc";
-  else if( csc_check_loewe != NULL && !local_cluster )
-    xmlpath = "/home/hfftheo/uphoff/pythia/pythia8157/xmldoc";
-  else
-    xmlpath = "/home/uphoff/cascade/pythia/pythia8140/xmldoc";
+  xmlpath = PYTHIA_XML_DIR;
   
   // Generator; shorthand for event and particleData.                           
   Pythia pythia( xmlpath );
