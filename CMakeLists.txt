@@ -27,13 +27,20 @@ FIND_PACKAGE(Cuba REQUIRED)
 ########## Find GSL library #########
 FIND_PACKAGE(GSL REQUIRED)
 
+######### This option controls whether optional goodies (subversion revison number and doxygen generation) should be disabled #########
+## Default: FALSE
+## Change on the command line via -DDISABLE_BUILD_EXTRAS=TRUE
+SET ( DISABLE_BUILD_EXTRAS FALSE CACHE BOOL "Whether to disable some goodies [svn rev number and doxygen targets]" )
+
 ######### Find svn and retrieve revision number #########
-FIND_PACKAGE(Subversion)
-IF(Subversion_FOUND)
-  Subversion_WC_INFO(${CMAKE_CURRENT_SOURCE_DIR} ER)
-  SET(SUBVERSION_REVISION ${ER_WC_REVISION})
-  SET(CPACK_PACKAGE_VERSION_PATCH "${SUBVERSION_REVISION}")
-ENDIF(Subversion_FOUND)
+IF( NOT DISABLE_BUILD_EXTRAS )
+  FIND_PACKAGE(Subversion)
+  IF(Subversion_FOUND)
+    Subversion_WC_INFO(${CMAKE_CURRENT_SOURCE_DIR} ER)
+    SET(SUBVERSION_REVISION ${ER_WC_REVISION})
+    SET(CPACK_PACKAGE_VERSION_PATCH "${SUBVERSION_REVISION}")
+  ENDIF(Subversion_FOUND)
+ENDIF( NOT DISABLE_BUILD_EXTRAS )
 
 ######### This option controls whether linking to an installed version of the BAMPS lib should be tried  #########
 ## instead of building the BAMPS library directly. 
@@ -51,7 +58,9 @@ ENDIF( LINK_TO_BAMPS_LIB )
 
 
 ######### Handle doxygen files via CMake, adds custom target, use as "make doxygen" #########
-INCLUDE(ConfigureDoxygenTarget.cmake)
+IF( NOT DISABLE_BUILD_EXTRAS )
+  INCLUDE(ConfigureDoxygenTarget.cmake)
+ENDIF( NOT DISABLE_BUILD_EXTRAS )
 
 ######### Set include and link directories #########
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
