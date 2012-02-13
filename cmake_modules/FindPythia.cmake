@@ -63,7 +63,8 @@ SET( Pythia_LIBRARIES ${Pythia_LIBRARY} )
 # if all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( Pythia DEFAULT_MSG Pythia_LIBRARY Pythia_INCLUDE_DIR Pythia_xmldoc_PATH)
-SET ( Pythia_FOUND PYTHIA_FOUND CACHE INTERNAL "Provide Pythia_FOUND in addition to PYTHIA_FOUND" FORCE )
+SET ( Pythia_FOUND ${PYTHIA_FOUND} CACHE INTERNAL "Provide Pythia_FOUND in addition to PYTHIA_FOUND" FORCE )
+
 
 # display some status information
 IF( Pythia_FOUND )
