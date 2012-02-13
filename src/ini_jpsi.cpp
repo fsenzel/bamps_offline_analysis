@@ -131,7 +131,7 @@ void ini_jpsi::sample_one_jpsi( const int partclNmb )
   double pt, y, phi;
 
   addedParticles[partclNmb].m = Particle::getMass( jpsi );
-  addedParticles[partclNmb].N_EVENT = partclNmb;
+  addedParticles[partclNmb].N_EVENT_pp = partclNmb;
   addedParticles[partclNmb].FLAVOR = jpsi;
 
   // get y and pt

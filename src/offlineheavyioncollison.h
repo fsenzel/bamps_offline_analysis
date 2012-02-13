@@ -21,6 +21,7 @@
 #include "configuration.h"
 #include "analysis.h"
 #include "interpolation23.h"
+#include "interpolation22.h" 
 #include "woodsaxon.h"
 #include "ringstructure.h"
 #include "cellcontainer.h"
@@ -51,6 +52,9 @@ private:
   
   config * const theConfig;
   interpolation23 theI23;
+  
+  /** @brief  interpolation22 object that provides access to tabulated values for the cross section of all 2->2 processes with running coupling */
+  interpolation22 theI22;
 
   //--parameters taken from config--------------------------------------------
   double stop;       //total simulated runtime in fm/c

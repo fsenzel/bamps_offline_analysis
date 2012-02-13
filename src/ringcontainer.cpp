@@ -137,7 +137,7 @@ void ringContainer::addParticleInFormGeom( const ParticleOffline& _particle, con
     ++numberOfQuarks;
   }
 
-  double Eold = sqrt( pow( _particle.PXold, 2 ) + pow( _particle.PYold, 2 ) + pow( _particle.PZold, 2 ) );
+  double Eold = sqrt( pow( _particle.PXold, 2 ) + pow( _particle.PYold, 2 ) + pow( _particle.PZold, 2 ) + pow( _particle.m, 2 ) );
   double cc = ( _time - _particle.T ) / Eold;
   double zz = _particle.Z + _particle.PZold * cc;
 

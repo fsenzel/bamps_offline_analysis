@@ -29,6 +29,7 @@
 #include "binary_cross_sections.h"
 #include "offlineoutput.h"
 #include "FPT_compare.h"
+#include "hadronization_hq.h"
 
 using namespace ns_casc;
 using namespace std;
@@ -79,6 +80,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     testpartcl( _config->getTestparticles() ),
     offlineInterface( _offlineInterface )
 {
+  theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom );
 }
 
 
@@ -92,7 +94,7 @@ offlineHeavyIonCollision::~offlineHeavyIonCollision()
 
 void offlineHeavyIonCollision::init()
 {
-  additionalParticlesDistribution addedStuff( theConfig, miniJetsInitialState );
+  additionalParticlesDistribution addedStuff( theConfig, theConfig->getInitialStateType() );
   addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
 
   int Nbefore = addedParticles.size();
@@ -129,6 +131,30 @@ void offlineHeavyIonCollision::init()
   }
   cout << "#### " << particles.size() << " out of " << Nbefore << " particles kept for simulation ( N_f = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << " )." << endl;
   numberAdded = addedParticles.size();
+  
+  // List particle numbers for all flavors
+  cout << "==========================" << endl;
+  cout << "Added particles:" << endl;
+  cout << "# of all=" << addedParticles.size() << endl;
+  int fl_sum = 0;
+  for( int i = 0; i <= 10; i++ )
+  {
+    for( int j = 0; j < addedParticles.size(); j++ )
+      if(addedParticles[j].FLAVOR == i)
+        fl_sum++;
+    cout << "F = " << i << "   # = " << fl_sum << endl;
+    fl_sum = 0;
+  }
+  for( int j = 0; j < addedParticles.size(); j++ )
+    if(addedParticles[j].FLAVOR == jpsi)
+      fl_sum++;
+  cout << "Jpsi:    # = " << fl_sum << endl;
+  fl_sum = 0;
+  double sum = 0.0;
+  for( int j = 0; j < addedParticles.size(); j++ )
+    sum += addedParticles[j].E;
+  cout << "E(init) = " << sum << endl;
+  cout << "==========================" << endl;
 
   addedStuff.prepareParticles( addedParticles );
 }
@@ -192,6 +218,17 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   int jumpMovieSteps = 0;
   double factor_dt = theConfig->getFactor_dt();
   cout << "scale time steps dt by facot " << factor_dt << endl;
+  
+  if( theConfig->isHadronizationHQ() )
+  {
+    hadronization_hq ppHadronization_hq( numberAdded );
+    ppHadronization_hq.heavyQuarkFragmentation();
+  }
+  if( theConfig->isMesonDecay() )
+  {
+    mesonDecay ppMesonDecay( numberAdded, theConfig->getNumberElectronStat(), theConfig->isLocalCluster(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
+    ppMesonDecay.decayToElectronsPythia();
+  }
 
   aa.initialOutput();
   if ( theConfig->doOutput_movieOutputJets() )
@@ -468,8 +505,43 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   }
   while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
 
+  if( theConfig->isHadronizationHQ() )
+  {
+    hadronization_hq theHadronization_hq( numberAdded );
+    theHadronization_hq.heavyQuarkFragmentation();
+  }
+  if( theConfig->isMesonDecay() )
+  {
+    mesonDecay theMesonDecay( numberAdded, theConfig->getNumberElectronStat(), theConfig->isLocalCluster(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
+    theMesonDecay.decayToElectronsPythia();
+  }
+
   aa.finalOutput( stoptime );
   aa.addJetEvents_final();
+  
+  // List particle numbers for all flavors
+  cout << "==========================" << endl;
+  cout << "Added particles:" << endl;
+  cout << "# of all=" << addedParticles.size() << endl;
+  int fl_sum = 0;
+  for( int i = 0; i <= 10; i++ )
+  {
+    for( int j = 0; j < addedParticles.size(); j++ )
+      if(addedParticles[j].FLAVOR == i)
+        fl_sum++;
+    cout << "F = " << i << "   # = " << fl_sum << endl;
+    fl_sum = 0;
+  }
+  for( int j = 0; j < addedParticles.size(); j++ )
+    if(addedParticles[j].FLAVOR == jpsi)
+      fl_sum++;
+  cout << "Jpsi:    # = " << fl_sum << endl;
+  fl_sum = 0;
+  double sum = 0.0;
+  for( int j = 0; j < addedParticles.size(); j++ )
+    sum += addedParticles[j].E;
+  cout << "E(end) = " << sum << endl;
+  cout << "==========================" << endl;
 
   cout << "number of jet collisions: " << ncoll << endl;
 
@@ -1126,11 +1198,11 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
   double ee;
   
   int nGluons = 0;
-  int nAllQuarks = 0;
-  int nAllAntiQuarks = 0;
+//   int nAllLightQuarks = 0;
+//   int nAllAntiLightQuarks = 0;
   int nGluonsAdded = 0;
-  int nAllQuarksAdded = 0;
-  int nAllAntiQuarksAdded = 0;
+//   int nAllLightQuarksAdded = 0;
+//   int nAllAntiLightQuarksAdded = 0;
   
   int IXY, id, nc;
   
@@ -1156,7 +1228,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
     for ( iIt = formGeomCopy.begin(); iIt != formGeomCopy.end(); )
     {
       id = *iIt;
-      cc = ( timenow - particles[id].T ) / sqrt( pow( particles[id].PXold, 2 ) + pow( particles[id].PYold, 2 ) + pow( particles[id].PZold, 2 ) );
+      cc = ( timenow - particles[id].T ) / sqrt( pow( particles[id].PXold, 2 ) + pow( particles[id].PYold, 2 ) + pow( particles[id].PZold, 2 ) + pow( particles[id].m, 2 ) );
       zz = particles[id].Z + particles[id].PZold * cc;
       eta = 0.5 * log(( timenow + zz ) / ( timenow - zz ) );
       
@@ -1190,7 +1262,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
       {
         xt = sqrt( pow( particles_atTimeNow [( *iIt )].X, 2 )  + pow( particles_atTimeNow[( *iIt )].Y, 2 ) );
 
-        if ( !particles_atTimeNow[( *iIt )].dead )
+        // calculation of energy density & co. is only written for massless particles, only add those -> for the medium properties heavy quarks do not contribute anyhow
+        if ( !particles_atTimeNow[( *iIt )].dead && particles_atTimeNow[( *iIt )].FLAVOR <= 2 * Particle::max_N_light_flavor )
         {
           rings.addParticle( particles_atTimeNow[( *iIt )] );
 //           rings.addRates( particles_atTimeNow[(*iIt)] );
@@ -1208,13 +1281,19 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
         continue; // jump to next particle in the list if this one is dead (should not happen)
       }
       
-      ee = sqrt( pow( particles_atTimeNow[id].PXold, 2 ) + pow( particles_atTimeNow[id].PYold, 2 ) + pow( particles_atTimeNow[id].PZold, 2 ) );
+      ee = sqrt( pow( particles_atTimeNow[id].PXold, 2 ) + pow( particles_atTimeNow[id].PYold, 2 ) + pow( particles_atTimeNow[id].PZold, 2 ) + pow( particles_atTimeNow[id].m, 2 ) );
       cc = ( simulationTime - particles_atTimeNow[id].T ) / ee;
       zz = particles_atTimeNow[id].Z + particles_atTimeNow[id].PZold * cc;
       eta = 0.5 * log(( simulationTime + zz ) / ( simulationTime - zz ) );
       
       if (( eta >= etaBins[etaSliceIndex].left ) && ( eta <= etaBins[etaSliceIndex].right ) )
       {
+        // calculation of energy density & co. is only written for massless particles, only add those -> for the medium properties heavy quarks do not contribute anyhow
+        if( particles_atTimeNow[( *iIt )].FLAVOR <= 2 * Particle::max_N_light_flavor ) 
+        {
+          rings.addParticleInFormGeom( particles_atTimeNow[id], simulationTime );
+        }
+        
         rings.addParticleInFormGeom( particles_atTimeNow[id], simulationTime );
         iIt = formGeomCopy.erase( iIt );    // erase this particle such that it needs not be looped over for the next rapidity slab
       }
@@ -1336,10 +1415,18 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
             nGluons = 0;
             nGluonsAdded = 0;
             free = false;
-            vector<int> nQuarks( Particle::N_light_flavor, 0 );
-            vector<int> nAntiQuarks( Particle::N_light_flavor, 0 );
-            vector<int> nQuarksAdded( Particle::N_light_flavor, 0 );
-            vector<int> nAntiQuarksAdded( Particle::N_light_flavor, 0 );
+            vector<int> nLightQuarks( Particle::N_light_flavor , 0 );
+            vector<int> nAntiLightQuarks( Particle::N_light_flavor, 0 );
+            int nCharmQuarks = 0;
+            int nAntiCharmQuarks = 0;
+            int nBottomQuarks = 0;
+            int nAntiBottomQuarks = 0;
+            vector<int> nLightQuarksAdded( Particle::N_light_flavor , 0 );
+            vector<int> nAntiLightQuarksAdded( Particle::N_light_flavor, 0 );
+            int nCharmQuarksAdded = 0;
+            int nAntiCharmQuarksAdded = 0;
+            int nBottomQuarksAdded = 0;
+            int nAntiBottomQuarksAdded = 0;
             
             list<int>::const_iterator iIt;
             for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
@@ -1359,22 +1446,34 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 switch ( particles_atTimeNow[id].FLAVOR )
                 {
                   case up:
-                    ++nQuarks[0];
+                    ++nLightQuarks[0];
                     break;
                   case down:
-                    ++nQuarks[1];
+                    ++nLightQuarks[1];
                     break;
                   case strange:
-                    ++nQuarks[2];
+                    ++nLightQuarks[2];
+                    break;
+                  case charm:
+                    ++nCharmQuarks;
+                    break;
+                  case bottom:
+                    ++nBottomQuarks;
                     break;
                   case anti_up:
-                    ++nAntiQuarks[0];
+                    ++nAntiLightQuarks[0];
                     break;
                   case anti_down:
-                    ++nAntiQuarks[1];
+                    ++nAntiLightQuarks[1];
                     break;
                   case anti_strange:
-                    ++nAntiQuarks[2];
+                    ++nAntiLightQuarks[2];
+                    break;
+                  case anti_charm:
+                    ++nAntiCharmQuarks;
+                    break;
+                  case anti_bottom:
+                    ++nAntiBottomQuarks;
                     break;
                   default:
                     break;
@@ -1419,22 +1518,34 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 switch ( addedParticles[id].FLAVOR )
                 {
                   case up:
-                    ++nQuarksAdded[0];
+                    ++nLightQuarks[0];
                     break;
                   case down:
-                    ++nQuarksAdded[1];
+                    ++nLightQuarks[1];
                     break;
                   case strange:
-                    ++nQuarksAdded[2];
+                    ++nLightQuarks[2];
+                    break;
+                  case charm:
+                    ++nCharmQuarks;
+                    break;
+                  case bottom:
+                    ++nBottomQuarks;
                     break;
                   case anti_up:
-                    ++nAntiQuarksAdded[0];
+                    ++nAntiLightQuarks[0];
                     break;
                   case anti_down:
-                    ++nAntiQuarksAdded[1];
+                    ++nAntiLightQuarks[1];
                     break;
                   case anti_strange:
-                    ++nAntiQuarksAdded[2];
+                    ++nAntiLightQuarks[2];
+                    break;
+                  case anti_charm:
+                    ++nAntiCharmQuarks;
+                    break;
+                  case anti_bottom:
+                    ++nAntiBottomQuarks;
                     break;
                   default:
                     break;
@@ -1592,6 +1703,7 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
   int iscat, jscat, typ;
   double P1[4], P2[4];
   double s, as, csgg, cs23, cs22, cs23t, cs22t, Vrel, lambda_scaled;
+  double M1, M2, P1P2;
   double probab22, probab23, probab2322;
   double averagedRate;
   double xt;
@@ -1604,14 +1716,14 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
 
   const int nTotal = _cell.particleList.size();
   int nGluons = 0;
-  vector<int> nQuarks( Particle::N_light_flavor, 0 );
-  vector<int> nAntiQuarks( Particle::N_light_flavor, 0 );
+//   vector<int> nQuarks( Particle::N_light_flavor, 0 );
+//   vector<int> nAntiQuarks( Particle::N_light_flavor, 0 );
 
   list<int>::const_iterator iIt;
   list<int>::const_iterator jIt;
 
   scattering23 scatt23_object( &theI23 );
-  scattering22 scatt22_object;
+  scattering22 scatt22_object( &theI22 );
   
   double lambdaJet = 0;
   double pt_addedParticle = 0;
@@ -1666,8 +1778,10 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
       
       F1 = particles_atTimeNow[iscat].FLAVOR;
       particles_atTimeNow[iscat].getMomentumArray( P1 );
+      M1 = particles_atTimeNow[iscat].m;
       F2 = addedParticles[jscat].FLAVOR;
       addedParticles[jscat].getMomentumArray( P2 );
+      M2 = addedParticles[jscat].m;
 
       s = pow(( P1[0] + P2[0] ), 2 ) - pow(( P1[1] + P2[1] ), 2 ) - pow(( P1[2] + P2[2] ), 2 ) - pow(( P1[3] + P2[3] ), 2 );
 
@@ -1687,7 +1801,8 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
       }
       else
       {
-        Vrel = s / ( 2.0 * P1[0] * P2[0] );
+        P1P2 = P1[0]*P2[0] - P1[1]*P2[1] - P1[2]*P2[2] - P1[3]*P2[3];
+        Vrel = pow((pow(P1P2,2.0)-pow(M1,2.0)*pow(M2,2.0)),0.5)/(P1[0]*P2[0]); // general relative velocity
         as = alpha_s( s );
 
         //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, therefore multiplied here
@@ -1698,7 +1813,10 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
 //         md2g = as * ( particles_atTimeNow[iscat].md2g + addedParticles[jscat].md2g ) / 2.0 * 2;
 //         md2q = md2g * 2.0 / 9.0;
 
-        scatt22_object.setParameter( P1, P2, F1, F2, s, md2g, md2q );
+        scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
+                                    theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
+                                    theConfig->isConstantCrossSecGQ(),
+                                    theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
         cs22 = scatt22_object.getXSection22( initialStateIndex );
 
         probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
@@ -2312,6 +2430,13 @@ int offlineHeavyIonCollision::scatt23_utility( scattering23& scatt23_obj, cellCo
   addedParticles[jscat].getMomentumArray( P2 );
   addedParticles[jscat].getCoordinateArray( R2 );
   F2 = addedParticles[jscat].FLAVOR;
+  
+  // these routines are not written for heavy flavors
+  if( F1 > 2*Particle::max_N_light_flavor || F2 > 2*Particle::max_N_light_flavor )
+  {
+    std::string errMsg = "Heavy flavor in scatt23_utility.";
+    throw eHIC_error( errMsg );
+  }
 
   ncoll++;
   ncoll23++;
@@ -2421,16 +2546,19 @@ void offlineHeavyIonCollision::scatt22_utility( scattering22& scatt22_obj, const
 {
   FLAVOR_TYPE F1, F2;
   double P1[4], P2[4], R1[4], R2[4];
-  double as;
-  double Tmax, TT, cc, PT2, t;
+  double as, Tmax, TT, cc, t;
+  double M1, M2;
+  double t_hat;
 
   particles_atTimeNow[iscat].getMomentumArray( P1 );
   particles_atTimeNow[iscat].getCoordinateArray( R1 );
   F1 = particles_atTimeNow[iscat].FLAVOR;
+  M1 = particles_atTimeNow[iscat].m;
 
   addedParticles[jscat].getMomentumArray( P2 );
   addedParticles[jscat].getCoordinateArray( R2 );
   F2 = addedParticles[jscat].FLAVOR;
+  M2 = addedParticles[jscat].m;
 
 
   ncoll++;
@@ -2458,29 +2586,34 @@ void offlineHeavyIonCollision::scatt22_utility( scattering22& scatt22_obj, const
   addedParticles[jscat].Z_lastInt = addedParticles[jscat].Z;
   addedParticles[jscat].T_lastInt = addedParticles[jscat].T;
 
-  scatt22_obj.getMomenta22( PT2, typ, F1, F2 );
-  scatt22_obj.setNewMomenta22( P1, P2, R1, R2, PT2 );
+  // determine type of scattering, momentum transfer t_hat, new flavor and new masses
+  scatt22_obj.getMomentaAndMasses22(F1, F2, M1, M2, t_hat, typ);
+  // translate momemtum transfer t_hat into actual momenta of outgoing particles
+  scatt22_obj.setNewMomenta22( P1, P2, R1, R2, t_hat );
 
   double pt_out1 = sqrt( pow( P1[1], 2 ) + pow( P1[2], 2 ) );
   double pt_out2 = sqrt( pow( P2[1], 2 ) + pow( P2[2], 2 ) );
 
   //<<---------------------------------------------
   // set new properties for added particle
-  if ( pt_out1 > pt_out2 )
+  // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
+  if ( pt_out1 > pt_out2 && addedParticles[jscat].FLAVOR <= 2 * Particle::max_N_light_flavor )
   {
     addedParticles[jscat].FLAVOR = F1;
+    addedParticles[jscat].m = M1;
     addedParticles[jscat].PX = P1[1];
     addedParticles[jscat].PY = P1[2];
     addedParticles[jscat].PZ = P1[3];
-    addedParticles[jscat].E = sqrt( pow( P1[1], 2 ) + pow( P1[2], 2 ) + pow( P1[3], 2 ) );
+    addedParticles[jscat].E = P1[0];
   }
   else
   {
     addedParticles[jscat].FLAVOR = F2;
+    addedParticles[jscat].m = M2;
     addedParticles[jscat].PX = P2[1];
     addedParticles[jscat].PY = P2[2];
     addedParticles[jscat].PZ = P2[3];
-    addedParticles[jscat].E = sqrt( pow( P2[1], 2 ) + pow( P2[2], 2 ) + pow( P2[3], 2 ) );
+    addedParticles[jscat].E = P2[0];
   }
 }
 
@@ -2505,6 +2638,13 @@ int offlineHeavyIonCollision::scatt32_utility( scattering32& scatt32_obj, std::l
   addedParticles[kscat].getMomentumArray( P3 );
   addedParticles[kscat].getCoordinateArray( R3 );
   F3 = addedParticles[kscat].FLAVOR;
+  
+  // these routines are not written for heavy flavors
+  if( F1 > 2*Particle::max_N_light_flavor || F2 > 2*Particle::max_N_light_flavor || F3 > 2*Particle::max_N_light_flavor )
+  {
+    std::string errMsg = "Heavy flavor in scatt32_utility.";
+    throw eHIC_error( errMsg );
+  }
 
   ncoll++;
   ncoll32++;

@@ -270,7 +270,7 @@ void pythiaInitialDistribution::sampleMomenta( std::vector< ParticleOffline >& _
     int flavTemp;
     // structure of file
     // number of pythia event  is hard?   flavour  energy  px  py  pz  m
-    readPythiaParticles >> _particles[i].N_EVENT >> _particles[i].HARD >> flavTemp >> _particles[i].E >> _particles[i].PX >> _particles[i].PY >> _particles[i].PZ >> _particles[i].m;
+    readPythiaParticles >> _particles[i].N_EVENT_pp >> _particles[i].HARD >> flavTemp >> _particles[i].E >> _particles[i].PX >> _particles[i].PY >> _particles[i].PZ >> _particles[i].m;
     _particles[i].FLAVOR = static_cast<FLAVOR_TYPE>( flavTemp );
     
     if ( flavTemp <= 6 )
@@ -290,7 +290,7 @@ void pythiaInitialDistribution::samplePositions( std::vector< ParticleOffline >&
 {
   cout << "Start sampling of particle positions for particles from PYTHIA." << endl;
   // particles are already read from file in momentum()
-  int nmb_of_events = _particles.back().N_EVENT;
+  int nmb_of_events = _particles.back().N_EVENT_pp;
   int event_tmp = 0;
   double x_tmp, y_tmp, z_tmp, t_tmp;
 
@@ -306,19 +306,19 @@ void pythiaInitialDistribution::samplePositions( std::vector< ParticleOffline >&
   {
     if ( _particles[j].HARD )
     {
-      if ( _particles[j].N_EVENT != event_tmp ) // first hard particle of an event
+      if ( _particles[j].N_EVENT_pp != event_tmp ) // first hard particle of an event
       {
         sample_T_one_partcl( _particles, j );
-        sample_XYZ_one_partcl( _particles, j, soft_event[_particles[j].N_EVENT] );
+        sample_XYZ_one_partcl( _particles, j, soft_event[_particles[j].N_EVENT_pp] );
 
         x_tmp = _particles[j].X;
         y_tmp = _particles[j].Y;
         z_tmp = _particles[j].Z;
         t_tmp = _particles[j].T;
 
-        partcl_soft_event[_particles[j].N_EVENT] = j;
+        partcl_soft_event[_particles[j].N_EVENT_pp] = j;
 
-        event_tmp = _particles[j].N_EVENT;
+        event_tmp = _particles[j].N_EVENT_pp;
       }
       else // all other hard particles of same event get same positions
       {

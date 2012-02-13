@@ -35,10 +35,10 @@ class Particle : public ParticlePrototype
   public:
     /** @brief Provide standard constructor (for completeness) */
     Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), temperature(0), flow_vr(0), flow_vz(0), 
-    N_EVENT( 0 ), HARD( true ), edge( -1 ), coll_id( -1 ), collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), 
+    N_EVENT_pp( 0 ), HARD( true ), N_EVENT_AA( 0 ), edge( -1 ), coll_id( -1 ), collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), 
     PYold( 0 ), PZold( 0 ), as22( 0 ), as23( 0 ), rate23v( 0 ), rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ),
     cs22t( 0 ), cs23t( 0 ), lambda_scaled( 0 ), md2g_scaled_22( 0 ),md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), 
-    md2q_scaled_23( 0 ), free( true ), init( true ), initially_produced( true ), jpsi_dissociation_number(-1), 
+    md2q_scaled_23( 0 ), free( true ), init( true ), initially_produced( true ), jpsi_dissociation_number( -1 ), 
     step( 0 ), tstep( 0 ), taustep( 0 ) {};
     
     /** @brief space time rapidity \eta */
@@ -58,9 +58,12 @@ class Particle : public ParticlePrototype
     double flow_vz;
     
     /** @brief Pythia event number */
-    int N_EVENT;
+    int N_EVENT_pp;
     /** @brief Pythia hard or soft scattering */
     bool HARD; // true/1 if parton comes from hard scattering
+    
+    /** @brief Event number of heavy ion collision to which particle belongs. Necessary if the number of added particles is much larger than the number of particles which would be present in a event according to the test particles number of offline particles. This is only important if one considers scatterings among the added particles.  */
+    int N_EVENT_AA;
     
     /** @brief index of edge cell the particle belongs to, edge = -1 corresponds to no edge cell */
     short int edge;

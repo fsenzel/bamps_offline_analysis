@@ -61,6 +61,13 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
     _pythiaInitialDistribution.populateParticleVector( _particles, numberOfParticlesToAdd, minimumPT ); 
     break;
   }
+//   case mcatnloInitialState:
+//   {
+//     mcatnloInitialDistribution _mcatnloInitialDistribution( *configObject, _wsParameter, useStoredTables );
+//     WoodSaxonParameter = _wsParameter;
+//     _mcatnloInitialDistribution.populateParticleVector( _particles, numberOfParticlesToAdd, minimumPT ); 
+//     break;
+//   }
   default:
     std::string errMsg = "Model for sampling the initial state not implemented yet!";
     throw eInitialState_error( errMsg );
@@ -82,9 +89,8 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
   double dtt = 0;
   double eta_max = 5.0;
 
-  double PT, y, cc;
+  double MT, y, cc;
   double shift;
-  double sum = 0;
   for ( int j = 0; j < _particles.size(); j++ )
   {   
     // last interaction spacetime point is point of creation
@@ -110,10 +116,10 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
 
     _particles[j].T += shift;
     
-    //formation time 1/p_T
+    //formation time 1/sqrt( p_T^2 + m^2) = 1/m_T
     y = 0.5 * log(( _particles[j].E+_particles[j].PZ ) / ( _particles[j].E-_particles[j].PZ ) );
-    PT = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
-    dtt = 1 / PT * cosh( y ) * 0.197327;  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
+    MT = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) + pow( _particles[j].m, 2 ) );   
+    dtt = 1 / MT * cosh( y ) * 0.197327;  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
 
     cc = dtt / _particles[j].E;
     _particles[j].T = _particles[j].T + dtt;
@@ -122,11 +128,7 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     _particles[j].Z = _particles[j].Z + _particles[j].PZ * cc;
 
     _particles[j].init = true;
-    
-    sum += _particles[j].E;
   }
- 
-  cout << "** " << _particles.size() << " particles added with total energy: " << sum << endl;
   
   for(int i = 0; i < _particles.size(); i++)
   {
