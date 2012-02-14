@@ -286,7 +286,7 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   ("offline.fixed_dt", po::value<double>( &fixed_dt ), "fixed dt (time steps) at which the reconstructed medium is \"sampled\" [optional]")
   ("offline.factor_dt", po::value<double>( &factor_dt )->default_value( factor_dt ), "factor with which time steps from the original run should be scaled for use in sampling of the reconstructed medium (should be <1)")
   ("offline.nAdded", po::value<int>( &numberOfParticlesToAdd)->default_value( numberOfParticlesToAdd ), "number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background" )
-  ("offline.minPT_added", po::value<double>( &minimumPT )->default_value( minimumPT ), "minimum p_T [GeV] of the added particles")
+  ("offline.minPT_added", po::value<double>( &minimumPT )->default_value( minimumPT ), "minimum p_T [GeV] of the added particles. If p_T of added particle falls below this value it does not scatter anymore.")
   ;
 
   // Group options that are meant to be provided via the command line

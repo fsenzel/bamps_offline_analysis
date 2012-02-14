@@ -8,7 +8,6 @@ configuration.cpp
 coordinateBins.cpp
 hadronization_hq.cpp
 ini_jpsi.cpp
-initialdistribution.cpp
 initialstatemodel.cpp
 integrand_time.cpp
 interpolation_iniJpsi.cpp

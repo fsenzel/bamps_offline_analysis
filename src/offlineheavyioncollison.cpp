@@ -283,27 +283,10 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   int n_dt = 0;
   double dt_sum = 0.0;
   int n_again = 0;
-
-  int n_up = 0;
-  int n_down = 0;
-  int n_strange = 0;
-  int n_anti_up = 0;
-  int n_anti_down = 0;
-  int n_anti_strange = 0;
-  int n_gluon = 0;
-  int n_quarks_temp = 0, n_anti_quarks_temp = 0;
   
 
   do
   {
-    n_up = 0;
-    n_down = 0;
-    n_strange = 0;
-    n_anti_up = 0;
-    n_anti_down = 0;
-    n_anti_strange = 0;
-    n_gluon = 0;
-    
     // remove init tag from particles after their formation
     for ( int i = 0; i < addedParticles.size(); i++ )
     {
@@ -311,41 +294,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       {
         addedParticles[i].init = false;
       }
-      
-      double pt_temp = sqrt( pow( addedParticles[i].PX, 2 ) + pow( addedParticles[i].PY, 2 ) );
-      if ( pt_temp > theConfig->getMinimumPT() )
-      {
-        switch( addedParticles[i].FLAVOR )
-        {
-          case gluon:
-            ++n_gluon;
-            break;
-          case up:
-            ++n_up;
-            break;
-          case down:
-            ++n_down;
-            break;
-          case strange:
-            ++n_strange;
-            break;
-          case anti_up:
-            ++n_anti_up;
-            break;
-          case anti_down:
-            ++n_anti_down;
-            break;            
-          case anti_strange:
-            ++n_anti_strange;
-            break;
-          default:
-            cout << "##quarks error" << endl;
-            break;
-        }
-      } 
     }
-    n_quarks_temp = n_up + n_down + n_strange;
-    n_anti_quarks_temp = n_anti_up + n_anti_down + n_anti_strange;
 
     // evolution of the medium to present time
     double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
@@ -1308,8 +1257,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
         {
           rings.addParticleInFormGeom( particles_atTimeNow[id], simulationTime );
         }
-        
-        rings.addParticleInFormGeom( particles_atTimeNow[id], simulationTime );
         iIt = formGeomCopy.erase( iIt );    // erase this particle such that it needs not be looped over for the next rapidity slab
       }
     }
@@ -1616,11 +1563,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
             {
               return;
             }
-            
-            if ( again )
-            {
-              return;
-            }
           }
           else  //if(nmb < cellcut)
             {
@@ -1650,9 +1592,13 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 {
                   particles_atTimeNow[id].ratev = rateQuarks[etaSliceIndex][nc];
                 }
-                else
+                else if ( particles_atTimeNow[id].FLAVOR == anti_up || particles_atTimeNow[id].FLAVOR == anti_down || particles_atTimeNow[id].FLAVOR == anti_strange || particles_atTimeNow[id].FLAVOR == anti_light_quark )
                 {
                   particles_atTimeNow[id].ratev = rateAntiQuarks[etaSliceIndex][nc];
+                }
+                else
+                {
+                  particles_atTimeNow[id].ratev = 0.0;
                 }
                 particles_atTimeNow[id].rate = 0.0;
               }
@@ -1682,6 +1628,10 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                 {
                   addedParticles[id].ratev = rateQuarks[etaSliceIndex][nc];
                 }
+                else  if ( addedParticles[id].FLAVOR == anti_up || addedParticles[id].FLAVOR == anti_down || addedParticles[id].FLAVOR == anti_strange || addedParticles[id].FLAVOR == anti_light_quark )
+                {
+                  addedParticles[id].ratev = rateAntiQuarks[etaSliceIndex][nc];
+                }
                 else
                 {
                   addedParticles[id].ratev = rateAntiQuarks[etaSliceIndex][nc];
@@ -1690,7 +1640,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
               }
             }
         }
-        
       }
       else if ( !cellsAdded[j].empty() ) // belongs to:  if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
         {
@@ -1754,16 +1703,10 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
   for ( jIt = _cellAdded.particleList.begin(); jIt != _cellAdded.particleList.end(); jIt++ ) 
   {
     jscat = *jIt;
-    
-    if ( addedParticles[iscat].dead || addedParticles[iscat].T < nexttime )
-    {
-      continue; // jump to next particle from _cellAdded.particleList
-    }
-    
-    
+
     pt_addedParticle = sqrt( pow( addedParticles[jscat].PX, 2.0 ) + pow( addedParticles[jscat].PY, 2.0 ) );
     
-    if ( pt_addedParticle < 4.0 && addedParticles[jscat].FLAVOR <= 2 * Particle::max_N_light_flavor ) //!! TODO
+    if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[iscat].dead )
     {
       continue; // jump to next particle in the list
     }
@@ -2024,7 +1967,7 @@ void offlineHeavyIonCollision::scatt32_withAddedParticles( cellContainer& _cell,
   for ( int i = 0; i < _allParticlesListAdded.size(); i++ )
   {
     double pt_addedParticle =  sqrt( pow( addedParticles[_allParticlesListAdded[i]].PX, 2.0 ) + pow( addedParticles[_allParticlesListAdded[i]].PY, 2.0 ) ); 
-    if ( pt_addedParticle < 4.0 )
+    if ( pt_addedParticle < theConfig->getMinimumPT() )
     {
       -- nTotalAdded;
       if ( addedParticles[_allParticlesListAdded[i]].FLAVOR == gluon )
@@ -2116,7 +2059,7 @@ void offlineHeavyIonCollision::scatt32_withAddedParticles( cellContainer& _cell,
       while ( !( F1 == gluon || F2 == gluon || F3 == gluon ) );
       
       pt_addedParticle = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) ); 
-      if ( pt_addedParticle < 4.0 )
+      if ( pt_addedParticle < theConfig->getMinimumPT() )
       {
         continue; //go to next particle triplet 
       }
@@ -2251,7 +2194,7 @@ void offlineHeavyIonCollision::scatt32_withAddedParticles( cellContainer& _cell,
     {
       kscat = _allParticlesListAdded[m3];
       pt_addedParticle = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) ); 
-      if ( pt_addedParticle < 4.0 )
+      if ( pt_addedParticle < theConfig->getMinimumPT() )
       {
         continue; //go to next particle triplet 
       }
@@ -2496,7 +2439,8 @@ int offlineHeavyIonCollision::scatt23_utility( scattering23& scatt23_obj, cellCo
 
   //<<---------------------------------------------
   // set new properties for added particle
-  if ( pt_out1 > pt_out2 )
+  // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
+  if ( pt_out1 > pt_out2 && addedParticles[jscat].FLAVOR <= 2 * Particle::max_N_light_flavor )
   {
     addedParticles[jscat].FLAVOR = F1;
     addedParticles[jscat].PX = P1[1];
