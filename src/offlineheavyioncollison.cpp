@@ -98,38 +98,38 @@ void offlineHeavyIonCollision::init()
   addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
 
   int Nbefore = addedParticles.size();
-  for(int j = 0; j < particles.size(); j++ )
+  for(int j = 0; j < addedParticles.size(); j++ )
   {
     // if this flavor is not active in the current run delete it or convert it to gluon for PYTHIA case to obtain the same initial energy density
-    if( ( particles[j].FLAVOR > 2 * Particle::N_light_flavor ) && ( ( particles[j].FLAVOR <= 2 * Particle::max_N_light_flavor ) || ( particles[j].FLAVOR > 2 * ( Particle::max_N_light_flavor + Particle::N_heavy_flavor ) ) ) )
+    if( ( addedParticles[j].FLAVOR > 2 * Particle::N_light_flavor ) && ( ( addedParticles[j].FLAVOR <= 2 * Particle::max_N_light_flavor ) || ( addedParticles[j].FLAVOR > 2 * ( Particle::max_N_light_flavor + Particle::N_heavy_flavor ) ) ) )
     {
       if( theConfig->getInitialStateType() == pythiaInitialState )
       {
         // transform non-active quarks to gluons
-        double ee = sqrt ( pow ( particles[j].PX , 2.0 ) +pow ( particles[j].PY , 2.0 ) +pow ( particles[j].PZ , 2.0 ) +pow ( particles[j].m , 2.0 ) );
-        double pp = sqrt ( pow ( particles[j].PX , 2.0 ) +pow ( particles[j].PY , 2.0 ) +pow ( particles[j].PZ , 2.0 ) );
+        double ee = sqrt ( pow ( addedParticles[j].PX , 2.0 ) +pow ( addedParticles[j].PY , 2.0 ) +pow ( addedParticles[j].PZ , 2.0 ) +pow ( addedParticles[j].m , 2.0 ) );
+        double pp = sqrt ( pow ( addedParticles[j].PX , 2.0 ) +pow ( addedParticles[j].PY , 2.0 ) +pow ( addedParticles[j].PZ , 2.0 ) );
 
         // scaling in order to conserve the energy when making quarks massles
-        particles[j].PX = particles[j].PX * ee / pp;
-        particles[j].PY = particles[j].PY * ee / pp;
-        particles[j].PZ = particles[j].PZ * ee / pp;
-        particles[j].E = sqrt ( pow ( particles[j].PX , 2.0 ) + pow ( particles[j].PY , 2.0 ) + pow ( particles[j].PZ , 2.0 ) );
-        particles[j].m = 0.0;
-        particles[j].FLAVOR = gluon;   
+        addedParticles[j].PX = addedParticles[j].PX * ee / pp;
+        addedParticles[j].PY = addedParticles[j].PY * ee / pp;
+        addedParticles[j].PZ = addedParticles[j].PZ * ee / pp;
+        addedParticles[j].E = sqrt ( pow ( addedParticles[j].PX , 2.0 ) + pow ( addedParticles[j].PY , 2.0 ) + pow ( addedParticles[j].PZ , 2.0 ) );
+        addedParticles[j].m = 0.0;
+        addedParticles[j].FLAVOR = gluon;   
       }
       else
       {
         // delete last particle if also not active otherwise switch position with particle to be deleted
-        while( ( particles.back().FLAVOR > 2 * Particle::N_light_flavor ) && ( ( particles.back().FLAVOR <= 2 * Particle::max_N_light_flavor ) || ( particles.back().FLAVOR > 2 * ( Particle::max_N_light_flavor + Particle::N_heavy_flavor ) ) ) )
+        while( ( addedParticles.back().FLAVOR > 2 * Particle::N_light_flavor ) && ( ( addedParticles.back().FLAVOR <= 2 * Particle::max_N_light_flavor ) || ( addedParticles.back().FLAVOR > 2 * ( Particle::max_N_light_flavor + Particle::N_heavy_flavor ) ) ) )
         {
-          particles.pop_back();
+          addedParticles.pop_back();
         }
-        particles[j] = particles.back();
-        particles.pop_back();
+        addedParticles[j] = addedParticles.back();
+        addedParticles.pop_back();
       }
     }
   }
-  cout << "#### " << particles.size() << " out of " << Nbefore << " particles kept for simulation ( N_f = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << " )." << endl;
+  cout << "#### " << addedParticles.size() << " out of " << Nbefore << " particles kept for simulation ( N_f = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << " )." << endl;
   numberAdded = addedParticles.size();
   
   // List particle numbers for all flavors
@@ -1165,6 +1165,7 @@ void offlineHeavyIonCollision::cell_ID( double _time )
           addedParticles[i].collisionPartner = -1;
           addedParticles[i].md2g = -1.0;
           addedParticles[i].md2q = -1.0;
+          addedParticles[i].temperature = -1.0;
         }
       }
     }
@@ -1228,8 +1229,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
     for ( iIt = formGeomCopy.begin(); iIt != formGeomCopy.end(); )
     {
       id = *iIt;
-      cc = ( timenow - particles[id].T ) / sqrt( pow( particles[id].PXold, 2 ) + pow( particles[id].PYold, 2 ) + pow( particles[id].PZold, 2 ) + pow( particles[id].m, 2 ) );
-      zz = particles[id].Z + particles[id].PZold * cc;
+      cc = ( timenow - particles_atTimeNow[id].T ) / sqrt( pow( particles_atTimeNow[id].PXold, 2 ) + pow( particles_atTimeNow[id].PYold, 2 ) + pow( particles_atTimeNow[id].PZold, 2 ) + pow( particles_atTimeNow[id].m, 2 ) );
+      zz = particles_atTimeNow[id].Z + particles_atTimeNow[id].PZold * cc;
       eta = 0.5 * log(( timenow + zz ) / ( timenow - zz ) );
       
       if (( eta < etaBins[etaBins.min_index()].left ) || ( eta > etaBins[etaBins.max_index()].right ) )
@@ -1485,6 +1486,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
               
               particles_atTimeNow[id].md2g = rings[nc].getAveraged_md2g();
               particles_atTimeNow[id].md2q = rings[nc].getAveraged_md2q();
+              particles_atTimeNow[id].temperature = rings[nc].getEffectiveTemperature();
               if ( particles_atTimeNow[id].FLAVOR == gluon )
               {
                 particles_atTimeNow[id].rate = rateGluons[etaSliceIndex][nc];
@@ -1557,6 +1559,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
               
               addedParticles[id].md2g = rings[nc].getAveraged_md2g();
               addedParticles[id].md2q = rings[nc].getAveraged_md2q();
+              addedParticles[id].temperature = rings[nc].getEffectiveTemperature();
               if ( addedParticles[id].FLAVOR == gluon )
               {
                 addedParticles[id].rate = rateGluons[etaSliceIndex][nc];
@@ -1622,6 +1625,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                   particles_atTimeNow[id].edge = true;
                   particles_atTimeNow[id].md2g = rings[nc].getAveraged_md2g();
                   particles_atTimeNow[id].md2q = rings[nc].getAveraged_md2q();
+                  particles_atTimeNow[id].temperature = rings[nc].getEffectiveTemperature();
                 }
                 
                 if ( particles_atTimeNow[id].FLAVOR == gluon )
@@ -1653,6 +1657,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
                   addedParticles[id].edge = true;
                   addedParticles[id].md2g = rings[nc].getAveraged_md2g();
                   addedParticles[id].md2q = rings[nc].getAveraged_md2q();
+                  addedParticles[id].temperature = rings[nc].getEffectiveTemperature();
                 }
                 
                 if ( addedParticles[id].FLAVOR == gluon )
@@ -1735,14 +1740,21 @@ void offlineHeavyIonCollision::scatt2223_withAddedParticles( cellContainer& _cel
   for ( jIt = _cellAdded.particleList.begin(); jIt != _cellAdded.particleList.end(); jIt++ ) 
   {
     jscat = *jIt;
+    
+    if ( addedParticles[iscat].dead || addedParticles[iscat].T < nexttime )
+    {
+      continue; // jump to next particle from _cellAdded.particleList
+    }
+    
+    
     pt_addedParticle = sqrt( pow( addedParticles[jscat].PX, 2.0 ) + pow( addedParticles[jscat].PY, 2.0 ) );
     
-    if ( pt_addedParticle < 4.0 )
+    if ( pt_addedParticle < 4.0 && addedParticles[jscat].FLAVOR <= 2 * Particle::max_N_light_flavor ) //!! TODO
     {
       continue; // jump to next particle in the list
     }
     
-    if ( pt_addedParticle > 8.0 )
+    if ( pt_addedParticle > 8.0 && addedParticles[jscat].FLAVOR <= 2 * Particle::max_N_light_flavor )
     {
       lambdaJet = iterateMFP( _allParticlesList, _gluonList, jscat, dt, dv );
       
@@ -2509,8 +2521,9 @@ int offlineHeavyIonCollision::scatt23_utility( scattering23& scatt23_obj, cellCo
   tempParticle.PZ_init = tempParticle.PZ;
   tempParticle.E_init = -tempParticle.E;   // negative to indicate creation via 2->3 process
   tempParticle.m = 0.0;
-  tempParticle.md2g = ( particles[iscat].md2g + particles[jscat].md2g ) / 2.0;
-  tempParticle.md2q = ( particles[iscat].md2q + particles[jscat].md2q ) / 2.0;
+  tempParticle.md2g = ( particles_atTimeNow[iscat].md2g + addedParticles[jscat].md2g ) / 2.0;
+  tempParticle.md2q = ( particles_atTimeNow[iscat].md2q + addedParticles[jscat].md2q ) / 2.0;
+  tempParticle.temperature = ( particles_atTimeNow[iscat].temperature + addedParticles[jscat].temperature ) / 2.0;
   tempParticle.edge = false;
   tempParticle.dead = false;
   tempParticle.free = false;
@@ -2518,8 +2531,8 @@ int offlineHeavyIonCollision::scatt23_utility( scattering23& scatt23_obj, cellCo
   tempParticle.coll_id = ncoll;
   tempParticle.collisionTime = infinity;
   tempParticle.collisionPartner = -1;
-  tempParticle.rate = particles[iscat].rate;    //GeV
-  tempParticle.ratev = particles[iscat].ratev;    //GeV
+  tempParticle.rate = particles_atTimeNow[iscat].rate;    //GeV
+  tempParticle.ratev = particles_atTimeNow[iscat].ratev;    //GeV
   tempParticle.unique_id = ParticleOffline::unique_id_counter_added;
   --ParticleOffline::unique_id_counter_added;
 

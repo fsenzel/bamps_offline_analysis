@@ -227,11 +227,8 @@ void mesonDecay::decayToElectronsPythia()
   binning binsElec( "output/binsElectron.dat", 1000., 1002., 3 );
   binning binsTheta( "output/binsTheta.dat", 0., 3.15, 200 );
 
-  string xmlpath;
   // give correct xml directory to pythia object, only possible via constructor
-  char * csc_check_fuchs = getenv("PBS_JOBID");
-  char * csc_check_loewe = getenv("SLURM_JOB_ID");
-  xmlpath = PYTHIA_XML_DIR;
+  string xmlpath = PYTHIA_XML_DIR;
   
   // Generator; shorthand for event and particleData.                           
   Pythia pythia( xmlpath );
