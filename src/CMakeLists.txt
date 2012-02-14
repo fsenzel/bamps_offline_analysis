@@ -13,7 +13,6 @@ initialstatemodel.cpp
 integrand_time.cpp
 interpolation_iniJpsi.cpp
 interpolation_nJpsi.cpp
-meson_decay_data.cpp
 minijets.cpp
 offlineBAMPS.cpp
 offlineheavyioncollison.cpp 
@@ -25,6 +24,14 @@ ringcontainer.cpp
 ringstructure.cpp
 woodsaxon.cpp
 )
+
+IF( Pythia_FOUND )
+  SET(project_SRCS
+    ${project_SRCS}
+    mesonDecayData.cpp
+    mesonDecay.cpp
+  )
+ENDIF( Pythia_FOUND )
 
 
 ######### Include the header files of the BAMPS library #########
