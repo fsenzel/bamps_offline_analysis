@@ -218,27 +218,10 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   int n_dt = 0;
   double dt_sum = 0.0;
   int n_again = 0;
-
-  int n_up = 0;
-  int n_down = 0;
-  int n_strange = 0;
-  int n_anti_up = 0;
-  int n_anti_down = 0;
-  int n_anti_strange = 0;
-  int n_gluon = 0;
-  int n_quarks_temp = 0, n_anti_quarks_temp = 0;
   
 
   do
   {
-    n_up = 0;
-    n_down = 0;
-    n_strange = 0;
-    n_anti_up = 0;
-    n_anti_down = 0;
-    n_anti_strange = 0;
-    n_gluon = 0;
-    
     // remove init tag from particles after their formation
     for ( int i = 0; i < addedParticles.size(); i++ )
     {
@@ -246,41 +229,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       {
         addedParticles[i].init = false;
       }
-      
-      double pt_temp = sqrt( pow( addedParticles[i].PX, 2 ) + pow( addedParticles[i].PY, 2 ) );
-      if ( pt_temp > theConfig->getMinimumPT() )
-      {
-        switch( addedParticles[i].FLAVOR )
-        {
-          case gluon:
-            ++n_gluon;
-            break;
-          case up:
-            ++n_up;
-            break;
-          case down:
-            ++n_down;
-            break;
-          case strange:
-            ++n_strange;
-            break;
-          case anti_up:
-            ++n_anti_up;
-            break;
-          case anti_down:
-            ++n_anti_down;
-            break;            
-          case anti_strange:
-            ++n_anti_strange;
-            break;
-          default:
-            cout << "##quarks error" << endl;
-            break;
-        }
-      } 
     }
-    n_quarks_temp = n_up + n_down + n_strange;
-    n_anti_quarks_temp = n_anti_up + n_anti_down + n_anti_strange;
 
     // evolution of the medium to present time
     double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );

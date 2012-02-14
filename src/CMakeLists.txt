@@ -6,7 +6,6 @@ cellcontainer.cpp
 cgcInitialDistribution.cpp
 configuration.cpp
 coordinateBins.cpp
-initialdistribution.cpp
 initialstatemodel.cpp
 integrand_time.cpp
 minijets.cpp
