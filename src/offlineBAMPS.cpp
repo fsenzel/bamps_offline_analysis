@@ -31,8 +31,6 @@ using namespace std;
 using namespace ns_casc;
 
 int Ntest;
-extern int numberAdded, number;
-extern int IX, IY, IZ;
 
 
 int main( int argc, char *argv[] )

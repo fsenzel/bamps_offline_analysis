@@ -122,12 +122,12 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
 
   _dNdEta.reshape( n_eta, -eta_max, + eta_max );
 
-  for ( int i = 0; i < particles.size(); i++ )
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {    
-    particles[i].eta = 0.5 * log(( particles[i].T + particles[i].Z ) / ( particles[i].T - particles[i].Z ) );
-    if ( particles[i].T < ( _timenow + _dt ) )
+    particles_atTimeNow[i].eta = 0.5 * log(( particles_atTimeNow[i].T + particles_atTimeNow[i].Z ) / ( particles_atTimeNow[i].T - particles_atTimeNow[i].Z ) );
+    if ( particles_atTimeNow[i].T < ( _timenow + _dt ) )
     {
-      _dNdEta.increase( particles[i].eta );
+      _dNdEta.increase( particles_atTimeNow[i].eta );
     }
   }
 
@@ -296,7 +296,7 @@ int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, c
   double initialArea = 4 * ( _param.RA - _b / 2 ) * sqrt(( _param.RA - _b / 2 ) * ( _param.RA + _b / 2 ) );
   NinEtaBin = int( initialArea / ( _dx * _dy ) * _NperCell );
 
-  int estimatedMaxNumber = particles.size() * 1.3;
+  int estimatedMaxNumber = particles_atTimeNow.size() * 1.3;
   if ( Particle::N_light_flavor == 0 )
   {
     estimatedMaxNumber *= 1.4;  // ugly fix, empirical value
@@ -309,10 +309,10 @@ int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, c
 
   cout << "number of cells in one etabin=" << int( pow(( 2 * _param.RA / _dx ), 2 ) )
        << "\t" << "particle number in one Etabin=" << NinEtaBin << endl;
-  if ( particles.size() <= ( 8 * NinEtaBin ) )
+  if ( particles_atTimeNow.size() <= ( 8 * NinEtaBin ) )
   {
-    cout << "N = " << particles.size() << "  NinEtaBin = " << NinEtaBin << "  IZ = " << _IZ << endl;
-    cout << "recommended number of test particles > " << ( ( 8 * NinEtaBin * _nTest ) / particles.size() ) << endl;
+    cout << "N = " << particles_atTimeNow.size() << "  NinEtaBin = " << NinEtaBin << "  IZ = " << _IZ << endl;
+    cout << "recommended number of test particles > " << ( ( 8 * NinEtaBin * _nTest ) / particles_atTimeNow.size() ) << endl;
     std::string errMsg = "insufficient number of test particles";
     throw eCoordBins_error( errMsg );
   }

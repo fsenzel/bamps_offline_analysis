@@ -33,7 +33,7 @@ using namespace ns_casc;
 namespace po = boost::program_options;
 
 /** @brief definition of particles vector, defined extern in configuration.h */
-std::vector<ParticleOffline> ns_casc::particles;
+std::vector<ParticleOffline> ns_casc::particlesEvolving;
 std::vector<ParticleOffline> ns_casc::particles_init;
 std::vector<ParticleOffline> ns_casc::particles_atTimeNow;
 std::vector<ParticleOffline> ns_casc::particles_atTimeNowCopy;
@@ -43,7 +43,7 @@ std::vector<ParticleOffline> ns_casc::addedParticlesCopy;
 
 double dt = 0.1;
 
-int MaxN, number, numberAdded, IX, IY, IZ;
+int MaxN, IX, IY, IZ;
 int cellcut;
 double deta;
 
@@ -386,18 +386,15 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
   IZ = ptrSimulationData->gridSizeZ;
   
   numberOfParticlesToAdd *= testparticles;
-  numberAdded = numberOfParticlesToAdd;
   cout << "** add " << numberOfParticlesToAdd << " particles with pt_min = " << minimumPT << endl;
   cout << timefirst << "  " << N_init << endl;
 
   cellcut = 4;
   //-------------------------//
-
-  number = N_init;
   
-  particles.reserve( N_init * 1.8 );
+  particlesEvolving.reserve( N_init * 1.8 );
   particles_init.reserve( N_init );
-  particles.resize( N_init * 1.8 );
+  particlesEvolving.resize( N_init * 1.8 );
   particles_init.resize( N_init );
 
   boost::shared_ptr< offlineDataInitialParticles > ptrInitialParticles = offlineInterface->readOfflineDataFromArchive< offlineDataInitialParticles >();
@@ -428,22 +425,22 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
 
   for ( int i = 0; i < particles_init.size(); i++ )
   {   
-    particles[i] = particles_init[i];
+    particlesEvolving[i] = particles_init[i];
     
-    particles[i].init = true;
-    particles[i].free = false;
+    particlesEvolving[i].init = true;
+    particlesEvolving[i].free = false;
     
-    if ( particles[i].T < timefirst )
+    if ( particlesEvolving[i].T < timefirst )
     {
-      particles[i].edge = true;
-      particles[i].init = false;
+      particlesEvolving[i].edge = true;
+      particlesEvolving[i].init = false;
     }
 
-    particles[i].PXold = particles_init[i].PX;
-    particles[i].PYold = particles_init[i].PY;
-    particles[i].PZold = particles_init[i].PZ;
-    particles[i].Eold  = particles_init[i].E;
+    particlesEvolving[i].PXold = particles_init[i].PX;
+    particlesEvolving[i].PYold = particles_init[i].PY;
+    particlesEvolving[i].PZold = particles_init[i].PZ;
+    particlesEvolving[i].Eold  = particles_init[i].E;
   }
 
-  particles_atTimeNow = particles;
+  particles_atTimeNow = particles_init;
 }

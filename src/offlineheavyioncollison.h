@@ -77,6 +77,8 @@ private:
 
   double stoptime;
   double stoptime_last;
+  
+  int numberEvolvingParticles;
 
   WoodSaxon WoodSaxonParameter;
 
