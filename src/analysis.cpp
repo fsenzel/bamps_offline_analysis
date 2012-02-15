@@ -32,9 +32,6 @@ using namespace std;
 using namespace ns_casc;
 
 
-extern int number, numberAdded;
-
-
 analysis::analysis( config* const c ):
     theConfig( c ),
     rings( c->getRingNumber(), c->getCentralRingRadius(), c->getDeltaR() ),
@@ -451,12 +448,12 @@ analysis::~analysis()
 
 void analysis::collectPtDataInitial()
 {
-  ptDistribution( gluon, addedParticles, numberAdded, 0 );
-  ptDistribution( light_quark, addedParticles, numberAdded, 0 );
-  ptDistribution( allFlavors, addedParticles, numberAdded, 0 );
-  ptSoftDistribution( gluon, particles, number, 0 );
-  ptSoftDistribution( light_quark, particles, number, 0 );
-  ptSoftDistribution( allFlavors, particles, number, 0 );
+  ptDistribution( gluon, addedParticles, addedParticles.size(), 0 );
+  ptDistribution( light_quark, addedParticles, addedParticles.size(), 0 );
+  ptDistribution( allFlavors, addedParticles, addedParticles.size(), 0 );
+  ptSoftDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), 0 );
+  ptSoftDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), 0 );
+  ptSoftDistribution( allFlavors, particles_atTimeNow, particles_atTimeNow.size(), 0 );
 }
 
 
@@ -465,12 +462,12 @@ void analysis::collectPtData( const int step )
 {
   //are issued starting with 0
   //0 is reserved for initial output, thus step is incremented
-  ptDistribution( gluon, addedParticles, numberAdded, step + 1 );
-  ptDistribution( light_quark, addedParticles, numberAdded, step + 1 );
-  ptDistribution( allFlavors, addedParticles, numberAdded, step + 1 );
-  ptSoftDistribution( gluon, particles, number, step + 1 );
-  ptSoftDistribution( light_quark, particles, number, step + 1 );
-  ptSoftDistribution( allFlavors, particles, number, step + 1 );
+  ptDistribution( gluon, addedParticles, addedParticles.size(), step + 1 );
+  ptDistribution( light_quark, addedParticles, addedParticles.size(), step + 1 );
+  ptDistribution( allFlavors, addedParticles, addedParticles.size(), step + 1 );
+  ptSoftDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  ptSoftDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  ptSoftDistribution( allFlavors, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
 }
 
 
@@ -484,13 +481,13 @@ void analysis::collectYData( const int step )
 {
   //are issued starting with 0
   //0 is reserved for initial output, thus step is incremented
-  yDistribution( gluon, particles, number, step + 1 );
-  yDistribution( up, particles, number, step + 1 );
-  yDistribution( down, particles, number, step + 1 );
-  yDistribution( strange, particles, number, step + 1 );
-  yDistribution( anti_up, particles, number, step + 1 );
-  yDistribution( anti_down, particles, number, step + 1 );
-  yDistribution( anti_strange, particles, number, step + 1 );
+  yDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  yDistribution( up, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  yDistribution( down, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  yDistribution( strange, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  yDistribution( anti_up, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  yDistribution( anti_down, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  yDistribution( anti_strange, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
 }
 
 
@@ -504,9 +501,9 @@ void analysis::collectEtData( const int step )
 {
   //are issued starting with 0
   //0 is reserved for initial output, thus step is incremented
-  transverseEnergyDistribution( gluon, particles, number, step + 1 );
-  transverseEnergyDistribution( light_quark, particles, number, step + 1 );
-  transverseEnergyDistribution( anti_light_quark, particles, number, step + 1 );
+  transverseEnergyDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  transverseEnergyDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  transverseEnergyDistribution( anti_light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
 }
 
 
@@ -555,14 +552,14 @@ void analysis::finalOutput( const double _stoptime )
 
 void analysis::movieOutput( const int step, const int jumpSteps )
 {
-  writePartclMovie( addedParticles, numberAdded, oscarJets, step, jumpSteps );
-//   writePartclMovie( particles, number, oscarBackground, step );
+  writePartclMovie( addedParticles, addedParticles.size(), oscarJets, step, jumpSteps );
+//   writePartclMovie( particles_atTimeNow, particles_atTimeNow.size(), oscarBackground, step );
 }
 
 
 void analysis::movieOutputMedium( const int step, const int jumpSteps )
 {
-  writePartclMovie( particles_atTimeNow, number, oscarBackground, step, jumpSteps );
+  writePartclMovie( particles_atTimeNow, particles_atTimeNow.size(), oscarBackground, step, jumpSteps );
 }
 
 
@@ -1091,7 +1088,7 @@ void analysis::onePartclCorrelations()
   double q_hat_scal_sum = 0.0, q_hat_vec_sum = 0.0;
   int count_q_hat_sum = 0;
 
-  for ( int i = 1;i <= numberAdded;i++ )
+  for ( int i = 1;i <= addedParticles.size();i++ )
   {
 //     if(addedParticles[i].T <= time)
 //     {
@@ -1225,7 +1222,7 @@ void analysis::twoPartclCorrelations()
   binning dNdrI_ptbar5_dpt02( filename, 0.0, 15.0, 60 );
 
   // 2 particle correlations, charm and anti-charm which are produced in same reaction
-  for ( int i = 1;i <= numberAdded;i++ )
+  for ( int i = 1;i <= addedParticles.size();i++ )
   {
 //     if(addedParticles[i].T <= time)
 //     {
@@ -1236,7 +1233,7 @@ void analysis::twoPartclCorrelations()
 
     if ( fabs( eta ) <= eta_max )
     {
-      for ( int j = i + 1;j <= numberAdded;j++ )
+      for ( int j = i + 1;j <= addedParticles.size();j++ )
       {
 //         if ( addedParticles[i].N_EVENT == addedParticles[j].N_EVENT )
         if ( true )
@@ -1391,7 +1388,7 @@ void analysis::twoPartclCorrelations()
 
 
 
-  for ( int j = 1;j <= numberAdded;j++ )
+  for ( int j = 1;j <= addedParticles.size();j++ )
   {
 
     pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
@@ -1444,23 +1441,23 @@ void analysis::computeV2RAA( string name, const double _outputTime )
 {
   v2RAA theV2RAA( theConfig, name, filename_prefix );
 
-  theV2RAA.computeFor( gluon, particles_atTimeNow, number, "background", _outputTime, v2background );
-  theV2RAA.computeFor( up, particles_atTimeNow, number, "background", _outputTime, v2background );
-  theV2RAA.computeFor( down, particles_atTimeNow, number, "background", _outputTime, v2background );
-  theV2RAA.computeFor( strange, particles_atTimeNow, number, "background", _outputTime, v2background );
-  theV2RAA.computeFor( anti_up, particles_atTimeNow, number, "background", _outputTime, v2background );
-  theV2RAA.computeFor( anti_down, particles_atTimeNow, number, "background", _outputTime, v2background );
-  theV2RAA.computeFor( anti_strange, particles_atTimeNow, number, "background", _outputTime, v2background );
-  theV2RAA.computeFor( light_quark, particles_atTimeNow, number, "background", _outputTime, v2background );
+  theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+  theV2RAA.computeFor( up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+  theV2RAA.computeFor( down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+  theV2RAA.computeFor( strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+  theV2RAA.computeFor( anti_up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+  theV2RAA.computeFor( anti_down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+  theV2RAA.computeFor( anti_strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+  theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
   
-  theV2RAA.computeFor( gluon, addedParticles, numberAdded, "jets", _outputTime, v2jets );
-  theV2RAA.computeFor( light_quark, addedParticles, numberAdded, "jets", _outputTime, v2jets );
-  theV2RAA.computeFor( up, addedParticles, numberAdded, "jets", _outputTime, v2jets );
-  theV2RAA.computeFor( down, addedParticles, numberAdded, "jets", _outputTime, v2jets );
-  theV2RAA.computeFor( strange, addedParticles, numberAdded, "jets", _outputTime, v2jets );
-  theV2RAA.computeFor( anti_up, addedParticles, numberAdded, "jets", _outputTime, v2jets );
-  theV2RAA.computeFor( anti_down, addedParticles, numberAdded, "jets", _outputTime, v2jets );
-  theV2RAA.computeFor( anti_strange, addedParticles, numberAdded, "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( anti_up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+  theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
 }
 
 
@@ -1920,7 +1917,7 @@ void analysis::volumeMidrap( const int step ) const
   binning zBins( filename_z, numberOfBins );
   binning tBins( filename_t, numberOfBins );
 
-  for ( int i = 0;i < number;i++ )
+  for ( int i = 0;i < particles_atTimeNow.size();i++ )
   {
 //     y = 0.5*log( (partclAtTimeNow[i].E + partclAtTimeNow[i].PZ) / (partclAtTimeNow[i].E - partclAtTimeNow[i].PZ) );
 //     if(fabs(y) <= y_max)
@@ -2678,7 +2675,7 @@ void analysis::particleOutput( const int step )
     printHeader( file, all, end );
   //---------------------------------------
 
-  for ( int i = 0; i < numberAdded; i++ )
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
     file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep << addedParticles[i].T << sep << addedParticles[i].X << sep
     << addedParticles[i].Y << sep  << addedParticles[i].Z << sep << addedParticles[i].E << sep << addedParticles[i].PX << sep << addedParticles[i].PY << sep

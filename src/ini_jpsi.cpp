@@ -11,7 +11,6 @@
 using namespace std;
 using namespace ns_casc;
 
-extern int numberAdded;
 extern int Ntest;
 
 binning ptbins("output/ptbins.dat", 0.0, 5.0, 100);
@@ -75,8 +74,9 @@ void ini_jpsi::sample_jpsis()
   
   for(int i = 0; i < number_jpsi; i++)
   {
-    numberAdded++;
-    sample_one_jpsi(numberAdded);
+//     numberAdded++;
+//     sample_one_jpsi(numberAdded);
+// TODO !!
   }
   
   

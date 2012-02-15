@@ -40,7 +40,7 @@ using namespace ns_casc;
 using namespace std;
 
 
-extern int number, numberAdded, IX, IY, IZ;
+extern int IX, IY, IZ;
 
 
 namespace
@@ -80,7 +80,7 @@ namespace
 
 
 offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface ) :
-    theConfig( _config ), stoptime_last( 0 ), stoptime( 5.0 ), currentNumber( 0 ),
+    theConfig( _config ), stoptime_last( 0 ), stoptime( 5.0 ), currentNumber( 0 ), numberEvolvingParticles( _config->getN_init() ),
     rings( _config->getRingNumber(), _config->getCentralRingRadius(), _config->getDeltaR() ),
     testpartcl( _config->getTestparticles() ),
     offlineInterface( _offlineInterface )
@@ -135,7 +135,6 @@ void offlineHeavyIonCollision::init()
     }
   }
   cout << "#### " << addedParticles.size() << " out of " << Nbefore << " particles kept for simulation ( N_f = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << " )." << endl;
-  numberAdded = addedParticles.size();
   
   // List particle numbers for all flavors
   cout << "==========================" << endl;
@@ -222,7 +221,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   int nn_ana_movie = 0;
   int jumpMovieSteps = 0;
   double factor_dt = theConfig->getFactor_dt();
-  cout << "scale time steps dt by facot " << factor_dt << endl;
+  cout << "scale time steps dt by factor " << factor_dt << endl;
   
   if( theConfig->isHadronizationHQ() )
   {
@@ -406,7 +405,6 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
       particles_atTimeNow = particles_atTimeNowCopy;
       addedParticles = addedParticlesCopy;
-      numberAdded = addedParticles.size();
       cells = cellsCopy;
       cellsAdded = cellsAddedCopy;
       edgeCell = edgeCellCopy;
@@ -530,31 +528,31 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
   double c;
 
   // give partcl from cascade the values for cell structurement which could have changed in collisions()
-  for ( int k = 0; k < particles.size(); k++ )
+  for ( int k = 0; k < particles_atTimeNow.size(); k++ )
   {
-    particles[k].init = particles_atTimeNow[k].init;
-    particles[k].edge = particles_atTimeNow[k].edge;
-    particles[k].free = particles_atTimeNow[k].free;
+    particlesEvolving[k].init = particles_atTimeNow[k].init;
+    particlesEvolving[k].edge = particles_atTimeNow[k].edge;
+    particlesEvolving[k].free = particles_atTimeNow[k].free;
   }
 
   if ( evolveToTime <= stoptime_last )
   {
     for ( int i = 0; i < theConfig->getN_init(); i++ )
     {
-      particles[i].init = true;
+      particlesEvolving[i].init = true;
 
-      particles[i].T = particles_init[i].T;
-      particles[i].X = particles_init[i].X;
-      particles[i].Y = particles_init[i].Y;
-      particles[i].Z = particles_init[i].Z;
+      particlesEvolving[i].T = particles_init[i].T;
+      particlesEvolving[i].X = particles_init[i].X;
+      particlesEvolving[i].Y = particles_init[i].Y;
+      particlesEvolving[i].Z = particles_init[i].Z;
 
-      particles[i].PXold = particles[i].PX = particles_init[i].PX;
-      particles[i].PYold = particles[i].PY = particles_init[i].PY;
-      particles[i].PZold = particles[i].PZ = particles_init[i].PZ;
-      particles[i].Eold = particles[i].E = particles_init[i].E;
+      particlesEvolving[i].PXold = particlesEvolving[i].PX = particles_init[i].PX;
+      particlesEvolving[i].PYold = particlesEvolving[i].PY = particles_init[i].PY;
+      particlesEvolving[i].PZold = particlesEvolving[i].PZ = particles_init[i].PZ;
+      particlesEvolving[i].Eold = particlesEvolving[i].E = particles_init[i].E;
     }
 
-    number = theConfig->getN_init();
+    numberEvolvingParticles = theConfig->getN_init();
   }
 
   offlineEventType actiontype = event_dummy;
@@ -616,44 +614,44 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       
       if ( time <= ( evolveToTime + 1.0e-6 ) )
       {
-        particles[iscat].init = particles[jscat].init = false;
+        particlesEvolving[iscat].init = particlesEvolving[jscat].init = false;
 
-        c = ( time - particles[iscat].T ) / particles[iscat].E;
-        particles[iscat].T = time;
-        particles[iscat].X = particles[iscat].X + particles[iscat].PX * c;
-        particles[iscat].Y = particles[iscat].Y + particles[iscat].PY * c;
-        particles[iscat].Z = particles[iscat].Z + particles[iscat].PZ * c;
+        c = ( time - particlesEvolving[iscat].T ) / particlesEvolving[iscat].E;
+        particlesEvolving[iscat].T = time;
+        particlesEvolving[iscat].X = particlesEvolving[iscat].X + particlesEvolving[iscat].PX * c;
+        particlesEvolving[iscat].Y = particlesEvolving[iscat].Y + particlesEvolving[iscat].PY * c;
+        particlesEvolving[iscat].Z = particlesEvolving[iscat].Z + particlesEvolving[iscat].PZ * c;
 
-        c = ( time - particles[jscat].T ) / particles[jscat].E;
-        particles[jscat].T = time;
-        particles[jscat].X = particles[jscat].X + particles[jscat].PX * c;
-        particles[jscat].Y = particles[jscat].Y + particles[jscat].PY * c;
-        particles[jscat].Z = particles[jscat].Z + particles[jscat].PZ * c;
+        c = ( time - particlesEvolving[jscat].T ) / particlesEvolving[jscat].E;
+        particlesEvolving[jscat].T = time;
+        particlesEvolving[jscat].X = particlesEvolving[jscat].X + particlesEvolving[jscat].PX * c;
+        particlesEvolving[jscat].Y = particlesEvolving[jscat].Y + particlesEvolving[jscat].PY * c;
+        particlesEvolving[jscat].Z = particlesEvolving[jscat].Z + particlesEvolving[jscat].PZ * c;
 
-        if ( time < particles[iscat].T )
+        if ( time < particlesEvolving[iscat].T )
         {
           cout << "back22_i" << endl;
           int zz;
           cin >> zz;
         }
-        if ( time < particles[jscat].T )
+        if ( time < particlesEvolving[jscat].T )
         {
           cout << "back22_j" << endl;
           int zz;
           cin >> zz;
         }
 
-        particles[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
-        particles[iscat].PX = pxi;
-        particles[iscat].PY = pyi;
-        particles[iscat].PZ = pzi;
-        particles[iscat].E = sqrt( pow( pxi, 2 ) + pow( pyi, 2 ) + pow( pzi, 2 ) );
+        particlesEvolving[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
+        particlesEvolving[iscat].PX = pxi;
+        particlesEvolving[iscat].PY = pyi;
+        particlesEvolving[iscat].PZ = pzi;
+        particlesEvolving[iscat].E = sqrt( pow( pxi, 2 ) + pow( pyi, 2 ) + pow( pzi, 2 ) );
 
-        particles[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
-        particles[jscat].PX = pxj;
-        particles[jscat].PY = pyj;
-        particles[jscat].PZ = pzj;
-        particles[jscat].E = sqrt( pow( pxj, 2 ) + pow( pyj, 2 ) + pow( pzj, 2 ) );
+        particlesEvolving[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
+        particlesEvolving[jscat].PX = pxj;
+        particlesEvolving[jscat].PY = pyj;
+        particlesEvolving[jscat].PZ = pzj;
+        particlesEvolving[jscat].E = sqrt( pow( pxj, 2 ) + pow( pyj, 2 ) + pow( pzj, 2 ) );
       }
       else
       {
@@ -679,60 +677,60 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       F1 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F1 );
       F2 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F2 );
       F3 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F3 );
-      particles[kscat].X = ptrInteraction23->newx;
-      particles[kscat].Y = ptrInteraction23->newy;
-      particles[kscat].Z = ptrInteraction23->newz;
-      particles[kscat].PX = ptrInteraction23->newpx;
-      particles[kscat].PY = ptrInteraction23->newpy;
-      particles[kscat].PZ = ptrInteraction23->newpz;
+      particlesEvolving[kscat].X = ptrInteraction23->newx;
+      particlesEvolving[kscat].Y = ptrInteraction23->newy;
+      particlesEvolving[kscat].Z = ptrInteraction23->newz;
+      particlesEvolving[kscat].PX = ptrInteraction23->newpx;
+      particlesEvolving[kscat].PY = ptrInteraction23->newpy;
+      particlesEvolving[kscat].PZ = ptrInteraction23->newpz;
 
       if ( time <= evolveToTime + 1.0e-6 )
       {
-        particles[kscat].T = time;
-        particles[kscat].FLAVOR = static_cast<FLAVOR_TYPE>( F3 );
-        particles[kscat].E = sqrt( pow( particles[kscat].PX, 2 ) + pow( particles[kscat].PY, 2 ) + pow( particles[kscat].PZ, 2 ) );
-        particles[kscat].free = false;
+        particlesEvolving[kscat].T = time;
+        particlesEvolving[kscat].FLAVOR = static_cast<FLAVOR_TYPE>( F3 );
+        particlesEvolving[kscat].E = sqrt( pow( particlesEvolving[kscat].PX, 2 ) + pow( particlesEvolving[kscat].PY, 2 ) + pow( particlesEvolving[kscat].PZ, 2 ) );
+        particlesEvolving[kscat].free = false;
 
-        particles[iscat].init = particles[jscat].init = particles[kscat].init = false;
+        particlesEvolving[iscat].init = particlesEvolving[jscat].init = particlesEvolving[kscat].init = false;
 
-        c = ( time - particles[iscat].T ) / particles[iscat].E;
-        particles[iscat].T = time;
-        particles[iscat].X = particles[iscat].X + particles[iscat].PX * c;
-        particles[iscat].Y = particles[iscat].Y + particles[iscat].PY * c;
-        particles[iscat].Z = particles[iscat].Z + particles[iscat].PZ * c;
+        c = ( time - particlesEvolving[iscat].T ) / particlesEvolving[iscat].E;
+        particlesEvolving[iscat].T = time;
+        particlesEvolving[iscat].X = particlesEvolving[iscat].X + particlesEvolving[iscat].PX * c;
+        particlesEvolving[iscat].Y = particlesEvolving[iscat].Y + particlesEvolving[iscat].PY * c;
+        particlesEvolving[iscat].Z = particlesEvolving[iscat].Z + particlesEvolving[iscat].PZ * c;
 
-        c = ( time - particles[jscat].T ) / particles[jscat].E;
-        particles[jscat].T = time;
-        particles[jscat].X = particles[jscat].X + particles[jscat].PX * c;
-        particles[jscat].Y = particles[jscat].Y + particles[jscat].PY * c;
-        particles[jscat].Z = particles[jscat].Z + particles[jscat].PZ * c;
+        c = ( time - particlesEvolving[jscat].T ) / particlesEvolving[jscat].E;
+        particlesEvolving[jscat].T = time;
+        particlesEvolving[jscat].X = particlesEvolving[jscat].X + particlesEvolving[jscat].PX * c;
+        particlesEvolving[jscat].Y = particlesEvolving[jscat].Y + particlesEvolving[jscat].PY * c;
+        particlesEvolving[jscat].Z = particlesEvolving[jscat].Z + particlesEvolving[jscat].PZ * c;
 
-        if ( time < particles[iscat].T )
+        if ( time < particlesEvolving[iscat].T )
         {
           cout << "back23_i" << endl;
           int zz;
           cin >> zz;
         }
-        if ( time < particles[jscat].T )
+        if ( time < particlesEvolving[jscat].T )
         {
           cout << "back23_j" << endl;
           int zz;
           cin >> zz;
         }
 
-        particles[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
-        particles[iscat].PX = pxi;
-        particles[iscat].PY = pyi;
-        particles[iscat].PZ = pzi;
-        particles[iscat].E = sqrt( pxi * pxi + pyi * pyi + pzi * pzi );
+        particlesEvolving[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
+        particlesEvolving[iscat].PX = pxi;
+        particlesEvolving[iscat].PY = pyi;
+        particlesEvolving[iscat].PZ = pzi;
+        particlesEvolving[iscat].E = sqrt( pxi * pxi + pyi * pyi + pzi * pzi );
 
-        particles[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
-        particles[jscat].PX = pxj;
-        particles[jscat].PY = pyj;
-        particles[jscat].PZ = pzj;
-        particles[jscat].E = sqrt( pxj * pxj + pyj * pyj + pzj * pzj );
+        particlesEvolving[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
+        particlesEvolving[jscat].PX = pxj;
+        particlesEvolving[jscat].PY = pyj;
+        particlesEvolving[jscat].PZ = pzj;
+        particlesEvolving[jscat].E = sqrt( pxj * pxj + pyj * pyj + pzj * pzj );
 
-        number++;//production
+        numberEvolvingParticles++;//production
       }
       else
       {
@@ -760,48 +758,48 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
 
       if ( time <= evolveToTime + 1.0e-6 )
       {
-        particles[iscat].init = particles[jscat].init = false;
+        particlesEvolving[iscat].init = particlesEvolving[jscat].init = false;
 
-        c = ( time - particles[iscat].T ) / particles[iscat].E;
-        particles[iscat].T = time;
-        particles[iscat].X = particles[iscat].X + particles[iscat].PX * c;
-        particles[iscat].Y = particles[iscat].Y + particles[iscat].PY * c;
-        particles[iscat].Z = particles[iscat].Z + particles[iscat].PZ * c;
+        c = ( time - particlesEvolving[iscat].T ) / particlesEvolving[iscat].E;
+        particlesEvolving[iscat].T = time;
+        particlesEvolving[iscat].X = particlesEvolving[iscat].X + particlesEvolving[iscat].PX * c;
+        particlesEvolving[iscat].Y = particlesEvolving[iscat].Y + particlesEvolving[iscat].PY * c;
+        particlesEvolving[iscat].Z = particlesEvolving[iscat].Z + particlesEvolving[iscat].PZ * c;
 
-        c = ( time - particles[jscat].T ) / particles[jscat].E;
-        particles[jscat].T = time;
-        particles[jscat].X = particles[jscat].X + particles[jscat].PX * c;
-        particles[jscat].Y = particles[jscat].Y + particles[jscat].PY * c;
-        particles[jscat].Z = particles[jscat].Z + particles[jscat].PZ * c;
+        c = ( time - particlesEvolving[jscat].T ) / particlesEvolving[jscat].E;
+        particlesEvolving[jscat].T = time;
+        particlesEvolving[jscat].X = particlesEvolving[jscat].X + particlesEvolving[jscat].PX * c;
+        particlesEvolving[jscat].Y = particlesEvolving[jscat].Y + particlesEvolving[jscat].PY * c;
+        particlesEvolving[jscat].Z = particlesEvolving[jscat].Z + particlesEvolving[jscat].PZ * c;
 
-        if ( time < particles[iscat].T )
+        if ( time < particlesEvolving[iscat].T )
         {
           cout << "back32_i" << endl;
           int zz;
           cin >> zz;
         }
-        if ( time < particles[jscat].T )
+        if ( time < particlesEvolving[jscat].T )
         {
           cout << "back32_j" << endl;
           int zz;
           cin >> zz;
         }
 
-        particles[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
-        particles[iscat].PX = pxi;
-        particles[iscat].PY = pyi;
-        particles[iscat].PZ = pzi;
-        particles[iscat].E = sqrt( pxi * pxi + pyi * pyi + pzi * pzi );
+        particlesEvolving[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
+        particlesEvolving[iscat].PX = pxi;
+        particlesEvolving[iscat].PY = pyi;
+        particlesEvolving[iscat].PZ = pzi;
+        particlesEvolving[iscat].E = sqrt( pxi * pxi + pyi * pyi + pzi * pzi );
 
-        particles[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
-        particles[jscat].PX = pxj;
-        particles[jscat].PY = pyj;
-        particles[jscat].PZ = pzj;
-        particles[jscat].E = sqrt( pxj * pxj + pyj * pyj + pzj * pzj );
+        particlesEvolving[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
+        particlesEvolving[jscat].PX = pxj;
+        particlesEvolving[jscat].PY = pyj;
+        particlesEvolving[jscat].PZ = pzj;
+        particlesEvolving[jscat].E = sqrt( pxj * pxj + pyj * pyj + pzj * pzj );
         
-        particles[dead].dead = true;
+        particlesEvolving[dead].dead = true;
         
-        number--;
+        numberEvolvingParticles--;
       }
       else
       {
@@ -827,47 +825,47 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       
       if (( timei <= evolveToTime + 1.0e-6 ) || ( timej <= evolveToTime + 1.0e-6 ) )
       {
-        particles[iscat].init = particles[jscat].init = false;
+        particlesEvolving[iscat].init = particlesEvolving[jscat].init = false;
 
-        particles[iscat].PXold = particles[iscat].PX;
-        particles[iscat].PYold = particles[iscat].PY;
-        particles[iscat].PZold = particles[iscat].PZ;
-        particles[iscat].Eold = particles[iscat].E;
+        particlesEvolving[iscat].PXold = particlesEvolving[iscat].PX;
+        particlesEvolving[iscat].PYold = particlesEvolving[iscat].PY;
+        particlesEvolving[iscat].PZold = particlesEvolving[iscat].PZ;
+        particlesEvolving[iscat].Eold = particlesEvolving[iscat].E;
 
-        particles[jscat].PXold = particles[jscat].PX;
-        particles[jscat].PYold = particles[jscat].PY;
-        particles[jscat].PZold = particles[jscat].PZ;
-        particles[jscat].Eold = particles[jscat].E;
+        particlesEvolving[jscat].PXold = particlesEvolving[jscat].PX;
+        particlesEvolving[jscat].PYold = particlesEvolving[jscat].PY;
+        particlesEvolving[jscat].PZold = particlesEvolving[jscat].PZ;
+        particlesEvolving[jscat].Eold = particlesEvolving[jscat].E;
 
-        c = ( timei - particles[iscat].T ) / particles[iscat].E;
-        particles[iscat].T = timei;
-        particles[iscat].X = particles[iscat].X + particles[iscat].PX * c;
-        particles[iscat].Y = particles[iscat].Y + particles[iscat].PY * c;
-        particles[iscat].Z = particles[iscat].Z + particles[iscat].PZ * c;
+        c = ( timei - particlesEvolving[iscat].T ) / particlesEvolving[iscat].E;
+        particlesEvolving[iscat].T = timei;
+        particlesEvolving[iscat].X = particlesEvolving[iscat].X + particlesEvolving[iscat].PX * c;
+        particlesEvolving[iscat].Y = particlesEvolving[iscat].Y + particlesEvolving[iscat].PY * c;
+        particlesEvolving[iscat].Z = particlesEvolving[iscat].Z + particlesEvolving[iscat].PZ * c;
 
-        particles[iscat].PX = pxi;
-        particles[iscat].PY = pyi;
-        particles[iscat].PZ = pzi;
-        particles[iscat].E = sqrt( pxi * pxi + pyi * pyi + pzi * pzi );
+        particlesEvolving[iscat].PX = pxi;
+        particlesEvolving[iscat].PY = pyi;
+        particlesEvolving[iscat].PZ = pzi;
+        particlesEvolving[iscat].E = sqrt( pxi * pxi + pyi * pyi + pzi * pzi );
 
-        c = ( timej - particles[jscat].T ) / particles[jscat].E;
-        particles[jscat].T = timej;
-        particles[jscat].X = particles[jscat].X + particles[jscat].PX * c;
-        particles[jscat].Y = particles[jscat].Y + particles[jscat].PY * c;
-        particles[jscat].Z = particles[jscat].Z + particles[jscat].PZ * c;
+        c = ( timej - particlesEvolving[jscat].T ) / particlesEvolving[jscat].E;
+        particlesEvolving[jscat].T = timej;
+        particlesEvolving[jscat].X = particlesEvolving[jscat].X + particlesEvolving[jscat].PX * c;
+        particlesEvolving[jscat].Y = particlesEvolving[jscat].Y + particlesEvolving[jscat].PY * c;
+        particlesEvolving[jscat].Z = particlesEvolving[jscat].Z + particlesEvolving[jscat].PZ * c;
 
-        particles[jscat].PX = pxj;
-        particles[jscat].PY = pyj;
-        particles[jscat].PZ = pzj;
-        particles[jscat].E = sqrt( pxj * pxj + pyj * pyj + pzj * pzj );
+        particlesEvolving[jscat].PX = pxj;
+        particlesEvolving[jscat].PY = pyj;
+        particlesEvolving[jscat].PZ = pzj;
+        particlesEvolving[jscat].E = sqrt( pxj * pxj + pyj * pyj + pzj * pzj );
 
-        if ( timei < particles[iscat].T )
+        if ( timei < particlesEvolving[iscat].T )
         {
           cout << "back22e_i" << endl;
           int zz;
           cin >> zz;
         }
-        if ( timej < particles[jscat].T )
+        if ( timej < particlesEvolving[jscat].T )
         {
           cout << "back22e_j" << endl;
           int zz;
@@ -888,24 +886,26 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       iscat = ptrSwap->removedParticleID;
       jscat = ptrSwap->replacingParticleID;
 
-      particles[iscat] = particles[jscat];
+      particlesEvolving[iscat] = particlesEvolving[jscat];
     }
   }
 
-  for ( int i = 0; i < number; i++ )
+  for ( int i = 0; i < numberEvolvingParticles; i++ )
   {
-    if ( particles[i].T < evolveToTime + 1.0e-8 )
+    if ( particlesEvolving[i].T < evolveToTime + 1.0e-8 )
     {
-      particles[i].init = false;
+      particlesEvolving[i].init = false;
     }
   }
 
   // duplicate partcl from cascade to partclAtTimeNow
-  particles_atTimeNow = particles;
-
+  particles_atTimeNow = particlesEvolving;
+  
+  // particles vector is larger and in size constant. But consider for partclAtTimenow only actual physical present particles (number is numberEvolvingParticles)
+  particles_atTimeNow.resize( numberEvolvingParticles ); 
 
   // propagate particles_atTimeNow to current time
-  for ( int i = 0; i < number; i++ )
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
     if ( particles_atTimeNow[i].T < evolveToTime )
     {
@@ -942,7 +942,7 @@ void offlineHeavyIonCollision::cell_ID( double _time )
     cells[i].particleList.clear();
   }
 
-  for ( int i = 0; i < number; i++ )
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
     if ( particles_atTimeNow[i].T < _time )
     {
@@ -1048,7 +1048,7 @@ void offlineHeavyIonCollision::cell_ID( double _time )
   }
   formGeomAdded.clear();
 
-  for ( int i = 0; i < numberAdded; i++ )
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
     if ( addedParticles[i].T < _time )
     {
@@ -2500,7 +2500,6 @@ int offlineHeavyIonCollision::scatt23_utility( scattering23& scatt23_obj, cellCo
 //   {
     addedParticles.push_back( tempParticle );
     int newIndex = addedParticles.size() - 1;
-    ++numberAdded;
 
     cc = ( nexttime - addedParticles[newIndex].T ) / addedParticles[newIndex].E;
     addedParticles[newIndex].T = nexttime;
@@ -2819,7 +2818,6 @@ void offlineHeavyIonCollision::removeDeadParticles( analysis& _aa )
   while ( addedParticles.size() != 0 && addedParticles.back().dead )
   {
     addedParticles.pop_back();
-    --numberAdded;
     deadParticleList.pop_back();
   }
 
@@ -2845,12 +2843,10 @@ void offlineHeavyIonCollision::removeDeadParticles( analysis& _aa )
 //       }
     }
     addedParticles.pop_back();
-    --numberAdded;
 
     while ( addedParticles.back().dead )
     {
       addedParticles.pop_back();
-      --numberAdded;
       deadParticleList.pop_back();
     }
   }
