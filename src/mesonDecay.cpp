@@ -13,18 +13,18 @@ using namespace ns_casc;
 using namespace std;
 
 
-mesonDecay::mesonDecay( const int number_arg, const int numberElectronStat_arg, const bool local_cluster_arg, const bool muonsInsteadOfElectrons_arg, const bool nonPromptJpsiInsteadOfElectrons_arg ) :
-  number(number_arg), numberElectronStat(numberElectronStat_arg), local_cluster(local_cluster_arg), muonsInsteadOfElectrons(muonsInsteadOfElectrons_arg), nonPromptJpsiInsteadOfElectrons(nonPromptJpsiInsteadOfElectrons_arg)
+mesonDecay::mesonDecay( const int numberElectronStat_arg, const bool local_cluster_arg, const bool muonsInsteadOfElectrons_arg, const bool nonPromptJpsiInsteadOfElectrons_arg ) :
+  numberElectronStat(numberElectronStat_arg), local_cluster(local_cluster_arg), muonsInsteadOfElectrons(muonsInsteadOfElectrons_arg), nonPromptJpsiInsteadOfElectrons(nonPromptJpsiInsteadOfElectrons_arg)
 {
   /**
   * Reserve memory for the Particle vector.
   */
-  addedPartcl_electron.reserve( number * numberElectronStat );
+  addedPartcl_electron.reserve( addedParticlesCopy.size() * numberElectronStat );
   /**
   * Now the addedPartcl_electron vector is re-sized to hold the needed number of particles (this is NOT done when reserving memory!).
   * The particles are initialised with the standard constructor, actual attributes such as momentum etc. MUST be set later!
   */
-  addedPartcl_electron.resize( number * numberElectronStat );
+  addedPartcl_electron.resize( addedParticlesCopy.size() * numberElectronStat );
 }
 
 // void mesonDecay::decayToElectronsToyModel()
@@ -103,7 +103,7 @@ void mesonDecay::decayToElectronsPythia()
 //   pythia.particleData.list(443);
   
 
-  for ( int i = 1; i <= number; i++ )
+  for ( int i = 1; i <= addedParticlesCopy.size(); i++ )
   {
     if ( ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == dmeson_gen || ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == bmeson_gen ) // d or b meson
     {

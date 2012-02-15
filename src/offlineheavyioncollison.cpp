@@ -31,6 +31,7 @@
 #include "FPT_compare.h"
 #include "hadronization_hq.h"
 
+#include "config.h"
 #ifdef Pythia_FOUND
 #include "mesonDecay.h"
 #endif
@@ -225,13 +226,13 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   
   if( theConfig->isHadronizationHQ() )
   {
-    hadronization_hq ppHadronization_hq( numberAdded );
+    hadronization_hq ppHadronization_hq;
     ppHadronization_hq.heavyQuarkFragmentation();
   }
   if( theConfig->isMesonDecay() )
   {
 #ifdef Pythia_FOUND
-    mesonDecay ppMesonDecay( numberAdded, theConfig->getNumberElectronStat(), theConfig->isLocalCluster(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
+    mesonDecay ppMesonDecay( theConfig->getNumberElectronStat(), theConfig->isLocalCluster(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
     ppMesonDecay.decayToElectronsPythia();
 #else
     string errMsg( "Could not perform decay of heavy mesons to electron because PYTHIA was not found." );
@@ -465,13 +466,13 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
   if( theConfig->isHadronizationHQ() )
   {
-    hadronization_hq theHadronization_hq( numberAdded );
+    hadronization_hq theHadronization_hq;
     theHadronization_hq.heavyQuarkFragmentation();
   }
   if( theConfig->isMesonDecay() )
   {
 #ifdef Pythia_FOUND
-    mesonDecay theMesonDecay( numberAdded, theConfig->getNumberElectronStat(), theConfig->isLocalCluster(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
+    mesonDecay theMesonDecay( theConfig->getNumberElectronStat(), theConfig->isLocalCluster(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
     theMesonDecay.decayToElectronsPythia();
 #else
     string errMsg( "Could not perform decay of heavy mesons to electron because PYTHIA was not found." );
