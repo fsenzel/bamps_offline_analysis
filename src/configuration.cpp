@@ -384,6 +384,12 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
   IX = ptrSimulationData->gridSizeX;
   IY = ptrSimulationData->gridSizeY;
   IZ = ptrSimulationData->gridSizeZ;
+  N_light_flavors_offline = ptrSimulationData->N_light_flav;
+  N_heavy_flavors_offline = ptrSimulationData->N_heavy_flav;
+  
+
+  Particle::set_N_light_flavor( N_light_flavors_offline );
+  Particle::set_N_heavy_flavor( N_heavy_flavors_offline );
   
   numberOfParticlesToAdd *= testparticles;
   cout << "** add " << numberOfParticlesToAdd << " particles with pt_min = " << minimumPT << endl;

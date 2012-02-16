@@ -359,6 +359,10 @@ class config
   double timefirst;
   /** @brief "time shift" as used in the original run */
   double timeshift;
+  /** @brief number of active light flavors in the offline run */
+  int N_light_flavors_offline;
+  /** @brief number of active heavy flavors in the offline run */
+  int N_heavy_flavors_offline;
   /** ----------------------------------------------- */
 };
 

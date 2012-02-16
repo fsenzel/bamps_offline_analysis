@@ -846,14 +846,14 @@ class offlineDataSimulationParameters : public offlineDataGeneric
       const double _firstTimeStep, const double _timeShift, const double _freezeOutEnergyDensity,
       const int _ringStructureSize, const double _ringStructureCentralRadius, const double _ringStructureDeltaR,
       const double _cellSizeDeltaX, const double _cellSizeDeltaY, const double _transversalSize,
-      const double _gridSizeX, const double _gridSizeY, const double _gridSizeZ ) : seed( _seed ), sqrtS(_sqrtS),
+      const double _gridSizeX, const double _gridSizeY, const double _gridSizeZ, const int _N_light_flav, const int _N_heavy_flav ) : seed( _seed ), sqrtS(_sqrtS),
       impactParameter(_impactParameter), massNumberNucleusA(_massNumberNucleusA), atomicNumberNucleusA(_atomicNumberNucleusA),
       massNumberNucleusB(_massNumberNucleusB), atomicNumberNucleusB(_atomicNumberNucleusB),
       numberOfTestparticles(_numberOfTestparticles), initialNumberOfParticles(_initialNumberOfParticles),
       firstTimeStep(_firstTimeStep), timeShift(_timeShift), freezeOutEnergyDensity(_freezeOutEnergyDensity),
       ringStructureSize(_ringStructureSize), ringStructureCentralRadius(_ringStructureCentralRadius),
       ringStructureDeltaR(_ringStructureDeltaR), cellSizeDeltaX(_cellSizeDeltaX), cellSizeDeltaY(_cellSizeDeltaY),
-      transversalSize(_transversalSize), gridSizeX(_gridSizeX), gridSizeY(_gridSizeY), gridSizeZ(_gridSizeZ),      
+      transversalSize(_transversalSize), gridSizeX(_gridSizeX), gridSizeY(_gridSizeY), gridSizeZ(_gridSizeZ), N_light_flav(_N_light_flav), N_heavy_flav(_N_heavy_flav),
       offlineDataGeneric() {};
     ~offlineDataSimulationParameters() {};
 
@@ -903,6 +903,10 @@ class offlineDataSimulationParameters : public offlineDataGeneric
     double gridSizeY;
     /** @brief number of cells in z-direction (= eta-direction) */
     double gridSizeZ;
+    /** @brief number of active light flavors */
+    int N_light_flav;
+    /** @brief number of active heavy flavors */
+    int N_heavy_flav;
     
     friend class boost::serialization::access;
     template<class Archive>
@@ -930,6 +934,8 @@ class offlineDataSimulationParameters : public offlineDataGeneric
       ar & gridSizeX;
       ar & gridSizeY;
       ar & gridSizeZ;
+      ar & N_light_flav;
+      ar & N_heavy_flav;
     }
 };
 
