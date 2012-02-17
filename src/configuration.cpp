@@ -163,7 +163,7 @@ config::config( const int argc, char* argv[] ) :
   Particle::set_N_heavy_flavor( N_heavy_flavors_input );
   cout << "N_f of added  = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << endl;
   
-  Particle::set_N_psi( N_psi_input );
+  Particle::set_N_psi_states( N_psi_input );
   
   checkOptionsForSanity();
   
@@ -402,7 +402,7 @@ void config::checkOptionsForSanity()
 {
   // sanity checks of parameters and options can go here  
   
-  if( ( scatt_amongAddedParticles && Particle::N_psi == 0 ) || ( Particle::N_psi > 0 && !scatt_amongAddedParticles ) )
+  if( ( scatt_amongAddedParticles && Particle::N_psi_states == 0 ) || ( Particle::N_psi_states > 0 && !scatt_amongAddedParticles ) )
   {
     string errMsg = "Scatterings among added particles and Jpsi not active or vice versa.";
     throw eConfig_error( errMsg );
@@ -474,7 +474,7 @@ void config::processHeavyQuarkOptions()
 
 
   // study Jpsi
-  if( Particle::N_psi > 0 )
+  if( Particle::N_psi_states > 0 )
   {
     Particle::setJpsiMass( Mjpsi_input );
     
@@ -552,7 +552,7 @@ void config::printUsedConfigurationParameters()
   output << "numberElectronStat = " << numberElectronStat << endl;
   output << "muonsInsteadOfElectrons = " << muonsInsteadOfElectrons << endl;
   output << "studyNonPromptJpsiInsteadOfElectrons = " << studyNonPromptJpsiInsteadOfElectrons << endl;
-  output << "N_psi_input = " << N_psi_input << endl;
+  output << "N_psi = " << N_psi_input << endl;
   output << "iso_xsection_jpsi = " << isotropicCrossSecJpsi << endl;
   output << "const_xsection_jpsi = " << constantCrossSecJpsi << endl;
   output << "const_xsection_jpsi_value = " << constantCrossSecValueJpsi << endl;

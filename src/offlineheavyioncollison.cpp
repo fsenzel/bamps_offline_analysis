@@ -1672,7 +1672,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
   formGeomCopy.clear();
   
   // J/psi dissociation: if temperature in cell is higher than Td = 2 Tc, decay J/psi to two charm quarks
-  if( Particle::N_psi > 0 )
+  if( Particle::N_psi_states > 0 )
     jpsi_dissociation_td( nexttime );
 }
 
