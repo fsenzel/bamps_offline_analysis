@@ -120,6 +120,10 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     y = 0.5 * log(( _particles[j].E+_particles[j].PZ ) / ( _particles[j].E-_particles[j].PZ ) );
     MT = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) + pow( _particles[j].m, 2 ) );   
     dtt = 1 / MT * cosh( y ) * 0.197327;  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
+    
+    // additional formation time for Jpsi
+    if( _particles[j].FLAVOR == jpsi )
+      dtt += configObject->getJpsiFormationTime() * cosh( y ); //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
 
     cc = dtt / _particles[j].E;
     _particles[j].T = _particles[j].T + dtt;

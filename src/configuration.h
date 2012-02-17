@@ -128,6 +128,12 @@ class config
   
   /** @brief Interface for config::scatt_amongAddedParticles */
   bool isScatt_amongAddedParticles() const {return scatt_amongAddedParticles;}
+  
+  /** @brief Interface for config::N_light_flavors_input */
+  int getNlightFlavorsAdded() const {return N_light_flavors_input;}
+  
+  /** @brief Interface for config::N_heavy_flavors_input */
+  int getNheavyFlavorsAdded() const {return N_heavy_flavors_input;}
   /** ------------------------------- */
   
   /** ---- initial state options ---- */ 
@@ -364,11 +370,11 @@ class config
    */
   double freezeOutEnergyDensity;
   
-  /** @brief number of active light flavors 
-   * ( 0: only gluons, 1: including up, 2: including down, 3: including strange)
+  /** @brief number of active light flavors for added particles 
+   * ( -1: no gluons nor light quarks, 0: only gluons, 1: including up, 2: including down, 3: including strange)
    */
   int N_light_flavors_input;
-  /** @brief number of active heavy flavors 
+  /** @brief number of active heavy flavors for added particles 
    * ( 0: no charm and bottom, 1: only charm, 2: charm and bottom), see particleprototype.h, global parameter 
    */
   int N_heavy_flavors_input;
@@ -584,6 +590,10 @@ class config
   double timefirst;
   /** @brief "time shift" as used in the original run */
   double timeshift;
+  /** @brief number of active light flavors in the offline run */
+  int N_light_flavors_offline;
+  /** @brief number of active heavy flavors in the offline run */
+  int N_heavy_flavors_offline;
   /** ----------------------------------------------- */
 };
 

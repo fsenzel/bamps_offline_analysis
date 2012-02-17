@@ -106,8 +106,8 @@ config::config( const int argc, char* argv[] ) :
  constantCrossSecValueGQ(10.0),
  Mcharm_input(1.5),
  Mbottom_input(4.8),
- hadronization_hq(true),
- mesonDecay(true),
+ hadronization_hq(false),
+ mesonDecay(false),
  numberElectronStat(20),
  muonsInsteadOfElectrons(false),
  studyNonPromptJpsiInsteadOfElectrons(false),
@@ -161,7 +161,7 @@ config::config( const int argc, char* argv[] ) :
   
   Particle::set_N_light_flavor( N_light_flavors_input );
   Particle::set_N_heavy_flavor( N_heavy_flavors_input );
-  cout << "N_f = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << endl;
+  cout << "N_f of added  = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << endl;
   
   Particle::set_N_psi( N_psi_input );
   
@@ -255,7 +255,7 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   ("heavy_quark.numberElectronStat", po::value<int>( &numberElectronStat )->default_value( numberElectronStat ), "one meson decays to numberElectronStat electrons")
   ("heavy_quark.muonsInsteadOfElectrons", po::value<bool>( &muonsInsteadOfElectrons )->default_value( muonsInsteadOfElectrons ), "decay to muons should be performed instead of electrons")
   ("heavy_quark.studyNonPromptJpsiInsteadOfElectrons", po::value<bool>( &studyNonPromptJpsiInsteadOfElectrons )->default_value( studyNonPromptJpsiInsteadOfElectrons ), "decay of B mesons to non prompt Jpsi should be performed instead to electrons")
-  ("heavy_quark.N_psi_input", po::value<int>( &N_psi_input )->default_value( N_psi_input ), "number of active psi states (1 = J/psi)")
+  ("heavy_quark.N_psi", po::value<int>( &N_psi_input )->default_value( N_psi_input ), "number of active psi states (1 = J/psi)")
   ("heavy_quark.iso_xsection_jpsi", po::value<bool>( &isotropicCrossSecJpsi )->default_value( isotropicCrossSecJpsi ), "isotropic momentum sampling is employed for process Q + Qbar -> g + J/psi")
   ("heavy_quark.const_xsection_jpsi", po::value<bool>( &constantCrossSecJpsi )->default_value( constantCrossSecJpsi ), "constant cross section is employed for process Q + Qbar -> g + J/psi")
   ("heavy_quark.const_xsection_jpsi_value", po::value<double>( &constantCrossSecValueJpsi )->default_value( constantCrossSecValueJpsi ), "value of constant cross section for process Q + Qbar -> g + J/psi in mb")
@@ -401,6 +401,24 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
 void config::checkOptionsForSanity()
 {
   // sanity checks of parameters and options can go here  
+  
+  if( ( scatt_amongAddedParticles && Particle::N_psi == 0 ) || ( Particle::N_psi > 0 && !scatt_amongAddedParticles ) )
+  {
+    string errMsg = "Scatterings among added particles and Jpsi not active or vice versa.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if( mesonDecay && !hadronization_hq )
+  {
+    string errMsg = "Meson decay not possible if heavy quarks cannot hadronize.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if( ( muonsInsteadOfElectrons || studyNonPromptJpsiInsteadOfElectrons ) && !mesonDecay )
+  {
+    string errMsg = "Meson decay to other particles does not make sense if meson decay is switched of.";
+    throw eConfig_error( errMsg );
+  }
 }
 
 
@@ -440,11 +458,7 @@ void config::processHeavyQuarkOptions()
   {
     cout << "Sample angle isotropic for gQ-> gQ." << endl;
   }
-  
-  // no meson decay if hadronization is not switched on (no mesons present)
-  if( !hadronization_hq )
-    mesonDecay = false;
-  
+
   if( mesonDecay )
   {
     if(muonsInsteadOfElectrons)
@@ -595,6 +609,20 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
   IX = ptrSimulationData->gridSizeX;
   IY = ptrSimulationData->gridSizeY;
   IZ = ptrSimulationData->gridSizeZ;
+  N_light_flavors_offline = ptrSimulationData->N_light_flav;
+  N_heavy_flavors_offline = ptrSimulationData->N_heavy_flav;
+  
+  // check if the number of flavors of the offline program is larger than that for added particles. If so set the global particle property accordingly to avoid errors. Particle::N_light_flavor must always be larger/equal the largest actually occuring particle flavor
+  if( N_light_flavors_offline > Particle::N_light_flavor )
+    Particle::set_N_light_flavor( N_light_flavors_offline );
+  if( N_heavy_flavors_offline > Particle::N_heavy_flavor )
+    Particle::set_N_heavy_flavor( N_heavy_flavors_offline );
+  
+  cout << "N_f of medium = N_f_light_quarks + N_f_heavy_quarks = " << N_light_flavors_offline << " + " <<   N_heavy_flavors_offline << endl;
+  cout << "N_f overall   = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << endl;
+  
+  if( N_light_flavors_offline < N_light_flavors_input )
+    cout << "There are more light flavors for added particles (" << N_light_flavors_input << ") switched on than for the medium (" << N_light_flavors_offline << "). It is assumed that you know what you do..." << endl;
   
   numberOfParticlesToAdd *= testparticles;
   cout << "** add " << numberOfParticlesToAdd << " particles with pt_min = " << minimumPT << endl;
