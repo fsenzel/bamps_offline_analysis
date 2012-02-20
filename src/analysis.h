@@ -18,6 +18,10 @@
 #include <vector>
 #include <math.h>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
+#include <boost/concept_check.hpp>
+
 #include "configuration.h"
 #include "particle.h"
 #include "ringstructure.h"
@@ -109,6 +113,18 @@ class analysisRingStructure
 };
 
 
+class analysisRapidityRange
+{
+  public:
+    analysisRapidityRange() : yleft(0), yright(0) {};
+    analysisRapidityRange( const double _left, const double _right ) : yleft(_left), yright(_right) {};
+  
+    void reset( const double _left, const double _right ) { yleft = _left; yright = _right; }
+    double ydelta() const { return (yright - yleft); }
+    
+    double yleft;
+    double yright;
+};
 
 
 class jetTrackerSingleEvent
@@ -135,6 +151,10 @@ class jetTrackerSingleEvent
     int jet_ID_in, jet_ID_out;
 };
 
+
+
+typedef boost::shared_array< std::vector<double> > tArrayOfDoubleVec;
+typedef std::vector< tArrayOfDoubleVec > tVecOfArrayOfDoubleVec;
 
 class analysis
 {
@@ -225,25 +245,28 @@ private:
   std::vector<double> yBinLabels;
   double minY, maxY, binWidthY;
   int numberBinsY;  
+
+  std::vector<analysisRapidityRange> rapidityRanges;
   
-  std::vector<double> *ptBinsDY1_gluons, *ptBinsDY2_gluons, *ptBinsDY3_gluons, *ptBinsDY4_gluons, *ptBinsDY5_gluons, *ptBinsAll_gluons;
-  std::vector<double> *ptBinsDY1_quarks, *ptBinsDY2_quarks, *ptBinsDY3_quarks, *ptBinsDY4_quarks, *ptBinsDY5_quarks, *ptBinsAll_quarks;
-  std::vector<double> *ptBinsDY1_ups, *ptBinsDY2_ups, *ptBinsDY3_ups, *ptBinsDY4_ups, *ptBinsDY5_ups, *ptBinsAll_ups;
-  std::vector<double> *ptBinsDY1_downs, *ptBinsDY2_downs, *ptBinsDY3_downs, *ptBinsDY4_downs, *ptBinsDY5_downs, *ptBinsAll_downs;
-  std::vector<double> *ptBinsDY1_stranges, *ptBinsDY2_stranges, *ptBinsDY3_stranges, *ptBinsDY4_stranges, *ptBinsDY5_stranges, *ptBinsAll_stranges;
-  std::vector<double> *ptBinsDY1_anti_ups, *ptBinsDY2_anti_ups, *ptBinsDY3_anti_ups, *ptBinsDY4_anti_ups, *ptBinsDY5_anti_ups, *ptBinsAll_anti_ups;
-  std::vector<double> *ptBinsDY1_anti_downs, *ptBinsDY2_anti_downs, *ptBinsDY3_anti_downs, *ptBinsDY4_anti_downs, *ptBinsDY5_anti_downs, *ptBinsAll_anti_downs;
-  std::vector<double> *ptBinsDY1_anti_stranges, *ptBinsDY2_anti_stranges, *ptBinsDY3_anti_stranges, *ptBinsDY4_anti_stranges, *ptBinsDY5_anti_stranges, *ptBinsAll_anti_stranges;
-  std::vector<double> *ptBinsDY1_all, *ptBinsDY2_all, *ptBinsDY3_all, *ptBinsDY4_all, *ptBinsDY5_all, *ptBinsAll_all;
-  std::vector<double> ptBinLabels;
   double minPT, maxPT, binWidthPT;
-  double maxPTSoft;
   int numberBinsPT;
+  std::vector<double> ptBinLabels;
+  tVecOfArrayOfDoubleVec ptBins_gluons;
+  tVecOfArrayOfDoubleVec ptBins_quarks;
+  tVecOfArrayOfDoubleVec ptBins_ups;
+  tVecOfArrayOfDoubleVec ptBins_downs;
+  tVecOfArrayOfDoubleVec ptBins_stranges;
+  tVecOfArrayOfDoubleVec ptBins_anti_ups;
+  tVecOfArrayOfDoubleVec ptBins_anti_downs;
+  tVecOfArrayOfDoubleVec ptBins_anti_stranges;
+  tVecOfArrayOfDoubleVec ptBins_all;
+
+  double maxPTSoft;
+  double binWidthSoftPT;
+  int numberBinsSoftPT;
   std::vector<double> *ptBinsSoftAll_gluons, *ptBinsSoftAll_quarks, *ptBinsSoftAll_all;
   std::vector<double> *ptBinsSoftAll_ups, *ptBinsSoftAll_downs, *ptBinsSoftAll_stranges, *ptBinsSoftAll_anti_ups, *ptBinsSoftAll_anti_downs, *ptBinsSoftAll_anti_stranges;
   std::vector<double> ptSoftBinLabels;
-  double binWidthSoftPT;
-  int numberBinsSoftPT;
   
   double jetTracking_PT;  
   
