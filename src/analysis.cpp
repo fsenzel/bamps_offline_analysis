@@ -120,151 +120,78 @@ analysis::analysis( config* const c ):
 
 
   jetTracking_PT = 10.0;
-
+  
+  
+  //---- defining rapidity ranges ----
+  analysisRapidityRange yRange(-0.5,0.5);
+  rapidityRanges.push_back(yRange);
+  yRange.reset( -0.8, 0.8 );
+  rapidityRanges.push_back(yRange);
+  yRange.reset( -1.0, 1.0 );
+  rapidityRanges.push_back(yRange);
+  yRange.reset( -1.5, 1.5 );
+  rapidityRanges.push_back(yRange);
+  yRange.reset( -2.0, 2.0 );
+  rapidityRanges.push_back(yRange);
+  yRange.reset( -2.5, 2.5 );
+  rapidityRanges.push_back(yRange);  
+  yRange.reset( -infinity, infinity );
+  rapidityRanges.push_back(yRange);  
+  //---- defining rapidity ranges ----
+  
   //---- initialisation of PT-binning ----
   minPT = 1.4;
   maxPTSoft = 3.0;
   maxPT = 34.4;
   binWidthPT = 1.0;
   numberBinsPT = int(( maxPT - minPT + 0.001 ) / binWidthPT );
-  ptBinsDY1_gluons = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
-  ptBinsDY2_gluons = new vector<double>[nTimeSteps+2];
-  ptBinsDY3_gluons = new vector<double>[nTimeSteps+2];
-  ptBinsDY4_gluons = new vector<double>[nTimeSteps+2];
-  ptBinsDY5_gluons = new vector<double>[nTimeSteps+2];
-  ptBinsAll_gluons = new vector<double>[nTimeSteps+2];
-
-  ptBinsDY1_quarks = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
-  ptBinsDY2_quarks = new vector<double>[nTimeSteps+2];
-  ptBinsDY3_quarks = new vector<double>[nTimeSteps+2];
-  ptBinsDY4_quarks = new vector<double>[nTimeSteps+2];
-  ptBinsDY5_quarks = new vector<double>[nTimeSteps+2];
-  ptBinsAll_quarks = new vector<double>[nTimeSteps+2];
   
-  ptBinsDY1_ups = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
-  ptBinsDY2_ups = new vector<double>[nTimeSteps+2];
-  ptBinsDY3_ups = new vector<double>[nTimeSteps+2];
-  ptBinsDY4_ups = new vector<double>[nTimeSteps+2];
-  ptBinsDY5_ups = new vector<double>[nTimeSteps+2];
-  ptBinsAll_ups = new vector<double>[nTimeSteps+2];
-
-  ptBinsDY1_downs = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
-  ptBinsDY2_downs = new vector<double>[nTimeSteps+2];
-  ptBinsDY3_downs = new vector<double>[nTimeSteps+2];
-  ptBinsDY4_downs = new vector<double>[nTimeSteps+2];
-  ptBinsDY5_downs = new vector<double>[nTimeSteps+2];
-  ptBinsAll_downs = new vector<double>[nTimeSteps+2];
-  
-  ptBinsDY1_stranges = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
-  ptBinsDY2_stranges = new vector<double>[nTimeSteps+2];
-  ptBinsDY3_stranges = new vector<double>[nTimeSteps+2];
-  ptBinsDY4_stranges = new vector<double>[nTimeSteps+2];
-  ptBinsDY5_stranges = new vector<double>[nTimeSteps+2];
-  ptBinsAll_stranges = new vector<double>[nTimeSteps+2];
-  
-  ptBinsDY1_anti_ups = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
-  ptBinsDY2_anti_ups = new vector<double>[nTimeSteps+2];
-  ptBinsDY3_anti_ups = new vector<double>[nTimeSteps+2];
-  ptBinsDY4_anti_ups = new vector<double>[nTimeSteps+2];
-  ptBinsDY5_anti_ups = new vector<double>[nTimeSteps+2];
-  ptBinsAll_anti_ups = new vector<double>[nTimeSteps+2];
-  
-  ptBinsDY1_anti_downs = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
-  ptBinsDY2_anti_downs = new vector<double>[nTimeSteps+2];
-  ptBinsDY3_anti_downs = new vector<double>[nTimeSteps+2];
-  ptBinsDY4_anti_downs = new vector<double>[nTimeSteps+2];
-  ptBinsDY5_anti_downs = new vector<double>[nTimeSteps+2];
-  ptBinsAll_anti_downs = new vector<double>[nTimeSteps+2];
-  
-  ptBinsDY1_anti_stranges = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
-  ptBinsDY2_anti_stranges = new vector<double>[nTimeSteps+2];
-  ptBinsDY3_anti_stranges = new vector<double>[nTimeSteps+2];
-  ptBinsDY4_anti_stranges = new vector<double>[nTimeSteps+2];
-  ptBinsDY5_anti_stranges = new vector<double>[nTimeSteps+2];
-  ptBinsAll_anti_stranges = new vector<double>[nTimeSteps+2];
-  
-  ptBinsDY1_all = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
-  ptBinsDY2_all = new vector<double>[nTimeSteps+2];
-  ptBinsDY3_all = new vector<double>[nTimeSteps+2];
-  ptBinsDY4_all = new vector<double>[nTimeSteps+2];
-  ptBinsDY5_all = new vector<double>[nTimeSteps+2];
-  ptBinsAll_all = new vector<double>[nTimeSteps+2];
-
-  for ( int j = 0; j < nTimeSteps + 2; j++ )          //+2 because of initial and final timesteps
+  tArrayOfDoubleVec tmpArray;
+  for ( int i = 0; i < rapidityRanges.size(); i++ )
   {
-    for ( int i = 0; i <= numberBinsPT; i++ )
-    {
-      ptBinsDY1_gluons[j].push_back( 0 );
-      ptBinsDY2_gluons[j].push_back( 0 );
-      ptBinsDY3_gluons[j].push_back( 0 );
-      ptBinsDY4_gluons[j].push_back( 0 );
-      ptBinsDY5_gluons[j].push_back( 0 );
-      ptBinsAll_gluons[j].push_back( 0 );
+    tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+    ptBins_gluons.push_back( tmpArray );
+    tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+    ptBins_quarks.push_back( tmpArray );
+    tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+    ptBins_ups.push_back( tmpArray );
+    tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+    ptBins_downs.push_back( tmpArray );
+    tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+    ptBins_stranges.push_back( tmpArray );
+    tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+    ptBins_anti_ups.push_back( tmpArray );
+    tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+    ptBins_anti_downs.push_back( tmpArray );
+    tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+    ptBins_anti_stranges.push_back( tmpArray );
+    tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+    ptBins_all.push_back( tmpArray );
+  }
 
-      ptBinsDY1_quarks[j].push_back( 0 );
-      ptBinsDY2_quarks[j].push_back( 0 );
-      ptBinsDY3_quarks[j].push_back( 0 );
-      ptBinsDY4_quarks[j].push_back( 0 );
-      ptBinsDY5_quarks[j].push_back( 0 );
-      ptBinsAll_quarks[j].push_back( 0 );
-      
-      ptBinsDY1_ups[j].push_back( 0 );
-      ptBinsDY2_ups[j].push_back( 0 );
-      ptBinsDY3_ups[j].push_back( 0 );
-      ptBinsDY4_ups[j].push_back( 0 );
-      ptBinsDY5_ups[j].push_back( 0 );
-      ptBinsAll_ups[j].push_back( 0 );
-      
-      ptBinsDY1_downs[j].push_back( 0 );
-      ptBinsDY2_downs[j].push_back( 0 );
-      ptBinsDY3_downs[j].push_back( 0 );
-      ptBinsDY4_downs[j].push_back( 0 );
-      ptBinsDY5_downs[j].push_back( 0 );
-      ptBinsAll_downs[j].push_back( 0 );
-      
-      ptBinsDY1_stranges[j].push_back( 0 );
-      ptBinsDY2_stranges[j].push_back( 0 );
-      ptBinsDY3_stranges[j].push_back( 0 );
-      ptBinsDY4_stranges[j].push_back( 0 );
-      ptBinsDY5_stranges[j].push_back( 0 );
-      ptBinsAll_stranges[j].push_back( 0 );
-      
-      ptBinsDY1_anti_ups[j].push_back( 0 );
-      ptBinsDY2_anti_ups[j].push_back( 0 );
-      ptBinsDY3_anti_ups[j].push_back( 0 );
-      ptBinsDY4_anti_ups[j].push_back( 0 );
-      ptBinsDY5_anti_ups[j].push_back( 0 );
-      ptBinsAll_anti_ups[j].push_back( 0 );
-      
-      ptBinsDY1_anti_downs[j].push_back( 0 );
-      ptBinsDY2_anti_downs[j].push_back( 0 );
-      ptBinsDY3_anti_downs[j].push_back( 0 );
-      ptBinsDY4_anti_downs[j].push_back( 0 );
-      ptBinsDY5_anti_downs[j].push_back( 0 );
-      ptBinsAll_anti_downs[j].push_back( 0 );
-      
-      ptBinsDY1_anti_stranges[j].push_back( 0 );
-      ptBinsDY2_anti_stranges[j].push_back( 0 );
-      ptBinsDY3_anti_stranges[j].push_back( 0 );
-      ptBinsDY4_anti_stranges[j].push_back( 0 );
-      ptBinsDY5_anti_stranges[j].push_back( 0 );
-      ptBinsAll_anti_stranges[j].push_back( 0 );
-      
-      ptBinsDY1_all[j].push_back( 0 );
-      ptBinsDY2_all[j].push_back( 0 );
-      ptBinsDY3_all[j].push_back( 0 );
-      ptBinsDY4_all[j].push_back( 0 );
-      ptBinsDY5_all[j].push_back( 0 );
-      ptBinsAll_all[j].push_back( 0 );
+  for ( int ny = 0; ny < rapidityRanges.size(); ny++ )
+  {
+    for ( int nt = 0; nt < nTimeSteps + 2; nt++ )
+    {
+      ptBins_gluons[ny][nt].resize( numberBinsPT + 1, 0 );
+      ptBins_quarks[ny][nt].resize( numberBinsPT + 1, 0 );
+      ptBins_ups[ny][nt].resize( numberBinsPT + 1, 0 );
+      ptBins_downs[ny][nt].resize( numberBinsPT + 1, 0 );
+      ptBins_stranges[ny][nt].resize( numberBinsPT + 1, 0 );
+      ptBins_anti_ups[ny][nt].resize( numberBinsPT + 1, 0 );
+      ptBins_anti_downs[ny][nt].resize( numberBinsPT + 1, 0 );
+      ptBins_anti_stranges[ny][nt].resize( numberBinsPT + 1, 0 );
+      ptBins_all[ny][nt].resize( numberBinsPT + 1, 0 );
     }
   }
+  
   //write the bin labels
   for ( int i = 0; i < numberBinsPT; i++ )
   {
     ptBinLabels.push_back( minPT + ( i * binWidthPT ) + ( binWidthPT / 2 ) );
   }
   cout << "number of bins: " << numberBinsPT << "  binWidth: " << binWidthPT << endl;
-
+  //---- initialisation of PT-binning ----
   
   //------ initialisation of rapidity binning ------
   minY = -6.0;
@@ -369,69 +296,6 @@ analysis::~analysis()
   oscarBackground.close();
   oscarJets.close();
   jetTrackerOutput();
-
-  delete[] ptBinsDY1_gluons;
-  delete[] ptBinsDY2_gluons;
-  delete[] ptBinsDY3_gluons;
-  delete[] ptBinsDY4_gluons;
-  delete[] ptBinsDY5_gluons;
-  delete[] ptBinsAll_gluons;
-  
-  delete[] ptBinsDY1_quarks;
-  delete[] ptBinsDY2_quarks;
-  delete[] ptBinsDY3_quarks;
-  delete[] ptBinsDY4_quarks;
-  delete[] ptBinsDY5_quarks;
-  delete[] ptBinsAll_quarks;
-  
-  delete[] ptBinsDY1_ups;
-  delete[] ptBinsDY2_ups;
-  delete[] ptBinsDY3_ups;
-  delete[] ptBinsDY4_ups;
-  delete[] ptBinsDY5_ups;
-  delete[] ptBinsAll_ups;
-  
-  delete[] ptBinsDY1_downs;
-  delete[] ptBinsDY2_downs;
-  delete[] ptBinsDY3_downs;
-  delete[] ptBinsDY4_downs;
-  delete[] ptBinsDY5_downs;
-  delete[] ptBinsAll_downs;
-  
-  delete[] ptBinsDY1_stranges;
-  delete[] ptBinsDY2_stranges;
-  delete[] ptBinsDY3_stranges;
-  delete[] ptBinsDY4_stranges;
-  delete[] ptBinsDY5_stranges;
-  delete[] ptBinsAll_stranges;
-  
-  delete[] ptBinsDY1_anti_ups;
-  delete[] ptBinsDY2_anti_ups;
-  delete[] ptBinsDY3_anti_ups;
-  delete[] ptBinsDY4_anti_ups;
-  delete[] ptBinsDY5_anti_ups;
-  delete[] ptBinsAll_anti_ups;
-  
-  delete[] ptBinsDY1_anti_downs;
-  delete[] ptBinsDY2_anti_downs;
-  delete[] ptBinsDY3_anti_downs;
-  delete[] ptBinsDY4_anti_downs;
-  delete[] ptBinsDY5_anti_downs;
-  delete[] ptBinsAll_anti_downs;
-  
-  delete[] ptBinsDY1_anti_stranges;
-  delete[] ptBinsDY2_anti_stranges;
-  delete[] ptBinsDY3_anti_stranges;
-  delete[] ptBinsDY4_anti_stranges;
-  delete[] ptBinsDY5_anti_stranges;
-  delete[] ptBinsAll_anti_stranges;
-
-  delete[] ptBinsDY1_all;
-  delete[] ptBinsDY2_all;
-  delete[] ptBinsDY3_all;
-  delete[] ptBinsDY4_all;
-  delete[] ptBinsDY5_all;
-  delete[] ptBinsAll_all;
   
   delete[] ptBinsSoftAll_gluons;
   delete[] ptBinsSoftAll_quarks;
@@ -661,98 +525,44 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   time_t end;
   time( &end );
 
-  vector<double> * _ptBinsAll;
-  vector<double> * _ptBinsDY5;
-  vector<double> * _ptBinsDY4;
-  vector<double> * _ptBinsDY3;
-  vector<double> * _ptBinsDY2;
-  vector<double> * _ptBinsDY1;
-
-  if ( _flavTypeToComputeFor == gluon )
+  // populate temporary _ptBins with temporary "references" to the actual data structures according to the requested flavor
+  tVecOfArrayOfDoubleVec _ptBins;
+  for ( int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
   {
-    _ptBinsAll = ptBinsAll_gluons;
-    _ptBinsDY5 = ptBinsDY5_gluons;
-    _ptBinsDY4 = ptBinsDY4_gluons;
-    _ptBinsDY3 = ptBinsDY3_gluons;
-    _ptBinsDY2 = ptBinsDY2_gluons;
-    _ptBinsDY1 = ptBinsDY1_gluons;
-  }
-  else if ( _flavTypeToComputeFor == light_quark )
-  {
-    _ptBinsAll = ptBinsAll_quarks;
-    _ptBinsDY5 = ptBinsDY5_quarks;
-    _ptBinsDY4 = ptBinsDY4_quarks;
-    _ptBinsDY3 = ptBinsDY3_quarks;
-    _ptBinsDY2 = ptBinsDY2_quarks;
-    _ptBinsDY1 = ptBinsDY1_quarks;
-  }
-  else if ( _flavTypeToComputeFor == up )
-  {
-    _ptBinsAll = ptBinsAll_ups;
-    _ptBinsDY5 = ptBinsDY5_ups;
-    _ptBinsDY4 = ptBinsDY4_ups;
-    _ptBinsDY3 = ptBinsDY3_ups;
-    _ptBinsDY2 = ptBinsDY2_ups;
-    _ptBinsDY1 = ptBinsDY1_ups;
-  }
-  else if ( _flavTypeToComputeFor == down )
-  {
-    _ptBinsAll = ptBinsAll_downs;
-    _ptBinsDY5 = ptBinsDY5_downs;
-    _ptBinsDY4 = ptBinsDY4_downs;
-    _ptBinsDY3 = ptBinsDY3_downs;
-    _ptBinsDY2 = ptBinsDY2_downs;
-    _ptBinsDY1 = ptBinsDY1_downs;
-  }
-  else if ( _flavTypeToComputeFor == strange )
-  {
-    _ptBinsAll = ptBinsAll_stranges;
-    _ptBinsDY5 = ptBinsDY5_stranges;
-    _ptBinsDY4 = ptBinsDY4_stranges;
-    _ptBinsDY3 = ptBinsDY3_stranges;
-    _ptBinsDY2 = ptBinsDY2_stranges;
-    _ptBinsDY1 = ptBinsDY1_stranges;
-  }
-  else if ( _flavTypeToComputeFor == anti_up )
-  {
-    _ptBinsAll = ptBinsAll_anti_ups;
-    _ptBinsDY5 = ptBinsDY5_anti_ups;
-    _ptBinsDY4 = ptBinsDY4_anti_ups;
-    _ptBinsDY3 = ptBinsDY3_anti_ups;
-    _ptBinsDY2 = ptBinsDY2_anti_ups;
-    _ptBinsDY1 = ptBinsDY1_anti_ups;
-  }
-  else if ( _flavTypeToComputeFor == anti_down )
-  {
-    _ptBinsAll = ptBinsAll_anti_downs;
-    _ptBinsDY5 = ptBinsDY5_anti_downs;
-    _ptBinsDY4 = ptBinsDY4_anti_downs;
-    _ptBinsDY3 = ptBinsDY3_anti_downs;
-    _ptBinsDY2 = ptBinsDY2_anti_downs;
-    _ptBinsDY1 = ptBinsDY1_anti_downs;
-  }
-    else if ( _flavTypeToComputeFor == anti_strange )
-  {
-    _ptBinsAll = ptBinsAll_anti_stranges;
-    _ptBinsDY5 = ptBinsDY5_anti_stranges;
-    _ptBinsDY4 = ptBinsDY4_anti_stranges;
-    _ptBinsDY3 = ptBinsDY3_anti_stranges;
-    _ptBinsDY2 = ptBinsDY2_anti_stranges;
-    _ptBinsDY1 = ptBinsDY1_anti_stranges;
-  }
-  else if ( _flavTypeToComputeFor == allFlavors )
-  {
-    _ptBinsAll = ptBinsAll_all;
-    _ptBinsDY5 = ptBinsDY5_all;
-    _ptBinsDY4 = ptBinsDY4_all;
-    _ptBinsDY3 = ptBinsDY3_all;
-    _ptBinsDY2 = ptBinsDY2_all;
-    _ptBinsDY1 = ptBinsDY1_all;
-  }
-  else
-  {
-    string errMsg = "error in ptDistribution, flavor not specified";
-    throw eAnalysis_error( errMsg );
+    switch ( _flavTypeToComputeFor )
+    {
+      case gluon:
+        _ptBins.push_back( ptBins_gluons[yRange] );
+        break;
+      case light_quark:
+        _ptBins.push_back( ptBins_quarks[yRange] );
+        break;
+      case up:
+        _ptBins.push_back( ptBins_ups[yRange] );
+        break;
+      case down:
+        _ptBins.push_back( ptBins_downs[yRange] );
+        break;
+      case strange:
+        _ptBins.push_back( ptBins_stranges[yRange] );
+        break;
+      case anti_up:
+        _ptBins.push_back( ptBins_anti_ups[yRange] );
+        break;
+      case anti_down:
+        _ptBins.push_back( ptBins_anti_downs[yRange] );
+        break;  
+      case anti_strange:
+        _ptBins.push_back( ptBins_anti_stranges[yRange] );
+        break;
+      case allFlavors:
+        _ptBins.push_back(ptBins_all[yRange]);
+        break;
+      default:
+        string errMsg = "error in ptDistribution, flavor not specified";
+        throw eAnalysis_error( errMsg );
+        break;
+    }
   }
 
   string type;
@@ -804,111 +614,27 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
     printHeader( file, ptSpectrum, end );
   //---------------------------------------
 
-  //---------------------- y in [-0.5,0.5] ---------------------
-  file << "#y in [-0.5,0.5]" << endl;
-  for ( int i = 0; i < numberBinsPT; i++ )
+  //------------- the actual output ---------------
+  for ( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
   {
-    file << ptBinLabels[i] << sep;
-    for ( int j = 0; j <= nTimeSteps; j++ )
+    file << "#y in [" << rapidityRanges[yRangeIndex].yleft << ", " << rapidityRanges[yRangeIndex].yright << "]" << endl;
+    for ( int i = 0; i < numberBinsPT; i++ )
     {
-      if ( j == 0 || j == nTimeSteps )
-        file << _ptBinsDY1[j][i] << sep;
-      else if ( tstep[j-1] <= theConfig->getRuntime() )
-        file << _ptBinsDY1[j][i] << sep;
+      file << ptBinLabels[i] << sep;
+      for ( int j = 0; j <= nTimeSteps; j++ )
+      {
+        if ( j == 0 || j == nTimeSteps )
+          file << _ptBins[yRangeIndex][j][i] << sep;
+        else if ( tstep[j-1] <= theConfig->getRuntime() )
+          file << _ptBins[yRangeIndex][j][i] << sep;
+      }
+      file << endl;
     }
-    file << endl;
+    file << endl << endl;
   }
-  //------------------------------------------------------------
-  file << endl << endl;
-
-  //---------------------- y in [-1.0,1.0] ---------------------
-  file << "#y in [-1.0,1.0]" << endl;
-  for ( int i = 0;i < numberBinsPT;i++ )
-  {
-    file << ptBinLabels[i] << sep;
-    for ( int j = 0; j <= nTimeSteps; j++ )
-    {
-      if ( j == 0 || j == nTimeSteps )
-        file << _ptBinsDY2[j][i] << sep;
-      else if ( tstep[j-1] <= theConfig->getRuntime() )
-        file << _ptBinsDY2[j][i] << sep;
-    }
-    file << endl;
-  }
-  //------------------------------------------------------------
-  file << endl << endl;
-
-
-  //---------------------- y in [-1.5,1.5] ---------------------
-  file << "#y in [-1.5,1.5]" << endl;
-  for ( int i = 0; i < numberBinsPT; i++ )
-  {
-    file << ptBinLabels[i] << sep;
-    for ( int j = 0; j <= nTimeSteps; j++ )
-    {
-      if ( j == 0 || j == nTimeSteps )
-        file << _ptBinsDY3[j][i] << sep;
-      else if ( tstep[j-1] <= theConfig->getRuntime() )
-        file << _ptBinsDY3[j][i] << sep;
-    }
-    file << endl;
-  }
-  //------------------------------------------------------------
-  file << endl << endl;
-
-  //---------------------- y in [-2.0,2.0] ---------------------
-  file << "#y in [-2.0,2.0]" << endl;
-  for ( int i = 0; i < numberBinsPT; i++ )
-  {
-    file << ptBinLabels[i] << sep;
-    for ( int j = 0; j <= nTimeSteps; j++ )
-    {
-      if ( j == 0 || j == nTimeSteps )
-        file << _ptBinsDY4[j][i] << sep;
-      else if ( tstep[j-1] <= theConfig->getRuntime() )
-        file << _ptBinsDY4[j][i] << sep;
-    }
-    file << endl;
-  }
-  //------------------------------------------------------------
-  file << endl << endl;
-
-  //---------------------- y in [-2.5,2.5] ---------------------
-  file << "#y in [-2.5,2.5]" << endl;
-  for ( int i = 0;i < numberBinsPT;i++ )
-  {
-    file << ptBinLabels[i] << sep;
-    for ( int j = 0; j <= nTimeSteps; j++ )
-    {
-      if ( j == 0 || j == nTimeSteps )
-        file << _ptBinsDY5[j][i] << sep;
-      else if ( tstep[j-1] <= theConfig->getRuntime() )
-        file << _ptBinsDY5[j][i] << sep;
-    }
-    file << endl;
-  }
-  //------------------------------------------------------------
-  file << endl << endl;
-
-  //---------------------- y in [-inf,inf] ---------------------
-  file << "#y in [-inf,inf]" << endl;
-  for ( int i = 0;i < numberBinsPT;i++ )
-  {
-    file << ptBinLabels[i] << sep;
-    for ( int j = 0; j <= nTimeSteps; j++ )
-    {
-      if ( j == 0 || j == nTimeSteps )
-        file << _ptBinsAll[j][i] << sep;
-      else if ( tstep[j-1] <= theConfig->getRuntime() )
-        file << _ptBinsAll[j][i] << sep;
-    }
-    file << endl;
-  }
-  //------------------------------------------------------------
+  //-------------------------------------------------
 
   file.close();
-  //---------------------------------------------------------------
-
 }
 
 
@@ -1954,217 +1680,82 @@ void analysis::volumeMidrap( const int step ) const
 
 void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
 {
-  double pt, y;
-  vector<double> * _ptBinsAll;
-  vector<double> * _ptBinsDY5;
-  vector<double> * _ptBinsDY4;
-  vector<double> * _ptBinsDY3;
-  vector<double> * _ptBinsDY2;
-  vector<double> * _ptBinsDY1;
-
-  if ( _flavTypeToComputeFor == gluon )
-  {
-    _ptBinsAll = ptBinsAll_gluons;
-    _ptBinsDY5 = ptBinsDY5_gluons;
-    _ptBinsDY4 = ptBinsDY4_gluons;
-    _ptBinsDY3 = ptBinsDY3_gluons;
-    _ptBinsDY2 = ptBinsDY2_gluons;
-    _ptBinsDY1 = ptBinsDY1_gluons;
-  }
-  else if ( _flavTypeToComputeFor == light_quark )
-  {
-    _ptBinsAll = ptBinsAll_quarks;
-    _ptBinsDY5 = ptBinsDY5_quarks;
-    _ptBinsDY4 = ptBinsDY4_quarks;
-    _ptBinsDY3 = ptBinsDY3_quarks;
-    _ptBinsDY2 = ptBinsDY2_quarks;
-    _ptBinsDY1 = ptBinsDY1_quarks;
-  }
-  else if ( _flavTypeToComputeFor == up )
-  {
-    _ptBinsAll = ptBinsAll_ups;
-    _ptBinsDY5 = ptBinsDY5_ups;
-    _ptBinsDY4 = ptBinsDY4_ups;
-    _ptBinsDY3 = ptBinsDY3_ups;
-    _ptBinsDY2 = ptBinsDY2_ups;
-    _ptBinsDY1 = ptBinsDY1_ups;
-  }
-  else if ( _flavTypeToComputeFor == down )
-  {
-    _ptBinsAll = ptBinsAll_downs;
-    _ptBinsDY5 = ptBinsDY5_downs;
-    _ptBinsDY4 = ptBinsDY4_downs;
-    _ptBinsDY3 = ptBinsDY3_downs;
-    _ptBinsDY2 = ptBinsDY2_downs;
-    _ptBinsDY1 = ptBinsDY1_downs;
-  }
-  else if ( _flavTypeToComputeFor == strange )
-  {
-    _ptBinsAll = ptBinsAll_stranges;
-    _ptBinsDY5 = ptBinsDY5_stranges;
-    _ptBinsDY4 = ptBinsDY4_stranges;
-    _ptBinsDY3 = ptBinsDY3_stranges;
-    _ptBinsDY2 = ptBinsDY2_stranges;
-    _ptBinsDY1 = ptBinsDY1_stranges;
-  }
-  else if ( _flavTypeToComputeFor == anti_up )
-  {
-    _ptBinsAll = ptBinsAll_anti_ups;
-    _ptBinsDY5 = ptBinsDY5_anti_ups;
-    _ptBinsDY4 = ptBinsDY4_anti_ups;
-    _ptBinsDY3 = ptBinsDY3_anti_ups;
-    _ptBinsDY2 = ptBinsDY2_anti_ups;
-    _ptBinsDY1 = ptBinsDY1_anti_ups;
-  }
-  else if ( _flavTypeToComputeFor == anti_down )
-  {
-    _ptBinsAll = ptBinsAll_anti_downs;
-    _ptBinsDY5 = ptBinsDY5_anti_downs;
-    _ptBinsDY4 = ptBinsDY4_anti_downs;
-    _ptBinsDY3 = ptBinsDY3_anti_downs;
-    _ptBinsDY2 = ptBinsDY2_anti_downs;
-    _ptBinsDY1 = ptBinsDY1_anti_downs;
-  }
-    else if ( _flavTypeToComputeFor == anti_strange )
-  {
-    _ptBinsAll = ptBinsAll_anti_stranges;
-    _ptBinsDY5 = ptBinsDY5_anti_stranges;
-    _ptBinsDY4 = ptBinsDY4_anti_stranges;
-    _ptBinsDY3 = ptBinsDY3_anti_stranges;
-    _ptBinsDY2 = ptBinsDY2_anti_stranges;
-    _ptBinsDY1 = ptBinsDY1_anti_stranges;
-  }
-  else if ( _flavTypeToComputeFor == allFlavors )
-  {
-    _ptBinsAll = ptBinsAll_all;
-    _ptBinsDY5 = ptBinsDY5_all;
-    _ptBinsDY4 = ptBinsDY4_all;
-    _ptBinsDY3 = ptBinsDY3_all;
-    _ptBinsDY2 = ptBinsDY2_all;
-    _ptBinsDY1 = ptBinsDY1_all;
-  }
-  else
-  {
-    string errMsg = "error in ptDistribution, flavor not specified";
-    throw eAnalysis_error( errMsg );
-  }
-
-
   FLAVOR_TYPE genFlavor;
+  double pt, y;
+  tVecOfArrayOfDoubleVec _ptBins;
+  
+  // populate temporary _ptBins with temporary "references" to the actual data structures according to the requested flavor
+  for ( int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
+  {
+    switch ( _flavTypeToComputeFor )
+    {
+      case gluon:
+        _ptBins.push_back( ptBins_gluons[yRange] );
+        break;
+      case light_quark:
+        _ptBins.push_back( ptBins_quarks[yRange] );
+        break;
+      case up:
+        _ptBins.push_back( ptBins_ups[yRange] );
+        break;
+      case down:
+        _ptBins.push_back( ptBins_downs[yRange] );
+        break;
+      case strange:
+        _ptBins.push_back( ptBins_stranges[yRange] );
+        break;
+      case anti_up:
+        _ptBins.push_back( ptBins_anti_ups[yRange] );
+        break;
+      case anti_down:
+        _ptBins.push_back( ptBins_anti_downs[yRange] );
+        break;  
+      case anti_strange:
+        _ptBins.push_back( ptBins_anti_stranges[yRange] );
+        break;
+      case allFlavors:
+        _ptBins.push_back(ptBins_all[yRange]);
+        break;
+      default:
+        string errMsg = "error in ptDistribution, flavor not specified";
+        throw eAnalysis_error( errMsg );
+        break;
+    }
+  }
+  
+  // loop over all particles and bin them according to their pt
   for ( int j = 0; j < n_particles; j++ )
   {
     pt = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
     y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
-
+    
+    // check whether particle has the correct flavor
     genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
     if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
       ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
-      //------------------------ y in [-inf,inf] -----------------------
-      if ( pt <= maxPT && pt >= minPT )
+      // is it in the possible pt range at all?
+      if ( pt < maxPT && pt >= minPT )
       {
-        if ( pt == maxPT )
+        // individually check for each rapidity range whether this particle needs to be binned
+        for ( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
         {
-          ++_ptBinsAll[step][numberBinsPT - 1];
-        }
-        else
-        {
-          if ( pt == minPT )
-            ++_ptBinsAll[step][0];
-          else
-            ++_ptBinsAll[step][int(( pt - minPT )/binWidthPT )];
-        }
-
-        //----------------------------------------------------------------
-
-        //------------------------ y in [-2.5,2.5] -----------------------
-        if ( fabs( y ) <= 2.5 )
-        {
-          if ( pt == maxPT )
+          if ( y >= rapidityRanges[yRangeIndex].yleft && y <= rapidityRanges[yRangeIndex].yright )
           {
-            ++_ptBinsDY5[step][numberBinsPT - 1];
-          }
-          else
-          {
-            if ( pt == minPT )
-              ++_ptBinsDY5[step][0];
+            if ( pt == minPT )  // a special case
+            {
+              ++_ptBins[yRangeIndex][step][0];  // actually bin the pt of the particle
+            }
             else
-              ++_ptBinsDY5[step][int(( pt - minPT )/binWidthPT )];
-          }
-        }
-        //----------------------------------------------------------------
-
-        //------------------------ y in [-2.0,2.0] -----------------------
-        if ( fabs( y ) <= 2.0 )
-        {
-          if ( pt == maxPT )
-          {
-            ++_ptBinsDY4[step][numberBinsPT - 1];
-          }
-          else
-          {
-            if ( pt == minPT )
-              ++_ptBinsDY4[step][0];
-            else
-              ++_ptBinsDY4[step][int(( pt - minPT )/binWidthPT )];
-          }
-        }
-        //----------------------------------------------------------------
-
-        //------------------------ y in [-1.5,1.5] -----------------------
-        if ( fabs( y ) <= 1.5 )
-        {
-          if ( pt == maxPT )
-          {
-            ++_ptBinsDY3[step][numberBinsPT - 1];
-          }
-          else
-          {
-            if ( pt == minPT )
-              ++_ptBinsDY3[step][0];
-            else
-              ++_ptBinsDY3[step][int(( pt - minPT )/binWidthPT )];
-          }
-        }
-        //----------------------------------------------------------------
-
-        //------------------------ y in [-1.0,1.0] -----------------------
-        if ( fabs( y ) <= 1.0 )
-        {
-          if ( pt == maxPT )
-          {
-            ++_ptBinsDY2[step][numberBinsPT - 1];
-          }
-          else
-          {
-            if ( pt == minPT )
-              ++_ptBinsDY2[step][0];
-            else
-              ++_ptBinsDY2[step][int(( pt - minPT )/binWidthPT )];
-          }
-        }
-        //----------------------------------------------------------------
-
-        //------------------------ y in [-0.5,0.5] -----------------------
-        if ( fabs( y ) <= 0.5 )
-        {
-          if ( pt == maxPT )
-          {
-            ++_ptBinsDY1[step][numberBinsPT - 1];
-          }
-          else
-          {
-            if ( pt == minPT )
-              ++_ptBinsDY1[step][0];
-            else
-              ++_ptBinsDY1[step][int(( pt - minPT )/binWidthPT )];
+            {
+              ++_ptBins[yRangeIndex][step][int(( pt - minPT )/binWidthPT )];  // actually bin the pt of the particle
+            }
           }
         }
       }
-      //----------------------------------------------------------------
     }
-
   }
+  
 }
 
 
