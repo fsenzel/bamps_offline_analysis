@@ -1165,7 +1165,7 @@ void analysis::twoPartclCorrelations()
 // compute v2 of gluons and charm quarks
 void analysis::computeV2RAA( string name, const double _outputTime )
 {
-  v2RAA theV2RAA( theConfig, name, filename_prefix );
+  v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
 
   theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
   theV2RAA.computeFor( up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
@@ -1188,18 +1188,10 @@ void analysis::computeV2RAA( string name, const double _outputTime )
 
 
 
-v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg ):
-    theConfig( c ), name( name_arg ), filename_prefix( filename_prefix_arg )
+v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg, const double pt_min_arg, const double pt_max_arg, const int n_g_arg, const double pt_min_background_arg, const double pt_max_background_arg, const int n_g_background_arg ):
+    theConfig( c ), name( name_arg ), filename_prefix( filename_prefix_arg ), rapidityRanges( rapidityRanges_arg ), pt_min( pt_min_arg ), pt_max( pt_max_arg ), n_g( n_g_arg ), pt_min_background( pt_min_arg ), pt_max_background( pt_max_arg ), n_g_background( n_g_arg )
 {
-  pt_min = 5.0;
-  pt_max = 40.0;
-  n_g = 35;
-  
-  pt_min_background = 0;
-  pt_max_background = 5.0;
-  n_g_background = 25;
-
-  eta_bins = 6; // Number of eta bins: 0: 0.35, 1: 0.5, 2: 0.75, 3: 1.0, 4: 1.5, 5: 2.0
+  eta_bins = rapidityRanges.size();
 }
 
 
@@ -1271,7 +1263,11 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     _pt_min = pt_min;
   }
   
-  const double dpt = ( _pt_max - _pt_min ) / n_bins;
+  // avoid problem with binning pt logaritmitically: cannot deal with pt = 0
+  if( _pt_min < 0.1 )
+    _pt_min = 0.1;
+  
+  const double d_ln_pt = ( log( _pt_max ) - log( _pt_min ) ) / n_bins;
 
   double v2sum[eta_bins];
   int NmbInRange[eta_bins];
@@ -1334,79 +1330,22 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
 
     flavor = _particles[i].FLAVOR;
 
-    if (( pt <= _pt_max && pt >= _pt_min ) &&  
+    if (( pt <= _pt_max && pt > _pt_min ) &&  
       ( _flavTypeToComputeFor == flavor || 
       ( _flavTypeToComputeFor == ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) ) ) ) )
     {
-      if ( fabs( eta ) <= 2.0 )
+      // individually check for each rapidity range whether this particle needs to be binned
+      for ( int yRangeIndex = 0; yRangeIndex < eta_bins; yRangeIndex++ )
       {
-        v2sum[5] += v2;
-        NmbInRange[5]++;
-
-        dummy = int(( pt - _pt_min ) / dpt );
-        ptBinsV2[5][dummy] += v2;
-        ptBinsNmb[5][dummy]++;
-        ptBinsAngleDep[5][alphaIndex][dummy]++;
-
-        if ( fabs( eta ) <= 1.5 )
+        if ( eta >= rapidityRanges[yRangeIndex].yleft && eta <= rapidityRanges[yRangeIndex].yright )
         {
-          v2sum[4] += v2;
-          NmbInRange[4]++;
+          v2sum[yRangeIndex] += v2;
+          NmbInRange[yRangeIndex]++;
 
-          dummy = int(( pt - _pt_min ) / dpt );
-          ptBinsV2[4][dummy] += v2;
-          ptBinsNmb[4][dummy]++;
-          ptBinsAngleDep[4][alphaIndex][dummy]++;
-
-          if ( fabs( eta ) <= 1.0 )
-          {
-            v2sum[3] += v2;
-            NmbInRange[3]++;
-
-            dummy = int(( pt - _pt_min ) / dpt );
-            ptBinsV2[3][dummy] += v2;
-            ptBinsNmb[3][dummy]++;
-            ptBinsAngleDep[3][alphaIndex][dummy]++;
-
-            if ( fabs( eta ) <= 0.75 )
-            {
-              v2sum[2] += v2;
-              NmbInRange[2]++;
-
-              dummy = int(( pt - _pt_min ) / dpt );
-              ptBinsV2[2][dummy] += v2;
-              ptBinsNmb[2][dummy]++;
-              ptBinsAngleDep[2][alphaIndex][dummy]++;
-
-              if ( fabs( eta ) <= 0.5 )
-              {
-                if ( xt < 1.5 )
-                {
-                  NmbInnerRegion++;
-                  ptBinsInnerRegion[dummy]++; 
-                }
-                
-                v2sum[1] += v2;
-                NmbInRange[1]++;
-
-                dummy = int(( pt - _pt_min ) / dpt );
-                ptBinsV2[1][dummy] += v2;
-                ptBinsNmb[1][dummy]++;
-                ptBinsAngleDep[1][alphaIndex][dummy]++;
-
-                if ( fabs( eta ) <= 0.35 )
-                {
-                  v2sum[0] += v2;
-                  NmbInRange[0]++;
-
-                  dummy = int(( pt - _pt_min ) / dpt );
-                  ptBinsV2[0][dummy] += v2;
-                  ptBinsNmb[0][dummy]++;
-                  ptBinsAngleDep[0][alphaIndex][dummy]++;
-                }
-              }
-            }
-          }
+          dummy = int(( log( pt ) - log( _pt_min ) ) / d_ln_pt );
+          ptBinsV2[yRangeIndex][dummy] += v2;
+          ptBinsNmb[yRangeIndex][dummy]++;
+          ptBinsAngleDep[yRangeIndex][alphaIndex][dummy]++;
         }
       }
     }
@@ -1429,13 +1368,11 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   // file output
   double pt_out;
 
-  filename_v2 = filename_prefix + "_" + type + "_" + additionalNameTag + "_v2_pt_" + name;
   filename_v2_summed = filename_prefix + "_" + type + "_" + additionalNameTag + "_v2_pt_summed_" + name;
   filename_v2_tot = filename_prefix + "_" + type + "_" + additionalNameTag + "_v2_tot_" + name;
   filename_yield = filename_prefix + "_" + type + "_" + additionalNameTag + "_yield_pt_" + name;
   filename_pt_angleDependence = filename_prefix + "_" + type + "_" + additionalNameTag + "_pt_angular_dependence_" + name;
 
-  fstream print_v2( filename_v2.c_str(), ios::out | ios::trunc );
   fstream print_v2_summed( filename_v2_summed.c_str(), ios::out | ios::trunc );
   fstream print_v2_tot( filename_v2_tot.c_str(), ios::out | ios::trunc );
   fstream print_yield( filename_yield.c_str(), ios::out | ios::trunc );
@@ -1447,7 +1384,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_v2_tot << "# total v2 of " << type << endl;
   print_v2_tot << "# t = " << _outputTime << endl;
   print_v2_tot << "# bin statistics for 0.35 mid-rapidity:  Avg per bin=" << double( NmbInRange[0] ) / n_c << "   Min=" << binMin << "   Max=" << binMax << endl;
-  print_v2_tot << "#mid.rap. betw. +-Y for  Y=0.35  Y=0.5  Y=0.75  Y=1  Y=1.5  Y=2   v2 sum and number in range  for mid.rap. betw. +-Y for  Y=0.35  Y=0.5  Y=0.75  Y=1  Y=1.5  Y=2" << endl;
+  print_v2_tot << "# total v2, v2_sum and number in range for different rapidity bins" << endl;
 
   print_v2_tot << _pt_min;
   print_v2_tot.width( 15 );
@@ -1496,45 +1433,6 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_v2_tot << endl;
 
 
-  // print v2 distribution as function of pt
-  print_v2 << "#v2 of " << type << endl;
-  print_v2 << "# t = " << _outputTime << endl;
-//   print_v2 << "#simulation parameter:" << endl;
-//   print_v2 << "#testparticles= " << theConfig->getTestparticles() << endl;
-//   print_v2 << "#runtime= " << theConfig->getRuntime() << endl;
-//   print_v2 << "#sqrtS= " << theConfig->getSqrtS() << " GeV" << endl;
-//   print_v2 << "#b= " << theConfig->getImpactParameter() << " fm" << endl;
-//   print_v2 << "#cascade data input folder: " << theConfig->getPathdirCascadeData() << endl;
-//   print_v2 << "#data file for charm quarks: " << theConfig->getPythiaParticleFileCharm() << endl;
-//   print_v2 << "#initial seed for random generator ran2(): " << initialSeed << endl;
-//   print_v2 << "#" << endl;
-  print_v2 << "#";
-  print_v2.width( 14 );
-  print_v2 << "pt";
-  print_v2.width( 15 );
-  print_v2 << "v_2 for mid.rap. betw. +-Y for  Y=0.35  Y=0.5  Y=0.75  Y=1  Y=1.5  Y=2" << endl;
-
-  for ( int k = 0;k < n_bins + 1;k++ )
-  {
-    print_v2.width( 15 );
-    pt_out = double( k ) * dpt + _pt_min + dpt / 2.0; // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
-    print_v2 << pt_out;
-    for ( int i = 0;i < eta_bins;i++ )
-    {
-      print_v2.width( 15 );
-      if ( ptBinsNmb[i][k] > 0 )
-      {
-        print_v2 << ptBinsV2[i][k] / ptBinsNmb[i][k];
-      }
-      else
-      {
-        print_v2 << 0;
-      }
-    }
-    print_v2 << endl;
-  }
-
-
   // print summed output, v2 is not computed, but summed v2 and the number in one bin
   print_v2_summed << "# summed v2 of " << type << endl;
   print_v2_summed << "# t = " << _outputTime << endl;
@@ -1542,12 +1440,12 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_v2_summed.width( 14 );
   print_v2_summed << "pt";
   print_v2_summed.width( 15 );
-  print_v2_summed << "summed v_2 and number in bin for mid.rap. betw. +-Y for  Y=0.35  Y=0.5  Y=0.75  Y=1  Y=1.5  Y=2" << endl;
+  print_v2_summed << "summed v_2 and number in bin for different rapidity bins" << endl;
 
   for ( int k = 0;k < n_bins + 1;k++ )
   {
     print_v2_summed.width( 15 );
-    pt_out = double( k ) * dpt + _pt_min + dpt / 2.0; // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
+    pt_out = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
     print_v2_summed << pt_out;
     for ( int i = 0;i < eta_bins;i++ )
     {
@@ -1566,23 +1464,24 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_yield.width( 14 );
   print_yield << "pt";
   print_yield.width( 15 );
-  print_yield << "yield for mid.rap. betw. +-Y for  Y=0.35  Y=0.5  Y=0.75  Y=1  Y=1.5  Y=2   central_region (|y|<0.5, r < 1.5)" << endl;
+  print_yield << "yield for different rapidity bins" << endl;
 
   for ( int k = 0;k < n_bins + 1;k++ )
   {
     print_yield.width( 15 );
-    pt_out = double( k ) * dpt + _pt_min + dpt / 2.0; // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
+    pt_out = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
     print_yield << pt_out;
+    const double dpt = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt ) - exp( double( k ) * d_ln_pt + log( _pt_min ) );
     for ( int i = 0;i < eta_bins;i++ )
     {
+      const double delta_eta = rapidityRanges[i].yright - rapidityRanges[i].yleft;
+      
       print_yield.width( 15 );
 //       if ( particleType == charm || particleType == bottom || particleType == charmBottom )
 //         print_yield << double( ptBinsNmb[i][k] ) / theConfig->getTestparticles() / theConfig->getKIniCharm();
 //       else
-      print_yield << double( ptBinsNmb[i][k] ) / theConfig->getTestparticles();
+      print_yield << double( ptBinsNmb[i][k] ) / theConfig->getTestparticles() / dpt / delta_eta;
     }
-    print_yield.width( 15 );
-    print_yield << double( ptBinsInnerRegion[k] ) / theConfig->getTestparticles();    
     print_yield << endl;
   }
   
@@ -1594,19 +1493,22 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_pt_angleDependence.width( 14 );
   print_pt_angleDependence << "pt";
   print_pt_angleDependence.width( 15 );
-  print_pt_angleDependence << "yield for mid.rap. betw. +-Y for  Y=0.35  Y=0.5  Y=0.75  Y=1  Y=1.5  Y=2" << endl;
+  print_pt_angleDependence << "yield for different rapidity bins" << endl;
   for ( int j = 0; j < nAlphaBins; j++ )
   {
     print_pt_angleDependence << "#alpha in [ " << j * deltaAlpha << "°, " << (j+1)*deltaAlpha << "° ] "<< endl;
     for ( int k = 0;k < n_bins + 1;k++ )
     {
       print_pt_angleDependence.width( 15 );
-      pt_out = double( k ) * dpt + _pt_min + dpt / 2.0; // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
+      pt_out = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
       print_pt_angleDependence << pt_out;
+      const double dpt = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt ) - exp( double( k ) * d_ln_pt + log( _pt_min ) );
       for ( int i = 0;i < eta_bins;i++ )
       {
+        const double delta_eta = rapidityRanges[i].yright - rapidityRanges[i].yleft;
+        
         print_pt_angleDependence.width( 15 );
-        print_pt_angleDependence << double( ptBinsAngleDep[i][j][k] ) / theConfig->getTestparticles();
+        print_pt_angleDependence << double( ptBinsAngleDep[i][j][k] ) / theConfig->getTestparticles() / dpt / delta_eta;
       }
       print_pt_angleDependence << endl;
     }    
@@ -1614,9 +1516,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     print_pt_angleDependence << endl;
   }
   
-  
 
-//   cout << type << ": " << NmbInRange[5] << endl;
 }
 
 
