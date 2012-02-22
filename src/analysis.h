@@ -282,7 +282,7 @@ private:
 class v2RAA
 {
 public:
-  v2RAA( config * const c, string name_arg, string filename_prefix_arg );
+  v2RAA( config * const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg, const double pt_min_arg = 5.0, const double pt_max_arg = 40.0, const int n_g_arg = 35, const double pt_min_background_arg = 0.1, const double pt_max_background_arg = 5.0, const int n_g_background_arg = 25 );
   
   void computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, std::vector< ParticleOffline >& _particles, const int n_particles, string additionalNameTag, const double _outputTime, const v2Type _v2type );
 
@@ -297,6 +297,8 @@ private:
   int n_g_background;
   
   string name,filename_prefix;
+  
+  std::vector<analysisRapidityRange> rapidityRanges;
   
 
 };
