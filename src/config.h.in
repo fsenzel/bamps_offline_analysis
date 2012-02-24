@@ -1,0 +1,4 @@
+
+#cmakedefine Cuba_FOUND
+
+#cmakedefine LHAPDF_FOUND

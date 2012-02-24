@@ -91,27 +91,35 @@ offlineHeavyIonCollision::~offlineHeavyIonCollision()
 
 
 
-void offlineHeavyIonCollision::init()
+void offlineHeavyIonCollision::initialize()
 {
-  additionalParticlesDistribution addedStuff( theConfig, miniJetsInitialState );
-  addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
-
-  int Nbefore = addedParticles.size();
-  for ( int j = 0; j < addedParticles.size(); j++ )
+  if ( theConfig->getNumberOfParticlesToAdd() > 0 )
   {
-    if ( addedParticles[j].FLAVOR > ( Particle::N_light_flavor * 2 ) )
+    additionalParticlesDistribution addedStuff( theConfig, miniJetsInitialState );
+    addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
+    
+    int Nbefore = addedParticles.size();
+    for ( int j = 0; j < addedParticles.size(); j++ )
     {
-      while ( addedParticles.back().FLAVOR > ( Particle::N_light_flavor * 2 ) )
+      if ( addedParticles[j].FLAVOR > ( Particle::N_light_flavor * 2 ) )
       {
+        while ( addedParticles.back().FLAVOR > ( Particle::N_light_flavor * 2 ) )
+        {
+          addedParticles.pop_back();
+        }
+        addedParticles[j] = addedParticles.back();
         addedParticles.pop_back();
       }
-      addedParticles[j] = addedParticles.back();
-      addedParticles.pop_back();
     }
+    cout << "#### " << addedParticles.size() << " out of " << Nbefore << " added ( N_f = " << Particle::N_light_flavor << " )." << endl;
+    
+    addedStuff.prepareParticles( addedParticles );
   }
-  cout << "#### " << addedParticles.size() << " out of " << Nbefore << " added ( N_f = " << Particle::N_light_flavor << " )." << endl;
-
-  addedStuff.prepareParticles( addedParticles );
+  else
+  {
+    addedParticles.clear();
+    cout << "#### 0 particles added" << endl;    
+  }
 }
 
 

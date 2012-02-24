@@ -21,6 +21,7 @@
 #include "woodsaxon.h"
 
 
+
 class additionalParticlesDistribution
 {
 public:
@@ -35,12 +36,6 @@ private:
   int numberOfParticlesToAdd;
   double minimumPT;
   const config * const configObject;
-  WoodSaxon WoodSaxonParameter;
-  double A;          //mass number of nucleus A
-  double Aatomic;    //atomic number, i.e. number of protons, of nucleus A
-  double B;          //mass number of nucleus B
-  double Batomic;    //atomic number of nucleus B
-  double sqrtS;      //c.m. energy per NN pair, GeV
   double impactParameter;       //impact parameter in fm
   int numberOfTestparticles;    //number of testparticles per real particle
   INITIAL_STATE_TYPE initialStateType;

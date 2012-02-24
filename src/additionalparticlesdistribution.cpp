@@ -14,11 +14,12 @@
 #include <math.h>
 #include <vector>
 
-#include "minijets.h"
 #include "additionalparticlesdistribution.h"
-#include "pythiaInitialDistribution.h"
-#include "woodsaxon.h"
 #include "configuration.h"
+#include "initialmodel.h"
+#include "initialmodel_minijets.h"
+#include "initialmodel_pythia.h"
+#include "initialmodel_cgc.h"
 
 using namespace ns_casc;
 using namespace std;
@@ -27,45 +28,40 @@ using namespace std;
 additionalParticlesDistribution::additionalParticlesDistribution( const config* const _config, const INITIAL_STATE_TYPE _initialStateType ) :
     initialStateType( _initialStateType ),
     configObject( _config ),
-    numberOfParticlesToAdd( 0 )
+    numberOfParticlesToAdd( _config->getNumberOfParticlesToAdd() ),
+    minimumPT( _config->getMinimumPT() ),
+    impactParameter( _config->getImpactParameter() ),
+    numberOfTestparticles( _config->getTestparticles() )
 {
-  numberOfParticlesToAdd = configObject->getNumberOfParticlesToAdd();
-  minimumPT = configObject->getMinimumPT();
-  
-  A = _config->getA();
-  Aatomic = _config->getAatomic();
-  B = _config->getB();
-  Batomic = _config->getBatomic();
-  sqrtS = _config->getSqrtS();
-  impactParameter = _config->getImpactParameter();
-  numberOfTestparticles = _config->getTestparticles();
 }
 
 
 
 void additionalParticlesDistribution::populateParticleVector( std::vector< ParticleOffline >& _particles, WoodSaxon& _wsParameter )
 {
+  initialModel *initialmodel;
+  
   switch ( initialStateType )
   {
-  case miniJetsInitialState:
+    case miniJetsInitialState:
+      initialmodel = new initialModel_minijets( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
+      break;
+    default:
+      std::string errMsg = "Model for sampling the initial state not implemented yet!";
+      throw eInitialModel_error( errMsg );
+      break;
+  }
+  
+  std::vector<Particle> tempParticleVector;
+  initialmodel->populateParticleVector( tempParticleVector );
+  
+  _particles.reserve( tempParticleVector.size() );
+  for ( int i = 0; i < tempParticleVector.size(); i++ )
   {
-    miniJets _miniJets( *configObject, _wsParameter, useStoredTables );
-    WoodSaxonParameter = _wsParameter;
-    _miniJets.populateParticleVector( _particles, numberOfParticlesToAdd, minimumPT );
-    break;
+    ParticleOffline tempParticle( tempParticleVector[i] );
+    _particles.push_back( tempParticle );
   }
-  case pythiaInitialState:
-  {
-    pythiaInitialDistribution _pythiaInitialDistribution( *configObject, _wsParameter, useStoredTables );
-    WoodSaxonParameter = _wsParameter;
-    _pythiaInitialDistribution.populateParticleVector( _particles, numberOfParticlesToAdd, minimumPT ); 
-    break;
-  }
-  default:
-    std::string errMsg = "Model for sampling the initial state not implemented yet!";
-    throw eInitialState_error( errMsg );
-    break;
-  }
+  
 
   for ( int i = 0; i < _particles.size(); i++ )
   {

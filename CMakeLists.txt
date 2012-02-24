@@ -22,7 +22,7 @@ FIND_PACKAGE(Boost 1.40 COMPONENTS serialization filesystem program_options REQU
 FIND_PACKAGE(Cuba REQUIRED)
 
 ######### Find LHAPDF library #########
-#FIND_PACKAGE(LHAPDF REQUIRED)
+FIND_PACKAGE(LHAPDF)
 
 ########## Find GSL library #########
 FIND_PACKAGE(GSL REQUIRED)
@@ -66,6 +66,9 @@ ENDIF( NOT DISABLE_BUILD_EXTRAS )
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${Cuba_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIRS})
+IF ( LHAPDF_FOUND )
+  INCLUDE_DIRECTORIES(${LHAPDF_INCLUDE_DIRS})
+ENDIF ( LHAPDF_FOUND )
 
 
 ######### Set the explicit path to the BAMPS library source directory #########

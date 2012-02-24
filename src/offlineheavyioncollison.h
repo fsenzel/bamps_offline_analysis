@@ -36,7 +36,7 @@ public:
   offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface );
   ~offlineHeavyIonCollision();
 
-  void init();
+  void initialize();
   void mainFramework( analysis& aa );
 
   double evolveMedium( const double evolveToTime, bool& _endOfDataFiles );

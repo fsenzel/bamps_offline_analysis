@@ -80,7 +80,7 @@ int main( int argc, char *argv[] )
     //--------cascade-------------------------------------
     cout << "=============start===============" << endl;
 
-    theHIC.init();
+    theHIC.initialize();
     theHIC.mainFramework( theAnalysis );
 
     cout << "==============end================" << endl;

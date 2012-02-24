@@ -131,6 +131,11 @@ class ParticleOffline : public Particle
     X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
     Eold( 0 ), rate( 0 ), ratev( 0 ) {};
     
+    ParticleOffline( const Particle& _particle ) : Particle( _particle ), T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
+    PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
+    X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
+    Eold( 0 ), rate( 0 ), ratev( 0 ) {};
+    
     /** @brief counter for unique particle IDs of added particles (static) */
     static long int unique_id_counter_added;
     

@@ -3,18 +3,18 @@ additionalparticlesdistribution.cpp
 analysis.cpp
 binning2.cpp
 cellcontainer.cpp
-cgcInitialDistribution.cpp
 configuration.cpp
 coordinateBins.cpp
-initialstatemodel.cpp
-integrand_time.cpp
-minijets.cpp
+initialmodel.cpp
+initialmodel_cgc.cpp
+initialmodel_minijets.cpp
+initialmodel_pythia.cpp
 offlineBAMPS.cpp
 offlineheavyioncollison.cpp 
 offlineoutput.cpp
 particle.cpp
+pdfinterface.cpp
 psf.cpp
-pythiaInitialDistribution.cpp
 ringcontainer.cpp
 ringstructure.cpp
 woodsaxon.cpp
@@ -48,6 +48,8 @@ ENDIF ( NOT DISABLE_BUILD_EXTRAS )
 # revision.h is a generated file
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/revision.h PROPERTIES GENERATED TRUE HEADER_FILE_ONLY TRUE)
 
+######### create a config.h #########
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 
 ######### Build the executable #########
@@ -65,8 +67,12 @@ ELSE( LINK_TO_BAMPS_LIB AND BAMPS_FOUND )
   ADD_DEPENDENCIES(offlineBAMPS bamps)          ## Add dependency such that libbamps.a is always build first ##
 ENDIF( LINK_TO_BAMPS_LIB AND BAMPS_FOUND ) 
 
-TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES})
-#TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${Cuba_LIBRARIES})
+IF( LHAPDF_FOUND )
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${LHAPDF_LIBRARIES})
+ELSE( LHAPDF_FOUND )
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES})
+ENDIF( LHAPDF_FOUND )
+
 
 #install(TARGETS offlineBAMPS ${INSTALL_TARGETS_DEFAULT_ARGS})
 
