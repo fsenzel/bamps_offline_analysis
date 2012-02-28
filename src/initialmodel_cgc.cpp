@@ -18,8 +18,7 @@
 #include <algorithm> // for std::count
 
 #include "configuration.h"
-#include "cgcInitialDistribution.h"
-#include "psf.h"
+#include "initialmodel_cgc.h"
 #include "random.h"
 #include "particle.h"
 
@@ -28,7 +27,7 @@ using std::cout;
 using std::endl;
 
 
-cgcInitialDistribution::cgcInitialDistribution( const config& _config )
+initialModel_CGC::initialModel_CGC( const config& _config ) : initialModel() 
 {
   filename_cgcParticleFile = _config.getCgcParticleFile();
   cout << "CGC particle data file: " << filename_cgcParticleFile << endl;
@@ -45,10 +44,10 @@ cgcInitialDistribution::cgcInitialDistribution( const config& _config )
 
 
 
-void cgcInitialDistribution::populateParticleVector( std::vector< ParticleOffline >& _particles )
+void initialModel_CGC::populateParticleVector( std::vector< Particle >& _particles )
 {
   /**
-  * Reserve memory for the ParticleOffline vector. Due to possible particle creation this size should be chosen somewhat larger
+  * Reserve memory for the Particle vector. Due to possible particle creation this size should be chosen somewhat larger
   * than the initial number of particles. Doing this, push_back operations to add new particles won't lead to internal
   * memory re-allocation in the vector, which could possibly be time consuming.
   * However push_back operations are always possible, even when the reserved size is used up (as long as there is physical
@@ -98,7 +97,7 @@ void cgcInitialDistribution::populateParticleVector( std::vector< ParticleOfflin
   while ( !( cgcParticles.eof() ) );
 
   if ( n != numberOfParticlesToGenerate )
-    cout << "Error in cgcInitialDistribution::populateParticleVector, wrong number of particles" << endl;
+    cout << "Error in initialModel_CGC::populateParticleVector, wrong number of particles" << endl;
 }
 
 

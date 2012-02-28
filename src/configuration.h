@@ -35,6 +35,9 @@
 /** @brief Enumeration type for possible initial state models */
 enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState };
 
+/** @brief Enumeration type for PDF sources */
+enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
+
 /** @brief Enumeration type for different variants of computing the mean free path of high-pt particles */
 enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeMfpInterpolation };
 
@@ -156,6 +159,24 @@ class config
   /** ---- initial state options ---- */ 
   /** @brief Interface for config::initialStateType */
   INITIAL_STATE_TYPE getInitialStateType() const { return initialStateType; }
+  
+  /** @brief Interface for config::PDFsource */
+  PDF_SOURCE_TYPE getPDFsource() const { return PDFsource; }
+  
+  /** @brief Interface for config::LHAPDFdatasetName */
+  string getLHAPDFdatasetName() const { return LHAPDFdatasetName; }
+  
+  /** @brief Interface for config::LHAPDFmember */
+  unsigned short int getLHAPDFmember() const { return LHAPDFmember; }
+  
+  /** @brief Interface for config::LHAPDFuseGrid */
+  bool getLHAPDFuseGrid() const { return LHAPDFuseGrid; }
+  
+  /** @brief Interface for config::nuclearPDFs */
+  bool useNuclearPDFs() const { return nuclearPDFs; }
+  
+  /** @brief Interface for config::nuclearPDFdatasetName */
+  string getNuclearPDFdatasetName() const { return nuclearPDFdatasetName; }
   
   /** @brief Interface for config::pythiaParticleFile */
   string getPythiaParticleFile() const { return pythiaParticleFile; }
@@ -414,6 +435,27 @@ class config
   /** ---- initial state options ---- */ 
   /** @brief Which type of initial state to use */
   INITIAL_STATE_TYPE initialStateType;
+  
+  /** @brief Which source to use for the parton distribution functions
+   * 0 = built-in GRV parametrization
+   * 1 = PDF parametrizations provided by the LHAPDF library
+   */
+  PDF_SOURCE_TYPE PDFsource;
+  
+  /** @brief Name of the LHAPDF data set that should be used */
+  string LHAPDFdatasetName;
+  
+  /** @brief Which member of the given LHAPDF data set should be used */
+  unsigned short int LHAPDFmember;
+  
+  /** @brief Whether to use the grid version of the given LHAPDF set */
+  bool LHAPDFuseGrid;
+  
+  /** @brief Whether to use nPDFs (only available in combination with LHAPDF and minijets) */
+  bool nuclearPDFs;
+  
+  /** @brief Name of the nPDF set that is to be used */
+  string nuclearPDFdatasetName;
                      
   /** @brief Relative or full path (including filename) of PYTHIA output file with particle data
    * Declare as "-" if particle momenta should be sampled via glauber method

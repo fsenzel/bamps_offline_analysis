@@ -84,6 +84,16 @@ config::config( const int argc, char* argv[] ) :
  switchOff_23_32(false),
 // ---- initial state options ----
  initialStateType(miniJetsInitialState),
+#ifdef LHAPDF_FOUND
+ PDFsource( LHAPDF ),
+#else
+ PDFsource( builtInGRV ),
+#endif
+ LHAPDFdatasetName("cteq6l"),
+ LHAPDFmember(0),
+ LHAPDFuseGrid(false),
+ nuclearPDFs(false),
+ nuclearPDFdatasetName("EPS09"),
  pythiaParticleFile("-"),
  cgcParticleFile("-"),
  mcatnloParticleFile("-"),
@@ -223,6 +233,12 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   po::options_description initial_state_options("Options and parameters for the initial state of added particles used by the BAMPS simulation");
   initial_state_options.add_options()
   ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo)")
+  ("initial_state.PDFsource", po::value<unsigned short int>()->default_value( static_cast<unsigned short int>(PDFsource) ), "which source to use for the PDFs ( 0 = built-in GRV, 1 = PDFs from LHAPDF )")
+  ("initial_state.LHAPDFset", po::value<string>( &LHAPDFdatasetName )->default_value( LHAPDFdatasetName ), "name of the LHAPDF data set that should be used")
+  ("initial_state.LHAPDFmember", po::value<unsigned short int>( &LHAPDFmember )->default_value( LHAPDFmember ), "which member of the LHAPDF set should be used")
+  ("initial_state.LHAPDFgrid", po::value<bool>( &LHAPDFuseGrid )->default_value( LHAPDFuseGrid ), "whether a grid version of the LHAPDF set should be used")
+  ("initial_state.nuclearPDF", po::value<bool>( &nuclearPDFs )->default_value( nuclearPDFs ), "whether to use nuclear PDFs (only available together with LHAPDF and mini-jets)")
+  ("initial_state.nuclearPDFname", po::value<string>( &nuclearPDFdatasetName )->default_value( nuclearPDFdatasetName ), "name of the nPDF dataset to use (EPS09, EPS09LO, EPS09NLO, EPS08, EKS98)")
   ("initial_state.minijet_P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for minijet initial conditions")
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
@@ -371,6 +387,19 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
     else
     {
       string errMsg = "parameter \"initial_state.type\" out of range";
+      throw eConfig_error( errMsg );
+    }
+  }
+  
+  if ( vm.count("initial_state.PDFsource") )
+  {
+    if ( vm["initial_state.PDFsource"].as<unsigned short int>() < 2 && vm["initial_state.PDFsource"].as<unsigned short int>() >= 0 )
+    {
+      PDFsource = static_cast<PDF_SOURCE_TYPE>( vm["initial_state.PDFsource"].as<unsigned short int>() );
+    }
+    else
+    {
+      string errMsg = "parameter \"initial_state.PDFsource\" out of range";
       throw eConfig_error( errMsg );
     }
   }
@@ -537,6 +566,12 @@ void config::printUsedConfigurationParameters()
   
   output << "[initial_state]" << endl;
   output << "type = " << static_cast<int>(initialStateType) << endl;
+  output << "PDFsource = " << static_cast<int>(PDFsource) << endl;
+  output << "LHAPDFset = " << LHAPDFdatasetName << endl;
+  output << "LHAPDFmember = " << LHAPDFmember << endl;
+  output << "LHAPDFgrid = " << static_cast<int>(LHAPDFuseGrid) << endl;
+  output << "nuclearPDF = " << static_cast<int>(nuclearPDFs) << endl;
+  output << "nuclearPDFname = " << nuclearPDFdatasetName << endl;
   output << "minijet_P0 = " << P0 << endl;
   output << "pythia_file = " << pythiaParticleFile << endl;
   output << "cgc_file = " << cgcParticleFile << endl;

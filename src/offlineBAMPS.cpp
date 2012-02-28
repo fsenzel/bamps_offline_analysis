@@ -80,7 +80,7 @@ int main( int argc, char *argv[] )
     //--------cascade-------------------------------------
     cout << "=============start===============" << endl;
 
-    theHIC.init();
+    theHIC.initialize();
     theHIC.mainFramework( theAnalysis );
 
     cout << "==============end================" << endl;
@@ -91,6 +91,17 @@ int main( int argc, char *argv[] )
   * handle exceptions
   *
   */
+  catch (int e) // provided to handle program termination after displaying usage and help messages
+  {
+    if ( e == HELP_MESSAGE_REQUESTED )
+    {
+      return EXIT_SUCCESS;
+    }
+    else
+    {
+      return EXIT_FAILURE;
+    }    
+  }  
   catch ( std::exception& e )
   {
     // output of the error information provided by the exception class

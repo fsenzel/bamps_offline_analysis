@@ -3,22 +3,22 @@ additionalparticlesdistribution.cpp
 analysis.cpp
 binning2.cpp
 cellcontainer.cpp
-cgcInitialDistribution.cpp
 configuration.cpp
 coordinateBins.cpp
 hadronization_hq.cpp
 ini_jpsi.cpp
-initialstatemodel.cpp
-integrand_time.cpp
+initialmodel.cpp
+initialmodel_cgc.cpp
+initialmodel_minijets.cpp
+initialmodel_pythia.cpp
 interpolation_iniJpsi.cpp
 interpolation_nJpsi.cpp
-minijets.cpp
 offlineBAMPS.cpp
 offlineheavyioncollison.cpp 
 offlineoutput.cpp
 particle.cpp
+pdfinterface.cpp
 psf.cpp
-pythiaInitialDistribution.cpp
 ringcontainer.cpp
 ringstructure.cpp
 woodsaxon.cpp
@@ -90,6 +90,7 @@ ELSE( LHAPDF_FOUND AND Pythia_FOUND )
   #TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${Cuba_LIBRARIES})
 ENDIF( LHAPDF_FOUND AND Pythia_FOUND )
   
+
 #install(TARGETS offlineBAMPS ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 ADD_DEPENDENCIES(offlineBAMPS revisiontag)

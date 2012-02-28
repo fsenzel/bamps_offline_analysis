@@ -124,6 +124,11 @@ class ParticleOffline : public Particle
     Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), 
     N_EVENT_pp( 0 ), HARD( true ), N_EVENT_AA( 0 ), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
     
+    ParticleOffline( const Particle& _particle ) : Particle( _particle ), T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
+    PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
+    X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
+    Eold( 0 ), rate( 0 ), ratev( 0 ) {};
+    
     /** @brief counter for unique particle IDs of added particles (static) */
     static long int unique_id_counter_added;
 

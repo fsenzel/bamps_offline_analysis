@@ -8,23 +8,23 @@
 //---------------------------------------------
 //---------------------------------------------
 
-#ifndef CGC_INITIAL_DISTRIBUTION_H
-#define CGC_INITIAL_DISTRIBUTION_H
+#ifndef INITIALMODEL_CGC_H
+#define INITIALMODEL_CGC_H
 
 #include <string>
 
-#include "initialstatemodel.h"
+#include "initialmodel.h"
 #include "configuration.h"
 #include "particle.h"
 
 
-class cgcInitialDistribution : public initialStateModel
+class initialModel_CGC : public initialModel
 {
   public:
-    cgcInitialDistribution( const config& _config);
-    ~cgcInitialDistribution() {};
+    initialModel_CGC( const config& _config);
+    ~initialModel_CGC() {};
     
-    void populateParticleVector( std::vector<ParticleOffline>& _particles );
+    void populateParticleVector( std::vector<Particle>& _particles );
   
         
   private:
@@ -33,4 +33,4 @@ class cgcInitialDistribution : public initialStateModel
 };
 
 
-#endif 
+#endif // INITIALMODEL_CGC_H

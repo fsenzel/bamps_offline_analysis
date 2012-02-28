@@ -109,63 +109,159 @@ offlineHeavyIonCollision::~offlineHeavyIonCollision()
 
 
 
-void offlineHeavyIonCollision::init()
+void offlineHeavyIonCollision::initialize()
 {
-  additionalParticlesDistribution addedStuff( theConfig, theConfig->getInitialStateType() );
-  addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
-  
-  int N_light_flav_added = theConfig->getNlightFlavorsAdded();
-  int N_heavy_flav_added = theConfig->getNheavyFlavorsAdded();
-
-  int Nbefore = addedParticles.size();
-  for(int j = 0; j < addedParticles.size(); j++ )
+  if ( theConfig->getNumberOfParticlesToAdd() > 0 )
   {
-    if( ( addedParticles[j].FLAVOR > 2 * N_light_flav_added ) && 
-        ( ( addedParticles[j].FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
-          ( addedParticles[j].FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
-        !( addedParticles[j].FLAVOR >= 50 && addedParticles[j].FLAVOR < 50 + Particle::N_psi_states )
-      )
+    additionalParticlesDistribution addedStuff( theConfig, theConfig->getInitialStateType() );
+    addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
+    
+    int N_light_flav_added = theConfig->getNlightFlavorsAdded();
+    int N_heavy_flav_added = theConfig->getNheavyFlavorsAdded();
+
+    int Nbefore = addedParticles.size();
+    for(int j = 0; j < addedParticles.size(); j++ )
     {
-      // delete last particle if also not active otherwise switch position with particle to be deleted
-      while( ( addedParticles.back().FLAVOR > 2 * N_light_flav_added ) && 
-             ( ( addedParticles.back().FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
-               ( addedParticles.back().FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
-             !( addedParticles.back().FLAVOR >= 50 && addedParticles.back().FLAVOR < 50 + Particle::N_psi_states )&& 
-             ( j != addedParticles.size() - 1 ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which is not correct.
+      if( ( addedParticles[j].FLAVOR > 2 * N_light_flav_added ) && 
+          ( ( addedParticles[j].FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
+            ( addedParticles[j].FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
+          !( addedParticles[j].FLAVOR >= 50 && addedParticles[j].FLAVOR < 50 + Particle::N_psi_states )
+        )
       {
+        // delete last particle if also not active otherwise switch position with particle to be deleted
+        while( ( addedParticles.back().FLAVOR > 2 * N_light_flav_added ) && 
+              ( ( addedParticles.back().FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
+                ( addedParticles.back().FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
+              !( addedParticles.back().FLAVOR >= 50 && addedParticles.back().FLAVOR < 50 + Particle::N_psi_states )&& 
+              ( j != addedParticles.size() - 1 ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which is not correct.
+        {
+          addedParticles.pop_back();
+        }
+        addedParticles[j] = addedParticles.back();
         addedParticles.pop_back();
       }
-      addedParticles[j] = addedParticles.back();
-      addedParticles.pop_back();
     }
-  }
-  cout << "#### " << addedParticles.size() << " out of " << Nbefore << " particles kept for simulation ( N_f = N_f_light_quarks + N_f_heavy_quarks = " << N_light_flav_added << " + " <<   N_heavy_flav_added << " )." << endl;
-  
-  // List particle numbers for all flavors
-  cout << "==========================" << endl;
-  cout << "Added particles:" << endl;
-  cout << "# of all=" << addedParticles.size() << endl;
-  int fl_sum = 0;
-  for( int i = 0; i <= 10; i++ )
-  {
+    cout << "#### " << addedParticles.size() << " out of " << Nbefore << " particles kept for simulation ( N_f = N_f_light_quarks + N_f_heavy_quarks = " << N_light_flav_added << " + " <<   N_heavy_flav_added << " )." << endl;
+    
+    // List particle numbers for all flavors
+    cout << "==========================" << endl;
+    cout << "Added particles:" << endl;
+    cout << "# of all=" << addedParticles.size() << endl;
+    int fl_sum = 0;
+    for( int i = 0; i <= 10; i++ )
+    {
+      for( int j = 0; j < addedParticles.size(); j++ )
+        if(addedParticles[j].FLAVOR == i)
+          fl_sum++;
+      cout << "F = " << i << "   # = " << fl_sum << endl;
+      fl_sum = 0;
+    }
     for( int j = 0; j < addedParticles.size(); j++ )
-      if(addedParticles[j].FLAVOR == i)
+      if(addedParticles[j].FLAVOR == jpsi)
         fl_sum++;
-    cout << "F = " << i << "   # = " << fl_sum << endl;
+    cout << "Jpsi:    # = " << fl_sum << endl;
     fl_sum = 0;
-  }
-  for( int j = 0; j < addedParticles.size(); j++ )
-    if(addedParticles[j].FLAVOR == jpsi)
-      fl_sum++;
-  cout << "Jpsi:    # = " << fl_sum << endl;
-  fl_sum = 0;
-  double sum = 0.0;
-  for( int j = 0; j < addedParticles.size(); j++ )
-    sum += addedParticles[j].E;
-  cout << "E(init) = " << sum << endl;
-  cout << "==========================" << endl;
+    double sum = 0.0;
+    for( int j = 0; j < addedParticles.size(); j++ )
+      sum += addedParticles[j].E;
+    cout << "E(init) = " << sum << endl;
+    cout << "==========================" << endl;
 
-  addedStuff.prepareParticles( addedParticles );
+    addedStuff.prepareParticles( addedParticles );
+  }
+  else
+  {
+    addedParticles.clear();
+    cout << "#### 0 particles added" << endl;    
+  }
+  
+  
+  
+// <<<<<<< .working
+//   additionalParticlesDistribution addedStuff( theConfig, theConfig->getInitialStateType() );
+//   addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
+//   
+//   int N_light_flav_added = theConfig->getNlightFlavorsAdded();
+//   int N_heavy_flav_added = theConfig->getNheavyFlavorsAdded();
+// 
+//   int Nbefore = addedParticles.size();
+//   for(int j = 0; j < addedParticles.size(); j++ )
+// =======
+//   if ( theConfig->getNumberOfParticlesToAdd() > 0 )
+// >>>>>>> .merge-right.r419
+//   {
+// <<<<<<< .working
+//     if( ( addedParticles[j].FLAVOR > 2 * N_light_flav_added ) && 
+//         ( ( addedParticles[j].FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
+//           ( addedParticles[j].FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
+//         !( addedParticles[j].FLAVOR >= 50 && addedParticles[j].FLAVOR < 50 + Particle::N_psi_states )
+//       )
+// =======
+//     additionalParticlesDistribution addedStuff( theConfig, miniJetsInitialState );
+//     addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
+//     
+//     int Nbefore = addedParticles.size();
+//     for ( int j = 0; j < addedParticles.size(); j++ )
+// >>>>>>> .merge-right.r419
+//     {
+// <<<<<<< .working
+//       // delete last particle if also not active otherwise switch position with particle to be deleted
+//       while( ( addedParticles.back().FLAVOR > 2 * N_light_flav_added ) && 
+//              ( ( addedParticles.back().FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
+//                ( addedParticles.back().FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
+//              !( addedParticles.back().FLAVOR >= 50 && addedParticles.back().FLAVOR < 50 + Particle::N_psi_states )&& 
+//              ( j != addedParticles.size() - 1 ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which is not correct.
+// =======
+//       if ( addedParticles[j].FLAVOR > ( Particle::N_light_flavor * 2 ) )
+// >>>>>>> .merge-right.r419
+//       {
+//         while ( addedParticles.back().FLAVOR > ( Particle::N_light_flavor * 2 ) )
+//         {
+//           addedParticles.pop_back();
+//         }
+//         addedParticles[j] = addedParticles.back();
+//         addedParticles.pop_back();
+//       }
+//     }
+//     cout << "#### " << addedParticles.size() << " out of " << Nbefore << " added ( N_f = " << Particle::N_light_flavor << " )." << endl;
+//     
+//     addedStuff.prepareParticles( addedParticles );
+//   }
+// <<<<<<< .working
+//   cout << "#### " << addedParticles.size() << " out of " << Nbefore << " particles kept for simulation ( N_f = N_f_light_quarks + N_f_heavy_quarks = " << N_light_flav_added << " + " <<   N_heavy_flav_added << " )." << endl;
+//   
+//   // List particle numbers for all flavors
+//   cout << "==========================" << endl;
+//   cout << "Added particles:" << endl;
+//   cout << "# of all=" << addedParticles.size() << endl;
+//   int fl_sum = 0;
+//   for( int i = 0; i <= 10; i++ )
+//   {
+//     for( int j = 0; j < addedParticles.size(); j++ )
+//       if(addedParticles[j].FLAVOR == i)
+//         fl_sum++;
+//     cout << "F = " << i << "   # = " << fl_sum << endl;
+//     fl_sum = 0;
+//   }
+//   for( int j = 0; j < addedParticles.size(); j++ )
+//     if(addedParticles[j].FLAVOR == jpsi)
+//       fl_sum++;
+//   cout << "Jpsi:    # = " << fl_sum << endl;
+//   fl_sum = 0;
+//   double sum = 0.0;
+//   for( int j = 0; j < addedParticles.size(); j++ )
+//     sum += addedParticles[j].E;
+//   cout << "E(init) = " << sum << endl;
+//   cout << "==========================" << endl;
+// 
+//   addedStuff.prepareParticles( addedParticles );
+// =======
+//   else
+//   {
+//     addedParticles.clear();
+//     cout << "#### 0 particles added" << endl;    
+//   }
+// >>>>>>> .merge-right.r419
 }
 
 
@@ -3365,6 +3461,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
   int iter = 0;
   deque<double> lambdaArray;
   double betaDistEntry;
+  double M1, M2, P1P2; 
   
   int initialStateIndex = -1;
   FLAVOR_TYPE F1, F2, F3;
@@ -3385,6 +3482,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
   
   
   F1 = addedParticles[jetID].FLAVOR;
+  M1 = addedParticles[jetID].m;
   P1[0] = addedParticles[jetID].E;
   P1[1] = addedParticles[jetID].PX;
   P1[2] = addedParticles[jetID].PY;
@@ -3452,7 +3550,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
   }
   //--------------------------------------------------------------------------------------------
   
-  scattering22 scatt22_object;
+  scattering22 scatt22_object( &theI22 );
   scattering32 scatt32_object;
   scattering23 scatt23_object( &theI23 );
   
@@ -3465,6 +3563,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
       if ( !particles_atTimeNow[jscat].dead )
       {
         F2 = particles_atTimeNow[jscat].FLAVOR;
+        M2 = particles_atTimeNow[jscat].m;
         P2[0] = particles_atTimeNow[jscat].E;
         P2[1] = particles_atTimeNow[jscat].PX;
         P2[2] = particles_atTimeNow[jscat].PY;
@@ -3475,7 +3574,8 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
         if ( s > 1.1*lambda2 )
         {
           n22++;
-          Vrel = s / ( 2.0 * P1[0] * P2[0] );
+          P1P2 = P1[0]*P2[0] - P1[1]*P2[1] - P1[2]*P2[2] - P1[3]*P2[3];
+          Vrel = pow((pow(P1P2,2.0)-pow(M1,2.0)*pow(M2,2.0)),0.5)/(P1[0]*P2[0]); // general relative velocity
           as = alpha_s( s );
           
           md2g = as * ( addedParticles[jetID].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
@@ -3484,17 +3584,29 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
 //           md2g = as * ( addedParticles[jetID].md2g + particles_atTimeNow[jscat].md2g ) / 2.0 * 2;          
 //           md2q = md2g * 2.0 / 9.0;
           
-          scatt22_object.setParameter( P1, P2, F1, F2, s, md2g, md2q );
+          scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
+                                        theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
+                                        theConfig->isConstantCrossSecGQ(),
+                                        theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
           cs22 = scatt22_object.getXSection22();
           probab22 += pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
           
-          n23++;
-          lambda_scaled = lambda * sqrt( s );
-          
-          betaDistEntry = scatt23_object.setParameter( vx, vy, vz, P1, P2, F1, F2 , sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
-          I23 = scatt23_object.getIntegral23( initialStateIndex );
-          cs23 = Ncolor * pow( as, 3 ) / s * I23;    //1/GeV^2
-          probab23 += pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
+          if( theConfig->isSwitchOff_23_32() )
+          {  
+            probab23 = 0;
+            cs23 = 0;
+            lambda_scaled = 0;
+          }
+          else
+          {
+            n23++;
+            lambda_scaled = lambda * sqrt( s );
+            
+            betaDistEntry = scatt23_object.setParameter( vx, vy, vz, P1, P2, F1, F2 , sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
+            I23 = scatt23_object.getIntegral23( initialStateIndex );
+            cs23 = Ncolor * pow( as, 3 ) / s * I23;    //1/GeV^2
+            probab23 += pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
+          }
         }
       }
     }
