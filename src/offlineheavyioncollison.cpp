@@ -77,17 +77,25 @@ namespace
   int n23_collected_quark;
   double lambdaJet_gluon;
   double lambdaJet_quark;
-  
+}
+
+namespace ns_heavy_quarks
+{
   int jpsi_dissociation = 0;
   int jpsi_dissociation_from_temperature = 0;
+  int jpsicreation = 0;
+  int charmAnnihil = 0;
 }
+
+
 
 
 offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface ) :
     theConfig( _config ), stoptime_last( 0 ), stoptime( 5.0 ), currentNumber( 0 ), numberEvolvingParticles( _config->getN_init() ),
     rings( _config->getRingNumber(), _config->getCentralRingRadius(), _config->getDeltaR() ),
     testpartcl( _config->getTestparticles() ),
-    offlineInterface( _offlineInterface )
+    offlineInterface( _offlineInterface ),
+    theI23( _config->isSwitchOff_23_32() )
 {
   theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom );
 }
@@ -114,12 +122,15 @@ void offlineHeavyIonCollision::init()
   {
     if( ( addedParticles[j].FLAVOR > 2 * N_light_flav_added ) && 
         ( ( addedParticles[j].FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
-          ( addedParticles[j].FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) )
+          ( addedParticles[j].FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
+        !( addedParticles[j].FLAVOR >= 50 && addedParticles[j].FLAVOR < 50 + Particle::N_psi_states )
+      )
     {
       // delete last particle if also not active otherwise switch position with particle to be deleted
       while( ( addedParticles.back().FLAVOR > 2 * N_light_flav_added ) && 
              ( ( addedParticles.back().FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
-               ( addedParticles.back().FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) && 
+               ( addedParticles.back().FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
+             !( addedParticles.back().FLAVOR >= 50 && addedParticles.back().FLAVOR < 50 + Particle::N_psi_states )&& 
              ( j != addedParticles.size() - 1 ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which is not correct.
       {
         addedParticles.pop_back();
@@ -169,6 +180,10 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   int ncoll23_backup = 0;
   int ncoll32_backup = 0;
   int ncolle_backup = 0;
+  int charmAnnihil_backup = 0;
+  int jpsicreation_backup = 0;
+  int jpsi_dissociation_from_temperature_backup = 0;
+  int jpsi_dissociation_backup = 0;
   
   list<int> edgeCellCopy, edgeCellAddedCopy;
 
@@ -277,7 +292,6 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   int n_dt = 0;
   double dt_sum = 0.0;
   int n_again = 0;
-  
 
   do
   {
@@ -339,6 +353,10 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     ncoll23_backup = ncoll23;
     ncoll32_backup = ncoll32;
     ncolle_backup = ncolle;
+    charmAnnihil_backup = ns_heavy_quarks::charmAnnihil;
+    jpsicreation_backup = ns_heavy_quarks::jpsicreation;
+    jpsi_dissociation_from_temperature_backup = ns_heavy_quarks::jpsi_dissociation_from_temperature;
+    jpsi_dissociation_backup = ns_heavy_quarks::jpsi_dissociation;
     //--------------------------
 
     nexttime = simulationTime + dt;
@@ -409,6 +427,10 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       ncoll23 = ncoll23_backup;
       ncoll32 = ncoll32_backup;
       ncolle = ncolle_backup;
+      ns_heavy_quarks::charmAnnihil = charmAnnihil_backup;
+      ns_heavy_quarks::jpsicreation = jpsicreation_backup;
+      ns_heavy_quarks::jpsi_dissociation_from_temperature = jpsi_dissociation_from_temperature_backup;
+      ns_heavy_quarks::jpsi_dissociation = jpsi_dissociation_backup;
 
       nexttime = simulationTime + dt;
 
@@ -447,6 +469,25 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       dt = dt_backup;
     }
     aa.printCentralDensities( simulationTime );
+    
+    
+    // just error checking if masses and flavors are correct
+    for ( int j = 0; j < addedParticles.size(); j++ )
+    {
+      double E_check = sqrt( pow( addedParticles[j].PX, 2 ) + pow( addedParticles[j].PY, 2 ) + pow( addedParticles[j].PZ, 2 ) + pow( addedParticles[j].m, 2 ) );
+      if( !FPT_COMP_E( addedParticles[j].E, E_check ) )
+        cout << "Error! Particle " << j << " does not fulfill E^2 = p^2 + m^2." << endl;
+      
+      if( !FPT_COMP_E( addedParticles[j].m, Particle::getMass( addedParticles[j].FLAVOR ) ) )
+        cout << "Error! Particle " << j << " with flavor " << addedParticles[j].FLAVOR << " has wrong mass: " << addedParticles[j].m << "  " << Particle::getMass( addedParticles[j].FLAVOR )  << endl;
+      
+      if( ( addedParticles[j].FLAVOR > 2 * theConfig->getNlightFlavorsAdded() ) && 
+          ( ( addedParticles[j].FLAVOR <= 2 * 3 ) || 
+            ( addedParticles[j].FLAVOR > 2 * ( 3 + theConfig->getNheavyFlavorsAdded() ) ) ) &&
+          !( addedParticles[j].FLAVOR >= 50 && addedParticles[j].FLAVOR < 50 + Particle::N_psi_states )
+        )
+        cout << "Error! Particle " << j << " with flavor " << addedParticles[j].FLAVOR << " should not exist: Nf = " << theConfig->getNlightFlavorsAdded() << " + " <<   theConfig->getNheavyFlavorsAdded() <<  endl;
+    }
 
     // analyse timesteps
     dt_sum += dt;
@@ -1535,7 +1576,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
             
             int n32 = 0;
             
-            if( theConfig->isScatt_offlineWithAddedParticles() )
+            if( theConfig->isScatt_offlineWithAddedParticles() && !theConfig->isSwitchOff_23_32() )
             {
               scatt32_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, n32, again, aa, nexttime );
               if ( again )
@@ -1806,35 +1847,45 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         cs22 = scatt22_object.getXSection22( initialStateIndex );
 
         probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
-
-//         probab23 = 0;
-        if ( lambdaJet > 0 )
-        {
-          lambda_scaled = lambdaJet * sqrt( s );
+        
+        
+        if( theConfig->isSwitchOff_23_32() )
+        {  
+          probab23 = 0;
+          cs23 = 0;
+          lambda_scaled = 0;
         }
         else
         {
-          if ( averagedRate > epsilon )
+          if ( lambdaJet > 0 )
           {
-            lambda_scaled = sqrt( s ) / averagedRate;  //dimensionless
+            lambda_scaled = lambdaJet * sqrt( s );
           }
           else
           {
-            xsection_gg_gg csObj( s, md2g, md2q );
-            csgg = csObj.totalCrossSection();
-            lambda_scaled = ( dv * rings[ringIndex].getGamma() * testpartcl * sqrt( s ) ) / ( nTotal * csgg * pow( 0.197, 3.0 ) );
+            if ( averagedRate > epsilon )
+            {
+              lambda_scaled = sqrt( s ) / averagedRate;  //dimensionless
+            }
+            else
+            {
+              xsection_gg_gg csObj( s, md2g, md2q );
+              csgg = csObj.totalCrossSection();
+              lambda_scaled = ( dv * rings[ringIndex].getGamma() * testpartcl * sqrt( s ) ) / ( nTotal * csgg * pow( 0.197, 3.0 ) );
+            }
           }
+          
+          double vx = rings[ringIndex].getAveraged_v_x();
+          double vy = rings[ringIndex].getAveraged_v_y();
+          double vz = rings[ringIndex].getAveraged_v_z();
+
+          betaDistEntry = scatt23_object.setParameter( vx, vy, vz, P1, P2, F1, F2, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
+
+          cs23 = 1 / s * Ncolor * pow( as, 3 ) * scatt23_object.getIntegral23();
+
+          probab23 = pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
         }
         
-        double vx = rings[ringIndex].getAveraged_v_x();
-        double vy = rings[ringIndex].getAveraged_v_y();
-        double vz = rings[ringIndex].getAveraged_v_z();
-
-        betaDistEntry = scatt23_object.setParameter( vx, vy, vz, P1, P2, F1, F2, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
-
-        cs23 = 1 / s * Ncolor * pow( as, 3 ) * scatt23_object.getIntegral23();
-
-        probab23 = pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
         if ( F1 == gluon )
         {
           probab22 *= scaleFactor;
@@ -1984,7 +2035,7 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
     {
       jscat = _allParticlesListAdded[j];
 
-      if ( !( addedParticles[jscat].FLAVOR == charm || addedParticles[jscat].FLAVOR == anti_charm) || addedParticles[jscat].dead ) // currently scattering among added particles is only used for c+cbar -> Jpsi + g
+      if ( !( addedParticles[jscat].FLAVOR == charm || addedParticles[jscat].FLAVOR == anti_charm) || addedParticles[jscat].dead || addedParticles[iscat].dead  ) // currently scattering among added particles is only used for c+cbar -> Jpsi + g. The last statement to check again whether iscat is dead is necessary since iscat could be deleted in the scattering before but the scatterings with all remaining jscat would be carried out.
       {
         continue; // jump to next particle from _cell.particleList
       }
@@ -2020,20 +2071,14 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
           temperature = addedParticles[jscat].temperature;
 
         scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
-                                    theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
-                                    theConfig->isConstantCrossSecGQ(),
-                                    theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-        // TODO !!
-//         scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
-//                                      theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
-//                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(),
-//                                      temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi()
-//                                      ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+                                     theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
+                                     theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(),
+                                     temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi()
+                                     ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
       
-//         cs22 = scatt22_object.getXSection22( initialStateIndex );
         cs22 = scatt22_object.getXSection22( initialStateIndex );
 
-        probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl ); // TODO !! Divide also by KIniCharm
+        probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl * theConfig->getNaddedEvents() );
 
         probab23 = 0;
         if ( F1 == gluon )
@@ -2733,7 +2778,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   
   if ( typ == 2240 ) // J/psi + g -> c + cb
   {
-    jpsi_dissociation++;
+    ns_heavy_quarks::jpsi_dissociation++;
     
     // add second charm quark
     ParticleOffline tempParticle;
@@ -2776,15 +2821,18 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     tempParticle.collisionPartner = -1;
     tempParticle.rate = addedParticles[jscat].rate;    //GeV
     tempParticle.ratev = addedParticles[jscat].ratev;    //GeV
-    tempParticle.jpsi_dissociation_number = jpsi_dissociation;
-    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_Cbar;
+    tempParticle.jpsi_dissociation_number = ns_heavy_quarks::jpsi_dissociation;
+    if( addedParticles[jscat].initially_produced )
+      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    else
+      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_Cbar;
     tempParticle.unique_id = ParticleOffline::unique_id_counter_added;
     --ParticleOffline::unique_id_counter_added;
 
     addedParticles.push_back( tempParticle );
     
     addedParticles[jscat].initially_produced = false;
-    addedParticles[jscat].jpsi_dissociation_number = jpsi_dissociation;
+    addedParticles[jscat].jpsi_dissociation_number = ns_heavy_quarks::jpsi_dissociation;
   }
 }
 
@@ -2849,6 +2897,8 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22
   
   if ( typ == 2212 || typ == 2213 ) // ccbar->gg or ccbar->qqbar
   {
+    ns_heavy_quarks::charmAnnihil++;
+    
     //mark charm quark for removal from global particle list
     deadParticleList.push_back( iscat );
     addedParticles[iscat].dead = true;
@@ -2867,16 +2917,17 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22
   }
   else if ( typ == 2241 ) // c + cbar -> J/psi + g
   {
-//     jpsicreation++;
-    // set new properties of outgoing particle -> J/psi
-    addedParticles[iscat].FLAVOR = F1;
-    addedParticles[iscat].m = M1;
-    addedParticles[iscat].PX = P1[1];
-    addedParticles[iscat].PY = P1[2];
-    addedParticles[iscat].PZ = P1[3];
-    addedParticles[iscat].E = P1[0];
+    ns_heavy_quarks::jpsicreation++;
+    // set new properties of outgoing particle -> J/psi (is always particle 2)
+    addedParticles[iscat].FLAVOR = F2;
+    addedParticles[iscat].m = M2;
+    addedParticles[iscat].PX = P2[1];
+    addedParticles[iscat].PY = P2[2];
+    addedParticles[iscat].PZ = P2[3];
+    addedParticles[iscat].E = P2[0];
     addedParticles[iscat].initially_produced = false;
     addedParticles[iscat].N_EVENT_Cbar = addedParticles[jscat].N_EVENT_pp;
+    addedParticles[iscat].jpsi_dissociation_number = -1; // delete the old property of the charm quark if it was produced via jpsi dissociation before.
 
     //mark second charm quark for removal from global particle list
     deadParticleList.push_back( jscat );
@@ -3068,8 +3119,8 @@ void offlineHeavyIonCollision::jpsi_dissociation_td( const double time )
       lorentz(inv_beta,P1cm,P1);
       lorentz(inv_beta,P2cm,P2);
       
-      jpsi_dissociation++;
-      jpsi_dissociation_from_temperature++;
+      ns_heavy_quarks::jpsi_dissociation++;
+      ns_heavy_quarks::jpsi_dissociation_from_temperature++;
       
       // update momenta of particles
       addedParticles[j].FLAVOR = charm;
@@ -3079,8 +3130,7 @@ void offlineHeavyIonCollision::jpsi_dissociation_td( const double time )
       addedParticles[j].PZ = P2[3];
       addedParticles[j].E = P2[0];
       
-      addedParticles[j].initially_produced = false;
-      addedParticles[j].jpsi_dissociation_number = jpsi_dissociation;
+      
       
       // add second charm quark
       ParticleOffline tempParticle;
@@ -3123,12 +3173,18 @@ void offlineHeavyIonCollision::jpsi_dissociation_td( const double time )
       tempParticle.collisionPartner = -1;
       tempParticle.rate = addedParticles[j].rate;    //GeV
       tempParticle.ratev = addedParticles[j].ratev;    //GeV
-      tempParticle.jpsi_dissociation_number = jpsi_dissociation;
-      tempParticle.N_EVENT_pp = addedParticles[j].N_EVENT_Cbar;
+      tempParticle.jpsi_dissociation_number = ns_heavy_quarks::jpsi_dissociation;
+      if( addedParticles[j].initially_produced )
+        tempParticle.N_EVENT_pp = addedParticles[j].N_EVENT_pp;
+      else
+        tempParticle.N_EVENT_pp = addedParticles[j].N_EVENT_Cbar;
       tempParticle.unique_id = ParticleOffline::unique_id_counter_added;
       --ParticleOffline::unique_id_counter_added;
 
       addedParticles.push_back( tempParticle );
+      
+      addedParticles[j].initially_produced = false;
+      addedParticles[j].jpsi_dissociation_number = ns_heavy_quarks::jpsi_dissociation;
     }
   }
   

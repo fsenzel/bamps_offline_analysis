@@ -39,7 +39,8 @@ std::vector<ParticleOffline> ns_casc::particles_atTimeNow;
 std::vector<ParticleOffline> ns_casc::particles_atTimeNowCopy;
 std::vector<ParticleOffline> ns_casc::addedParticles;
 std::vector<ParticleOffline> ns_casc::addedParticlesCopy;
-std::vector<ParticleHFelectron> ns_casc::addedPartcl_electron;
+// std::vector<ParticleHFelectron> ns_casc::addedPartcl_electron;
+std::vector<ParticleOffline> ns_casc::addedPartcl_electron;
 
 
 double dt = 0.1;
@@ -80,6 +81,7 @@ config::config( const int argc, char* argv[] ) :
  scatt_offlineWithAddedParticles(true),
  scatt_amongOfflineParticles(false),
  scatt_amongAddedParticles(false),
+ switchOff_23_32(false),
 // ---- initial state options ----
  initialStateType(miniJetsInitialState),
  pythiaParticleFile("-"),
@@ -94,8 +96,8 @@ config::config( const int argc, char* argv[] ) :
  standardOutputDirectoryName("output"),
  v2RAAoutput(true),
  v2RAAoutputIntermediateSteps(false),
- v2RAAoutputEtaBins(6),
  dndyOutput(false),
+ outputScheme(no_output),
 // ---- heavy quark options ----
  KggQQbar(1.0),
  KgQgQ(1.0),
@@ -135,6 +137,7 @@ config::config( const int argc, char* argv[] ) :
  fixed_dt(-0.1),
  factor_dt(0.8),
  numberOfParticlesToAdd(0),
+ numberOfAddedEvents(1),
  minimumPT(10.0)
 {
   // process command line arguments and parameters provided via an input file
@@ -212,6 +215,8 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   ("simulation.scatt_offlineWithAdded", po::value<bool>( &scatt_offlineWithAddedParticles )->default_value( scatt_offlineWithAddedParticles ), "whether offline particles are allowed to scatter with added particles")
   ("simulation.scatt_amongOffline", po::value<bool>( &scatt_amongOfflineParticles )->default_value( scatt_amongOfflineParticles ), "whether offline particles are allowed to scatter with other offline particles")
   ("simulation.scatt_amongAdded", po::value<bool>( &scatt_amongAddedParticles )->default_value( scatt_amongAddedParticles ), "whether added particles are allowed to scatter with other added particles")
+  ("simulation.switchOff_23_32", po::value<bool>( &switchOff_23_32 )->default_value( switchOff_23_32 ), "whether 2->3 and 3->2 processed are switched off for added particles")
+  
   ;
   
   // Group some options related to the initial state
@@ -234,8 +239,8 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   ("output.movie_medium", po::value<bool>( &outputSwitch_movieOutputBackground )->default_value( outputSwitch_movieOutputBackground ), "write movie output for medium particles")
   ("output.v2RAA", po::value<bool>( &v2RAAoutput )->default_value( v2RAAoutput ), "write v2 and RAA output for added particles")
   ("output.v2RAAoutputIntermediateSteps", po::value<bool>( &v2RAAoutputIntermediateSteps )->default_value( v2RAAoutputIntermediateSteps ), "whether v2 and RAA output are printed at each analyisis time step (otherwise just at beginning and end)")
-  ("output.v2RAAoutputEtaBins", po::value<int>( &v2RAAoutputEtaBins )->default_value( v2RAAoutputEtaBins ), "how many eta bins are written out for v2 and RAA output")
   ("output.dndyOutput", po::value<bool>( &dndyOutput )->default_value( dndyOutput ), "whether dndy output is written out")
+  ("output.outputScheme", po::value<int>()->default_value( static_cast<int>(outputScheme) ), "output scheme id which configures the analysis routines and decides which output is written. The integer for the desired output scheme is given in the OUTPUT_SCHEME enum in configuration.h.")
   ;
   
   // Group heavy quark options
@@ -286,6 +291,7 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   ("offline.fixed_dt", po::value<double>( &fixed_dt ), "fixed dt (time steps) at which the reconstructed medium is \"sampled\" [optional]")
   ("offline.factor_dt", po::value<double>( &factor_dt )->default_value( factor_dt ), "factor with which time steps from the original run should be scaled for use in sampling of the reconstructed medium (should be <1)")
   ("offline.nAdded", po::value<int>( &numberOfParticlesToAdd)->default_value( numberOfParticlesToAdd ), "number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background" )
+  ("offline.numberOfAddedEvents", po::value<int>( &numberOfAddedEvents)->default_value( numberOfAddedEvents ), "number of heavy ion collision events, set on top of the offline reconstruction. This input is neede if Pythia data files are read in to normalize the total yield of the particles. The number of one such heavy ion collision event includes < number of produced particles in pp > * Ntest * Nbin" )
   ("offline.minPT_added", po::value<double>( &minimumPT )->default_value( minimumPT ), "minimum p_T [GeV] of the added particles. If p_T of added particle falls below this value it does not scatter anymore.")
   ;
 
@@ -395,6 +401,11 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
     }
   }
   
+  if ( vm.count("output.outputScheme") )
+  {
+    outputScheme = static_cast<OUTPUT_SCHEME>( vm["output.outputScheme"].as<int>() );
+  }
+  
 }
 
 
@@ -404,8 +415,8 @@ void config::checkOptionsForSanity()
   
   if( ( scatt_amongAddedParticles && Particle::N_psi_states == 0 ) || ( Particle::N_psi_states > 0 && !scatt_amongAddedParticles ) )
   {
-    string errMsg = "Scatterings among added particles and Jpsi not active or vice versa.";
-    throw eConfig_error( errMsg );
+//     string errMsg = "Scatterings among added particles and Jpsi not active or vice versa.";
+//     throw eConfig_error( errMsg );
   }
   
   if( mesonDecay && !hadronization_hq )
@@ -417,6 +428,12 @@ void config::checkOptionsForSanity()
   if( ( muonsInsteadOfElectrons || studyNonPromptJpsiInsteadOfElectrons ) && !mesonDecay )
   {
     string errMsg = "Meson decay to other particles does not make sense if meson decay is switched of.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if( ( studyNonPromptJpsiInsteadOfElectrons && outputScheme != cms_hq_nonPromptJpsi ) || ( outputScheme == cms_hq_nonPromptJpsi && !studyNonPromptJpsiInsteadOfElectrons ) )
+  {
+    string errMsg = "Study Jpsi instead of electrons but no output for this or vice versa.";
     throw eConfig_error( errMsg );
   }
 }
@@ -515,6 +532,7 @@ void config::printUsedConfigurationParameters()
   output << "scatt_offlineWithAdded = " << scatt_offlineWithAddedParticles << endl;
   output << "scatt_amongOffline = " << scatt_amongOfflineParticles << endl;
   output << "scatt_amongAdded = " << scatt_amongAddedParticles << endl;
+  output << "switchOff_23_32 = " << switchOff_23_32 << endl;
   output << endl;
   
   output << "[initial_state]" << endl;
@@ -533,8 +551,8 @@ void config::printUsedConfigurationParameters()
   output << "movie_medium = " << static_cast<int>( outputSwitch_movieOutputBackground ) << endl;
   output << "v2RAA = " << static_cast<int>( v2RAAoutput ) << endl;
   output << "v2RAAoutputIntermediateSteps = " << static_cast<int>( v2RAAoutputIntermediateSteps ) << endl;
-  output << "v2RAAoutputEtaBins = " << static_cast<int>( v2RAAoutputEtaBins ) << endl;
   output << "dndyOutput = " << static_cast<int>( dndyOutput ) << endl;
+  output << "outputScheme = " << static_cast<int>( outputScheme ) << endl;
   output << endl;
   
   output << "[heavy_quark]" << endl;
@@ -579,6 +597,7 @@ void config::printUsedConfigurationParameters()
   output << "fixed_dt = " << fixed_dt  << endl;
   output << "factor_dt = " << factor_dt << endl;
   output << "nAdded = " << numberOfParticlesToAdd << endl;
+  output << "numberOfAddedEvents = " << numberOfAddedEvents << endl;
   output << "minPT_added = " << minimumPT  << endl;
   output << endl;
 }

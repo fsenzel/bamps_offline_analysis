@@ -203,7 +203,8 @@ class ParticleOffline : public Particle
 *
 * Use only basic properties of the ParticlePrototype class to minimize memory allocation. This is possible because heavy flavor electrons are not propagated through the medium. 
 */
-class ParticleHFelectron : public ParticlePrototype
+// class ParticleHFelectron : public ParticlePrototype
+class ParticleHFelectron : public ParticleOffline
 {
 };
 

@@ -16,7 +16,7 @@ void hadronization_hq::heavyQuarkFragmentation()
   
   addedParticlesCopy=addedParticles; // copy all added particles, perform hadronization here (important to have a second instant for initial hadronization, simulating pp collisions)
 
-  for ( int i = 1; i <= addedParticles.size(); i++ )
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
     flav = addedParticlesCopy[i].FLAVOR;
     if ( flav >= 7 && flav <= 10 )

@@ -161,7 +161,7 @@ void mesonDecay::setPythiaDecayChannelsElectrons(Pythia& pythia)
   
   
   // switch all decay channels for B0 off except to electrons  
-  // decay channels to D mesons which can again decay to electrons are not switched on!!
+  // decay channels to D mesons which can again decay to electrons are not switched on!
 
 pythia.readString("511:8:bRatio = 0.0");
 pythia.readString("511:9:bRatio = 0.0");
@@ -1046,7 +1046,7 @@ pythia.readString("511:889:bRatio = 0.0");
 
 
   // switch all decay channels for B+- off except to electrons  
-  // decay channels to D mesons which can again decay to electrons are not switched on!!
+  // decay channels to D mesons which can again decay to electrons are not switched on!
 
 pythia.readString("521:0:bRatio = 0.0");
 
@@ -1930,7 +1930,7 @@ void mesonDecay::setPythiaDecayChannelsMuons(Pythia& pythia)
   
   
     // switch all decay channels for B0 off except to muons  
-  // decay channels to D mesons which can again decay to muons are not switched on!!
+  // decay channels to D mesons which can again decay to muons are not switched on!
   pythia.readString("511:0:bRatio = 0.0");                                                                                                                                                                       
   pythia.readString("511:1:bRatio = 0.0");                                                                                                                                                                       
   pythia.readString("511:2:bRatio = 0.0");                                                                                                                                                                       
@@ -2814,7 +2814,7 @@ void mesonDecay::setPythiaDecayChannelsMuons(Pythia& pythia)
 
   
   // switch all decay channels for B+- off except to muons  
-  // decay channels to D mesons which can again decay to muons are not switched on!!
+  // decay channels to D mesons which can again decay to muons are not switched on!
   
   pythia.readString("521:0:bRatio = 0.0");                                                                                                                                                                       
 pythia.readString("521:1:bRatio = 0.0");                                                                                                                                                                       

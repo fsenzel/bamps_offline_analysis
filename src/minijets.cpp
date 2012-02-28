@@ -1076,9 +1076,50 @@ void miniJets::sample_FLAV( std::vector< ParticleOffline >& _particles ) const
       std::string errMsg = "problem in sample_FLAV";
       throw eMiniJet_error( errMsg );
     }
-
+    
+    //!! temporary hack: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    double random = ran2();
+    if( random < 0.6 )
+    {
+      f1 = 7;
+      f2 = 8;
+      _particles[index].N_EVENT_pp = index+1;
+    _particles[index+1].N_EVENT_pp = index+1;
+    }
+//     else if( random < 0.9 )
+// //     else
+//     {
+//       f1 = 9;
+//       f2 = 10;
+//     }
+    else
+    {
+      f1 = 50;
+      f2 = 50;
+      _particles[index].N_EVENT_pp = index+1;
+      _particles[index+1].N_EVENT_pp = index+2;
+    }
+//     else
+//     {
+//       f1 = 7;
+//       f2 = 8;
+//     }
+    
     _particles[index].FLAVOR = static_cast<FLAVOR_TYPE>( f1 );
     _particles[index+1].FLAVOR = static_cast<FLAVOR_TYPE>( f2 );
+    
+    
+    //!! temporary hack: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    _particles[index].m = ParticleOffline::getMass( _particles[index].FLAVOR );
+    _particles[index+1].m = ParticleOffline::getMass( _particles[index+1].FLAVOR );
+    
+    _particles[index].E = sqrt( pow( _particles[index].E, 2 ) + pow( _particles[index].m, 2 ) );
+    _particles[index+1].E = sqrt( pow( _particles[index+1].E, 2 ) + pow( _particles[index+1].m, 2 ) );
+    
+    
+    
+    
+    
   }
 }
 

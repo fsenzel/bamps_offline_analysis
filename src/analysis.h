@@ -25,9 +25,12 @@
 #include "configuration.h"
 #include "particle.h"
 #include "ringstructure.h"
+#include "interpolation_nJpsi.h"
 
 using std::vector;
 using std::fstream;
+
+
 
 
 class config;
@@ -198,7 +201,7 @@ public:
   
   void volumeMidrap(const int ) const;
   
-  double tstep[65];
+  double tstep[90];
   double tstep_movie[500];
   
   analysisRingStructure rings;
@@ -213,6 +216,26 @@ private:
   
   string filename_prefix;
   
+  
+  OUTPUT_SCHEME outputScheme;
+  
+  void handle_output_studies( OUTPUT_SCHEME _outputScheme );
+  
+  // switches for studies:
+  bool studyHQ;
+  bool studyJpsi;
+  bool studyTempInTube;
+  bool studyParticleOutput;
+  bool studyTempAndVelocity;
+  bool studyPtSpectra;
+  bool studyEtSpectra;
+  bool studyYDistribution;
+  bool studyJets;
+  bool studyCentralDensity;
+  bool studyBackground;
+  
+  
+  
   void writePartclMovie( const int step ) const;
   void yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
   void transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
@@ -226,8 +249,7 @@ private:
   void printHeader( fstream & f, const anaType mode, const time_t end );
   
   void computeV2RAA( string, const double _outputTime );
-  void onePartclCorrelations();
-  void twoPartclCorrelations();
+
   void printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor);
   void printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor );
   void printYDistribution();
@@ -274,6 +296,97 @@ private:
   fstream oscarJets;
   fstream centralDensitiesOutputFile;
   fstream mfpJetsOutputFile;
+  
+  
+  
+  void calcTempCell( const int cell_id );
+  void writeTempAndVel( const int step  );
+  void addNeighborCells( const int cell_id, const int neighborCell_id );
+  void writeTempInTube( const int step  );
+  void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  );
+  void print_dndy(const string subfix );
+  
+  bool v2output;
+  bool v2outputIntermediateSteps;
+  bool dndyOutput;
+  
+  
+  int *numberInCell; 
+  int *temp_numberInCell; 
+  double *vx_cell; 
+  double *vy_cell;  
+  double *vz_cell;
+  double *vr_cell;
+  double *em_cell;
+  double *prm_cell;
+  double *pzm_cell;
+  double *pr2em_cell;
+  double *pz2em_cell;
+  double *przem_cell;
+  double *densn_cell;
+  double *gama_cell;
+  double *temp_cell;
+  double *tempWithQuarks_cell;
+  double dv;
+  int nCells;
+  
+  int *numberInCell_org;
+  double *vx_cell_org; 
+  double *vy_cell_org;  
+  double *vz_cell_org;
+  double *vr_cell_org;
+  double *em_cell_org;
+  double *prm_cell_org;
+  double *pzm_cell_org;
+  double *pr2em_cell_org;
+  double *pz2em_cell_org;
+  double *przem_cell_org;
+  
+  
+  
+  // heavy flavor stuff
+  
+  fstream printJpsiFugacity;
+  fstream printTempInTube;
+  
+  void onePartclCorrelations();
+  void twoPartclCorrelations();
+  void jpsiEvolution(int step);
+  void printJpsiEvolution();
+  void analyseAngleDe();
+  void writeJpsiFugacityOutput(const int step);
+  void getJpsiFugacity(const double time, const double dr, const double dz, double& fugacity, int& n_charm, double& temp, double& deltaTemp);
+  void jpsi_correlations();
+  void ini_charm_correlations();
+  
+  interpolation_nJpsi theInterpolation_nJpsi;
+
+  bool particleCorrelationsOutput;
+  bool hadronization_hq;
+  bool mesonDecay;
+
+  int *numberJpsi_all_time;
+  int *numberJpsi_ini_time;  
+
+  int *numberJpsi_midPseudoRap_all_time;
+  int *numberJpsi_midPseudoRap_ini_time;
+  int *numberJpsi_forwardPseudoRap_all_time;
+  int *numberJpsi_forwardPseudoRap_ini_time;
+  int *numberJpsi_midNormRap_all_time;
+  int *numberJpsi_midNormRap_ini_time;
+  int *numberJpsi_forwardNormRap_all_time;
+  int *numberJpsi_forwardNormRap_ini_time;
+//   int *numberJpsi_midSpaceTimeRap_time;
+  int *numberJpsiProd_time;
+  int *numberCCbGG_time;
+  bool *timestepAnalysed;
+
+  int* numberJpsiDiss_time;
+  int* numberJpsiDissTd_time;
+  
+  double midrap_jpsi_production;
+
+  
 };
 
 
@@ -282,7 +395,17 @@ private:
 class v2RAA
 {
 public:
-  v2RAA( config * const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg, const double pt_min_arg = 5.0, const double pt_max_arg = 40.0, const int n_g_arg = 35, const double pt_min_background_arg = 0.1, const double pt_max_background_arg = 5.0, const int n_g_background_arg = 25 );
+  v2RAA( config * const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg, const double pt_min_arg = 5.0, const double pt_max_arg = 40.0, const int n_g_arg = 35, const double pt_min_background_arg = 0.0, const double pt_max_background_arg = 5.0, const int n_g_background_arg = 25 );
+  
+  void setPtBinProperties( const double pt_min_arg, const double pt_max_arg, const int n_g_arg, const double pt_min_background_arg = 0.0, const double pt_max_background_arg = 5.0, const int n_g_background_arg = 25 )
+  {
+    pt_min = pt_min_arg;
+    pt_max = pt_max_arg;
+    n_g = n_g_arg;
+    pt_min_background = pt_min_background_arg;
+    pt_max_background = pt_max_background_arg;
+    n_g_background = n_g_background_arg;
+  }
   
   void computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, std::vector< ParticleOffline >& _particles, const int n_particles, string additionalNameTag, const double _outputTime, const v2Type _v2type );
 

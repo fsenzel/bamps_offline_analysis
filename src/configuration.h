@@ -38,6 +38,19 @@ enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialSt
 /** @brief Enumeration type for different variants of computing the mean free path of high-pt particles */
 enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeMfpInterpolation };
 
+/** @brief Enumeration type for different output schemes to decide which kind of output is printed 
+ * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
+*/
+enum OUTPUT_SCHEME { no_output = 0, 
+// heavy quarks:
+phenix_hq_electrons = 101,
+alice_hq_electrons = 111,
+alice_hq_muons = 112,
+alice_hq_dmesons = 113,
+cms_hq_nonPromptJpsi = 114,
+phenix_jpsi = 131
+};
+
 
 /** @brief This extends the namespace ns_casc (see globalsettings.h) to hold a global particle vector */
 namespace ns_casc
@@ -54,7 +67,8 @@ namespace ns_casc
   extern std::vector<ParticleOffline> particles_atTimeNowCopy;
   extern std::vector<ParticleOffline> addedParticles;
   extern std::vector<ParticleOffline> addedParticlesCopy;
-  extern std::vector<ParticleHFelectron> addedPartcl_electron;
+//   extern std::vector<ParticleHFelectron> addedPartcl_electron;
+  extern std::vector<ParticleOffline> addedPartcl_electron;
 }
 //--------------------------------------------------------//
 
@@ -134,6 +148,9 @@ class config
   
   /** @brief Interface for config::N_heavy_flavors_input */
   int getNheavyFlavorsAdded() const {return N_heavy_flavors_input;}
+  
+  /** @brief Interface for config::switchOff_23_32 */
+  bool isSwitchOff_23_32() const {return switchOff_23_32;}
   /** ------------------------------- */
   
   /** ---- initial state options ---- */ 
@@ -175,11 +192,11 @@ class config
   /** @brief Interface for config::v2RAAoutputIntermediateSteps */
   bool isV2RAAoutputIntermediateSteps() const {return v2RAAoutputIntermediateSteps;}
   
-  /** @brief Interface for config::v2RAAoutputEtaBins */
-  int getV2RAAoutputEtaBins() const {return v2RAAoutputEtaBins;}
-  
   /** @brief Interface for config::dndyOutput */
   bool isDndyOutput() const {return  dndyOutput;}
+  
+  /** @brief Interface for config::outputScheme */
+  OUTPUT_SCHEME getOutputScheme() const {return  outputScheme;}
   /** ------------------------------- */
   
   /** -------- heavy quark options ------- */ 
@@ -286,6 +303,8 @@ class config
 
   /** @brief Interface for config::numberOfParticlesToAdd */
   int getNumberOfParticlesToAdd() const { return numberOfParticlesToAdd; }
+  /** @brief Interface for config::numberOfAddedEvents */
+  int getNaddedEvents() const { return numberOfAddedEvents; }
   /** @brief Interface for config::minimumPT */
   double getMinimumPT() const { return minimumPT; }
 
@@ -387,6 +406,9 @@ class config
   
   /** @brief Whether added particles are allowed to scatter with other added particles */
   bool scatt_amongAddedParticles;
+  
+  /** @brief Whether 2->3 and 3->2 processed are switched off for added particles */
+  bool switchOff_23_32;
   /** ------------------------------- */
   
   /** ---- initial state options ---- */ 
@@ -434,11 +456,11 @@ class config
   /** @brief Whether v2 and RAA output are printed at each analyisis time step (otherwise just at beginning and end) */
   bool v2RAAoutputIntermediateSteps;
   
-  /** @brief How many eta bins are written out for v2 and RAA output (small number means small rapidity interval at mid rapidity) */
-  int v2RAAoutputEtaBins;
-  
   /** @brief Whether dndy output is written out */
   bool dndyOutput;
+  
+  /** @brief Output schemes to decide which kind of output is printed */
+  OUTPUT_SCHEME outputScheme;
   /** ------------------------------- */
   
   /** -------- heavy quark options ------- */ 
@@ -564,8 +586,10 @@ class config
   /** @brief Factor with which time steps from the original run should be scaled for use in sampling of the reconstructed medium (should be <1) */
   double factor_dt;
 
-  /** @brief Number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background */
+  /** @brief Number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background. This is needed for mini-jet initial conditions. However, to do a correct normalisation for particles yields also set numberOfAddedEvents */
   int numberOfParticlesToAdd;
+  /** @brief Number of heavy ion collision events, set on top of the offline reconstruction. This input is neede if Pythia data files are read in to normalize the total yield of the particles. The number of one such heavy ion collision event includes < number of produced particles in pp > * Ntest * Nbin */
+  int numberOfAddedEvents;
   /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT; 
   

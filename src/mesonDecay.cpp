@@ -103,14 +103,14 @@ void mesonDecay::decayToElectronsPythia()
 //   pythia.particleData.list(443);
   
 
-  for ( int i = 1; i <= addedParticlesCopy.size(); i++ )
+  for ( int i = 0; i < addedParticlesCopy.size(); i++ )
   {
     if ( ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == dmeson_gen || ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == bmeson_gen ) // d or b meson
     {
       // each d meson decays to numberElectronStat electrons
-      for(int k = 1; k <= numberElectronStat; k++)
+      for(int k = 0; k < numberElectronStat; k++)
       {      
-        k_e = ( i - 1 ) * numberElectronStat + k ;
+        k_e = ( i ) * numberElectronStat + k ;
         // do not copy all particle properties, just E, p, M, Flavor (see below))
 //         addedPartcl_electron[k_e]=addedParticlesCopy[i]; // copy all added particles, perform decay here (important to have a second instant for initial electrons, simulating pp collisions)
         
