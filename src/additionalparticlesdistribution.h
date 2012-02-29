@@ -34,7 +34,10 @@ public:
 
 private:
   int numberOfParticlesToAdd;
+  /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT;
+  /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
+  double minijet_P0;
   const config * const configObject;
   double impactParameter;       //impact parameter in fm
   int numberOfTestparticles;    //number of testparticles per real particle

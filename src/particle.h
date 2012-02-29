@@ -34,7 +34,8 @@ class Particle : public ParticlePrototype
 {
   public:
     /** @brief Provide standard constructor (for completeness) */
-    Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), edge( -1 ), coll_id( -1 ), collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), 
+    Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), N_EVENT_pp( 0 ), HARD( true ), 
+    N_EVENT_AA( 0 ), edge( -1 ), coll_id( -1 ), collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), 
     PYold( 0 ), PZold( 0 ), as22( 0 ), as23( 0 ), rate23v( 0 ), rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ),
     cs22t( 0 ), cs23t( 0 ), lambda_scaled( 0 ), md2g_scaled_22( 0 ),md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), 
     md2q_scaled_23( 0 ), free( true ), init( true ), 
@@ -47,6 +48,14 @@ class Particle : public ParticlePrototype
     double md2g;
     /** @brief quark screening mass currently associated with the particle object, scaled by alpha_s as md2g / alpha_s [GeV^2] */
     double md2q;
+    
+    /** @brief Pythia event number */
+    int N_EVENT_pp;
+    /** @brief Pythia hard or soft scattering */
+    bool HARD; // true/1 if parton comes from hard scattering
+    
+    /** @brief Event number of heavy ion collision to which particle belongs. Necessary if the number of added particles is much larger than the number of particles which would be present in a event according to the test particles number of offline particles. This is only important if one considers scatterings among the added particles.  */
+    int N_EVENT_AA;
 
     /** @brief index of edge cell the particle belongs to, edge = -1 corresponds to no edge cell */
     short int edge;
@@ -121,27 +130,18 @@ class ParticleOffline : public Particle
     ParticleOffline() : Particle(), T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
     PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
     X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
-    Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), 
-    N_EVENT_pp( 0 ), HARD( true ), N_EVENT_AA( 0 ), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
+    Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
     
     ParticleOffline( const Particle& _particle ) : Particle( _particle ), T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
     PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
     X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
-    Eold( 0 ), rate( 0 ), ratev( 0 ) {};
+    Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
     
     /** @brief counter for unique particle IDs of added particles (static) */
     static long int unique_id_counter_added;
 
     /** @brief Temperature of the surrounding medium, needed for J/psi melting */
     double temperature;
-    
-    /** @brief Pythia event number */
-    int N_EVENT_pp;
-    /** @brief Pythia hard or soft scattering */
-    bool HARD; // true/1 if parton comes from hard scattering
-    
-    /** @brief Event number of heavy ion collision to which particle belongs. Necessary if the number of added particles is much larger than the number of particles which would be present in a event according to the test particles number of offline particles. This is only important if one considers scatterings among the added particles.  */
-    int N_EVENT_AA;
     
     /** @brief Whether the particle was initially produced or later in a secondary process */
     bool initially_produced;

@@ -30,6 +30,7 @@ additionalParticlesDistribution::additionalParticlesDistribution( const config* 
     configObject( _config ),
     numberOfParticlesToAdd( _config->getNumberOfParticlesToAdd() ),
     minimumPT( _config->getMinimumPT() ),
+    minijet_P0( _config->getPtCutoff() ),
     impactParameter( _config->getImpactParameter() ),
     numberOfTestparticles( _config->getTestparticles() )
 {
@@ -44,15 +45,20 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   switch ( initialStateType )
   {
     case miniJetsInitialState:
-      initialmodel = new initialModel_minijets( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
+      double usedMinimumPT;
+      // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
+      if( minimumPT > minijet_P0 )
+        usedMinimumPT = minimumPT;
+      else
+        usedMinimumPT = minijet_P0;
+      initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
       break;
-//   case mcatnloInitialState:
-//   {
-//     mcatnloInitialDistribution _mcatnloInitialDistribution( *configObject, _wsParameter, useStoredTables );
-//     WoodSaxonParameter = _wsParameter;
-//     _mcatnloInitialDistribution.populateParticleVector( _particles, numberOfParticlesToAdd, minimumPT ); 
-//     break;
-//   }
+    case pythiaInitialState:
+      initialmodel = new initialModel_Pythia( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
+      break;
+//     case mcatnloInitialState:
+//       initialmodel = new mcatnloInitialDistribution( *configObject, _wsParameter, useStoredTables );
+//       break;
     default:
       std::string errMsg = "Model for sampling the initial state not implemented yet!";
       throw eInitialModel_error( errMsg );
@@ -68,6 +74,13 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
     ParticleOffline tempParticle( tempParticleVector[i] );
     _particles.push_back( tempParticle );
   }
+  
+  //!! TODO 
+//   if( theConfig.isStudyNonPromptJpsiInsteadOfElectrons() )
+//       deleteAllParticlesExceptBottom();
+// 
+//     if( theConfig.isStudyJpsi() )
+//       getJpsis();
 
   for ( int i = 0; i < _particles.size(); i++ )
   {

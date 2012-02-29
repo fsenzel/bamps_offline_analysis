@@ -28,30 +28,36 @@
 class initialModel_Pythia : public initialModelWS
 {
   public:
-    initialModel_Pythia( const config& _config, WoodSaxon& _WoodSaxonParameter );
+    initialModel_Pythia( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT = 0.0, const int _nToGenerate = -1 );
     ~initialModel_Pythia() {};
     
-    void populateParticleVector( std::vector<ParticleOffline>& _particles );
+    void populateParticleVector( std::vector<Particle>& _particles );
     
         
   protected:
     /**
      * @brief Set the positions of the particles
      */
-    void samplePositions( std::vector<ParticleOffline>& _particles );
+    void samplePositions( std::vector<Particle>& _particles );
 
     /**
      * @brief Set the momenta of the particles
      */
-    void sampleMomenta( std::vector<ParticleOffline>& _particles );
+    void sampleMomenta( std::vector<Particle>& _particles );
     
     /** 
      * @brief Sampling of time and positions of one parton 
      **/
-    void sample_TXYZ_one_partcl( ParticleOffline& _particle, bool& soft );
+    void sample_TXYZ_one_partcl( Particle& _particle, bool& soft );
     
     int numberOfTestparticles;
     int numberOfParticlesToGenerate;
+    
+    /** @brief Particles with transverse momenta below this value are not considered for simulation. */
+    double minimumPT;
+    
+    /** @brief Number of independent heavy ion events. Particles from different events might not allowed to scatter with each other. */
+    int nEventsAA;
  
     
   private:

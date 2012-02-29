@@ -111,7 +111,7 @@ offlineHeavyIonCollision::~offlineHeavyIonCollision()
 
 void offlineHeavyIonCollision::initialize()
 {
-  if ( theConfig->getNumberOfParticlesToAdd() > 0 )
+  if ( theConfig->getNumberOfParticlesToAdd() != 0 )
   {
     additionalParticlesDistribution addedStuff( theConfig, theConfig->getInitialStateType() );
     addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
@@ -148,18 +148,29 @@ void offlineHeavyIonCollision::initialize()
     cout << "Added particles:" << endl;
     cout << "# of all=" << addedParticles.size() << endl;
     int fl_sum = 0;
+    cout << "Flavor       Number    Number wo testparticles per Event" << endl;
     for( int i = 0; i <= 10; i++ )
     {
       for( int j = 0; j < addedParticles.size(); j++ )
         if(addedParticles[j].FLAVOR == i)
           fl_sum++;
-      cout << "F = " << i << "   # = " << fl_sum << endl;
+      cout.width(6);
+      cout << i;
+      cout.width(10);
+      cout << fl_sum;
+      cout.width(16);
+      cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;
       fl_sum = 0;
     }
     for( int j = 0; j < addedParticles.size(); j++ )
       if(addedParticles[j].FLAVOR == jpsi)
         fl_sum++;
-    cout << "Jpsi:    # = " << fl_sum << endl;
+    cout.width(6);
+    cout << "Jpsi";
+    cout.width(10);
+    cout << fl_sum;
+    cout.width(16);
+    cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;
     fl_sum = 0;
     double sum = 0.0;
     for( int j = 0; j < addedParticles.size(); j++ )
@@ -174,94 +185,6 @@ void offlineHeavyIonCollision::initialize()
     addedParticles.clear();
     cout << "#### 0 particles added" << endl;    
   }
-  
-  
-  
-// <<<<<<< .working
-//   additionalParticlesDistribution addedStuff( theConfig, theConfig->getInitialStateType() );
-//   addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
-//   
-//   int N_light_flav_added = theConfig->getNlightFlavorsAdded();
-//   int N_heavy_flav_added = theConfig->getNheavyFlavorsAdded();
-// 
-//   int Nbefore = addedParticles.size();
-//   for(int j = 0; j < addedParticles.size(); j++ )
-// =======
-//   if ( theConfig->getNumberOfParticlesToAdd() > 0 )
-// >>>>>>> .merge-right.r419
-//   {
-// <<<<<<< .working
-//     if( ( addedParticles[j].FLAVOR > 2 * N_light_flav_added ) && 
-//         ( ( addedParticles[j].FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
-//           ( addedParticles[j].FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
-//         !( addedParticles[j].FLAVOR >= 50 && addedParticles[j].FLAVOR < 50 + Particle::N_psi_states )
-//       )
-// =======
-//     additionalParticlesDistribution addedStuff( theConfig, miniJetsInitialState );
-//     addedStuff.populateParticleVector( addedParticles, WoodSaxonParameter );
-//     
-//     int Nbefore = addedParticles.size();
-//     for ( int j = 0; j < addedParticles.size(); j++ )
-// >>>>>>> .merge-right.r419
-//     {
-// <<<<<<< .working
-//       // delete last particle if also not active otherwise switch position with particle to be deleted
-//       while( ( addedParticles.back().FLAVOR > 2 * N_light_flav_added ) && 
-//              ( ( addedParticles.back().FLAVOR <= 2 * Particle::max_N_light_flavor ) || 
-//                ( addedParticles.back().FLAVOR > 2 * ( Particle::max_N_light_flavor + N_heavy_flav_added ) ) ) &&
-//              !( addedParticles.back().FLAVOR >= 50 && addedParticles.back().FLAVOR < 50 + Particle::N_psi_states )&& 
-//              ( j != addedParticles.size() - 1 ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which is not correct.
-// =======
-//       if ( addedParticles[j].FLAVOR > ( Particle::N_light_flavor * 2 ) )
-// >>>>>>> .merge-right.r419
-//       {
-//         while ( addedParticles.back().FLAVOR > ( Particle::N_light_flavor * 2 ) )
-//         {
-//           addedParticles.pop_back();
-//         }
-//         addedParticles[j] = addedParticles.back();
-//         addedParticles.pop_back();
-//       }
-//     }
-//     cout << "#### " << addedParticles.size() << " out of " << Nbefore << " added ( N_f = " << Particle::N_light_flavor << " )." << endl;
-//     
-//     addedStuff.prepareParticles( addedParticles );
-//   }
-// <<<<<<< .working
-//   cout << "#### " << addedParticles.size() << " out of " << Nbefore << " particles kept for simulation ( N_f = N_f_light_quarks + N_f_heavy_quarks = " << N_light_flav_added << " + " <<   N_heavy_flav_added << " )." << endl;
-//   
-//   // List particle numbers for all flavors
-//   cout << "==========================" << endl;
-//   cout << "Added particles:" << endl;
-//   cout << "# of all=" << addedParticles.size() << endl;
-//   int fl_sum = 0;
-//   for( int i = 0; i <= 10; i++ )
-//   {
-//     for( int j = 0; j < addedParticles.size(); j++ )
-//       if(addedParticles[j].FLAVOR == i)
-//         fl_sum++;
-//     cout << "F = " << i << "   # = " << fl_sum << endl;
-//     fl_sum = 0;
-//   }
-//   for( int j = 0; j < addedParticles.size(); j++ )
-//     if(addedParticles[j].FLAVOR == jpsi)
-//       fl_sum++;
-//   cout << "Jpsi:    # = " << fl_sum << endl;
-//   fl_sum = 0;
-//   double sum = 0.0;
-//   for( int j = 0; j < addedParticles.size(); j++ )
-//     sum += addedParticles[j].E;
-//   cout << "E(init) = " << sum << endl;
-//   cout << "==========================" << endl;
-// 
-//   addedStuff.prepareParticles( addedParticles );
-// =======
-//   else
-//   {
-//     addedParticles.clear();
-//     cout << "#### 0 particles added" << endl;    
-//   }
-// >>>>>>> .merge-right.r419
 }
 
 
@@ -617,18 +540,29 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   cout << "Added particles:" << endl;
   cout << "# of all=" << addedParticles.size() << endl;
   int fl_sum = 0;
+  cout << "Flavor       Number    Number wo testparticles per Event" << endl;
   for( int i = 0; i <= 10; i++ )
   {
     for( int j = 0; j < addedParticles.size(); j++ )
       if(addedParticles[j].FLAVOR == i)
         fl_sum++;
-    cout << "F = " << i << "   # = " << fl_sum << endl;
+    cout.width(6);
+    cout << i;
+    cout.width(10);
+    cout << fl_sum;
+    cout.width(16);
+    cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;
     fl_sum = 0;
   }
   for( int j = 0; j < addedParticles.size(); j++ )
     if(addedParticles[j].FLAVOR == jpsi)
       fl_sum++;
-  cout << "Jpsi:    # = " << fl_sum << endl;
+  cout.width(6);
+  cout << "Jpsi";
+  cout.width(10);
+  cout << fl_sum;
+  cout.width(16);
+  cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;
   fl_sum = 0;
   double sum = 0.0;
   for( int j = 0; j < addedParticles.size(); j++ )

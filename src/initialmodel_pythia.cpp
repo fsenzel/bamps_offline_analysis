@@ -29,11 +29,19 @@ using std::cout;
 using std::endl;
 using namespace ns_casc;
 
-
-initialModel_Pythia::initialModel_Pythia( const config& _config, WoodSaxon& _WoodSaxonParameter) :
+/**
+* @brief Constructor for Pythia initial conditions
+* @param[in] _config configuration class
+* @param[out] _WoodSaxonParameter returns Wood Saxon Parameters
+* @param[in] _minimumPT Particles with transverse momenta below this value are discared and not considered for simulation.
+* @param[in] _nToGenerate Specifies number of particles to generate. A negative value is standard and indicates that all particles in PYTHIA particle file are used.
+*/
+initialModel_Pythia::initialModel_Pythia( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT, const int _nToGenerate ) :
   initialModelWS(_config) ,
   numberOfParticlesToGenerate ( 0 ),
-  numberOfTestparticles ( _config.getTestparticles() )
+  numberOfTestparticles ( _config.getTestparticles() ),
+  minimumPT( _minimumPT ),
+  nEventsAA( _config.getNaddedEvents() )
 {
   double Tab;
 
@@ -59,7 +67,24 @@ initialModel_Pythia::initialModel_Pythia( const config& _config, WoodSaxon& _Woo
   std::ifstream countPythiaParticles( filename_pythiaParticleFile.c_str() );
   if ( countPythiaParticles.good() )
   {
-    numberOfParticlesToGenerate = std::count( std::istreambuf_iterator<char>( countPythiaParticles ), std::istreambuf_iterator<char>(), '\n' ); // counts number of lines in PYTHIA particle data file
+    int numberOfParticlesInDataFile = std::count( std::istreambuf_iterator<char>( countPythiaParticles ), std::istreambuf_iterator<char>(), '\n' ); // counts number of lines in PYTHIA particle data file
+    
+    if( _nToGenerate < 0 )
+    {  
+      numberOfParticlesToGenerate = numberOfParticlesInDataFile;
+    }
+    else
+    {
+      if( numberOfParticlesInDataFile < _nToGenerate )
+      {
+        cout << "Not enough particles in PYTHIA data file to sample all particles. Sample only " << numberOfParticlesInDataFile << " instead of " << _nToGenerate << endl;
+        numberOfParticlesToGenerate = numberOfParticlesInDataFile;
+      }
+      else
+      {
+        numberOfParticlesToGenerate = _nToGenerate;
+      }
+    }
   }
   else
   {
@@ -72,7 +97,7 @@ initialModel_Pythia::initialModel_Pythia( const config& _config, WoodSaxon& _Woo
 
 
 
-void initialModel_Pythia::populateParticleVector( std::vector< ParticleOffline >& _particles )
+void initialModel_Pythia::populateParticleVector( std::vector< Particle >& _particles )
 {
   /**
   * Reserve memory for the Particle vector. Due to possible particle creation this size should be chosen somewhat larger
@@ -83,11 +108,6 @@ void initialModel_Pythia::populateParticleVector( std::vector< ParticleOffline >
   * but still, it's good practice.
   */
   _particles.reserve( static_cast<int>( numberOfParticlesToGenerate * 1.2 ) );
-  /**
-  * Now the particle vector is re-sized to hold the initial number of particles (this is NOT done when reserving memory!).
-  * The particles are initialised with the standard constructor, actual attributes such as momentum etc. MUST be set later!
-  */
-  _particles.resize( numberOfParticlesToGenerate );
 
   sampleMomenta( _particles );
   samplePositions( _particles );
@@ -96,27 +116,51 @@ void initialModel_Pythia::populateParticleVector( std::vector< ParticleOffline >
 
 
 
-void initialModel_Pythia::sampleMomenta( std::vector< ParticleOffline >& _particles )
+void initialModel_Pythia::sampleMomenta( std::vector< Particle >& _particles )
 {
-
+  int event_tmp = 0;
+  int event_counter = 0;
+  
   std::ifstream readPythiaParticles( filename_pythiaParticleFile.c_str() );
-  cout << "Read particle momentum from PYTHIA data file." << endl;
+  cout << "Read particle momenta from PYTHIA data file." << endl;
   for ( int i = 0; i < numberOfParticlesToGenerate; i++ )
   {
+    Particle tempParticle; 
     int flavTemp;
+    int n_event_pp_input;
     // structure of file
     // number of pythia event  is hard?   flavour  energy  px  py  pz  m
-    readPythiaParticles >> _particles[i].N_EVENT_pp >> _particles[i].HARD >> flavTemp >> _particles[i].E >> _particles[i].PX >> _particles[i].PY >> _particles[i].PZ >> _particles[i].m;
-    _particles[i].FLAVOR = static_cast<FLAVOR_TYPE>( flavTemp );
+    readPythiaParticles >> n_event_pp_input >> tempParticle.HARD >> flavTemp >> tempParticle.E >> tempParticle.PX >> tempParticle.PY >> tempParticle.PZ >> tempParticle.m;
+    tempParticle.FLAVOR = static_cast<FLAVOR_TYPE>( flavTemp );
+    
+    if( n_event_pp_input != event_tmp )
+    {
+      event_tmp = n_event_pp_input;
+      event_counter++;
+      tempParticle.N_EVENT_pp = event_counter;
+    }
+    else
+    {
+      tempParticle.N_EVENT_pp = event_counter;
+    }
     
     if ( flavTemp <= 2 * Particle::max_N_light_flavor )
     {
-      _particles[i].m = 0;
+      tempParticle.m = 0;
     }
     
     // to avoid rounding errors compute energy from momenta and mass E^2=p^2+m^2, for light partons this can be different from Pythia's value if in Pythia this parton had a mass
-    _particles[i].E = sqrt( pow( _particles[i].PX, 2.0 ) + pow( _particles[i].PY, 2.0 ) + pow( _particles[i].PZ, 2.0 ) + pow( _particles[i].m, 2.0 ) );
+    tempParticle.E = sqrt( pow( tempParticle.PX, 2.0 ) + pow( tempParticle.PY, 2.0 ) + pow( tempParticle.PZ, 2.0 ) + pow( tempParticle.m, 2.0 ) );
+    
+    double pt = sqrt( pow( tempParticle.PX, 2.0 ) + pow( tempParticle.PY, 2.0 ) );
+    
+    if( pt >= minimumPT )
+    {
+      _particles.push_back( tempParticle );
+    }
   }
+  
+  readPythiaParticles.close();
   
   // charm quarks in Pythia have a mass of 1.5 GeV
   // make charm quarks from pythia lighter, if Mcharm is not 1.5 GeV
@@ -175,15 +219,17 @@ void initialModel_Pythia::sampleMomenta( std::vector< ParticleOffline >& _partic
 }
 
 
-
-
-void initialModel_Pythia::samplePositions( std::vector< ParticleOffline >& _particles )
+void initialModel_Pythia::samplePositions( std::vector< Particle >& _particles )
 {
   cout << "Start sampling of particle positions for particles from PYTHIA." << endl;
   // particles are already read from file in momentum()
-  int nmb_of_events = _particles.back().N_EVENT_pp;
+  int nmb_of_events;
+  if( _particles.size() > 0 )
+    nmb_of_events = _particles.back().N_EVENT_pp;
+  else
+    nmb_of_events = 0;
   int event_tmp = 0;
-  double x_tmp, y_tmp, z_tmp, t_tmp;
+  double x_tmp, y_tmp, z_tmp, t_tmp, event_AA_tmp;
 
   bool soft_event[nmb_of_events + 1]; // array to store which events are soft and which not (true if event is soft)
   for ( int i = 1; i <= nmb_of_events; i++ )
@@ -193,7 +239,7 @@ void initialModel_Pythia::samplePositions( std::vector< ParticleOffline >& _part
   int partcl_soft_event[nmb_of_events + 1]; // array to store one particle number of each event to obtain the position of the event afterwards for soft particles
 
   // sample positions for binary collisions/events where hard partons are produced. Sample also if there are also soft particles at this event (reason: scaling behavior of soft and hard partons differ)
-  for ( int j = 0; j < numberOfParticlesToGenerate; j++ )
+  for ( int j = 0; j < _particles.size(); j++ )
   {
     if ( _particles[j].HARD )
     {
@@ -208,7 +254,14 @@ void initialModel_Pythia::samplePositions( std::vector< ParticleOffline >& _part
 
         partcl_soft_event[_particles[j].N_EVENT_pp] = j;
 
+        // pp event to which the particle belongs
         event_tmp = _particles[j].N_EVENT_pp;
+        
+        // sample heavy ion event to which the particle belongs
+        event_AA_tmp = int( ran2() * nEventsAA ) + 1; // event_AA_tmp is integer in [1;nEventsAA]
+        if(event_AA_tmp > nEventsAA)
+          cout << " error in initialModel_Pythia::samplePositions, event_AA_tmp=" << event_AA_tmp << endl;
+        _particles[j].N_EVENT_AA = event_AA_tmp; // give particles the flag of the heavy ion event
       }
       else // all other hard particles of same event get same positions
       {
@@ -216,6 +269,8 @@ void initialModel_Pythia::samplePositions( std::vector< ParticleOffline >& _part
         _particles[j].Y = y_tmp;
         _particles[j].Z = z_tmp;
         _particles[j].T = t_tmp;
+        
+        _particles[j].N_EVENT_AA = event_AA_tmp; // give particles the flag of the heavy ion event
       }
     }
   }
@@ -223,8 +278,7 @@ void initialModel_Pythia::samplePositions( std::vector< ParticleOffline >& _part
   // start insert for non vanishing b=Bimp
   if ( impactParameter != 0.0 ) // soft particles are deleted for b!=0, because treatment of these is written for b=0 and would cause an error
   {
-    std::vector<ParticleOffline>::iterator iIt;
-    //!! delete particles
+    std::vector<Particle>::iterator iIt;
     for ( iIt = _particles.begin(); iIt != _particles.end(); )
     {
       if ( ( *iIt ).HARD == false )
@@ -245,7 +299,7 @@ void initialModel_Pythia::samplePositions( std::vector< ParticleOffline >& _part
     int event = 1;
     // get positions for soft partons from events which have besides hard also soft partons
     int soft_break = 0;
-    for ( int j = 0; j < numberOfParticlesToGenerate; j++ )
+    for ( int j = 0; j < _particles.size(); j++ )
     {
       if ( !_particles[j].HARD )
       {
@@ -269,7 +323,7 @@ void initialModel_Pythia::samplePositions( std::vector< ParticleOffline >& _part
     }
     cout << "Soft events: " << sum << endl;
 
-    for ( int s = 0; s <  numberOfParticlesToGenerate; s++ )
+    for ( int s = 0; s < _particles.size(); s++ )
     {
       if ( !_particles[s].HARD )
       {
@@ -308,9 +362,8 @@ void initialModel_Pythia::samplePositions( std::vector< ParticleOffline >& _part
 
 
 
-
 // sample position for only one particle with id=number
-void initialModel_Pythia::sample_TXYZ_one_partcl( ParticleOffline& _particle, bool& soft )
+void initialModel_Pythia::sample_TXYZ_one_partcl( Particle& _particle, bool& soft )
 {
   double T, X, Y, Z;
   double densityA_max;
