@@ -17,6 +17,7 @@
 #include "additionalparticlesdistribution.h"
 #include "configuration.h"
 #include "initialmodel.h"
+#include "initialmodel_mcatnlo.h"
 #include "initialmodel_minijets.h"
 #include "initialmodel_pythia.h"
 #include "initialmodel_cgc.h"
@@ -56,9 +57,9 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
     case pythiaInitialState:
       initialmodel = new initialModel_Pythia( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
       break;
-//     case mcatnloInitialState:
-//       initialmodel = new mcatnloInitialDistribution( *configObject, _wsParameter, useStoredTables );
-//       break;
+    case mcatnloInitialState:
+      initialmodel = new initialModel_Mcatnlo( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
+      break;
     default:
       std::string errMsg = "Model for sampling the initial state not implemented yet!";
       throw eInitialModel_error( errMsg );

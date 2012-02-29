@@ -9,7 +9,9 @@ hadronization_hq.cpp
 ini_jpsi.cpp
 initialmodel.cpp
 initialmodel_cgc.cpp
+initialmodel_mcatnlo.cpp
 initialmodel_minijets.cpp
+initialmodel_particlesFromFile.cpp
 initialmodel_pythia.cpp
 interpolation_iniJpsi.cpp
 interpolation_nJpsi.cpp

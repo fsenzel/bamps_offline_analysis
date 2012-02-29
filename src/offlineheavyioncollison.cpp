@@ -154,9 +154,9 @@ void offlineHeavyIonCollision::initialize()
       for( int j = 0; j < addedParticles.size(); j++ )
         if(addedParticles[j].FLAVOR == i)
           fl_sum++;
-      cout.width(6);
+      cout.width(5);
       cout << i;
-      cout.width(10);
+      cout.width(12);
       cout << fl_sum;
       cout.width(16);
       cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;
@@ -165,9 +165,9 @@ void offlineHeavyIonCollision::initialize()
     for( int j = 0; j < addedParticles.size(); j++ )
       if(addedParticles[j].FLAVOR == jpsi)
         fl_sum++;
-    cout.width(6);
+    cout.width(5);
     cout << "Jpsi";
-    cout.width(10);
+    cout.width(12);
     cout << fl_sum;
     cout.width(16);
     cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;
@@ -546,9 +546,9 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     for( int j = 0; j < addedParticles.size(); j++ )
       if(addedParticles[j].FLAVOR == i)
         fl_sum++;
-    cout.width(6);
+    cout.width(5);
     cout << i;
-    cout.width(10);
+    cout.width(12);
     cout << fl_sum;
     cout.width(16);
     cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;
@@ -557,9 +557,9 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   for( int j = 0; j < addedParticles.size(); j++ )
     if(addedParticles[j].FLAVOR == jpsi)
       fl_sum++;
-  cout.width(6);
+  cout.width(5);
   cout << "Jpsi";
-  cout.width(10);
+  cout.width(12);
   cout << fl_sum;
   cout.width(16);
   cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;

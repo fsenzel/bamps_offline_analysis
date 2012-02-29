@@ -380,7 +380,7 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
   // some special conversions from integer type values to enum values
   if ( vm.count("initial_state.type") )
   {
-    if ( vm["initial_state.type"].as<int>() < 3 && vm["initial_state.type"].as<int>() >= 0 )
+    if ( vm["initial_state.type"].as<int>() < 4 && vm["initial_state.type"].as<int>() >= 0 )
     {
       initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
     }
