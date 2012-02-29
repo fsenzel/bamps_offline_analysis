@@ -48,7 +48,6 @@ initialModel_ParticlesFromFile::initialModel_ParticlesFromFile( const string _fi
     std::string errMsg = "Impact parameter b too large. b > 2 R_A0";
     throw eParticlesFromFile_error( errMsg );
   }
-  WoodSaxonParameter.Calculate( A, impactParameter, sqrtS_perNN);
   _WoodSaxonParameter = WoodSaxonParameter;
 
 

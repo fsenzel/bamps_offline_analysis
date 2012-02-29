@@ -1,6 +1,16 @@
+//---------------------------------------------
+//provided by subversion
+//---------------------------------------------
+//$HeadURL: file:///home/bamps/svn/full/offlineAnalysis/branches/heavy_quark_offline/src/configuration.cpp $
+//$LastChangedDate: 2012-02-29 11:20:46 +0100 (Wed, 29 Feb 2012) $
+//$LastChangedRevision: 423 $
+//$LastChangedBy: uphoff $
+//---------------------------------------------
+//---------------------------------------------
+
 #include <math.h>
 #include <iostream>
-#include "ini_jpsi.h"
+#include "initialmodel_jpsi.h"
 #include "random.h"
 #include "FPT_compare.h"
 #include "interpolation_iniJpsi.h"
@@ -11,128 +21,105 @@
 using namespace std;
 using namespace ns_casc;
 
-extern int Ntest;
-
-binning ptbins("output/ptbins.dat", 0.0, 5.0, 100);
-
-ini_jpsi::ini_jpsi( const double sqrtS_arg, const double Bimp_arg, const double sigmaAbs_arg, const double agN_arg, const shadowModelJpsi shadowing_model_arg, const double KInicharm_arg )
-: sqrtS(sqrtS_arg), impact_parameter(Bimp_arg), sigmaAbs(sigmaAbs_arg), agN(agN_arg), shadowing_model(shadowing_model_arg), KInicharm(KInicharm_arg)
+initialModel_Jpsi::initialModel_Jpsi( const config& _config, WoodSaxon& _WoodSaxonParameter )
+: initialModelWS(_config), sigmaAbs( _config.getSigmaAbs() ), agN( _config.getJpsiagN() ), shadowing_model( _config.getShadowingModel() ), nEventsAA( _config.getNaddedEvents() ), testparticles( _config.getTestparticles() )
 {
-  theInterpolation_dndptdy.configure( sqrtS, impact_parameter, sigmaAbs, agN, shadowing_model );
+  double Tab;
+  
+  impactParameter = _config.getImpactParameter();
+  sqrtS_perNN = _config.getSqrtS();
+  if (!WoodSaxonParameter.Calculate( A, impactParameter, sqrtS_perNN))
+  {
+    std::string errMsg = "Impact parameter b too large. b > 2 R_A0";
+    throw eJpsi_error( errMsg );
+  }
+  _WoodSaxonParameter = WoodSaxonParameter;
+  
+  cout << "======= Generating data sets for sampling of initial state =======" << endl;
+  generateTimeDistributionWS(Tab);
+  cout << "++++  Tab = " << Tab << "1/mb" << endl;
+  cout << "==================================================================" << endl;
+  
+  theInterpolation_dndptdy.configure( sqrtS_perNN, impactParameter, sigmaAbs, agN, shadowing_model );
 }
 
-void ini_jpsi::sample_jpsis()
+
+void initialModel_Jpsi::populateParticleVector( std::vector< Particle >& _particles )
 {
   double total_number_jpsi_one_Au_collision = 0.0; // integration over dndydpt, gives the number of jpsis in one collision
   
-  if( sqrtS == 200.0)
+  if( sqrtS_perNN == 200.0)
   {
     if( sigmaAbs == 2.8 && agN == 0.1 && shadowing_model == eps08 )
     {
-      if( impact_parameter == 0.0)
+      if( impactParameter == 0.0)
         total_number_jpsi_one_Au_collision = 0.04716;
-      else if( impact_parameter == 3.3)
+      else if( impactParameter == 3.3)
         total_number_jpsi_one_Au_collision = 0.03716;
-      else if( impact_parameter == 4.6)
+      else if( impactParameter == 4.6)
         total_number_jpsi_one_Au_collision = 0.03030;
-      else if( impact_parameter == 5.8)
+      else if( impactParameter == 5.8)
         total_number_jpsi_one_Au_collision = 0.02374;
-      else if( impact_parameter == 8.2)
+      else if( impactParameter == 8.2)
         total_number_jpsi_one_Au_collision = 0.01191;
-      else if( impact_parameter == 10.3)
+      else if( impactParameter == 10.3)
         total_number_jpsi_one_Au_collision = 0.004515;
     }
     else if( sigmaAbs == 1.5 && agN == 0.1 && shadowing_model == eps08 )
     {
-      if( impact_parameter == 0.0)
+      if( impactParameter == 0.0)
         total_number_jpsi_one_Au_collision = 0.057675;
-      else if( impact_parameter == 8.2)
+      else if( impactParameter == 8.2)
         total_number_jpsi_one_Au_collision = 0.0139615;
     }
     else if( sigmaAbs == 0.0 && agN == 0.1 && shadowing_model == eps08 )
     {
-      if( impact_parameter == 0.0)
+      if( impactParameter == 0.0)
         total_number_jpsi_one_Au_collision = 0.073531;
-      else if( impact_parameter == 8.2)
+      else if( impactParameter == 8.2)
         total_number_jpsi_one_Au_collision = 0.0169033;
     }
     else if( sigmaAbs == 0.0 && agN == 0.0 && shadowing_model == none )
     {
-      if( impact_parameter == 0.0)
+      if( impactParameter == 0.0)
         total_number_jpsi_one_Au_collision = 0.0862351;    
-      else if( impact_parameter == 8.2)
+      else if( impactParameter == 8.2)
         total_number_jpsi_one_Au_collision = 0.018879;
     }
   }
+  
+  if ( total_number_jpsi_one_Au_collision == 0.0 )
+  {
+    std::string errMsg = "Impact parameter b too large. b > 2 R_A0";
+    throw eJpsi_error( errMsg );
+  }
 
-  int number_jpsi = int(total_number_jpsi_one_Au_collision * KInicharm * Ntest);
-  double remainder = total_number_jpsi_one_Au_collision * KInicharm * Ntest - number_jpsi; // int() above rounds down, but we want to take the remainder also into account
+  int number_jpsi = int(total_number_jpsi_one_Au_collision * nEventsAA * testparticles);
+  double remainder = total_number_jpsi_one_Au_collision * nEventsAA * testparticles - number_jpsi; // int() above rounds down, but we want to take the remainder also into account
   if(ran2() < remainder)
     number_jpsi++;
-
-//   cout << "Jpsi: " << number_jpsi << endl;
   
   for(int i = 0; i < number_jpsi; i++)
   {
-//     numberAdded++;
-//     sample_one_jpsi(numberAdded);
-// TODO !!
+    Particle tempParticle;
+    
+    sample_PXYZE_FLAV_singleParticle( tempParticle, _particles.size() );
+    sample_TXYZ_singleParticle( tempParticle );
+    
+    _particles.push_back( tempParticle );
   }
-  
-  
-  ptbins.print();
 }
 
 
-// void ini_jpsi::sample_one_jpsi( const int partclNmb )
-// {
-//   double pt, y, phi;
-//   
-//   double MASS,PX,PY,PZ,E;
-// 
-//   MASS = Mjpsi;
-// 
-//   // get y and pt
-//   sample_metropolis_dndptdy( pt, y );
-//   
-//   // angle of jpsi
-//   phi = ran2() * 2.0 * M_PI;
-// 
-//   // momenta and energy
-//   PX = pt * sin( phi );
-//   PY = pt * cos( phi );
-//   PZ = ( pow( pt, 2.0 ) + pow( MASS, 2.0 ) ) * pow( exp( y ) - exp( -y ) , 2.0 ) / 4.0;
-//   // consider also negativ pz. y is only sampled for positiv y since tables are only for positiv y and y is symmetric around 0. Here, substitute randomly pz by -pz:
-//   if ( ran2() < 0.5 )
-//     PZ = -PZ;
-// 
-//   E = sqrt( pow( PX, 2.0 ) + pow( PY, 2.0 ) + pow( PZ, 2.0 ) + pow( MASS, 2.0 ) );
-//   
-//   
-// //   // Kai has another definition of the J/psi's mass:
-// //   const double M_jpsi = 3.6; // GeV
-// //   // make Jpsi heavier by breaking energy conservation
-// //   MASS = M_jpsi;
-// //   E = sqrt( pow( PX, 2.0 ) + pow( PY, 2.0 ) + pow( PZ, 2.0 ) + pow( MASS, 2.0 ) );
-// 
-// 
-//   double y_test = 0.5 * log( (E + PZ) / (E - PZ) );
-//   double pt_test = sqrt( pow( PX, 2.0 ) + pow( PY, 2.0 ) );
-//   
-//   if( fabs(y_test) < 0.5 )
-//     ptbins.add(pt_test);
-// 
-// }
 
-
-
-void ini_jpsi::sample_one_jpsi( const int partclNmb )
+void initialModel_Jpsi::sample_PXYZE_FLAV_singleParticle( Particle& _tempParticle, const int ParticleNumber )
 {
   double pt, y, phi;
 
-  addedParticles[partclNmb].m = Particle::getMass( jpsi );
-  addedParticles[partclNmb].N_EVENT_pp = partclNmb;
-  addedParticles[partclNmb].FLAVOR = jpsi;
+  _tempParticle.m = Particle::getMass( jpsi );
+  _tempParticle.N_EVENT_pp = ParticleNumber + 1;
+  _tempParticle.N_EVENT_AA = int( ran2() * nEventsAA ) + 1; // event_AA_tmp is integer in [1;nEventsAA]
+  _tempParticle.FLAVOR = jpsi;
 
   // get y and pt
   sample_metropolis_dndptdy( pt, y );
@@ -141,18 +128,18 @@ void ini_jpsi::sample_one_jpsi( const int partclNmb )
   phi = ran2() * 2.0 * M_PI;
 
   // momenta and energy
-  addedParticles[partclNmb].PX = pt * sin( phi );
-  addedParticles[partclNmb].PY = pt * cos( phi );
-  addedParticles[partclNmb].PZ = sqrt( ( pow( pt, 2.0 ) + pow( addedParticles[partclNmb].m, 2.0 ) ) * pow( exp( y ) - exp( -y ) , 2.0 ) / 4.0 );
+  _tempParticle.PX = pt * sin( phi );
+  _tempParticle.PY = pt * cos( phi );
+  _tempParticle.PZ = sqrt( ( pow( pt, 2.0 ) + pow( _tempParticle.m, 2.0 ) ) * pow( exp( y ) - exp( -y ) , 2.0 ) / 4.0 );
   // consider also negativ pz. y is only sampled for positiv y since tables are only for positiv y and y is symmetric around 0. Here, substitute randomly pz by -pz:
   if ( ran2() < 0.5 )
-    addedParticles[partclNmb].PZ = -addedParticles[partclNmb].PZ;
+    _tempParticle.PZ = -_tempParticle.PZ;
 
-  addedParticles[partclNmb].E = sqrt( pow( addedParticles[partclNmb].PX, 2.0 ) + pow( addedParticles[partclNmb].PY, 2.0 ) + pow( addedParticles[partclNmb].PZ, 2.0 ) + pow( addedParticles[partclNmb].m, 2.0 ) );
+  _tempParticle.E = sqrt( pow( _tempParticle.PX, 2.0 ) + pow( _tempParticle.PY, 2.0 ) + pow( _tempParticle.PZ, 2.0 ) + pow( _tempParticle.m, 2.0 ) );
 }
 
 
-void ini_jpsi::sample_metropolis_dndptdy( double& pt_arg, double& y_arg )
+void initialModel_Jpsi::sample_metropolis_dndptdy( double& pt_arg, double& y_arg )
 {
   double pt, y, r;
   double pt_new, y_new;

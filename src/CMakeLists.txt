@@ -6,9 +6,9 @@ cellcontainer.cpp
 configuration.cpp
 coordinateBins.cpp
 hadronization_hq.cpp
-ini_jpsi.cpp
 initialmodel.cpp
 initialmodel_cgc.cpp
+initialmodel_jpsi.cpp
 initialmodel_mcatnlo.cpp
 initialmodel_minijets.cpp
 initialmodel_particlesFromFile.cpp

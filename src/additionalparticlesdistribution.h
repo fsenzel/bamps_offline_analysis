@@ -33,6 +33,9 @@ public:
  
 
 private:
+  
+  void deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles );
+  
   int numberOfParticlesToAdd;
   /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT;

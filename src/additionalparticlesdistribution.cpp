@@ -21,6 +21,7 @@
 #include "initialmodel_minijets.h"
 #include "initialmodel_pythia.h"
 #include "initialmodel_cgc.h"
+#include "initialmodel_jpsi.h"
 
 using namespace ns_casc;
 using namespace std;
@@ -69,6 +70,12 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   std::vector<Particle> tempParticleVector;
   initialmodel->populateParticleVector( tempParticleVector );
   
+  if( Particle::N_psi_states > 0 )
+  {
+    initialModel_Jpsi theIni_Jpsi( *configObject, _wsParameter );
+    theIni_Jpsi.populateParticleVector( tempParticleVector );
+  }
+  
   _particles.reserve( tempParticleVector.size() );
   for ( int i = 0; i < tempParticleVector.size(); i++ )
   {
@@ -76,12 +83,8 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
     _particles.push_back( tempParticle );
   }
   
-  //!! TODO 
-//   if( theConfig.isStudyNonPromptJpsiInsteadOfElectrons() )
-//       deleteAllParticlesExceptBottom();
-// 
-//     if( theConfig.isStudyJpsi() )
-//       getJpsis();
+  if( configObject->isStudyNonPromptJpsiInsteadOfElectrons() )
+    deleteAllParticlesExceptBottom( _particles );
 
   for ( int i = 0; i < _particles.size(); i++ )
   {
@@ -157,4 +160,22 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     _particles[i].X_traveled = 0.0;
   }
 }
-// kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on; 
+
+
+void additionalParticlesDistribution::deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles )
+{
+  for(int j = 0; j < addedParticles.size(); j++ )
+  {
+    if( !( addedParticles[j].FLAVOR == bottom || addedParticles[j].FLAVOR == anti_bottom ) )
+    {
+      // delete last particle if also not active otherwise switch position with particle to be deleted
+      while( !( addedParticles.back().FLAVOR == bottom || addedParticles.back().FLAVOR == anti_bottom ) && 
+            ( j != addedParticles.size() - 1 ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which is not correct.
+      {
+        addedParticles.pop_back();
+      }
+      addedParticles[j] = addedParticles.back();
+      addedParticles.pop_back();
+    }
+  }
+}
