@@ -14,7 +14,7 @@ INCLUDE(CPack)
 ######### Find Boost libraries #########
 SET(BOOST_ROOT "$ENV{HOME}/usr")
 MESSAGE(STATUS "** Search Boost root: ${BOOST_ROOT}")
-FIND_PACKAGE(Boost 1.40 COMPONENTS serialization filesystem program_options REQUIRED)
+FIND_PACKAGE(Boost 1.40 COMPONENTS serialization filesystem program_options regex REQUIRED)
  MESSAGE(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
  MESSAGE(STATUS "** Boost Libraries: ${Boost_LIBRARY_DIRS}")
 
