@@ -105,14 +105,6 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
   double shift;
   for ( int j = 0; j < _particles.size(); j++ )
   {   
-    // last interaction spacetime point is point of creation
-    _particles[j].X_lastInt = _particles[j].X;
-    _particles[j].Y_lastInt = _particles[j].Y;
-    _particles[j].Z_lastInt = _particles[j].Z;
-    _particles[j].T_lastInt = _particles[j].T;
-    _particles[j].T_creation = _particles[j].T;
-    
-    
     dtt = fabs( _particles[j].Z ) / tanh( eta_max ) - _particles[j].T;  //tanh(eta)=z/t
     if ( dtt < configObject->getTimeshift() )
     {
@@ -127,6 +119,12 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     }
 
     _particles[j].T += shift;
+    
+    // last interaction spacetime point is point of creation
+    _particles[j].X_lastInt = _particles[j].X;
+    _particles[j].Y_lastInt = _particles[j].Y;
+    _particles[j].Z_lastInt = _particles[j].Z;
+    _particles[j].T_lastInt = _particles[j].T;
     
     //formation time 1/sqrt( p_T^2 + m^2) = 1/m_T
     y = 0.5 * log(( _particles[j].E+_particles[j].PZ ) / ( _particles[j].E-_particles[j].PZ ) );
@@ -144,6 +142,9 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     _particles[j].Z = _particles[j].Z + _particles[j].PZ * cc;
 
     _particles[j].init = true;
+    
+    // creation time is time at which the particle is allowed to scatter
+    _particles[j].T_creation = _particles[j].T;
   }
   
   for(int i = 0; i < _particles.size(); i++)

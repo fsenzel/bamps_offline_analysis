@@ -13,8 +13,8 @@ using namespace ns_casc;
 using namespace std;
 
 
-mesonDecay::mesonDecay( const int numberElectronStat_arg, const bool local_cluster_arg, const bool muonsInsteadOfElectrons_arg, const bool nonPromptJpsiInsteadOfElectrons_arg ) :
-  numberElectronStat(numberElectronStat_arg), local_cluster(local_cluster_arg), muonsInsteadOfElectrons(muonsInsteadOfElectrons_arg), nonPromptJpsiInsteadOfElectrons(nonPromptJpsiInsteadOfElectrons_arg)
+mesonDecay::mesonDecay( const int numberElectronStat_arg, const bool muonsInsteadOfElectrons_arg, const bool nonPromptJpsiInsteadOfElectrons_arg ) :
+  numberElectronStat(numberElectronStat_arg), muonsInsteadOfElectrons(muonsInsteadOfElectrons_arg), nonPromptJpsiInsteadOfElectrons(nonPromptJpsiInsteadOfElectrons_arg)
 {
   /**
   * Reserve memory for the Particle vector.

@@ -169,7 +169,7 @@ analysis::analysis( config* const c ):
   //--------------------------------------
   string name_fug, name_temp, mfpName, centralDensitiesName, oscarName_jet, oscarName_background;
   if ( studyJpsi )
-    name_fug = filename_prefix + "_fugacity";
+    name_fug = filename_prefix + "_jpsi_fugacity";
   else
     name_fug = "/dev/null";
   
@@ -3023,36 +3023,36 @@ void analysis::jpsi_correlations()
   double cos_delta_phi, cos_delta_theta, pt, pp, delta_eta, eta, eta_charm;
   string filename;
 
-  filename = filename_prefix + "_ptbins_iniJpsi";
+  filename = filename_prefix + "_jpsi_corr_ptbins_iniJpsi";
   binning ptbins_iniJpsi(filename, 0.0, 6.0, 40);
-  filename = filename_prefix + "_ptbins_secJpsi";
+  filename = filename_prefix + "_jpsi_corr_ptbins_secJpsi";
   binning ptbins_secJpsi(filename, 0.0, 6.0, 40);
-  filename = filename_prefix + "_phibins_deltaPhiJpsiCharm";
+  filename = filename_prefix + "_jpsi_corr_phibins_deltaPhiJpsiCharm";
   binning phibins_deltaPhiJpsiCharm(filename, 0.0, M_PI, 30);
-  filename = filename_prefix + "_phibins_deltaPhiCharmCharm";
+  filename = filename_prefix + "_jpsi_corr_phibins_deltaPhiCharmCharm";
   binning phibins_deltaPhiCharmCharm(filename, 0.0, M_PI, 30);
-  filename = filename_prefix + "_phibins_deltaThetaJpsiCharm";
+  filename = filename_prefix + "_jpsi_corr_phibins_deltaThetaJpsiCharm";
   binning phibins_deltaThetaJpsiCharm(filename, 0.0, M_PI, 30);
-  filename = filename_prefix + "_phibins_deltaThetaCharmCharm";
+  filename = filename_prefix + "_jpsi_corr_phibins_deltaThetaCharmCharm";
   binning phibins_deltaThetaCharmCharm(filename, 0.0, M_PI, 30);
-  filename = filename_prefix + "_ptbins_charmFromJpsi";
+  filename = filename_prefix + "_jpsi_corr_ptbins_charmFromJpsi";
   binning ptbins_charmFromJpsi(filename, 0.0, 6.0, 40);
   
-  filename = filename_prefix + "_etabins_detaJpsiCharm";
+  filename = filename_prefix + "_jpsi_corr_etabins_detaJpsiCharm";
   binning etabins_detaJpsiCharm(filename, 0.0, 20.0, 70);
-  filename = filename_prefix + "_etabins_detaCharmCharm";
+  filename = filename_prefix + "_jpsi_corr_etabins_detaCharmCharm";
   binning etabins_detaCharmCharm(filename, 0.0, 20.0, 70);
-  filename = filename_prefix + "_etabins_detaSecJpsiAllCharm";
+  filename = filename_prefix + "_jpsi_corr_etabins_detaSecJpsiAllCharm";
   binning etabins_detaSecJpsiAllCharm(filename, 0.0, 20.0, 70);
-  filename = filename_prefix + "_etabins_detaIniJpsiAllCharm";
+  filename = filename_prefix + "_jpsi_corr_etabins_detaIniJpsiAllCharm";
   binning etabins_detaIniJpsiAllCharm(filename, 0.0, 20.0, 70);
-  filename = filename_prefix + "_etabins_detaJpsiCharm_2d";
+  filename = filename_prefix + "_jpsi_corr_etabins_detaJpsiCharm_2d";
   binning2d etabins_detaJpsiCharm2d(filename, 0.0, 10.0, 40, 0.0, 10.0, 40);
   
   
-  filename = filename_prefix + "_eta_test";
+  filename = filename_prefix + "_jpsi_corr_eta_test";
   binning eta_test(filename, -7.0, 7.0, 100);
-  filename = filename_prefix + "_y_test";
+  filename = filename_prefix + "_jpsi_corr_y_test";
   binning y_test(filename, -7.0, 7.0, 100);
   
   
@@ -3389,11 +3389,7 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   // sum over all particles
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-   
-//     if ( FPT_COMP_LE( particles_atTimeNow[i].T_creation, time ) && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
-//        cout << time << "  " << particles_atTimeNow[i].T - time << "  " << particles_atTimeNow[i].T << "  " << particles_atTimeNow[i].T_creation <<  "  " << particles_atTimeNow[i].init << endl;
-      
-    if ( FPT_COMP_E( particles_atTimeNow[i].T, time )  && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
+    if ( FPT_COMP_LE( particles_atTimeNow[i].T, time )  && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
     {
       if (( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Z ) < dz ) )
       {
@@ -3439,6 +3435,7 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
     else // take also 6 neighbor cells into account
     {
       cout << "error in calculateTempInTube(): to few particles in cell. Number=" << numberInCell[i] << "  time=" << time << endl;
+      cout << particles_atTimeNow.size() << "  " << particles_atTimeNow[0].T << "  " << particles_atTimeNow[10].T << endl;
     }
   }
   
@@ -3945,9 +3942,9 @@ void analysis::analyseAngleDe()
   string filename;
   
   
-  filename = filename_prefix + "_cosTheta";
+  filename = filename_prefix + "_dmeson_electron_cosTheta";
   binningValues binsCosTheta(filename, 0.0, 10.0, 200);
-  filename = filename_prefix + "_cosPhiTrans";
+  filename = filename_prefix + "_dmeson_electron_cosPhiTrans";
   binningValues binsCosPhi(filename, 0.0, 10.0, 200);
   
   for ( int i = 0; i < addedParticles.size(); i++ )
@@ -3955,9 +3952,9 @@ void analysis::analyseAngleDe()
     if ( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
     {
       // there are several electrons per dmeson/charm quark
-      for(int k = 1; k <= theConfig->getNumberElectronStat(); k++)
-      {
-        k_e = ( i - 1 ) * theConfig->getNumberElectronStat() + k ;
+      for(int k = 0; k < theConfig->getNumberElectronStat(); k++)
+      {      
+        k_e = ( i ) * theConfig->getNumberElectronStat() + k ;
         costheta = ( addedParticlesCopy[i].PX*addedPartcl_electron[k_e].PX + addedParticlesCopy[i].PY*addedPartcl_electron[k_e].PY + addedParticlesCopy[i].PZ*addedPartcl_electron[k_e].PZ ) 
         / sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) + pow( addedPartcl_electron[k_e].PZ, 2.0 ) ) 
         / sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) ) ;

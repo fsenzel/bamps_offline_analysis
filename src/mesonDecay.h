@@ -6,7 +6,7 @@
 class mesonDecay
 {
   public:
-    mesonDecay( const int numberElectronStat_arg, const bool local_cluster_arg = false, const bool muonsInsteadOfElectrons_arg = false, const bool nonPromptJpsiInsteadOfElectrons_arg = false );
+    mesonDecay( const int numberElectronStat_arg, const bool muonsInsteadOfElectrons_arg = false, const bool nonPromptJpsiInsteadOfElectrons_arg = false );
     void decayToElectronsToyModel();
     void decayToElectronsPythia();
 
@@ -18,7 +18,6 @@ class mesonDecay
     
     bool muonsInsteadOfElectrons;
     bool nonPromptJpsiInsteadOfElectrons;
-    bool local_cluster;
     int numberElectronStat;
 };
 

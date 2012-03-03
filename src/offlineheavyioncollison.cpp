@@ -259,7 +259,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   if( theConfig->isMesonDecay() )
   {
 #ifdef Pythia_FOUND
-    mesonDecay ppMesonDecay( theConfig->getNumberElectronStat(), theConfig->isLocalCluster(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
+    mesonDecay ppMesonDecay( theConfig->getNumberElectronStat(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
     ppMesonDecay.decayToElectronsPythia();
 #else
     string errMsg( "Could not perform decay of heavy mesons to electron because PYTHIA was not found." );
@@ -524,7 +524,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   if( theConfig->isMesonDecay() )
   {
 #ifdef Pythia_FOUND
-    mesonDecay theMesonDecay( theConfig->getNumberElectronStat(), theConfig->isLocalCluster(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
+    mesonDecay theMesonDecay( theConfig->getNumberElectronStat(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
     theMesonDecay.decayToElectronsPythia();
 #else
     string errMsg( "Could not perform decay of heavy mesons to electron because PYTHIA was not found." );

@@ -40,7 +40,7 @@ double interpolation_nJpsi::getN(const double T) const
   else if(T > a_start + delta_a*n_i )
   {
     temp = a_start + delta_a*n_i;
-    cout << "error in interpolation_nJpsi::getN, T=" << T << endl;
+//     cout << "error in interpolation_nJpsi::getN, T=" << T << endl;
   }
     
   n = getInterpolatedData( temp );

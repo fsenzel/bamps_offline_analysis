@@ -166,16 +166,19 @@ void initialModel_ParticlesFromFile::samplePositions( std::vector< Particle >& _
   // start insert for non vanishing b=Bimp
   if ( impactParameter != 0.0 ) // soft particles are deleted for b!=0, because treatment of these is written for b=0 and would cause an error
   {
-    std::vector<Particle>::iterator iIt;
-    for ( iIt = _particles.begin(); iIt != _particles.end(); )
+    // delete soft particles
+    for(int j = 0; j < _particles.size(); j++ )
     {
-      if ( ( *iIt ).HARD == false )
+      // delete last particle if soft
+      if( !_particles[j].HARD )
       {
-        iIt = _particles.erase( iIt );
-      }
-      else
-      {
-        ++iIt;
+        // delete last particle if also not active otherwise switch position with particle to be deleted
+        while( ( !_particles.back().HARD ) && ( j != _particles.size() - 1  ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which would be wrong.
+        {
+          _particles.pop_back();
+        }
+        _particles[j] = _particles.back();
+        _particles.pop_back();
       }
     }
     cout << "Soft particles have been deleted since b!=0 and this would cause an error!" << endl;

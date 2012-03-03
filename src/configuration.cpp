@@ -158,12 +158,12 @@ config::config( const int argc, char* argv[] ) :
   //create the names of the output files for Fuchs CSC (old cluster) and LOEWE CSC
   char * csc_check_fuchs = getenv("PBS_JOBID");
   char * csc_check_loewe = getenv("SLURM_JOB_ID");
-  if( csc_check_fuchs != NULL )
+  if( csc_check_fuchs != NULL && !localCluster )
   {
     string jobID( csc_check_fuchs );
     standardOutputDirectoryName = "/local/" + jobID;
   }
-  else if( csc_check_loewe != NULL )
+  else if( csc_check_loewe != NULL && !localCluster )
   {
     string jobID( csc_check_loewe );
     standardOutputDirectoryName = "/local/" + jobID;
@@ -313,7 +313,7 @@ void config::readAndProcessProgramOptions( const int argc, char* argv[] )
 
   // Group options that are meant to be provided via the command line
   po::options_description command_line_options;
-  command_line_options.add(usage_information).add(hidden_options);
+  command_line_options.add(usage_information).add(general_options).add(misc_options).add(hidden_options);
   
   // Group options that are meant to be provided via a configuration file
   po::options_description config_file_options;
