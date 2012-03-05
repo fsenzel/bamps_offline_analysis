@@ -20,13 +20,16 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 #include <stdint.h>
 
-#include "globalsettings.h"
+// #define BOOST_FILESYSTEM_VERSION 3
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
+#include "configurationbase.h"
 #include "particle.h"
 #include "offlineoutput.h"
-
-#define HELP_MESSAGE_REQUESTED 1
 
 
 /** @brief Enumeration type for possible initial state models */
@@ -43,11 +46,11 @@ enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeM
 namespace ns_casc
 {  
   /** @brief Vector to hold all particles in the simulation, GLOBAL 
-  *
-  * Declared as extern here. There MUST be ONE definition in a cpp-file that includes this header in the global 
-  * scope (it's in configuration.cpp).
-  * All files that include this header can then access the vector.
-  */
+   * 
+   * Declared as extern here. There MUST be ONE definition in a cpp-file that includes this header in the global 
+   * scope (it's in configuration.cpp).
+   * All files that include this header can then access the vector.
+   */
   extern std::vector<ParticleOffline> particlesEvolving;
   extern std::vector<ParticleOffline> particles_init;
   extern std::vector<ParticleOffline> particles_atTimeNow;
@@ -64,31 +67,39 @@ extern double dt;
 
 
 /**
- * @brief Interface for settings made at runtime
+ * @brief interface for runtime configuration
  *
- * This class provides an interface for settings made by the user at runtime. These need to be specified in a configuration
- * file whose name is passed to the program as the first (and only) command line parameter. This file is read when the constructor
- * of the class config is called.
+ * This class provides a basic interface for settings made by the user at runtime. It is based on boost::program_options 
+ * and can handle command line arguments as well as INI-type configuration files.
+ * 
+ * It derives from and extends the base class configBase that is provided in the BAMPS lib. configBase provides the basic
+ * functionality, some helper routines (e.g. printing of used parameters) and also some basic boost::program_options::options_description groups
+ * and options. The structure of configBase allows this derived class to extend the functionality by 
+ *  a) adding to existing boost::program_options::options_description objects
+ *  b) defining new boost::program_options::options_description objects and adding those to either the command line or the 
+ *    configuration file option groups
+ * 
+ * This is done in config::initializeProgramOptions() and in config::groupProgramOptions(). In principle these two steps 
+ * would be sufficient as they eventually only add to the groups configBase::command_line_options and configBase::config_file_options
+ * which are members of the base class. Therefore reading and processing - including the extended options - could then be
+ * handled by the base class.
+ * However, in order to provide the flexibility to add more sophisticated checking, processing, etc. to the extended options
+ * this class explicitly re-implements the processing routines of the base class configBase. Mostly by simply calling 
+ * the appropriate member routines of the base class. 
+ * 
+ * The program flow is therefore identical to the one descriped in the documentation of configBase
  */
-class config
+class config : public configBase
 {
  public:
   /** @brief Constructor that internally reads the provided input file */
-  config(const int argc, char* argv[]);
+  config();
   /** @brief Standard constructor */
   ~config() {};
-
+  
   /** @brief processes command line arguments and settings provided via a configuration file */
   void readAndProcessProgramOptions(const int argc, char* argv[]);
-  
-  /** ------ general options ------- */  
-  /** @brief Interface for config::jobname */
-  string getJobName() const { return jobName; }
-  
-  /** @brief Interface for config::seed */
-  long getSeed() const { return seed; }
-  /** ------------------------------- */
-  
+
   /** ---- collision parameters ---- */ 
   /** @brief Interface for config::A */
   double getA() const { return A; }
@@ -110,16 +121,10 @@ class config
   /** ------------------------------- */
   
   /** ---- simulation parameters ---- */ 
-  /** @brief Interface for config::runtime */
-  double getRuntime() const { return runtime; }
-  
-  /** @brief Interface for config::testparticles */
-  int getTestparticles() const { return testparticles; }
-  
   /** @brief Interface for config::freezeOutEnergyDensity */
   double getFreezeOutEnergyDensity() const { return freezeOutEnergyDensity; }
   /** ------------------------------- */
-  
+
   /** ---- initial state options ---- */ 
   /** @brief Interface for config::initialStateType */
   INITIAL_STATE_TYPE getInitialStateType() const { return initialStateType; }
@@ -151,66 +156,63 @@ class config
   /** @brief Interface for config::P0 */
   double getPtCutoff() const { return P0; }
   /** ------------------------------- */
-  
+
   /** -------- output options ------- */   
   /** @brief Interface for config::outputSwitch_progressLog */
   bool doOutput_progressLog() const { return outputSwitch_progressLog; }  
-
+  
   /** @brief Interface for config::outputSwitch_detailedParticleOutput */
   bool doOutput_detailedParticleOutput() const { return outputSwitch_detailedParticleOutput; }
   
   /** @brief Interface for config::outputSwitch_movieOutput */
   bool doOutput_movieOutputJets() const {return outputSwitch_movieOutputJets;}
-
+  
   /** @brief Interface for config::outputSwitch_movieOutput */
   bool doOutput_movieOutputBackground() const {return outputSwitch_movieOutputBackground;}
- 
-  /** @brief Interface for config::standardOutputDirectoryName */
-  string getStandardOutputDirectoryName() const { return standardOutputDirectoryName; }
   /** ------------------------------- */
-
+  
   /** -------- miscellaneous options ------- */ 
   bool repeatTimesteps() const { return switch_repeatTimesteps; }
   
   /** @brief Interface for config::interpolationBorder */
   double getMFPInterpolationBorder() const {return interpolationBorder;}
-
-  /** @brief Interface for config::localCluster */
-  bool isLocalCluster() const {return localCluster;}
   
   /** @brief Interface for config::jetMfpComputationSwitch */
   JET_MFP_COMPUTATION_TYPE getJetMfpComputationType() const {return jetMfpComputationSwitch;}
+  
+  /**@brief Interface for config::scaleTimesteps */
+  double getScaleTimesteps() const {return scaleTimesteps;}
   /** ------------------------------------ */
-
+  
   /** -------- offline reconstruction options ------- */ 
   /** @brief Interface for config::originalName */
   string getOriginalName() const {return originalName;} 
-
+  
   /** @brief Interface for config::pathdirOfflineData */
   string getPathdirOfflineData() const { return pathdirOfflineData; }
-
+  
   /** @brief Interface for config::pathdirOfflineData, returns pointer to char */
   const char* getPathdirOfflineDataChar() const { return pathdirOfflineData.c_str(); }
-
+  
   /** @brief Interface for config::fixed_dt */
   double getFixed_dt() const {return fixed_dt;}
   /** @brief Interface for config::switch_fixed_dt */
   bool useFixed_dt() const {return switch_fixed_dt;}
   /** @brief Interface for config::factor_dt */
   double getFactor_dt() const { return factor_dt; }
-
+  
   /** @brief Interface for config::numberOfParticlesToAdd */
   int getNumberOfParticlesToAdd() const { return numberOfParticlesToAdd; }
   /** @brief Interface for config::minimumPT */
   double getMinimumPT() const { return minimumPT; }
-
+  
   /** @brief Interface for config::ringNumber */
   int getRingNumber() const { return ringNumber; }
   /** @brief Interface for config::centralRingRadius */
   double getCentralRingRadius() const { return centralRingRadius; }
   /** @brief Interface for config::deltaR */
   double getDeltaR() const { return deltaR; }
-
+  
   /** @brief Interface for config::N_init */
   int getN_init() const { return N_init; }
   /** @brief Interface for config::dx */
@@ -219,7 +221,7 @@ class config
   double get_dy() const { return dy; }
   /** @brief Interface for config::transLen */
   double getTransLen() const { return transLen; }
-
+  
   /** @brief Interface for config::timeshift */
   double getTimeshift() const {return timeshift;}
   /** @brief Interface for config::timefirst */
@@ -230,21 +232,56 @@ class config
   void readAndPrepareInitialSettings( offlineOutputInterface*const _offlineInterface );
   /** ------------------------------ */
 
- private:
-  /** ----- auxiliary routines ----- */  
-  /** @brief Write out all input parameters */
-  void printUsedConfigurationParameters();
-  
-  /** @brief Do some checks on user-provided options and parameters */
-  void checkOptionsForSanity();
-  /** ------------------------------ */
-  
+ protected:
+   /** ----- auxiliary routines ----- */
+   /** @brief Sort the options into groups */   
+   void groupProgramOptions();
+   
+   /** @brief Actually define all the options */
+   void initializeProgramOptions();
+   
+   /** @brief Read command line arguments and settings provided via a configuration file and via the commmand line */
+   void readProgramOptions(const int argc, char* argv[]);
+   
+   /** @brief Do some processing on program options that have previously been read via configPrototype::readProgramOptions */
+   void processProgramOptions();
+   
+   /** @brief Print a complete configuration file using all current parameter values */
+   void printUsedConfigurationParameters();   
+   
+   /** @brief Do some checks on user-provided options and parameters */
+   void checkOptionsForSanity();
+   
+   /** @brief Some processing of heavy quark options */
+   void processHeavyQuarkOptions();
+   /** ------------------------------ */
+   
+   /** ------ boost::program_options objects ------- */ 
+   // base class provides:
+   //    po::options_description command_line_options;
+   //    po::options_description config_file_options;
+   //    po::options_description visible_options;
+   //    po::positional_options_description pos_options;
+   //    po::variables_map vm;
+   //    po::options_description usage_information;
+   //    po::options_description hidden_options;
+   // 
+   //    po::options_description general_options;
+   //    po::options_description simulation_parameters;
+   //    po::options_description output_options;
+   //    po::options_description misc_options;
+   //    po::options_description heavy_quark_options;
+   
+   po::options_description collision_parameters;
+   po::options_description initial_state_options;   
+   po::options_description offline_options;
+   /** ------ boost::program_options objects ------- */ 
+   
+   
   /** ------ general options ------- */  
-  /** @brief The name of the current job - assigned to output files */
-  string jobName;
-  
-  /** @brief Initial seed for the random number generator. seed = 0 forces the random generation of a seed */
-  long seed;
+  // base class provides:
+  // string jobname;
+  // long seed;
   /** ------------------------------ */
   
   /** ---- collision parameters ---- */  
@@ -268,11 +305,11 @@ class config
   /** ------------------------------ */
   
   /** ---- simulation parameters ---- */ 
-  /** @brief Total simulated runtime in fm/c */
-  double runtime;  
-
-  /** @brief Number of testparticles per real particle */
-  int testparticles;
+  // base class provides:
+  // double runtime  
+  // int testparticles
+  // int N_light_flavors_input
+  // int N_heavy_flavors_input
   
   /** @brief Energy density for freeze out (in GeV/fm^3)
    * Particles in regions with energy densities below this threshold will be freely streaming
@@ -320,6 +357,9 @@ class config
   /** ------------------------------- */
   
   /** -------- output options ------- */ 
+  // provided by base class:
+  // string standardOutputDirectoryName
+  
   /** @brief Specify whether progress output should be written to a file */
   bool outputSwitch_progressLog;
   
@@ -328,25 +368,19 @@ class config
   
   /** @brief Specify whether movie output should be written (for added jet particles) */
   bool outputSwitch_movieOutputJets;
-
+  
   /** @brief Specify whether movie output should be written (for the reconstructed background) */
   bool outputSwitch_movieOutputBackground;
-  
-  /** @brief Directory to which general output should be written */
-  string standardOutputDirectoryName;
-  /** ------------------------------- */
-  
+  /** ------------------------------- */ 
+
   /** -------- miscellaneous options ------- */ 
+  // provided by base class:
+  // bool localCluster
+  
   /** @brief X where interpolation of MFP is done for E > X*T */
   double interpolationBorder; 
-  
-  /** @brief whether jobs should run on local itp cluster or CSC or the like
-   * chose false for CSC and true for local queuing system, like housewifes, dwarfs etc. 
-   * local system accesses personal filesystem, no need for transfering data from /local/ to working environment 
-   */
-  bool localCluster;
-  
-   /** @brief How to compute the mean free path high energy particles?
+   
+  /** @brief How to compute the mean free path high energy particles?
    *
    * 0 = computeMfpDefault = default, i.e. no special treatment
    * 1 = computeMfpIteration = iterative computation
@@ -356,31 +390,34 @@ class config
   
   /** @brief Whether timesteps are repeated in cases where the probability has been > 1 */
   bool switch_repeatTimesteps;
+  
+  /**  @brief Factor with which timesteps as computed when building the eta-cells are scaled */
+  double scaleTimesteps;
   /** ------------------------------------ */
   
   /** -------- offline reconstruction options ------- */ 
   /** @brief Path to which the output needed for offline analysis is written */
   string pathdirOfflineData;
-
+  
   /** @brief The name of the BAMPS job that is processed (input file names) */
   string originalName;
-
+  
   /** @brief Initial seed used in the full BAMPS run */
   uint32_t originalSeed;
-
+  
   /** @brief A fixed dt (time steps) at which the reconstructed medium is "sampled" [optional] */
   double fixed_dt;
   /** @brief Indicates whether a fixed dt (provided via fixed_dt) should be used. Use time steps from the original run if not. */
   bool switch_fixed_dt;
   /** @brief Factor with which time steps from the original run should be scaled for use in sampling of the reconstructed medium (should be <1) */
   double factor_dt;
-
+  
   /** @brief Number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background */
   int numberOfParticlesToAdd;
   /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT; 
   
-
+  
   // the following parameters are read at runtime from the offline data recorded by the original run, 
   // see config::readAndPrepareInitialSettings
   /** @brief centralRingRadius as used in the original run */
@@ -407,17 +444,5 @@ class config
   int N_heavy_flavors_offline;
   /** ----------------------------------------------- */
 };
-
-
-
-/** @brief exception class for handling unexpected critical behaviour within the configuration of the BAMPS run  */
-class eConfig_error : public std::runtime_error
-{
-  public:
-    explicit eConfig_error(const std::string& what) : std::runtime_error(what) {};
-    
-    virtual ~eConfig_error() throw() {};
-};
-
 
 #endif
