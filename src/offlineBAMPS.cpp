@@ -47,7 +47,8 @@ int main( int argc, char *argv[] )
     //--------------------------------------------------------------
     // create and initialize the main objects needed for
     // configuration,execution and analysis of the simulation
-    config theConfig( argc, argv );
+    config theConfig;
+    theConfig.readAndProcessProgramOptions( argc, argv );
     
     offlineOutputInterface offlineInterface( theConfig.getPathdirOfflineDataChar() );
     offlineInterface.setAdditionalFilenameTag( theConfig.getOriginalName() );    

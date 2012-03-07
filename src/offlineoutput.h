@@ -237,6 +237,12 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
     stream.reset( new boost::filesystem::ifstream() );
     std::string filename = outputDirectory.string() + "/" + filenamePrefix + additionalFilenameTag + T::filenameIdentifier + filenameSuffix;
     
+    if( !boost::filesystem::exists( filename ) )
+    {
+      std::string errMsg = filename + " does not exist.";
+      throw eOfflineOutput_error( errMsg );
+    }
+    
     #if BINARY_OFFLINE_OUTPUT > 0
       stream->open( filename.c_str(), std::ios::binary );
     #else
