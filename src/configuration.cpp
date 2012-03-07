@@ -57,13 +57,6 @@ initParam iparam;
  */
 config::config() :
  configBase(),
-// ---- collision parameters ---- 
- A(197),
- Aatomic(79),
- B(197),
- Batomic(79),
- sqrtS(200),
- impact(0),
 // ---- simulation parameters ---- 
  freezeOutEnergyDensity(0.6),
 // ---- initial state options ----
@@ -90,7 +83,6 @@ config::config() :
  switch_repeatTimesteps(true),
  jetMfpComputationSwitch(computeMfpDefault),
  interpolationBorder(50),
- scaleTimesteps(0.2),
  // ---- offline reconstruction options ----
  pathdirOfflineData("offline_data"),
  originalName("default"),
@@ -101,7 +93,6 @@ config::config() :
  numberOfParticlesToAdd(0),
  minimumPT(10.0),
 //---- program_options groups ----
- collision_parameters("Parameters of the heavy ion collision"),
  initial_state_options("Options and parameters for the initial state used by the BAMPS simulation"),
  offline_options("Offline reconstruction options")
 {
@@ -219,16 +210,6 @@ void config::processProgramOptions()
  */
 void config::initializeProgramOptions()
 {
-  // Group some collision parameters
-  collision_parameters.add_options()
-  ("collision.A_mass", po::value<double>( &A )->default_value( A ), "mass number of nucleus A" )
-  ("collision.A_atomic", po::value<double>( &Aatomic )->default_value( Aatomic ), "atomic number (number of protons) of nucleus A" )
-  ("collision.B_mass", po::value<double>( &B )->default_value( B ), "mass number of nucleus B" )
-  ("collision.B_atomic", po::value<double>( &Batomic )->default_value( Batomic ), "atomic number (number of protons) of nucleus B" )
-  ("collision.impact", po::value<double>( &impact )->default_value( impact ), "impact parameter (fm)")
-  ("collision.sqrt_s", po::value<double>( &sqrtS )->default_value( sqrtS ), "center of mass energy per nucleon-nucleon pair (GeV)")
-  ;
-  
   // Add some simulation parameters
   simulation_parameters.add_options()
   ("simulation.e_freeze", po::value<double>( &freezeOutEnergyDensity )->default_value( freezeOutEnergyDensity ), "freeze out energy density (GeV/fm^3)")
@@ -261,7 +242,6 @@ void config::initializeProgramOptions()
   ("misc.repeat_timesteps", po::value<bool>( &switch_repeatTimesteps )->default_value( switch_repeatTimesteps ), "repeat timesteps in cases where the probability has been > 1" ) 
   ("misc.interpolation_border", po::value<double>( &interpolationBorder )->default_value( interpolationBorder ), "X where interpolation of MFP is done for E > X*T")
   ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "special treatment for the mean free path of high energy particles")
-  ("misc.scale_dt", po::value<double>( &scaleTimesteps )->default_value( scaleTimesteps ), "factor with which timesteps dt are scaled")
   ;
   
   // Group offline reconstruction options
@@ -286,10 +266,10 @@ void config::groupProgramOptions()
   configBase::groupProgramOptions(); // first add the options already contained in the base class
   
   // Add some groups that are meant to be provided via a configuration file
-  config_file_options.add(collision_parameters).add(initial_state_options).add(offline_options);
+  config_file_options.add(initial_state_options).add(offline_options);
   
   // Add option groups that are to be printed in a detailed help message
-  visible_options.add(collision_parameters).add(initial_state_options).add(offline_options);
+  visible_options.add(initial_state_options).add(offline_options);
 }
 
 
@@ -327,7 +307,6 @@ void config::printUsedConfigurationParameters()
  
   printOptionsDescriptionToIniFormat( general_options, output );
   printOptionsDescriptionToIniFormat( simulation_parameters, output );
-  printOptionsDescriptionToIniFormat( collision_parameters, output );
   printOptionsDescriptionToIniFormat( initial_state_options, output );
   printOptionsDescriptionToIniFormat( output_options, output );
   printOptionsDescriptionToIniFormat( misc_options, output );
@@ -346,6 +325,7 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
   Aatomic = ptrSimulationData->atomicNumberNucleusA;
   B = ptrSimulationData->massNumberNucleusB;
   Batomic = ptrSimulationData->atomicNumberNucleusB;
+  // This overwrites the value of testparticles set by an input file since it must determined by the offline data. Effectively, specifying Ntest in input file has no consequences, but is present in configbase due to its need to specify in the input file in most BAMPS programs.
   testparticles = ptrSimulationData->numberOfTestparticles;
   N_init = ptrSimulationData->initialNumberOfParticles;
   timefirst = ptrSimulationData->firstTimeStep;

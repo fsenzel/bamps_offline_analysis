@@ -99,26 +99,6 @@ class config : public configBase
   
   /** @brief processes command line arguments and settings provided via a configuration file */
   void readAndProcessProgramOptions(const int argc, char* argv[]);
-
-  /** ---- collision parameters ---- */ 
-  /** @brief Interface for config::A */
-  double getA() const { return A; }
-  
-  /** @brief Interface for config::Aatomic */
-  double getAatomic() const { return Aatomic; }
-  
-  /** @brief Interface for config::B */
-  double getB() const { return B; }
-  
-  /** @brief Interface for config::Batomic */
-  double getBatomic() const { return Batomic; }
-  
-  /** @brief Interface for config::sqrtS */
-  double getSqrtS() const { return sqrtS; }
-  
-  /** @brief Interface for config::impact */
-  double getImpactParameter() const { return impact; }  
-  /** ------------------------------- */
   
   /** ---- simulation parameters ---- */ 
   /** @brief Interface for config::freezeOutEnergyDensity */
@@ -179,9 +159,6 @@ class config : public configBase
   
   /** @brief Interface for config::jetMfpComputationSwitch */
   JET_MFP_COMPUTATION_TYPE getJetMfpComputationType() const {return jetMfpComputationSwitch;}
-  
-  /**@brief Interface for config::scaleTimesteps */
-  double getScaleTimesteps() const {return scaleTimesteps;}
   /** ------------------------------------ */
   
   /** -------- offline reconstruction options ------- */ 
@@ -226,6 +203,20 @@ class config : public configBase
   double getTimeshift() const {return timeshift;}
   /** @brief Interface for config::timefirst */
   double getTimefirst() const {return timefirst;}
+  
+  // collision parameters
+  /** @brief Interface for config::A */
+  double getA() const { return A; }
+  /** @brief Interface for config::Aatomic */
+  double getAatomic() const { return Aatomic; }
+  /** @brief Interface for config::B */
+  double getB() const { return B; }
+  /** @brief Interface for config::Batomic */
+  double getBatomic() const { return Batomic; }
+  /** @brief Interface for config::sqrtS */
+  double getSqrtS() const { return sqrtS; }
+  /** @brief Interface for config::impact */
+  double getImpactParameter() const { return impact; }  
   /** ----------------------------------------------- */ 
   
   /** ----- auxiliary routines ----- */
@@ -272,7 +263,6 @@ class config : public configBase
    //    po::options_description misc_options;
    //    po::options_description heavy_quark_options;
    
-   po::options_description collision_parameters;
    po::options_description initial_state_options;   
    po::options_description offline_options;
    /** ------ boost::program_options objects ------- */ 
@@ -282,26 +272,6 @@ class config : public configBase
   // base class provides:
   // string jobname;
   // long seed;
-  /** ------------------------------ */
-  
-  /** ---- collision parameters ---- */  
-  /** @brief Mass number of nucleus A  */
-  double A;  
-  
-  /** @brief Atomic number, i.e. number of protons, of nucleus A */
-  double Aatomic;
-  
-  /** @brief Mass number of nucleus B  */
-  double B;
-  
-  /** @brief Atomic number, i.e. number of protons, of nucleus B */
-  double Batomic;
-  
-  /** @brief Center of mass energy per NN pair in GeV */
-  double sqrtS;   
-  
-  /** @brief Impact parameter in fm */
-  double impact;  
   /** ------------------------------ */
   
   /** ---- simulation parameters ---- */ 
@@ -390,9 +360,6 @@ class config : public configBase
   
   /** @brief Whether timesteps are repeated in cases where the probability has been > 1 */
   bool switch_repeatTimesteps;
-  
-  /**  @brief Factor with which timesteps as computed when building the eta-cells are scaled */
-  double scaleTimesteps;
   /** ------------------------------------ */
   
   /** -------- offline reconstruction options ------- */ 
@@ -420,6 +387,7 @@ class config : public configBase
   
   // the following parameters are read at runtime from the offline data recorded by the original run, 
   // see config::readAndPrepareInitialSettings
+  // testparticles is defined in configBase but overwritten in readAndPrepareInitialSettings.
   /** @brief centralRingRadius as used in the original run */
   double centralRingRadius;
   /** @brief deltaR as used in the original run */
@@ -442,6 +410,18 @@ class config : public configBase
   int N_light_flavors_offline;
   /** @brief number of active heavy flavors in the offline run */
   int N_heavy_flavors_offline;
+  /** @brief Mass number of nucleus A  */
+  double A;  
+  /** @brief Atomic number, i.e. number of protons, of nucleus A */
+  double Aatomic;
+  /** @brief Mass number of nucleus B  */
+  double B;
+  /** @brief Atomic number, i.e. number of protons, of nucleus B */
+  double Batomic;
+  /** @brief Center of mass energy per NN pair in GeV */
+  double sqrtS;   
+  /** @brief Impact parameter in fm */
+  double impact;  
   /** ----------------------------------------------- */
 };
 
