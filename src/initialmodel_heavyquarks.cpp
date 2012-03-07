@@ -234,7 +234,7 @@ void initialModel_heavyQuarks::samplePositions( std::vector< Particle >& _partic
     {
       if ( _particles[j].N_EVENT != event_tmp ) // first hard particle of an event
       {
-        sample_TXYZ_one_partcl( _particles, j );
+        sample_TXYZ_singleParticle( _particles[j] );
 
         x_tmp = _particles[j].X;
         y_tmp = _particles[j].Y;
@@ -252,23 +252,4 @@ void initialModel_heavyQuarks::samplePositions( std::vector< Particle >& _partic
       }
     }
   }
-}
-
-
-
-// sample position for only one particle with id=number
-void initialModel_heavyQuarks::sample_TXYZ_one_partcl( std::vector< Particle >& _particles, const int number ) const
-{
-  double T, X, Y, Z;
-  double densityA_max;
-  double L_z;
-  double p_soft;
-  
-  sample_T_WoodSaxon(T);
-  _particles[number].T = T;
-  
-  sample_XYZ_WoodSaxon(T, X,Y,Z);
-  _particles[number].X = X;
-  _particles[number].Y = Y;
-  _particles[number].Z = Z;
 }

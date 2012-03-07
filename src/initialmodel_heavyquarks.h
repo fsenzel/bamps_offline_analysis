@@ -41,11 +41,6 @@ class initialModel_heavyQuarks : public initialModelWS
      */
     void sampleMomenta( std::vector<Particle>& _particles );
     
-    /** 
-     * @brief sampling of time and positions of one parton 
-     **/
-    void sample_TXYZ_one_partcl( std::vector<Particle>& _particles, const int number ) const;
-    
   private:
     SEPERATE_HEAVY_QUARK_INITIAL_MODEL seperateHeavyQuarkInitialModel;
     std::string filename_heavyQuarkParticleFile;
