@@ -578,7 +578,9 @@ class config : public configBase
    *  This input is needed if Pythia data files are read in to normalize the total yield of the particles. 
    * The number of particles in one such heavy ion collision event is equal to < number of produced particles 
    * in pp > * Ntest * Nbin. Consequently, 1 would mean that one adds as many particles as there are in a heavy 
-   * ion collision times Ntest, making it analogously to a standard BAMPS simulation.  
+   * ion collision times Ntest, making it analogously to a standard BAMPS simulation.
+   * 
+   * To use the number of events to sample the initial number of particles instead of the given number of particles via numberOfParticlesToAdd set numberOfParticlesToAdd to a negative value.
   */
   int numberOfAddedEvents;
   /** @brief Minimum p_T [GeV] of the added particles */

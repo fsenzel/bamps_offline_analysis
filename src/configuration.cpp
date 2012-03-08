@@ -179,6 +179,30 @@ void config::processProgramOptions()
   
   Particle::set_N_psi_states( N_psi_input );
   
+  // check if both initial number of particles and initial number of events are set which does not make sense
+  bool ini_number_added_set = false;
+  bool ini_number_added_events_set = false;
+  if( !( vm["offline.nAdded"].defaulted() || vm["offline.nAdded"].empty() ) )
+  {
+    ini_number_added_set = true;
+  }
+  if( !( vm["offline.nAddedEvents"].defaulted() || vm["offline.nAddedEvents"].empty() ) )
+  {
+    ini_number_added_events_set = true;
+  }
+  
+  // if both are given and the number of particles is not negative (which means use number of added events), throw error.
+  if( ini_number_added_set && ini_number_added_events_set && numberOfParticlesToAdd >= 0 )
+  {
+    string errMsg = "Both initial number of particles and initial number of events are set. Do not know which one to use.";
+    throw eConfig_error( errMsg );
+  }
+  else if( !ini_number_added_set && ini_number_added_events_set )
+  {
+    // set initial number of particles to a negative value to use the number of added events instead
+    numberOfParticlesToAdd = -1;
+  }
+  
   if ( switch_fixed_dt )
   {
     if ( !(fixed_dt > 0) )
@@ -329,8 +353,8 @@ void config::initializeProgramOptions()
   ("offline.use_fixed_dt", po::value<bool>( &switch_fixed_dt )->default_value( switch_fixed_dt ), "Indicates whether a fixed dt (provided via fixed_dt) should be used. Use time steps from the original run if not" ) 
   ("offline.fixed_dt", po::value<double>( &fixed_dt )->default_value( fixed_dt ), "fixed dt (time steps) at which the reconstructed medium is \"sampled\" [optional]")
   ("offline.factor_dt", po::value<double>( &factor_dt )->default_value( factor_dt ), "factor with which time steps from the original run should be scaled for use in sampling of the reconstructed medium (should be <1)")
-  ("offline.nAdded", po::value<int>( &numberOfParticlesToAdd)->default_value( numberOfParticlesToAdd ), "number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background" )
-  ("offline.numberOfAddedEvents", po::value<int>( &numberOfAddedEvents)->default_value( numberOfAddedEvents ), "number of heavy ion collision events, set on top of the offline reconstruction. This input is neede if Pythia data files are read in to normalize the total yield of the particles. The number of one such heavy ion collision event includes < number of produced particles in pp > * Ntest * Nbin" )
+  ("offline.nAdded", po::value<int>( &numberOfParticlesToAdd)->default_value( numberOfParticlesToAdd ), "number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background. Do not use together with nAddedEvents." )
+  ("offline.nAddedEvents", po::value<int>( &numberOfAddedEvents)->default_value( numberOfAddedEvents ), "number of heavy ion collision events, set on top of the offline reconstruction. Do not use together with nAdded. This input is needed if Pythia data files are read in to normalize the total yield of the particles. The number of one such heavy ion collision event includes < number of produced particles in pp > * Ntest * Nbin" )
   ("offline.minPT_added", po::value<double>( &minimumPT )->default_value( minimumPT ), "minimum p_T [GeV] of the added particles. If p_T of added particle falls below this value it does not scatter anymore.")
   ;
 }
@@ -497,7 +521,8 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
     throw eConfig_error( errMsg );
   }
   
-  cout << "** add " << numberOfParticlesToAdd << " particles with pt_min = " << minimumPT << endl;
+  if( numberOfParticlesToAdd >= 0 )
+    cout << "** add " << numberOfParticlesToAdd << " particles with pt_min = " << minimumPT << endl;
   cout << timefirst << "  " << N_init << endl;
   
   cellcut = 4;

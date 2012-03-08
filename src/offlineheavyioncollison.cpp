@@ -490,23 +490,23 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     aa.printCentralDensities( simulationTime );
     
     
-    // just error checking if masses and flavors are correct
-    for ( int j = 0; j < addedParticles.size(); j++ )
-    {
-      double E_check = sqrt( pow( addedParticles[j].PX, 2 ) + pow( addedParticles[j].PY, 2 ) + pow( addedParticles[j].PZ, 2 ) + pow( addedParticles[j].m, 2 ) );
-      if( !FPT_COMP_E( addedParticles[j].E, E_check ) )
-        cout << "Error! Particle " << j << " does not fulfill E^2 = p^2 + m^2." << endl;
-      
-      if( !FPT_COMP_E( addedParticles[j].m, Particle::getMass( addedParticles[j].FLAVOR ) ) )
-        cout << "Error! Particle " << j << " with flavor " << addedParticles[j].FLAVOR << " has wrong mass: " << addedParticles[j].m << "  " << Particle::getMass( addedParticles[j].FLAVOR )  << endl;
-      
-      if( ( addedParticles[j].FLAVOR > 2 * theConfig->getNlightFlavorsAdded() ) && 
-          ( ( addedParticles[j].FLAVOR <= 2 * 3 ) || 
-            ( addedParticles[j].FLAVOR > 2 * ( 3 + theConfig->getNheavyFlavorsAdded() ) ) ) &&
-          !( addedParticles[j].FLAVOR >= 50 && addedParticles[j].FLAVOR < 50 + Particle::N_psi_states )
-        )
-        cout << "Error! Particle " << j << " with flavor " << addedParticles[j].FLAVOR << " should not exist: Nf = " << theConfig->getNlightFlavorsAdded() << " + " <<   theConfig->getNheavyFlavorsAdded() <<  endl;
-    }
+//     // just error checking if masses and flavors are correct
+//     for ( int j = 0; j < addedParticles.size(); j++ )
+//     {
+//       double E_check = sqrt( pow( addedParticles[j].PX, 2 ) + pow( addedParticles[j].PY, 2 ) + pow( addedParticles[j].PZ, 2 ) + pow( addedParticles[j].m, 2 ) );
+//       if( !FPT_COMP_E( addedParticles[j].E, E_check ) )
+//         cout << "Error! Particle " << j << " does not fulfill E^2 = p^2 + m^2." << endl;
+//       
+//       if( !FPT_COMP_E( addedParticles[j].m, Particle::getMass( addedParticles[j].FLAVOR ) ) )
+//         cout << "Error! Particle " << j << " with flavor " << addedParticles[j].FLAVOR << " has wrong mass: " << addedParticles[j].m << "  " << Particle::getMass( addedParticles[j].FLAVOR )  << endl;
+//       
+//       if( ( addedParticles[j].FLAVOR > 2 * theConfig->getNlightFlavorsAdded() ) && 
+//           ( ( addedParticles[j].FLAVOR <= 2 * 3 ) || 
+//             ( addedParticles[j].FLAVOR > 2 * ( 3 + theConfig->getNheavyFlavorsAdded() ) ) ) &&
+//           !( addedParticles[j].FLAVOR >= 50 && addedParticles[j].FLAVOR < 50 + Particle::N_psi_states )
+//         )
+//         cout << "Error! Particle " << j << " with flavor " << addedParticles[j].FLAVOR << " should not exist: Nf = " << theConfig->getNlightFlavorsAdded() << " + " <<   theConfig->getNheavyFlavorsAdded() <<  endl;
+//     }
 
     // analyse timesteps
     dt_sum += dt;
