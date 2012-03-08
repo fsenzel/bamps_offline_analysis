@@ -139,11 +139,21 @@ void binningValues::print()
     file << x_min + (i+0.5)*binWidth;
     file.width(15);
     if(NumberInBins[i] != 0)
+    {
       file << theBins[i];
+      file.width(15);
+      file << NumberInBins[i];
+      file.width(15);
+      file << theBins[i] / NumberInBins[i] << endl;
+    }
     else
+    {
       file << 0;
-    file.width(15);
-    file << NumberInBins[i] << endl;
+      file.width(15);
+      file << 0;
+      file.width(15);
+      file << 0 << endl;
+    }
   }   
   file.close();
 }

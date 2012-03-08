@@ -8,8 +8,8 @@
 //---------------------------------------------
 //---------------------------------------------
 
-#ifndef INITIALMODEL_PYTHIA_H
-#define INITIALMODEL_PYTHIA_H
+#ifndef INITIALMODEL_MCATNLO_H
+#define INITIALMODEL_MCATNLO_H
 
 #include <vector>
 #include <string>
@@ -21,13 +21,13 @@
 
 
 /**
- * @brief Class to provide the Pythia initialization
+ * @brief Class to provide the MC@TNLO initialization
  */
-class initialModel_Pythia : public initialModel_ParticlesFromFile
+class initialModel_Mcatnlo : public initialModel_ParticlesFromFile
 {
   public:
-    initialModel_Pythia( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT = 0.0, const int _nToGenerate = -1 ) :
-    initialModel_ParticlesFromFile( _config.getPythiaParticleFile(), _config, _WoodSaxonParameter, _minimumPT, _nToGenerate) {};
+    initialModel_Mcatnlo( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT = 0.0, const int _nToGenerate = -1 ) :
+    initialModel_ParticlesFromFile( _config.getMcatnloParticleFile(), _config, _WoodSaxonParameter, _minimumPT, _nToGenerate) {};
 
   private:
     /**
@@ -38,4 +38,4 @@ class initialModel_Pythia : public initialModel_ParticlesFromFile
 };
 
 
-#endif // INITIALMODEL_PYTHIA_H
+#endif // INITIALMODEL_MCATNLO_H

@@ -17,9 +17,11 @@
 #include "additionalparticlesdistribution.h"
 #include "configuration.h"
 #include "initialmodel.h"
+#include "initialmodel_mcatnlo.h"
 #include "initialmodel_minijets.h"
 #include "initialmodel_pythia.h"
 #include "initialmodel_cgc.h"
+#include "initialmodel_jpsi.h"
 
 using namespace ns_casc;
 using namespace std;
@@ -30,6 +32,7 @@ additionalParticlesDistribution::additionalParticlesDistribution( const config* 
     configObject( _config ),
     numberOfParticlesToAdd( _config->getNumberOfParticlesToAdd() ),
     minimumPT( _config->getMinimumPT() ),
+    minijet_P0( _config->getPtCutoff() ),
     impactParameter( _config->getImpactParameter() ),
     numberOfTestparticles( _config->getTestparticles() )
 {
@@ -44,7 +47,19 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   switch ( initialStateType )
   {
     case miniJetsInitialState:
-      initialmodel = new initialModel_minijets( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
+      double usedMinimumPT;
+      // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
+      if( minimumPT > minijet_P0 )
+        usedMinimumPT = minimumPT;
+      else
+        usedMinimumPT = minijet_P0;
+      initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
+      break;
+    case pythiaInitialState:
+      initialmodel = new initialModel_Pythia( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
+      break;
+    case mcatnloInitialState:
+      initialmodel = new initialModel_Mcatnlo( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
       break;
     default:
       std::string errMsg = "Model for sampling the initial state not implemented yet!";
@@ -55,6 +70,12 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   std::vector<Particle> tempParticleVector;
   initialmodel->populateParticleVector( tempParticleVector );
   
+  if( Particle::N_psi_states > 0 )
+  {
+    initialModel_Jpsi theIni_Jpsi( *configObject, _wsParameter );
+    theIni_Jpsi.populateParticleVector( tempParticleVector );
+  }
+  
   _particles.reserve( tempParticleVector.size() );
   for ( int i = 0; i < tempParticleVector.size(); i++ )
   {
@@ -62,6 +83,8 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
     _particles.push_back( tempParticle );
   }
   
+  if( configObject->isStudyNonPromptJpsiInsteadOfElectrons() )
+    deleteAllParticlesExceptBottom( _particles );
 
   for ( int i = 0; i < _particles.size(); i++ )
   {
@@ -78,19 +101,10 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
   double dtt = 0;
   double eta_max = 5.0;
 
-  double PT, y, cc;
+  double MT, y, cc;
   double shift;
-  double sum = 0;
   for ( int j = 0; j < _particles.size(); j++ )
   {   
-    // last interaction spacetime point is point of creation
-    _particles[j].X_lastInt = _particles[j].X;
-    _particles[j].Y_lastInt = _particles[j].Y;
-    _particles[j].Z_lastInt = _particles[j].Z;
-    _particles[j].T_lastInt = _particles[j].T;
-    _particles[j].T_creation = _particles[j].T;
-    
-    
     dtt = fabs( _particles[j].Z ) / tanh( eta_max ) - _particles[j].T;  //tanh(eta)=z/t
     if ( dtt < configObject->getTimeshift() )
     {
@@ -106,10 +120,20 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
 
     _particles[j].T += shift;
     
-    //formation time 1/p_T
+    // last interaction spacetime point is point of creation
+    _particles[j].X_lastInt = _particles[j].X;
+    _particles[j].Y_lastInt = _particles[j].Y;
+    _particles[j].Z_lastInt = _particles[j].Z;
+    _particles[j].T_lastInt = _particles[j].T;
+    
+    //formation time 1/sqrt( p_T^2 + m^2) = 1/m_T
     y = 0.5 * log(( _particles[j].E+_particles[j].PZ ) / ( _particles[j].E-_particles[j].PZ ) );
-    PT = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
-    dtt = 1 / PT * cosh( y ) * 0.197327;  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
+    MT = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) + pow( _particles[j].m, 2 ) );   
+    dtt = 1 / MT * cosh( y ) * 0.197327;  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
+    
+    // additional formation time for Jpsi
+    if( _particles[j].FLAVOR == jpsi )
+      dtt += configObject->getJpsiFormationTime() * cosh( y ); //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
 
     cc = dtt / _particles[j].E;
     _particles[j].T = _particles[j].T + dtt;
@@ -119,10 +143,9 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
 
     _particles[j].init = true;
     
-    sum += _particles[j].E;
+    // creation time is time at which the particle is allowed to scatter
+    _particles[j].T_creation = _particles[j].T;
   }
- 
-  cout << "** " << _particles.size() << " particles added with total energy: " << sum << endl;
   
   for(int i = 0; i < _particles.size(); i++)
   {
@@ -138,4 +161,22 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     _particles[i].X_traveled = 0.0;
   }
 }
-// kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on; 
+
+
+void additionalParticlesDistribution::deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles )
+{
+  for(int j = 0; j < addedParticles.size(); j++ )
+  {
+    if( !( addedParticles[j].FLAVOR == bottom || addedParticles[j].FLAVOR == anti_bottom ) )
+    {
+      // delete last particle if also not active otherwise switch position with particle to be deleted
+      while( !( addedParticles.back().FLAVOR == bottom || addedParticles.back().FLAVOR == anti_bottom ) && 
+            ( j != addedParticles.size() - 1 ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which is not correct.
+      {
+        addedParticles.pop_back();
+      }
+      addedParticles[j] = addedParticles.back();
+      addedParticles.pop_back();
+    }
+  }
+}

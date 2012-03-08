@@ -24,6 +24,9 @@ FIND_PACKAGE(Cuba REQUIRED)
 ######### Find LHAPDF library #########
 FIND_PACKAGE(LHAPDF)
 
+######### Find Pythia8 library #########
+FIND_PACKAGE(Pythia)
+
 ########## Find GSL library #########
 FIND_PACKAGE(GSL REQUIRED)
 
@@ -61,6 +64,7 @@ ENDIF( LINK_TO_BAMPS_LIB )
 IF( NOT DISABLE_BUILD_EXTRAS )
   INCLUDE(ConfigureDoxygenTarget.cmake)
 ENDIF( NOT DISABLE_BUILD_EXTRAS )
+  
 
 ######### Set include and link directories #########
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
@@ -69,7 +73,9 @@ INCLUDE_DIRECTORIES(${GSL_INCLUDE_DIRS})
 IF ( LHAPDF_FOUND )
   INCLUDE_DIRECTORIES(${LHAPDF_INCLUDE_DIRS})
 ENDIF ( LHAPDF_FOUND )
-
+IF ( Pythia_FOUND )
+  INCLUDE_DIRECTORIES(${Pythia_INCLUDE_DIRS})
+ENDIF ( Pythia_FOUND )
 
 ######### Set the explicit path to the BAMPS library source directory #########
 SET( BAMPS_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/lib/ CACHE PATH "directory in which the BAMPS library source files reside" )

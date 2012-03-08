@@ -40,6 +40,8 @@ std::vector<ParticleOffline> ns_casc::particles_atTimeNow;
 std::vector<ParticleOffline> ns_casc::particles_atTimeNowCopy;
 std::vector<ParticleOffline> ns_casc::addedParticles;
 std::vector<ParticleOffline> ns_casc::addedParticlesCopy;
+// std::vector<ParticleHFelectron> ns_casc::addedPartcl_electron;
+std::vector<ParticleOffline> ns_casc::addedPartcl_electron;
 
 
 double dt = 0.1;
@@ -59,6 +61,10 @@ config::config() :
  configBase(),
 // ---- simulation parameters ---- 
  freezeOutEnergyDensity(0.6),
+ scatt_offlineWithAddedParticles(true),
+ scatt_amongOfflineParticles(false),
+ scatt_amongAddedParticles(false),
+ switchOff_23_32(false),
 // ---- initial state options ----
  initialStateType(miniJetsInitialState),
 #ifdef LHAPDF_FOUND
@@ -73,12 +79,34 @@ config::config() :
  nuclearPDFdatasetName("EPS09"),
  pythiaParticleFile("-"),
  cgcParticleFile("-"),
+ mcatnloParticleFile("-"),
  P0(1.4),
 // ---- output options ----
  outputSwitch_progressLog( true ),
  outputSwitch_detailedParticleOutput(false),
  outputSwitch_movieOutputJets(false),
  outputSwitch_movieOutputBackground(false),
+ v2RAAoutput(true),
+ v2RAAoutputIntermediateSteps(false),
+ dndyOutput(false),
+ outputScheme(no_output),
+// ---- heavy quark options ----
+ hadronization_hq(false),
+ mesonDecay(false),
+ numberElectronStat(20),
+ muonsInsteadOfElectrons(false),
+ studyNonPromptJpsiInsteadOfElectrons(false),
+ N_psi_input(0),
+ isotropicCrossSecJpsi(false),
+ constantCrossSecJpsi(false),
+ constantCrossSecValueJpsi(10.0),
+ Mjpsi_input(3.1),
+ TdJpsi(0.32),
+ jpsi_sigmaAbs(2.8),
+ jpsi_agN(0.1),
+ shadowing_model(eps08),
+ jpsi_formationTime(0.0),
+ hqCorrelationsOutput(false),
 // ---- miscellaneous options ----
  switch_repeatTimesteps(true),
  jetMfpComputationSwitch(computeMfpDefault),
@@ -91,6 +119,7 @@ config::config() :
  fixed_dt(-0.1),
  factor_dt(0.8),
  numberOfParticlesToAdd(0),
+ numberOfAddedEvents(1),
  minimumPT(10.0),
 //---- program_options groups ----
  initial_state_options("Options and parameters for the initial state used by the BAMPS simulation"),
@@ -130,11 +159,11 @@ void config::readAndProcessProgramOptions ( const int argc, char* argv[] )
     
   checkOptionsForSanity();
   
-//   if( ParticlePrototype::N_heavy_flavor > 0 )
-//   {
-//     processHeavyQuarkOptions();
-//   }
-  
+  if( Particle::N_heavy_flavor > 0 )
+  {
+    processHeavyQuarkOptions();
+  }
+
   printUsedConfigurationParameters();
 }
 
@@ -147,7 +176,33 @@ void config::readAndProcessProgramOptions ( const int argc, char* argv[] )
 void config::processProgramOptions()
 {
   configBase::processProgramOptions();
-   
+  
+  Particle::set_N_psi_states( N_psi_input );
+  
+  // check if both initial number of particles and initial number of events are set which does not make sense
+  bool ini_number_added_set = false;
+  bool ini_number_added_events_set = false;
+  if( !( vm["offline.nAdded"].defaulted() || vm["offline.nAdded"].empty() ) )
+  {
+    ini_number_added_set = true;
+  }
+  if( !( vm["offline.nAddedEvents"].defaulted() || vm["offline.nAddedEvents"].empty() ) )
+  {
+    ini_number_added_events_set = true;
+  }
+  
+  // if both are given and the number of particles is not negative (which means use number of added events), throw error.
+  if( ini_number_added_set && ini_number_added_events_set && numberOfParticlesToAdd >= 0 )
+  {
+    string errMsg = "Both initial number of particles and initial number of events are set. Do not know which one to use.";
+    throw eConfig_error( errMsg );
+  }
+  else if( !ini_number_added_set && ini_number_added_events_set )
+  {
+    // set initial number of particles to a negative value to use the number of added events instead
+    numberOfParticlesToAdd = -1;
+  }
+  
   if ( switch_fixed_dt )
   {
     if ( !(fixed_dt > 0) )
@@ -156,11 +211,11 @@ void config::processProgramOptions()
       throw eConfig_error( errMsg );
     }   
   }
-  
+
   // some special conversions from integer type values to enum values
   if ( vm.count("initial_state.type") )
   {
-    if ( vm["initial_state.type"].as<int>() < 3 && vm["initial_state.type"].as<int>() >= 0 )
+    if ( vm["initial_state.type"].as<int>() < 4 && vm["initial_state.type"].as<int>() >= 0 )
     {
       initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
     }
@@ -183,7 +238,7 @@ void config::processProgramOptions()
       throw eConfig_error( errMsg );
     }
   }
-  
+
   if ( vm.count("misc.jet_mfp_computation") )
   {
     if ( vm["misc.jet_mfp_computation"].as<int>() < 3 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
@@ -195,6 +250,24 @@ void config::processProgramOptions()
       string errMsg = "parameter \"misc.jet_mfp_computation\" out of range";
       throw eConfig_error( errMsg );      
     }
+  }
+  
+  if ( vm.count("heavy_quark.shadowing_model") )
+  {
+    if ( vm["heavy_quark.shadowing_model"].as<int>() < 3 && vm["heavy_quark.shadowing_model"].as<int>() >= 0 )
+    {
+      shadowing_model = static_cast<shadowModelJpsi>( vm["heavy_quark.shadowing_model"].as<int>() );
+    }
+    else
+    {
+      string errMsg = "parameter \"heavy_quark.shadowing_model\" out of range";
+      throw eConfig_error( errMsg );
+    }
+  }
+  
+  if ( vm.count("output.outputScheme") )
+  {
+    outputScheme = static_cast<OUTPUT_SCHEME>( vm["output.outputScheme"].as<int>() );
   }
 }
 
@@ -213,11 +286,15 @@ void config::initializeProgramOptions()
   // Add some simulation parameters
   simulation_parameters.add_options()
   ("simulation.e_freeze", po::value<double>( &freezeOutEnergyDensity )->default_value( freezeOutEnergyDensity ), "freeze out energy density (GeV/fm^3)")
+  ("simulation.scatt_offlineWithAdded", po::value<bool>( &scatt_offlineWithAddedParticles )->default_value( scatt_offlineWithAddedParticles ), "whether offline particles are allowed to scatter with added particles")
+  ("simulation.scatt_amongOffline", po::value<bool>( &scatt_amongOfflineParticles )->default_value( scatt_amongOfflineParticles ), "whether offline particles are allowed to scatter with other offline particles")
+  ("simulation.scatt_amongAdded", po::value<bool>( &scatt_amongAddedParticles )->default_value( scatt_amongAddedParticles ), "whether added particles are allowed to scatter with other added particles")
+  ("simulation.switchOff_23_32", po::value<bool>( &switchOff_23_32 )->default_value( switchOff_23_32 ), "whether 2->3 and 3->2 processed are switched off for added particles")
   ;
   
   // Group some options related to the initial state
   initial_state_options.add_options()
-  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc)")
+  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo)")
   ("initial_state.PDFsource", po::value<unsigned short int>()->default_value( static_cast<unsigned short int>(PDFsource) ), "which source to use for the PDFs ( 0 = built-in GRV, 1 = PDFs from LHAPDF )")
   ("initial_state.LHAPDFset", po::value<string>( &LHAPDFdatasetName )->default_value( LHAPDFdatasetName ), "name of the LHAPDF data set that should be used")
   ("initial_state.LHAPDFmember", po::value<unsigned short int>( &LHAPDFmember )->default_value( LHAPDFmember ), "which member of the LHAPDF set should be used")
@@ -227,6 +304,7 @@ void config::initializeProgramOptions()
   ("initial_state.minijet_P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for minijet initial conditions")
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
+  ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
   ;
   
   // Add some options related to the program output  
@@ -235,6 +313,30 @@ void config::initializeProgramOptions()
   ("output.particles", po::value<bool>( &outputSwitch_detailedParticleOutput )->default_value( outputSwitch_detailedParticleOutput ), "write detailed particle output")
   ("output.movie_jets", po::value<bool>( &outputSwitch_movieOutputJets )->default_value( outputSwitch_movieOutputJets ), "write movie output for added high-pt particles")
   ("output.movie_medium", po::value<bool>( &outputSwitch_movieOutputBackground )->default_value( outputSwitch_movieOutputBackground ), "write movie output for medium particles")
+  ("output.v2RAA", po::value<bool>( &v2RAAoutput )->default_value( v2RAAoutput ), "write v2 and RAA output for added particles")
+  ("output.v2RAAoutputIntermediateSteps", po::value<bool>( &v2RAAoutputIntermediateSteps )->default_value( v2RAAoutputIntermediateSteps ), "whether v2 and RAA output are printed at each analyisis time step (otherwise just at beginning and end)")
+  ("output.dndyOutput", po::value<bool>( &dndyOutput )->default_value( dndyOutput ), "whether dndy output is written out")
+  ("output.outputScheme", po::value<int>()->default_value( static_cast<int>(outputScheme) ), "output scheme id which configures the analysis routines and decides which output is written. The integer for the desired output scheme is given in the OUTPUT_SCHEME enum in configuration.h.")
+  ;
+  
+  // Add heavy quark options
+  heavy_quark_options.add_options()
+  ("heavy_quark.hadronization_hq", po::value<bool>( &hadronization_hq )->default_value( hadronization_hq ), "whether hadronization of heavy quarks to D and B mesons is carried out")
+  ("heavy_quark.mesonDecay", po::value<bool>( &mesonDecay )->default_value( mesonDecay ), "whether decay of heavy mesons from charm and bottom to electrons is performed")
+  ("heavy_quark.numberElectronStat", po::value<int>( &numberElectronStat )->default_value( numberElectronStat ), "one meson decays to numberElectronStat electrons")
+  ("heavy_quark.muonsInsteadOfElectrons", po::value<bool>( &muonsInsteadOfElectrons )->default_value( muonsInsteadOfElectrons ), "decay to muons should be performed instead of electrons")
+  ("heavy_quark.studyNonPromptJpsiInsteadOfElectrons", po::value<bool>( &studyNonPromptJpsiInsteadOfElectrons )->default_value( studyNonPromptJpsiInsteadOfElectrons ), "decay of B mesons to non prompt Jpsi should be performed instead to electrons")
+  ("heavy_quark.N_psi", po::value<int>( &N_psi_input )->default_value( N_psi_input ), "number of active psi states (1 = J/psi)")
+  ("heavy_quark.iso_xsection_jpsi", po::value<bool>( &isotropicCrossSecJpsi )->default_value( isotropicCrossSecJpsi ), "isotropic momentum sampling is employed for process Q + Qbar -> g + J/psi")
+  ("heavy_quark.const_xsection_jpsi", po::value<bool>( &constantCrossSecJpsi )->default_value( constantCrossSecJpsi ), "constant cross section is employed for process Q + Qbar -> g + J/psi")
+  ("heavy_quark.const_xsection_jpsi_value", po::value<double>( &constantCrossSecValueJpsi )->default_value( constantCrossSecValueJpsi ), "value of constant cross section for process Q + Qbar -> g + J/psi in mb")
+  ("heavy_quark.jpsi_mass", po::value<double>( &Mjpsi_input )->default_value( Mjpsi_input ), "J/psi mass (GeV)")
+  ("heavy_quark.TdJpsi", po::value<double>( &TdJpsi )->default_value( TdJpsi ), "dissociation temperature of J/psi")
+  ("heavy_quark.jpsi_sigmaAbs", po::value<double>( &jpsi_sigmaAbs )->default_value( jpsi_sigmaAbs ), "absorption cross section for initial J/psi in mb")
+  ("heavy_quark.jpsi_agN", po::value<double>( &jpsi_agN )->default_value( jpsi_agN ), "parameter for momentum broadening of initial J/psi")
+  ("heavy_quark.shadowing_model", po::value<int>( )->default_value( static_cast<int>(shadowing_model) ), "shadowing model used for initial J/psi")
+  ("heavy_quark.jpsi_formationTime", po::value<double>( &jpsi_formationTime )->default_value( jpsi_formationTime ), "formation time for initial J/psi in addition to the standard 1/M_T")
+  ("heavy_quark.hqCorrelationsOutput", po::value<bool>( &hqCorrelationsOutput )->default_value( hqCorrelationsOutput ), "whether correlation analysis of heavy quark pairs is done")
   ;
   
   // Add some miscellaneous options
@@ -251,8 +353,9 @@ void config::initializeProgramOptions()
   ("offline.use_fixed_dt", po::value<bool>( &switch_fixed_dt )->default_value( switch_fixed_dt ), "Indicates whether a fixed dt (provided via fixed_dt) should be used. Use time steps from the original run if not" ) 
   ("offline.fixed_dt", po::value<double>( &fixed_dt )->default_value( fixed_dt ), "fixed dt (time steps) at which the reconstructed medium is \"sampled\" [optional]")
   ("offline.factor_dt", po::value<double>( &factor_dt )->default_value( factor_dt ), "factor with which time steps from the original run should be scaled for use in sampling of the reconstructed medium (should be <1)")
-  ("offline.nAdded", po::value<int>( &numberOfParticlesToAdd)->default_value( numberOfParticlesToAdd ), "number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background" )
-  ("offline.minPT_added", po::value<double>( &minimumPT )->default_value( minimumPT ), "minimum p_T [GeV] of the added particles")
+  ("offline.nAdded", po::value<int>( &numberOfParticlesToAdd)->default_value( numberOfParticlesToAdd ), "number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background. Do not use together with nAddedEvents." )
+  ("offline.nAddedEvents", po::value<int>( &numberOfAddedEvents)->default_value( numberOfAddedEvents ), "number of heavy ion collision events, set on top of the offline reconstruction. Do not use together with nAdded. This input is needed if Pythia data files are read in to normalize the total yield of the particles. The number of one such heavy ion collision event includes < number of produced particles in pp > * Ntest * Nbin" )
+  ("offline.minPT_added", po::value<double>( &minimumPT )->default_value( minimumPT ), "minimum p_T [GeV] of the added particles. If p_T of added particle falls below this value it does not scatter anymore.")
   ;
 }
 
@@ -281,16 +384,70 @@ void config::groupProgramOptions()
 void config::checkOptionsForSanity()
 {
   configBase::checkOptionsForSanity();  // perform sanity check for base class options
+  
   // sanity checks of parameters and options provided by the derived class can go here  
+  if( ( scatt_amongAddedParticles && Particle::N_psi_states == 0 ) || ( Particle::N_psi_states > 0 && !scatt_amongAddedParticles ) )
+  {
+    string errMsg = "Scatterings among added particles and Jpsi not active or vice versa.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if( mesonDecay && !hadronization_hq )
+  {
+    string errMsg = "Meson decay not possible if heavy quarks cannot hadronize.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if( ( muonsInsteadOfElectrons || studyNonPromptJpsiInsteadOfElectrons ) && !mesonDecay )
+  {
+    string errMsg = "Meson decay to other particles does not make sense if meson decay is switched of.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if( ( studyNonPromptJpsiInsteadOfElectrons && outputScheme != cms_hq_nonPromptJpsi ) || ( outputScheme == cms_hq_nonPromptJpsi && !studyNonPromptJpsiInsteadOfElectrons ) )
+  {
+    string errMsg = "Study Jpsi instead of electrons but no output for this or vice versa.";
+    throw eConfig_error( errMsg );
+  }
 }
-
-
 
 void config::processHeavyQuarkOptions()
 {
   configBase::processHeavyQuarkOptions();  
-}
 
+  if( mesonDecay )
+  {
+    if(muonsInsteadOfElectrons)
+      cout << "Decay of heavy mesons to muons and not to electrons. " << endl;
+    if(studyNonPromptJpsiInsteadOfElectrons)
+      cout << "Decay of B mesons to non prompt Jpsi and not to electrons. " << endl;
+    if( muonsInsteadOfElectrons && studyNonPromptJpsiInsteadOfElectrons )
+    {
+      string errMsg = "Decay to muons and non prompt Jpsi not possible.";
+      throw eConfig_error( errMsg );
+    }
+  }
+
+
+  // study Jpsi
+  if( Particle::N_psi_states > 0 )
+  {
+    Particle::setJpsiMass( Mjpsi_input );
+    
+    if(constantCrossSecJpsi)
+      cout << "Constant cross section of " << constantCrossSecValueJpsi << " mb for ccbar -> Jpsi + g." << endl;
+    else
+      cout << "Cross section from Peskin for ccbar -> Jpsi + g." << endl;
+
+    if(isotropicCrossSecJpsi)
+      cout << "Sample angle isotropic for ccbar -> Jpsi + g." << endl;
+    
+    cout << "TdJpsi = " << TdJpsi << endl;
+
+    if( jpsi_formationTime != 0.0 )
+      cout << "Jpsi formation time: " << jpsi_formationTime << endl;
+  }
+}
 
 
 /**
@@ -310,13 +467,16 @@ void config::printUsedConfigurationParameters()
   printOptionsDescriptionToIniFormat( initial_state_options, output );
   printOptionsDescriptionToIniFormat( output_options, output );
   printOptionsDescriptionToIniFormat( misc_options, output );
-//   printOptionsDescriptionToIniFormat( heavy_quark_options, output );
+  if( Particle::N_heavy_flavor > 0 )
+    printOptionsDescriptionToIniFormat( heavy_quark_options, output );
   printOptionsDescriptionToIniFormat( offline_options, output );
 }
 
 
 void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlineInterface )
 {
+  double freezeOutEnergyDensity_offline;
+  
   boost::shared_ptr< offlineDataSimulationParameters > ptrSimulationData = offlineInterface->readOfflineDataFromArchive< offlineDataSimulationParameters >();
   originalSeed = ptrSimulationData->seed;
   sqrtS = ptrSimulationData->sqrtS;
@@ -330,7 +490,7 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
   N_init = ptrSimulationData->initialNumberOfParticles;
   timefirst = ptrSimulationData->firstTimeStep;
   timeshift = ptrSimulationData->timeShift;
-  freezeOutEnergyDensity = ptrSimulationData->freezeOutEnergyDensity;
+  freezeOutEnergyDensity_offline = ptrSimulationData->freezeOutEnergyDensity;
   ringNumber = ptrSimulationData->ringStructureSize;
   centralRingRadius = ptrSimulationData->ringStructureCentralRadius;
   deltaR = ptrSimulationData->ringStructureDeltaR;
@@ -343,11 +503,26 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
   N_light_flavors_offline = ptrSimulationData->N_light_flav;
   N_heavy_flavors_offline = ptrSimulationData->N_heavy_flav;
   
+  // check if the number of flavors of the offline program is larger than that for added particles. If so set the global particle property accordingly to avoid errors. Particle::N_light_flavor must always be larger/equal the largest actually occuring particle flavor
+  if( N_light_flavors_offline > Particle::N_light_flavor )
+    Particle::set_N_light_flavor( N_light_flavors_offline );
+  if( N_heavy_flavors_offline > Particle::N_heavy_flavor )
+    Particle::set_N_heavy_flavor( N_heavy_flavors_offline );
+
+  cout << "N_f of medium = N_f_light_quarks + N_f_heavy_quarks = " << N_light_flavors_offline << " + " <<   N_heavy_flavors_offline << endl;
+  cout << "N_f overall   = N_f_light_quarks + N_f_heavy_quarks = " << Particle::N_light_flavor << " + " <<   Particle::N_heavy_flavor << endl;
   
-  Particle::set_N_light_flavor( N_light_flavors_offline );
-  Particle::set_N_heavy_flavor( N_heavy_flavors_offline );
+  if( N_light_flavors_offline < N_light_flavors_input )
+    cout << "There are more light flavors for added particles (" << N_light_flavors_input << ") switched on than for the medium (" << N_light_flavors_offline << "). It is assumed that you know what you do..." << endl;
   
-  cout << "** add " << numberOfParticlesToAdd << " particles with pt_min = " << minimumPT << endl;
+  if( freezeOutEnergyDensity_offline > freezeOutEnergyDensity )
+  {
+    string errMsg = "Freeze-out energy density of offline data is larger than the input value of the simulation.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if( numberOfParticlesToAdd >= 0 )
+    cout << "** add " << numberOfParticlesToAdd << " particles with pt_min = " << minimumPT << endl;
   cout << timefirst << "  " << N_init << endl;
   
   cellcut = 4;

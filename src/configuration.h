@@ -22,24 +22,36 @@
 #include <stdexcept>
 #include <iostream>
 #include <stdint.h>
-
-// #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #include "configurationbase.h"
 #include "particle.h"
 #include "offlineoutput.h"
+#include "interpolation_iniJpsi.h"
 
 
 /** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState };
+enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState };
 
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
 
 /** @brief Enumeration type for different variants of computing the mean free path of high-pt particles */
 enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeMfpInterpolation };
+
+/** @brief Enumeration type for different output schemes to decide which kind of output is printed 
+ * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
+*/
+enum OUTPUT_SCHEME { no_output = 0, 
+// heavy quarks:
+phenix_hq_electrons = 101,
+alice_hq_electrons = 111,
+alice_hq_muons = 112,
+alice_hq_dmesons = 113,
+cms_hq_nonPromptJpsi = 114,
+phenix_jpsi = 131
+};
 
 
 /** @brief This extends the namespace ns_casc (see globalsettings.h) to hold a global particle vector */
@@ -57,6 +69,8 @@ namespace ns_casc
   extern std::vector<ParticleOffline> particles_atTimeNowCopy;
   extern std::vector<ParticleOffline> addedParticles;
   extern std::vector<ParticleOffline> addedParticlesCopy;
+//   extern std::vector<ParticleHFelectron> addedPartcl_electron;
+  extern std::vector<ParticleOffline> addedPartcl_electron;
 }
 //--------------------------------------------------------//
 
@@ -103,6 +117,24 @@ class config : public configBase
   /** ---- simulation parameters ---- */ 
   /** @brief Interface for config::freezeOutEnergyDensity */
   double getFreezeOutEnergyDensity() const { return freezeOutEnergyDensity; }
+  
+  /** @brief Interface for config::scatt_offlineWithAddedParticles */
+  bool isScatt_offlineWithAddedParticles() const {return scatt_offlineWithAddedParticles;}
+  
+  /** @brief Interface for config::scatt_amongOfflineParticles */
+  bool isScatt_amongOfflineParticles() const {return scatt_amongOfflineParticles;}
+  
+  /** @brief Interface for config::scatt_amongAddedParticles */
+  bool isScatt_amongAddedParticles() const {return scatt_amongAddedParticles;}
+  
+  /** @brief Interface for config::N_light_flavors_input */
+  int getNlightFlavorsAdded() const {return N_light_flavors_input;}
+  
+  /** @brief Interface for config::N_heavy_flavors_input */
+  int getNheavyFlavorsAdded() const {return N_heavy_flavors_input;}
+  
+  /** @brief Interface for config::switchOff_23_32 */
+  bool isSwitchOff_23_32() const {return switchOff_23_32;}
   /** ------------------------------- */
 
   /** ---- initial state options ---- */ 
@@ -133,6 +165,9 @@ class config : public configBase
   /** @brief Interface for config::cgcParticleFile */
   string getCgcParticleFile() const { return cgcParticleFile; }
   
+  /** @brief Interface for config::mcatnloParticleFileCharm */
+  string getMcatnloParticleFile() const {return mcatnloParticleFile;}
+  
   /** @brief Interface for config::P0 */
   double getPtCutoff() const { return P0; }
   /** ------------------------------- */
@@ -149,8 +184,69 @@ class config : public configBase
   
   /** @brief Interface for config::outputSwitch_movieOutput */
   bool doOutput_movieOutputBackground() const {return outputSwitch_movieOutputBackground;}
+  
+  /** @brief Interface for config::v2RAAoutput */
+  bool isV2RAAoutput() const {return  v2RAAoutput;}
+  
+  /** @brief Interface for config::v2RAAoutputIntermediateSteps */
+  bool isV2RAAoutputIntermediateSteps() const {return v2RAAoutputIntermediateSteps;}
+  
+  /** @brief Interface for config::dndyOutput */
+  bool isDndyOutput() const {return  dndyOutput;}
+  
+  /** @brief Interface for config::outputScheme */
+  OUTPUT_SCHEME getOutputScheme() const {return  outputScheme;}
   /** ------------------------------- */
   
+  /** -------- heavy quark options ------- */ 
+  // hadronization of open heavy flavor
+  /** @brief Interface for config::hadronization_hq */
+  bool isHadronizationHQ() const {return hadronization_hq;}
+  
+  /** @brief Interface for config::mesonDecay */
+  bool isMesonDecay() const {return mesonDecay;}
+  
+  /** @brief Interface for config::numberElectronStat */
+  int getNumberElectronStat() const {return  numberElectronStat;}
+  
+  /** @brief Interface for config::muonsInsteadOfElectrons */
+  bool isMuonsInsteadOfElectrons() const {return muonsInsteadOfElectrons;}
+  
+  /** @brief Interface for config::studyNonPromptJpsiInsteadOfElectrons */
+  bool isStudyNonPromptJpsiInsteadOfElectrons() const {return studyNonPromptJpsiInsteadOfElectrons;}
+  
+  
+  // Jpsi
+  /** @brief Interface for config::isotropicCrossSecJpsi */
+  bool isIsotropicCrossSecJpsi() const {return  isotropicCrossSecJpsi;}
+  
+  /** @brief Interface for config::constantCrossSecJpsi */
+  bool isConstantCrossSecJpsi() const {return  constantCrossSecJpsi;}
+  
+  /** @brief Interface for config::constantCrossSecValueJpsi */
+  double getConstantCrossSecValueJpsi() const {return  constantCrossSecValueJpsi; }
+  
+  /** @brief Interface for config::TdJpsi */
+  double getTdJpsi() const {return  TdJpsi;}
+  
+  /** @brief Interface for config::jpsi_sigmaAbs */
+  double getSigmaAbs() const {return jpsi_sigmaAbs;} 
+  
+  /** @brief Interface for config::jpsi_agN */
+  double getJpsiagN() const {return jpsi_agN;} 
+  
+  /** @brief Interface for config::shadowing_model */
+  shadowModelJpsi getShadowingModel() const  {return shadowing_model;} 
+
+  /** @brief Interface for config::jpsi_formationTime */
+  double getJpsiFormationTime() const  {return jpsi_formationTime;} 
+  
+  
+  // heavy quark output
+  /** @brief Interface for config::hqCorrelationsOutput */
+  bool isHqCorrelationsOutput() const {return hqCorrelationsOutput;}
+  /** ------------------------------------ */
+
   /** -------- miscellaneous options ------- */ 
   bool repeatTimesteps() const { return switch_repeatTimesteps; }
   
@@ -180,6 +276,8 @@ class config : public configBase
   
   /** @brief Interface for config::numberOfParticlesToAdd */
   int getNumberOfParticlesToAdd() const { return numberOfParticlesToAdd; }
+  /** @brief Interface for config::numberOfAddedEvents */
+  int getNaddedEvents() const { return numberOfAddedEvents; }
   /** @brief Interface for config::minimumPT */
   double getMinimumPT() const { return minimumPT; }
   
@@ -223,6 +321,7 @@ class config : public configBase
   void readAndPrepareInitialSettings( offlineOutputInterface*const _offlineInterface );
   /** ------------------------------ */
 
+  
  protected:
    /** ----- auxiliary routines ----- */
    /** @brief Sort the options into groups */   
@@ -266,7 +365,7 @@ class config : public configBase
    po::options_description initial_state_options;   
    po::options_description offline_options;
    /** ------ boost::program_options objects ------- */ 
-   
+
    
   /** ------ general options ------- */  
   // base class provides:
@@ -285,6 +384,18 @@ class config : public configBase
    * Particles in regions with energy densities below this threshold will be freely streaming
    */
   double freezeOutEnergyDensity;
+  
+  /** @brief Whether offline particles are allowed to scatter with added particles */
+  bool scatt_offlineWithAddedParticles;
+  
+  /** @brief Whether offline particles are allowed to scatter with other offline particles */
+  bool scatt_amongOfflineParticles;
+  
+  /** @brief Whether added particles are allowed to scatter with other added particles */
+  bool scatt_amongAddedParticles;
+  
+  /** @brief Whether 2->3 and 3->2 processed are switched off for added particles */
+  bool switchOff_23_32;
   /** ------------------------------- */
   
   /** ---- initial state options ---- */ 
@@ -318,9 +429,12 @@ class config : public configBase
   string pythiaParticleFile;
   
   /** @brief Relative or full path (including filename) of color glass condensate output file with particle data
-   * Declare as "-" if particle momenta should be sampled via glauber method
    */
   string cgcParticleFile; 
+  
+  /** @brief Relative or full path (including filename) of MC@NLO output file with particle data
+   */
+  string mcatnloParticleFile;
   
   /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
   double P0;  
@@ -341,8 +455,87 @@ class config : public configBase
   
   /** @brief Specify whether movie output should be written (for the reconstructed background) */
   bool outputSwitch_movieOutputBackground;
+  
+  /** @brief Whether v2 and RAA output are printed */
+  bool v2RAAoutput;
+  
+  /** @brief Whether v2 and RAA output are printed at each analyisis time step (otherwise just at beginning and end) */
+  bool v2RAAoutputIntermediateSteps;
+  
+  /** @brief Whether dndy output is written out */
+  bool dndyOutput;
+  
+  /** @brief Output schemes to decide which kind of output is printed */
+  OUTPUT_SCHEME outputScheme;
   /** ------------------------------- */ 
 
+  /** -------- heavy quark options ------- */ 
+  // provided by base class:
+  // open heavy flavor
+  //   double KggQQbar
+  //   double KgQgQ
+  //   double kappa_gQgQ
+  //   bool couplingRunning
+  //   bool isotropicCrossSecGQ
+  //   bool constantCrossSecGQ
+  //   double constantCrossSecValueGQ
+  //   double Mcharm_input
+  //   double Mbottom_input
+  
+  // hadronization of open heavy flavor
+  /** @brief Whether hadronization of heavy quarks to D and B mesons is carried out */
+  bool hadronization_hq;
+  
+  /** @brief Whether decay of heavy mesons from charm and bottom to electrons is performed */
+  bool mesonDecay;
+  
+  /** @brief To improve statistics one meson decays to numberElectronStat electrons */
+  int numberElectronStat;
+  
+  /** @brief Whether decay to muons should be performed instead of electrons */
+  bool muonsInsteadOfElectrons;
+  
+  /** @brief Whether decay of B mesons to non prompt Jpsi should be performed instead to electrons */
+  bool studyNonPromptJpsiInsteadOfElectrons;
+  
+  
+  // Jpsi
+  /** @brief How many psi states are allowed */
+  int N_psi_input;
+  
+  /** @brief Whether an isotropic momentum sampling is employed for process Q + Qbar -> g + J/psi */
+  bool isotropicCrossSecJpsi;
+  
+  /** @brief Whether a constant cross section is employed for process Q + Qbar -> g + J/psi */
+  bool constantCrossSecJpsi;
+  
+  /** @brief Value of constant cross section for process Q + Qbar -> g + J/psi in mb */
+  double constantCrossSecValueJpsi;
+  
+  /** @brief Mass of J/psi */
+  double Mjpsi_input;
+
+  /** @brief Dissociation temperature of J/psi */
+  double TdJpsi;
+  
+  /** @brief Absorption cross section for initial J/psi in mb */
+  double jpsi_sigmaAbs;
+  
+  /** @brief Parameter for momentum broadening of initial J/psi */
+  double jpsi_agN;
+  
+  /** @brief Shadowing model used for initial J/psi */
+  shadowModelJpsi shadowing_model;
+
+  /** @brief Formation time for initial J/psi in addition to the standard 1/M_T */
+  double jpsi_formationTime;
+  
+  
+  // heavy quark output
+  /** @brief Whether correlation analysis of heavy quark pairs is done */
+  bool hqCorrelationsOutput;
+  /** ------------------------------------ */
+  
   /** -------- miscellaneous options ------- */ 
   // provided by base class:
   // bool localCluster
@@ -360,8 +553,8 @@ class config : public configBase
   
   /** @brief Whether timesteps are repeated in cases where the probability has been > 1 */
   bool switch_repeatTimesteps;
-  /** ------------------------------------ */
-  
+  /** ------------------------------- */
+
   /** -------- offline reconstruction options ------- */ 
   /** @brief Path to which the output needed for offline analysis is written */
   string pathdirOfflineData;
@@ -379,8 +572,17 @@ class config : public configBase
   /** @brief Factor with which time steps from the original run should be scaled for use in sampling of the reconstructed medium (should be <1) */
   double factor_dt;
   
-  /** @brief Number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background */
+  /** @brief Number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background. This is needed for mini-jet initial conditions. However, to do a correct normalisation for particles yields also set numberOfAddedEvents */
   int numberOfParticlesToAdd;
+  /** @brief Number of heavy ion collision events, set on top of the offline reconstruction. 
+   *  This input is needed if Pythia data files are read in to normalize the total yield of the particles. 
+   * The number of particles in one such heavy ion collision event is equal to < number of produced particles 
+   * in pp > * Ntest * Nbin. Consequently, 1 would mean that one adds as many particles as there are in a heavy 
+   * ion collision times Ntest, making it analogously to a standard BAMPS simulation.
+   * 
+   * To use the number of events to sample the initial number of particles instead of the given number of particles via numberOfParticlesToAdd set numberOfParticlesToAdd to a negative value.
+  */
+  int numberOfAddedEvents;
   /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT; 
   

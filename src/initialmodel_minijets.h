@@ -85,8 +85,19 @@ private:
   
 
   double P0; /**< lower PT-cutoff (in GeV) */
+  
   int nTestparticles;
+  
+  /** @brief Number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background. */
   int nParticlesToGenerate;
+  /** @brief Number of heavy ion collision events, set on top of the offline reconstruction. 
+   * The number of particles in one such heavy ion collision event is equal to < number of produced particles 
+   * in pp > * Ntest * Nbin. Consequently, 1 would mean that one adds as many particles as there are in a heavy 
+   * ion collision times Ntest, making it analogously to a standard BAMPS simulation.
+   * 
+   * It is only used if the number of particles to sample is not explicitly given (in which case it is negative)
+  */
+  int nEventsToGenerate;
   
   ranGen_Distr *distrPT; /**< the random generator for the PT distribution */
   interpolationGSL *maxIntegrandPT; /**< the maximum value of the integrand per pT */

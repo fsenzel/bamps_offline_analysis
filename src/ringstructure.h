@@ -48,8 +48,8 @@ public:
   
   void addParticle( const double _xt, const ParticleOffline& _particle );
   void addParticle( const ParticleOffline& _particle );
-  void addParticleInFormGeom( const double _xt, const ParticleOffline& _particle, const double _time ) { rings[ getIndex( _xt ) ].addParticleInFormGeom( _particle, _time ); }
-  void addParticleInFormGeom( const ParticleOffline& _particle, const double _time ) { rings[ getIndex( _particle ) ].addParticleInFormGeom( _particle, _time ); }
+  void addParticleInFormGeom( const double _xt, const ParticleOffline& _particle, const double _time );
+  void addParticleInFormGeom( const ParticleOffline& _particle, const double _time );
   void addRates( const double _xt, const ParticleOffline& _particle );
   void addRates( const ParticleOffline& _particle );
   

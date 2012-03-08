@@ -159,11 +159,42 @@ void ringStructure::addParticle( const ParticleOffline& _particle )
 
 void ringStructure::addParticle( const double _xt, const ParticleOffline& _particle )
 {
-  int index = getIndexPure( _xt );
-  if ( index < static_cast<int>( rings.size() ) )
+  if( _particle.FLAVOR > 2*Particle::max_N_light_flavor )
   {
-    rings[ index ].addParticle( _particle );
+    std::string errMsg = "Heavy quark added to ringStructure which cannot deal with massive particles";
+    throw eRingStructure_error( errMsg );
   }
+  else
+  {
+    int index = getIndexPure( _xt );
+    if ( index < static_cast<int>( rings.size() ) )
+    {
+      rings[ index ].addParticle( _particle );
+    }
+  }
+}
+
+void ringStructure::addParticleInFormGeom( const double _xt, const ParticleOffline& _particle, const double _time )
+{
+  if( _particle.FLAVOR > 2*Particle::max_N_light_flavor )
+  {
+    std::string errMsg = "Heavy quark added to ringStructure which cannot deal with massive particles";
+    throw eRingStructure_error( errMsg );
+  }
+  else
+    rings[ getIndex( _xt ) ].addParticleInFormGeom( _particle, _time );
+}
+
+
+void ringStructure::addParticleInFormGeom( const ParticleOffline& _particle, const double _time )
+{
+  if( _particle.FLAVOR > 2*Particle::max_N_light_flavor )
+  {
+    std::string errMsg = "Heavy quark added to ringStructure which cannot deal with massive particles";
+    throw eRingStructure_error( errMsg );
+  }
+  else
+    rings[ getIndex( _particle ) ].addParticleInFormGeom( _particle, _time );
 }
 
 

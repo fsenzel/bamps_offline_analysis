@@ -5,10 +5,16 @@ binning2.cpp
 cellcontainer.cpp
 configuration.cpp
 coordinateBins.cpp
+hadronization_hq.cpp
 initialmodel.cpp
 initialmodel_cgc.cpp
+initialmodel_jpsi.cpp
+initialmodel_mcatnlo.cpp
 initialmodel_minijets.cpp
+initialmodel_particlesFromFile.cpp
 initialmodel_pythia.cpp
+interpolation_iniJpsi.cpp
+interpolation_nJpsi.cpp
 offlineBAMPS.cpp
 offlineheavyioncollison.cpp 
 offlineoutput.cpp
@@ -19,6 +25,14 @@ ringcontainer.cpp
 ringstructure.cpp
 woodsaxon.cpp
 )
+
+IF( Pythia_FOUND )
+  SET(project_SRCS
+    ${project_SRCS}
+    mesonDecayData.cpp
+    mesonDecay.cpp
+  )
+ENDIF( Pythia_FOUND )
 
 
 ######### Include the header files of the BAMPS library #########
@@ -51,7 +65,6 @@ SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/revision.h PROPERTIES GE
 ######### create a config.h #########
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
-
 ######### Build the executable #########
 ADD_EXECUTABLE(offlineBAMPS ${project_SRCS} )
 
@@ -67,12 +80,18 @@ ELSE( LINK_TO_BAMPS_LIB AND BAMPS_FOUND )
   ADD_DEPENDENCIES(offlineBAMPS bamps)          ## Add dependency such that libbamps.a is always build first ##
 ENDIF( LINK_TO_BAMPS_LIB AND BAMPS_FOUND ) 
 
-IF( LHAPDF_FOUND )
-  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${LHAPDF_LIBRARIES})
-ELSE( LHAPDF_FOUND )
-  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES})
-ENDIF( LHAPDF_FOUND )
 
+IF( LHAPDF_FOUND AND Pythia_FOUND )
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${LHAPDF_LIBRARIES} ${Pythia_LIBRARIES})
+ELSEIF( Pythia_FOUND )
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${Pythia_LIBRARIES} ${Pythia_LHAPDFDummy_LIBRARY})
+ELSEIF( LHAPDF_FOUND )
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${LHAPDF_LIBRARIES})
+ELSE( LHAPDF_FOUND AND Pythia_FOUND )
+  TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES})
+  #TARGET_LINK_LIBRARIES(offlineBAMPS ${Boost_LIBRARIES} ${GSL_LIBRARIES} ${Cuba_LIBRARIES})
+ENDIF( LHAPDF_FOUND AND Pythia_FOUND )
+  
 
 #install(TARGETS offlineBAMPS ${INSTALL_TARGETS_DEFAULT_ARGS})
 

@@ -31,7 +31,8 @@ using namespace ns_casc;
 initialModel_minijets::initialModel_minijets( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT, const int _nToGenerate ) :
   initialModelWS(_config) ,
   nParticlesToGenerate( 0 ),
-  nTestparticles( _config.getTestparticles() )
+  nTestparticles( _config.getTestparticles() ),
+  nEventsToGenerate( _config.getNaddedEvents() )
 {
   distrPT = 0;  // assign a null-pointer
   maxIntegrandPT = 0; // assign a null-pointer
@@ -84,7 +85,7 @@ void initialModel_minijets::generateSamplingDataSets( const int _nToGenerate )
 
   if ( _nToGenerate < 0 )
   {
-    nParticlesToGenerate = 2 * static_cast<int>( Tab * sigmaJet ) * nTestparticles;
+    nParticlesToGenerate = 2 * static_cast<int>( Tab * sigmaJet * nTestparticles * nEventsToGenerate );
   }
   else
   {

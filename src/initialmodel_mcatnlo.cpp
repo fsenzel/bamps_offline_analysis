@@ -15,7 +15,7 @@
 #include <fstream>
 #include <algorithm> // for std::count
 
-#include "initialmodel_pythia.h"
+#include "initialmodel_mcatnlo.h"
 #include "particle.h"
 
 using std::cout;
@@ -23,33 +23,25 @@ using std::endl;
 using namespace ns_casc;
 
 
-void initialModel_Pythia::sampleMomenta( std::vector< Particle >& _particles )
+void initialModel_Mcatnlo::sampleMomenta( std::vector< Particle >& _particles )
 {
   int event_tmp = 0;
   int event_counter = 0;
   
   std::ifstream readParticles( filename_particleFile.c_str() );
-  cout << "Read particle momenta from PYTHIA data file." << endl;
+  cout << "Read particle momenta from MC@NLO data file." << endl;
   for ( int i = 0; i < numberOfParticlesToGenerate; i++ )
   {
     Particle tempParticle; 
     int flavTemp;
     int n_event_pp_input;
     // structure of file
-    // number of pythia event  is hard?   flavour  energy  px  py  pz  m
-    readParticles >> n_event_pp_input >> tempParticle.HARD >> flavTemp >> tempParticle.E >> tempParticle.PX >> tempParticle.PY >> tempParticle.PZ >> tempParticle.m;
+    // flavour  energy  px  py  pz  m
+    readParticles >> flavTemp >> tempParticle.E >> tempParticle.PX >> tempParticle.PY >> tempParticle.PZ >> tempParticle.m;
     tempParticle.FLAVOR = static_cast<FLAVOR_TYPE>( flavTemp );
     
-    if( n_event_pp_input != event_tmp )
-    {
-      event_tmp = n_event_pp_input;
-      event_counter++;
-      tempParticle.N_EVENT_pp = event_counter;
-    }
-    else
-    {
-      tempParticle.N_EVENT_pp = event_counter;
-    }
+    tempParticle.HARD = 1;
+    tempParticle.N_EVENT_pp = int( ( i + 2) / 2 ); // pairs get same Event number_mcatnloFile
     
     if ( flavTemp <= 2 * Particle::max_N_light_flavor )
     {
@@ -71,11 +63,11 @@ void initialModel_Pythia::sampleMomenta( std::vector< Particle >& _particles )
   
   // charm quarks in Pythia have a mass of 1.5 GeV
   // make charm quarks from pythia lighter, if Mcharm is not 1.5 GeV
-  const double M_old_charm = 1.5;
+  const double M_old_charm = 1.3;
   changeCharmMass( _particles, M_old_charm );
   
   // make bottom quarks from pythia lighter, if Mbottom is not 4.8 GeV
-  const double M_old_bottom = 4.8;
+  const double M_old_bottom = 4.6;
   changeBottomMass( _particles, M_old_bottom );
 
 }
