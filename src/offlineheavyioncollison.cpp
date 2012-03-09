@@ -95,7 +95,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     rings( _config->getRingNumber(), _config->getCentralRingRadius(), _config->getDeltaR() ),
     testpartcl( _config->getTestparticles() ),
     offlineInterface( _offlineInterface ),
-    theI23( _config->doScattering_23() || _config->doScattering_32() )
+    theI23( _config->doScattering_23() )
 {
   theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom );
 }
