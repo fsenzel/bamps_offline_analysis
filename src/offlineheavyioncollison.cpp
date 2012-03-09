@@ -95,7 +95,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     rings( _config->getRingNumber(), _config->getCentralRingRadius(), _config->getDeltaR() ),
     testpartcl( _config->getTestparticles() ),
     offlineInterface( _offlineInterface ),
-    theI23( _config->isSwitchOff_23_32() )
+    theI23( _config->doScattering_23() || _config->doScattering_32() )
 {
   theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom );
 }
@@ -1606,7 +1606,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
             
             int n32 = 0;
             
-            if( theConfig->isScatt_offlineWithAddedParticles() && !theConfig->isSwitchOff_23_32() )
+            if( theConfig->isScatt_offlineWithAddedParticles() && theConfig->doScattering_32() )
             {
               scatt32_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, n32, again, aa, nexttime );
               if ( again )
@@ -1622,7 +1622,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
               scaleFactor = static_cast<double>( nGluons ) / static_cast<double>( nGluons - n32 );
             }
             
-            if( theConfig->isScatt_amongAddedParticles() )
+            if( theConfig->isScatt_amongAddedParticles() && theConfig->doScattering_22() )
             {
               scatt22_amongAddedParticles( cellsAdded[j], allParticlesListAdded, scaleFactor, again, nexttime );
               
@@ -1869,23 +1869,26 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         // HACK for N_f = 0 background!!!!
 //         md2g = as * ( particles_atTimeNow[iscat].md2g + addedParticles[jscat].md2g ) / 2.0 * 2;
 //         md2q = md2g * 2.0 / 9.0;
-
-        scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
-                                    theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
-                                    theConfig->isConstantCrossSecGQ(),
-                                    theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-        cs22 = scatt22_object.getXSection22( initialStateIndex );
-
-        probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
         
-        
-        if( theConfig->isSwitchOff_23_32() )
-        {  
-          probab23 = 0;
-          cs23 = 0;
-          lambda_scaled = 0;
+        if( theConfig->doScattering_22() )
+        {
+          scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
+                                      theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
+                                      theConfig->isConstantCrossSecGQ(),
+                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+          cs22 = scatt22_object.getXSection22( initialStateIndex );
+
+          probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
+          
+          cs22t = 18.0 * M_PI * as * as / s * ( log( 1.0 + 0.25 / md2g ) + 1.0 / ( 1.0 + 0.25 / md2g ) - 1.0 );//1/GeV^2
         }
         else
+        {
+          cs22 = probab22 = cs22t = 0.0;
+        }
+        
+
+        if( theConfig->doScattering_23() )
         {
           if ( lambdaJet > 0 )
           {
@@ -1915,6 +1918,12 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
 
           probab23 = pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
         }
+        else
+        {  
+          probab23 = 0;
+          cs23 = 0;
+          lambda_scaled = 0;
+        }
         
         if ( F1 == gluon )
         {
@@ -1942,8 +1951,6 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
             lambdaJet_quark += lambda_scaled;
           }
         }
-
-        cs22t = 18.0 * M_PI * as * as / s * ( log( 1.0 + 0.25 / md2g ) + 1.0 / ( 1.0 + 0.25 / md2g ) - 1.0 );//1/GeV^2
 
         if ( cs22 > 0.0 )
         {
@@ -2038,9 +2045,9 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
 {
   int iscat, jscat, typ;
   double P1[4], P2[4];
-  double s, as, cs23, cs22, Vrel;
+  double s, as, cs22, Vrel;
   double M1, M2, P1P2;
-  double probab22, probab23, probab2322;
+  double probab22;
   double md2g, md2q;
   int initialStateIndex = -1;
   FLAVOR_TYPE F1, F2;
@@ -2081,8 +2088,8 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
 
       if ( s < 1.1*lambda2 )
       {
-        probab2322 = -1.0;
-        cs22 = cs23 = 0.0; //1/GeV^2
+        probab22 = -1.0;
+        cs22 = 0.0; //1/GeV^2
       }
       else
       {
@@ -2110,41 +2117,29 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
 
         probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl * theConfig->getNaddedEvents() );
 
-        probab23 = 0;
         if ( F1 == gluon )
         {
           probab22 *= scaleFactor;
-          probab23 *= scaleFactor;
         }
         if ( F2 == gluon )
         {
           probab22 *= scaleFactor;
-          probab23 *= scaleFactor;
         }
-
-        probab2322 = probab22 + probab23;
       }
 
-      if ( probab2322 > 1.0 )
+      if ( probab22 > 1.0 )
       {
 //         cout << "P2322=" << probab2322 << ">1" << endl;
         again = true;
 //         cout << "dt (old) = " << dt << endl;
-        dt = 0.5 / ( probab2322 / dt );
+        dt = 0.5 / ( probab22 / dt );
 //         cout << "dt (new) = " << dt << endl;
         return;
       }
 
-      if ( ran2() < probab2322 )
+      if ( ran2() < probab22 )
       {
-        if ( ran2() * probab2322 < probab23 )
-        {
-          cout << "Error in scatt22_amongAddedParticles()." << endl;
-        }
-        else
-        {
-          scatt22_amongAddedParticles_utility( scatt22_object, _cellAdded.particleList, _allParticlesListAdded, iscat, jscat, typ, nexttime );
-        }
+        scatt22_amongAddedParticles_utility( scatt22_object, _cellAdded.particleList, _allParticlesListAdded, iscat, jscat, typ, nexttime );
       }
     }
   }
@@ -3518,20 +3513,22 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
 //           md2g = as * ( addedParticles[jetID].md2g + particles_atTimeNow[jscat].md2g ) / 2.0 * 2;          
 //           md2q = md2g * 2.0 / 9.0;
           
-          scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
-                                        theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
-                                        theConfig->isConstantCrossSecGQ(),
-                                        theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-          cs22 = scatt22_object.getXSection22();
-          probab22 += pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
-          
-          if( theConfig->isSwitchOff_23_32() )
-          {  
-            probab23 = 0;
-            cs23 = 0;
-            lambda_scaled = 0;
+          if( theConfig->doScattering_22() )
+          {
+            scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
+                                          theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
+                                          theConfig->isConstantCrossSecGQ(),
+                                          theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+            cs22 = scatt22_object.getXSection22();
+            probab22 += pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
           }
           else
+          {
+            cs22 = 0.0;
+            probab22 = 0.0;
+          }
+          
+          if( theConfig->doScattering_23() )
           {
             n23++;
             lambda_scaled = lambda * sqrt( s );
@@ -3541,6 +3538,12 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
             cs23 = Ncolor * pow( as, 3 ) / s * I23;    //1/GeV^2
             probab23 += pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
           }
+          else
+          {
+            probab23 = 0;
+            cs23 = 0;
+            lambda_scaled = 0;
+          }
         }
       }
     }
@@ -3548,128 +3551,135 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
     R23 = probab23 / dt * rings[nc].getGamma();
     //-------------------------------------------------------------
     
-    const int consideredTriplets = 5;
-    double scaleForSelectedTriplets = 1;
-    if ( allTriplets > 10 )
-    {      
-      int m2, m3;
-      scaleForSelectedTriplets = static_cast<double>( allTriplets ) / static_cast<double>( consideredTriplets );
-      
-      for ( int i = 0; i < consideredTriplets && _gluonList.size() > 0; i++ )
-      {
-        do
+    if( theConfig->doScattering_32() )
+    {
+      const int consideredTriplets = 5;
+      double scaleForSelectedTriplets = 1;
+      if ( allTriplets > 10 )
+      {      
+        int m2, m3;
+        scaleForSelectedTriplets = static_cast<double>( allTriplets ) / static_cast<double>( consideredTriplets );
+        
+        for ( int i = 0; i < consideredTriplets && _gluonList.size() > 0; i++ )
         {
           do
           {
-            m2 = int ( _allParticlesList.size() * ran2() );
-            if ( m2 == _allParticlesList.size() )
+            do
             {
-              m2 = _allParticlesList.size() - 1;
+              m2 = int ( _allParticlesList.size() * ran2() );
+              if ( m2 == _allParticlesList.size() )
+              {
+                m2 = _allParticlesList.size() - 1;
+              }
+              iscat = _allParticlesList[m2];
             }
-            iscat = _allParticlesList[m2];
+            while ( particles_atTimeNow[iscat].dead );
+            F2 = particles_atTimeNow[iscat].FLAVOR;
+            
+            do
+            {
+              m3 = int ( _allParticlesList.size() * ran2() );
+              if ( m3 == _allParticlesList.size() )
+              {
+                m3 = _allParticlesList.size() - 1;
+              }
+              jscat = _allParticlesList[m3];
+            }
+            while (( m3 == m2 ) || ( particles_atTimeNow[jscat].dead ) );
+            F3 = particles_atTimeNow[jscat].FLAVOR;          
           }
-          while ( particles_atTimeNow[iscat].dead );
-          F2 = particles_atTimeNow[iscat].FLAVOR;
+          while ( !( F1 == gluon || F2 == gluon || F3 == gluon ) );
           
-          do
+          P2[0] = particles_atTimeNow[iscat].E;
+          P2[1] = particles_atTimeNow[iscat].PX;
+          P2[2] = particles_atTimeNow[iscat].PY;
+          P2[3] = particles_atTimeNow[iscat].PZ;
+          
+          P3[0] = particles_atTimeNow[jscat].E;
+          P3[1] = particles_atTimeNow[jscat].PX;
+          P3[2] = particles_atTimeNow[jscat].PY;
+          P3[3] = particles_atTimeNow[jscat].PZ;
+          
+          s = pow(( P1[0] + P2[0] + P3[0] ), 2 ) - pow(( P1[1] + P2[1] + P3[1] ), 2 ) - pow(( P1[2] + P2[2] + P3[2] ), 2 ) - pow(( P1[3] + P2[3] + P3[3] ), 2 );
+          
+          if ( s > 1.1*lambda2 )
           {
-            m3 = int ( _allParticlesList.size() * ran2() );
-            if ( m3 == _allParticlesList.size() )
-            {
-              m3 = _allParticlesList.size() - 1;
-            }
-            jscat = _allParticlesList[m3];
+            n32++;
+            lambda_scaled = lambda * sqrt( s );
+            
+            as = alpha_s( s );
+            
+            md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0;
+            md2g = as * ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q + addedParticles[jetID].md2q ) / 3.0;
+            // HACK for N_f = 0 background
+  //           md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0 * 2;
+  //           md2q = md2g * 2.0 / 9.0;
+            
+            // create scattering32 object for the given 3 particles
+            betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
+            I32 = scatt32_object.getIntegral32_fast();                        // get the integral I32 for the given 3 particles
+            
+            probab32 += pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2.0 ) * pow( testpartcl, 2.0 ) * s * P1[0] * P2[0] * P3[0] );
           }
-          while (( m3 == m2 ) || ( particles_atTimeNow[jscat].dead ) );
-          F3 = particles_atTimeNow[jscat].FLAVOR;          
-        }
-        while ( !( F1 == gluon || F2 == gluon || F3 == gluon ) );
-        
-        P2[0] = particles_atTimeNow[iscat].E;
-        P2[1] = particles_atTimeNow[iscat].PX;
-        P2[2] = particles_atTimeNow[iscat].PY;
-        P2[3] = particles_atTimeNow[iscat].PZ;
-        
-        P3[0] = particles_atTimeNow[jscat].E;
-        P3[1] = particles_atTimeNow[jscat].PX;
-        P3[2] = particles_atTimeNow[jscat].PY;
-        P3[3] = particles_atTimeNow[jscat].PZ;
-        
-        s = pow(( P1[0] + P2[0] + P3[0] ), 2 ) - pow(( P1[1] + P2[1] + P3[1] ), 2 ) - pow(( P1[2] + P2[2] + P3[2] ), 2 ) - pow(( P1[3] + P2[3] + P3[3] ), 2 );
-        
-        if ( s > 1.1*lambda2 )
-        {
-          n32++;
-          lambda_scaled = lambda * sqrt( s );
-          
-          as = alpha_s( s );
-          
-          md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0;
-          md2g = as * ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q + addedParticles[jetID].md2q ) / 3.0;
-          // HACK for N_f = 0 background
-//           md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0 * 2;
-//           md2q = md2g * 2.0 / 9.0;
-          
-          // create scattering32 object for the given 3 particles
-          betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
-          I32 = scatt32_object.getIntegral32_fast();                        // get the integral I32 for the given 3 particles
-          
-          probab32 += pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2.0 ) * pow( testpartcl, 2.0 ) * s * P1[0] * P2[0] * P3[0] );
         }
       }
-    }
-    else
-    {
-      //---------------------------- 3->2 ---------------------------
-      for ( int m1 = 0; m1 < static_cast<int>( _allParticlesList.size() ) - 1; m1++ )
+      else
       {
-        iscat = _allParticlesList[m1];
-        if ( !particles_atTimeNow[iscat].dead )
-        {   
-          for ( int m2 = m1 + 1; m2 < _allParticlesList.size(); m2++ )
-          {
-            jscat = _allParticlesList[m2];
-            if ( !particles_atTimeNow[jscat].dead )
+        //---------------------------- 3->2 ---------------------------
+        for ( int m1 = 0; m1 < static_cast<int>( _allParticlesList.size() ) - 1; m1++ )
+        {
+          iscat = _allParticlesList[m1];
+          if ( !particles_atTimeNow[iscat].dead )
+          {   
+            for ( int m2 = m1 + 1; m2 < _allParticlesList.size(); m2++ )
             {
-              F2 = particles_atTimeNow[iscat].FLAVOR;
-              P2[0] = particles_atTimeNow[iscat].E;
-              P2[1] = particles_atTimeNow[iscat].PX;
-              P2[2] = particles_atTimeNow[iscat].PY;
-              P2[3] = particles_atTimeNow[iscat].PZ;
-              
-              F3 = particles_atTimeNow[jscat].FLAVOR;
-              P3[0] = particles_atTimeNow[jscat].E;
-              P3[1] = particles_atTimeNow[jscat].PX;
-              P3[2] = particles_atTimeNow[jscat].PY;
-              P3[3] = particles_atTimeNow[jscat].PZ;
-              
-              s = pow(( P1[0] + P2[0] + P3[0] ), 2 ) - pow(( P1[1] + P2[1] + P3[1] ), 2 ) - pow(( P1[2] + P2[2] + P3[2] ), 2 ) - pow(( P1[3] + P2[3] + P3[3] ), 2 );
-              
-              if ( s > 1.1*lambda2 )
+              jscat = _allParticlesList[m2];
+              if ( !particles_atTimeNow[jscat].dead )
               {
-                n32++;
-                lambda_scaled = lambda * sqrt( s );
+                F2 = particles_atTimeNow[iscat].FLAVOR;
+                P2[0] = particles_atTimeNow[iscat].E;
+                P2[1] = particles_atTimeNow[iscat].PX;
+                P2[2] = particles_atTimeNow[iscat].PY;
+                P2[3] = particles_atTimeNow[iscat].PZ;
                 
-                as = alpha_s( s );
+                F3 = particles_atTimeNow[jscat].FLAVOR;
+                P3[0] = particles_atTimeNow[jscat].E;
+                P3[1] = particles_atTimeNow[jscat].PX;
+                P3[2] = particles_atTimeNow[jscat].PY;
+                P3[3] = particles_atTimeNow[jscat].PZ;
                 
-                md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0;
-                md2g = as * ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q + addedParticles[jetID].md2q ) / 3.0;
-                // HACK for N_f = 0 background
-//                 md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0 * 2;
-//                 md2q = md2g * 2.0 / 9.0;
+                s = pow(( P1[0] + P2[0] + P3[0] ), 2 ) - pow(( P1[1] + P2[1] + P3[1] ), 2 ) - pow(( P1[2] + P2[2] + P3[2] ), 2 ) - pow(( P1[3] + P2[3] + P3[3] ), 2 );
                 
-                // create scattering32 object for the given 3 particles
-                betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
-                I32 = scatt32_object.getIntegral32_fast();                        // get the integral I32 for the given 3 particles
-                
-                probab32 += pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2.0 ) * pow( testpartcl, 2.0 ) * s * P1[0] * P2[0] * P3[0] );
+                if ( s > 1.1*lambda2 )
+                {
+                  n32++;
+                  lambda_scaled = lambda * sqrt( s );
+                  
+                  as = alpha_s( s );
+                  
+                  md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0;
+                  md2g = as * ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q + addedParticles[jetID].md2q ) / 3.0;
+                  // HACK for N_f = 0 background
+  //                 md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0 * 2;
+  //                 md2q = md2g * 2.0 / 9.0;
+                  
+                  // create scattering32 object for the given 3 particles
+                  betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
+                  I32 = scatt32_object.getIntegral32_fast();                        // get the integral I32 for the given 3 particles
+                  
+                  probab32 += pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2.0 ) * pow( testpartcl, 2.0 ) * s * P1[0] * P2[0] * P3[0] );
+                }
               }
             }
           }
         }
       }
+      R32 = scaleForSelectedTriplets * probab32 / dt * rings[nc].getGamma();  // fm^-1
     }
-    R32 = scaleForSelectedTriplets * probab32 / dt * rings[nc].getGamma();  // fm^-1
+    else
+    {
+      R32 = 0.0;
+    }
     //-------------------------------------------------------------
     
     lambda = 1 / ( R22 + R23 + R32 ); //fm

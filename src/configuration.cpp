@@ -64,7 +64,6 @@ config::config() :
  scatt_offlineWithAddedParticles(true),
  scatt_amongOfflineParticles(false),
  scatt_amongAddedParticles(false),
- switchOff_23_32(false),
 // ---- initial state options ----
  initialStateType(miniJetsInitialState),
 #ifdef LHAPDF_FOUND
@@ -289,7 +288,6 @@ void config::initializeProgramOptions()
   ("simulation.scatt_offlineWithAdded", po::value<bool>( &scatt_offlineWithAddedParticles )->default_value( scatt_offlineWithAddedParticles ), "whether offline particles are allowed to scatter with added particles")
   ("simulation.scatt_amongOffline", po::value<bool>( &scatt_amongOfflineParticles )->default_value( scatt_amongOfflineParticles ), "whether offline particles are allowed to scatter with other offline particles")
   ("simulation.scatt_amongAdded", po::value<bool>( &scatt_amongAddedParticles )->default_value( scatt_amongAddedParticles ), "whether added particles are allowed to scatter with other added particles")
-  ("simulation.switchOff_23_32", po::value<bool>( &switchOff_23_32 )->default_value( switchOff_23_32 ), "whether 2->3 and 3->2 processed are switched off for added particles")
   ;
   
   // Group some options related to the initial state

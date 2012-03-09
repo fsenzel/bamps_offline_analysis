@@ -132,9 +132,6 @@ class config : public configBase
   
   /** @brief Interface for config::N_heavy_flavors_input */
   int getNheavyFlavorsAdded() const {return N_heavy_flavors_input;}
-  
-  /** @brief Interface for config::switchOff_23_32 */
-  bool isSwitchOff_23_32() const {return switchOff_23_32;}
   /** ------------------------------- */
 
   /** ---- initial state options ---- */ 
@@ -393,9 +390,6 @@ class config : public configBase
   
   /** @brief Whether added particles are allowed to scatter with other added particles */
   bool scatt_amongAddedParticles;
-  
-  /** @brief Whether 2->3 and 3->2 processed are switched off for added particles */
-  bool switchOff_23_32;
   /** ------------------------------- */
   
   /** ---- initial state options ---- */ 
