@@ -19,7 +19,7 @@ FIND_PACKAGE(Boost 1.40 COMPONENTS serialization filesystem program_options rege
  MESSAGE(STATUS "** Boost Libraries: ${Boost_LIBRARY_DIRS}")
 
 ######### Find Cuba library #########
-FIND_PACKAGE(Cuba REQUIRED)
+FIND_PACKAGE(Cuba)
 
 ######### Find LHAPDF library #########
 FIND_PACKAGE(LHAPDF)

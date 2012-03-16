@@ -31,7 +31,7 @@ INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( Cuba DEFAULT_MSG Cuba_LIBRARY Cuba_INCLUDE_DIR)
 
 # display some status information
-SET ( Cuba_FOUND CUBA_FOUND CACHE INTERNAL "Provide Cuba_FOUND in addition to CUBA_FOUND" FORCE )
+SET ( Cuba_FOUND ${CUBA_FOUND} CACHE INTERNAL "Provide Cuba_FOUND in addition to CUBA_FOUND" FORCE )
 IF( Cuba_FOUND )
  MESSAGE( STATUS "** Cuba library: ${Cuba_LIBRARIES}" )
  MESSAGE( STATUS "** Cuba include: ${Cuba_INCLUDE_DIRS}" )
