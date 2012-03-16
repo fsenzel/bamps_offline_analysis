@@ -206,7 +206,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   
   list<int> edgeCellCopy, edgeCellAddedCopy;
 
-  gG = 2 * ( pow( Ncolor, 2 ) - 1 );
+  gG = 2 * ( pow( static_cast<double>( Ncolor ) , 2 ) - 1 );
   gQ = 2 * Ncolor;
 
   dx = theConfig->get_dx();
@@ -343,7 +343,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       cout << "# time = " << simulationTime << "    dt = " << dt << endl;
       break;
     }
-    cout << "# time = " << simulationTime << "    dt = " << dt << endl;
+//     cout << "# time = " << simulationTime << "    dt = " << dt << endl;
 
     p23_collected_gluon = 0;
     n23_collected_gluon = 0;
@@ -1249,7 +1249,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
   
   formGeomCopy = formGeom;
 
-  gG = 2 * ( pow( Ncolor, 2 ) - 1 );
+  gG = 2 * ( pow( static_cast<double>( Ncolor ) , 2 ) - 1 );
   
   if ( !formGeomCopy.empty() )
   {
@@ -2332,7 +2332,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
         betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
         I32 = scatt32_object.getIntegral32_fast();                        // get the integral I32 for the given 3 particles
 
-        probab32 = scaleForSelectedTriplets * pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2 ) * pow( testpartcl, 2 ) * s * P1[0] * P2[0] * P3[0] );
+        probab32 = scaleForSelectedTriplets * pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2 ) * pow( static_cast<double>( testpartcl ), 2 ) * s * P1[0] * P2[0] * P3[0] );
       }
 
       if ( probab32 > 1.0 )
@@ -2495,7 +2495,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
             betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
             I32 = scatt32_object.getIntegral32_fast();                        // get the integral I32 for the given 3 particles
 
-            probab32 = pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2 ) * pow( testpartcl, 2 ) * s * P1[0] * P2[0] * P3[0] );
+            probab32 = pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2 ) * pow( static_cast<double>( testpartcl ), 2 ) * s * P1[0] * P2[0] * P3[0] );
           }
 
           if ( probab32 > 1.0 )
@@ -3619,7 +3619,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
             betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
             I32 = scatt32_object.getIntegral32_fast();                        // get the integral I32 for the given 3 particles
             
-            probab32 += pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2.0 ) * pow( testpartcl, 2.0 ) * s * P1[0] * P2[0] * P3[0] );
+            probab32 += pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2.0 ) * pow( static_cast<double>( testpartcl ) , 2.0 ) * s * P1[0] * P2[0] * P3[0] );
           }
         }
       }
@@ -3667,7 +3667,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
                   betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
                   I32 = scatt32_object.getIntegral32_fast();                        // get the integral I32 for the given 3 particles
                   
-                  probab32 += pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2.0 ) * pow( testpartcl, 2.0 ) * s * P1[0] * P2[0] * P3[0] );
+                  probab32 += pow( 0.197, 5.0 ) * 9.0 * M_PI * Ncolor * pow( as, 3.0 ) * dt * I32 / ( gG * pow( dv, 2.0 ) * pow( static_cast<double>( testpartcl ), 2.0 ) * s * P1[0] * P2[0] * P3[0] );
                 }
               }
             }
