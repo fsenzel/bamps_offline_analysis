@@ -39,6 +39,8 @@ public:
 
   void initialize();
   void mainFramework( analysis& aa );
+  
+  void onlyMediumEvolution( analysis& aa );
 
   double evolveMedium( const double evolveToTime, bool& _endOfDataFiles );
   void scattering( const double nexttime, bool& again, analysis& aa );

@@ -44,6 +44,10 @@ enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeM
  * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
 */
 enum OUTPUT_SCHEME { no_output = 0, 
+
+// medium output
+dndy_time = 201,
+
 // heavy quarks:
 phenix_hq_electrons = 101,
 alice_hq_electrons = 111,
@@ -277,6 +281,9 @@ class config : public configBase
   int getNaddedEvents() const { return numberOfAddedEvents; }
   /** @brief Interface for config::minimumPT */
   double getMinimumPT() const { return minimumPT; }
+  
+  /** @brief Interface for config::onlyMediumEvolution */
+  double isOnlyMediumEvolution() const { return true; }
   
   /** @brief Interface for config::ringNumber */
   int getRingNumber() const { return ringNumber; }

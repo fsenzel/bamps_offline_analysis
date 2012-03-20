@@ -81,8 +81,17 @@ int main( int argc, char *argv[] )
     //--------cascade-------------------------------------
     cout << "=============start===============" << endl;
 
-    theHIC.initialize();
-    theHIC.mainFramework( theAnalysis );
+    
+    
+    if( theConfig.isOnlyMediumEvolution() )
+    {
+      theHIC.onlyMediumEvolution( theAnalysis );
+    }
+    else
+    {
+      theHIC.initialize();
+      theHIC.mainFramework( theAnalysis );
+    }
 
     cout << "==============end================" << endl;
     //--------end of cascade------------------------------

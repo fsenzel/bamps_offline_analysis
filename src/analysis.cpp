@@ -64,7 +64,7 @@ analysis::analysis( config* const c ):
   
   handle_output_studies( outputScheme );
   
-  if( studyJpsi ) // jpsi evolution: more timesteps
+  if( studyJpsi || study_dndy_time ) // jpsi evolution: more timesteps
   {
     tstep[0]=.10;
     tstep[1]=.15;
@@ -167,7 +167,7 @@ analysis::analysis( config* const c ):
  
   
   //--------------------------------------
-  string name_fug, name_temp, mfpName, centralDensitiesName, oscarName_jet, oscarName_background;
+  string name_fug, name_temp, mfpName, centralDensitiesName, oscarName_jet, oscarName_background, name_dndy_time;
   if ( studyJpsi )
     name_fug = filename_prefix + "_jpsi_fugacity";
   else
@@ -188,6 +188,13 @@ analysis::analysis( config* const c ):
   else
     centralDensitiesName = "/dev/null";
   
+  if ( study_dndy_time )
+    name_dndy_time = filename_prefix + "_dndy_time";
+  else
+    name_dndy_time = "/dev/null";
+  
+  
+  
   // movie output
   if( theConfig->doOutput_movieOutputBackground() )
     oscarName_background = filename_prefix + "_background.oscar";
@@ -205,6 +212,7 @@ analysis::analysis( config* const c ):
   centralDensitiesOutputFile.open( centralDensitiesName.c_str(), ios::out );
   oscarBackground.open( oscarName_background.c_str(), ios::out );
   oscarJets.open( oscarName_jet.c_str(), ios::out );
+  printDndyTime.open( name_dndy_time.c_str(), ios::out );
   //--------------------------------------
 
   jetTracking_PT = 10.0;
@@ -432,6 +440,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyJets = false; // study jets
   studyCentralDensity = false; // density in central part of collision
   studyBackground = false; // print also properties like v2, RAA of background
+  study_dndy_time = false; // study background medium's dndy and dedy etc. as a function of time
   
   
   //---- defining standard rapidity ranges ----
@@ -537,6 +546,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
+      break;
+    case dndy_time:
+      study_dndy_time = true;
       break;
     default:
       break;
@@ -645,6 +657,9 @@ void analysis::initialOutput()
   if ( studyParticleOutput )
     particleOutput( 0 );
   
+  if ( study_dndy_time )
+    print_dndy_time( 0 );
+  
 }
 
 
@@ -677,6 +692,9 @@ void analysis::intermediateOutput( const int nn )
   
   if ( dndyOutput )
     print_dndy( name );
+  
+  if ( study_dndy_time )
+    print_dndy_time( nn + 1 );
 }
 
 
@@ -4196,6 +4214,67 @@ void analysis::printJpsiEvolution()
 
 
 
+void analysis::print_dndy_time( int step )
+{
+  double pt;
+  
+  const double rapidity_range = 0.5;
+  
+  int number_g = 0;
+  int number_q = 0;
+  
+  double energy_g = 0;
+  double energy_q = 0;
+  
+  double pt_g = 0;
+  double pt_q = 0;
+  
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+    // normal rapidity
+    double normrap = 0.5 * log(( particles_atTimeNow[i].E + particles_atTimeNow[i].PZ ) / ( particles_atTimeNow[i].E - particles_atTimeNow[i].PZ ) );
+    
+    if( fabs( normrap ) < rapidity_range )
+    {
+      if( particles_atTimeNow[i].FLAVOR == gluon )
+      {
+        number_g++;
+        energy_g += particles_atTimeNow[i].E;
+        pt = sqrt( pow( particles_atTimeNow[i].PX , 2.0 ) + pow( particles_atTimeNow[i].PY , 2.0 ) );
+        pt_g += pt;
+      }
+      else if( Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == light_quark || Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == anti_light_quark )
+      {
+        number_q++;
+        energy_q += particles_atTimeNow[i].E;
+        pt = sqrt( pow( particles_atTimeNow[i].PX , 2.0 ) + pow( particles_atTimeNow[i].PY , 2.0 ) );
+        pt_q += pt;
+      }
+    }
+  }
+  
+  if ( step == 0 )
+    printDndyTime << "# time   N gluons   N quarks   E gluons   E quarks   E_T gluons   E_T quarks" << endl;
+  
+  printDndyTime.width( 15 );
+  if ( step == 0 )
+    printDndyTime << "0";
+  else
+    printDndyTime << tstep[step-1];
+  printDndyTime.width( 15 );
+  printDndyTime << number_g / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << number_q / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << energy_g / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << energy_q / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << pt_g / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << pt_q / theConfig->getTestparticles();
+  printDndyTime << endl;
+}
 
 
 

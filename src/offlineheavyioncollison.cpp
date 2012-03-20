@@ -3737,4 +3737,125 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
 }
 
 
+void offlineHeavyIonCollision::onlyMediumEvolution( analysis& aa )
+{
+  double nexttime;
+
+  bool endOfDataFiles = false;
+  bool doAnalysisStep = false;
+  bool doMovieStepMedium = false;
+  
+  vector<double> tempVec( rings.size(), 0 );
+  rateGluons.assign( IZ, tempVec );
+  rateQuarks.assign( IZ, tempVec );
+  rateAntiQuarks.assign( IZ, tempVec );
+  rateGluons_prev.assign( IZ, tempVec );
+  rateQuarks_prev.assign( IZ, tempVec );
+  rateAntiQuarks_prev.assign( IZ, tempVec );
+
+  stoptime = theConfig -> getRuntime();
+  int nn_ana = 0;
+  int nn_ana_movie = 0;
+  int jumpMovieSteps = 0;
+
+  aa.initialOutput();
+  if ( theConfig->doOutput_movieOutputJets() )
+  {
+    aa.movieOutput( 0, jumpMovieSteps );
+  }
+  if ( theConfig->doOutput_movieOutputBackground() )
+  {
+    aa.movieOutputMedium( 0, jumpMovieSteps );
+  }
+  aa.collectPtDataInitial();
+  aa.collectYDataInitial();
+  aa.collectEtDataInitial();
+  simulationTime = theConfig->getTimefirst(); //fm/c
+
+  while ( simulationTime >= aa.tstep[nn_ana] )
+  {
+    nn_ana++;
+  }
+  while ( simulationTime >= aa.tstep_movie[nn_ana_movie] )
+  {
+    nn_ana_movie++;
+    jumpMovieSteps++;
+  }
+
+  do
+  {
+    // time for next analysis or movie
+    double time_ana = aa.tstep[nn_ana];
+    double time_movie = aa.tstep_movie[nn_ana_movie];
+    // determine which one is earlier/smaller
+    if( time_movie < time_ana && theConfig->doOutput_movieOutputBackground() )
+      simulationTime = time_movie;
+    else
+      simulationTime = time_ana;
+
+    if(simulationTime > stoptime)
+      break;
+
+    // evolution of the medium to this time
+    double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
+    
+    if ( endOfDataFiles )
+    {
+      cout << "* End of data files reached. Aborting." << endl;
+      cout << "# time = " << simulationTime << "    dt = " << dt << endl;
+      break;
+    }
+//     cout << "# time = " << simulationTime << "    dt = " << dt << endl;
+
+    if ( FPT_COMP_E( simulationTime, aa.tstep[nn_ana] ) ) // ask if it is time for analysis
+    {
+      doAnalysisStep = true;
+      cout << "profile " << simulationTime << endl;
+    }
+    if ( FPT_COMP_E( simulationTime, aa.tstep_movie[nn_ana_movie] ) && theConfig->doOutput_movieOutputBackground() ) // ask if it is time for movie output
+    {
+      doMovieStepMedium = true;
+      if ( theConfig->doOutput_movieOutputBackground() )
+      {
+        cout << "** movie: " << nexttime << endl;
+      }
+    }
+    
+    if ( doAnalysisStep && doMovieStepMedium )
+    {
+      if ( !FPT_COMP_E(aa.tstep[nn_ana],aa.tstep_movie[nn_ana_movie]) )
+      {
+        string errMsg( "time steps for movie output and general analysis output do not match" );
+        throw eHIC_error( errMsg );
+      }
+    }   
+
+
+    if ( doMovieStepMedium )
+    {
+      if( theConfig->doOutput_movieOutputBackground() )
+        aa.movieOutputMedium( nn_ana_movie - 1, jumpMovieSteps );
+      
+      nn_ana_movie++;
+      doMovieStepMedium = false;
+    }
+
+    if ( doAnalysisStep )
+    {
+      aa.intermediateOutput( nn_ana );
+      aa.collectPtData( nn_ana );
+      aa.collectYData( nn_ana );
+      aa.collectEtData( nn_ana );
+      nn_ana++;
+      doAnalysisStep = false;
+    }
+  }
+  while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
+
+  aa.finalOutput( stoptime );
+}
+
+
+
+
 // kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;

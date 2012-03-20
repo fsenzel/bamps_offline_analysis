@@ -233,6 +233,7 @@ private:
   bool studyJets;
   bool studyCentralDensity;
   bool studyBackground;
+  bool study_dndy_time;
   
   
   
@@ -296,6 +297,7 @@ private:
   fstream oscarJets;
   fstream centralDensitiesOutputFile;
   fstream mfpJetsOutputFile;
+  fstream printDndyTime;
   
   
   
@@ -305,6 +307,8 @@ private:
   void writeTempInTube( const int step  );
   void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  );
   void print_dndy(const string subfix );
+  
+  void print_dndy_time( int step );
   
   bool v2output;
   bool v2outputIntermediateSteps;
