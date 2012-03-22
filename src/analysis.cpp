@@ -4234,6 +4234,9 @@ void analysis::print_dndy_time( int step )
     // normal rapidity
     double normrap = 0.5 * log(( particles_atTimeNow[i].E + particles_atTimeNow[i].PZ ) / ( particles_atTimeNow[i].E - particles_atTimeNow[i].PZ ) );
     
+    // space time rapidity
+    double strap = 0.5 * log(( particles_atTimeNow[i].T + particles_atTimeNow[i].Z ) / ( particles_atTimeNow[i].T - particles_atTimeNow[i].Z ) );
+    
     if( fabs( normrap ) < rapidity_range )
     {
       if( particles_atTimeNow[i].FLAVOR == gluon )
@@ -4254,13 +4257,16 @@ void analysis::print_dndy_time( int step )
   }
   
   if ( step == 0 )
-    printDndyTime << "# time   N gluons   N quarks   E gluons   E quarks   E_T gluons   E_T quarks" << endl;
+    printDndyTime << "# time   N gluons   N quarks   E gluons   E quarks   E_T gluons   E_T quarks          the same for tube, but densities" << endl;
+  
+  double time;
+  if ( step == 0 )
+    time = 0.0;
+  else
+    time = tstep[step-1];
   
   printDndyTime.width( 15 );
-  if ( step == 0 )
-    printDndyTime << "0";
-  else
-    printDndyTime << tstep[step-1];
+  printDndyTime << time;
   printDndyTime.width( 15 );
   printDndyTime << number_g / theConfig->getTestparticles();
   printDndyTime.width( 15 );
@@ -4273,6 +4279,60 @@ void analysis::print_dndy_time( int step )
   printDndyTime << pt_g / theConfig->getTestparticles();
   printDndyTime.width( 15 );
   printDndyTime << pt_q / theConfig->getTestparticles();
+  
+  
+  
+  number_g = 0;
+  number_q = 0;
+  energy_g = 0;
+  energy_q = 0;
+  pt_g = 0;
+  pt_q = 0;
+  
+  const double radius = 15.0; //fm
+  const double deta = 0.2; // spacetime rapidty interval
+  const double dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
+  // total length in z direction
+  const double zlength = dz*2.0;
+  // volume
+  dv = M_PI * pow( radius , 2.0 ) * zlength; // 1/GeV^3
+  
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+
+    if (( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Z ) < dz ))
+    {
+      if( particles_atTimeNow[i].FLAVOR == gluon )
+      {
+        number_g++;
+        energy_g += particles_atTimeNow[i].E;
+        pt = sqrt( pow( particles_atTimeNow[i].PX , 2.0 ) + pow( particles_atTimeNow[i].PY , 2.0 ) );
+        pt_g += pt;
+      }
+      else if( Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == light_quark || Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == anti_light_quark )
+      {
+        number_q++;
+        energy_q += particles_atTimeNow[i].E;
+        pt = sqrt( pow( particles_atTimeNow[i].PX , 2.0 ) + pow( particles_atTimeNow[i].PY , 2.0 ) );
+        pt_q += pt;
+      }
+    }
+  }
+  
+  printDndyTime.width( 30 );
+  printDndyTime << number_g / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << number_q / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << energy_g / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << energy_q / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << pt_g / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << pt_q / theConfig->getTestparticles() / dv;
+  
+  
   printDndyTime << endl;
 }
 
