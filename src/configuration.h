@@ -126,7 +126,10 @@ class config : public configBase
   
   /** @brief Interface for config::scatt_amongAddedParticles */
   bool isScatt_amongAddedParticles() const {return scatt_amongAddedParticles;}
-  
+
+  /** @brief Interface for config::scatt_furtherOfflineParticles */
+  bool isScatt_furtherOfflineParticles() const {return scatt_furtherOfflineParticles;}
+
   /** @brief Interface for config::N_light_flavors_input */
   int getNlightFlavorsAdded() const {return N_light_flavors_input;}
   
@@ -391,7 +394,11 @@ class config : public configBase
   /** @brief Whether added particles are allowed to scatter with other added particles */
   bool scatt_amongAddedParticles;
   /** ------------------------------- */
-  
+
+  /** @brief Whether scattered offline particles are allowed to scatter again with other added particles */
+  bool scatt_furtherOfflineParticles;
+  /** ------------------------------- */
+
   /** ---- initial state options ---- */ 
   /** @brief Which type of initial state to use */
   INITIAL_STATE_TYPE initialStateType;
