@@ -283,7 +283,7 @@ class config : public configBase
   double getMinimumPT() const { return minimumPT; }
   
   /** @brief Interface for config::onlyMediumEvolution */
-  double isOnlyMediumEvolution() const { return true; }
+  double isOnlyMediumEvolution() const { return onlyMediumEvolution; }
   
   /** @brief Interface for config::ringNumber */
   int getRingNumber() const { return ringNumber; }
@@ -586,6 +586,9 @@ class config : public configBase
   int numberOfAddedEvents;
   /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT; 
+  
+  /** @brief Whether to do only medium evolution without scatterings or rate and debye mass calculations */
+  bool onlyMediumEvolution;
   
   
   // the following parameters are read at runtime from the offline data recorded by the original run, 

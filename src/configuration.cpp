@@ -120,6 +120,7 @@ config::config() :
  numberOfParticlesToAdd(0),
  numberOfAddedEvents(1),
  minimumPT(10.0),
+ onlyMediumEvolution( false ),
 //---- program_options groups ----
  initial_state_options("Options and parameters for the initial state used by the BAMPS simulation"),
  offline_options("Offline reconstruction options")
@@ -354,6 +355,7 @@ void config::initializeProgramOptions()
   ("offline.nAdded", po::value<int>( &numberOfParticlesToAdd)->default_value( numberOfParticlesToAdd ), "number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background. Do not use together with nAddedEvents." )
   ("offline.nAddedEvents", po::value<int>( &numberOfAddedEvents)->default_value( numberOfAddedEvents ), "number of heavy ion collision events, set on top of the offline reconstruction. Do not use together with nAdded. This input is needed if Pythia data files are read in to normalize the total yield of the particles. The number of one such heavy ion collision event includes < number of produced particles in pp > * Ntest * Nbin" )
   ("offline.minPT_added", po::value<double>( &minimumPT )->default_value( minimumPT ), "minimum p_T [GeV] of the added particles. If p_T of added particle falls below this value it does not scatter anymore.")
+  ("offline.onlyMediumEvolution", po::value<bool>( &onlyMediumEvolution )->default_value( onlyMediumEvolution ), "whether to do only medium evolution without scatterings or rate and debye mass calculations.")
   ;
 }
 
