@@ -473,11 +473,13 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       studyHQ = true;
       
       rapidityRanges.clear();
-      yRange.reset( 0, 0.5 );
+      yRange.reset( 0, 0.8 );
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 1.0 );
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
       rapidityRanges.push_back(yRange);
       break;
     case alice_hq_muons:
@@ -490,6 +492,8 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 0.5 );
       rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.8 );
+      rapidityRanges.push_back(yRange);
       yRange.reset( 0, 1.0 );
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 2.0 );
@@ -500,6 +504,8 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       
       rapidityRanges.clear();
       yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.8 );
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 1.0 );
       rapidityRanges.push_back(yRange);
