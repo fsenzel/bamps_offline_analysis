@@ -37,8 +37,8 @@ class Particle : public ParticlePrototype
     Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), N_EVENT_pp( 0 ), HARD( true ), 
     N_EVENT_AA( 0 ), edge( -1 ), coll_id( -1 ), collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), 
     PYold( 0 ), PZold( 0 ), as22( 0 ), as23( 0 ), rate23v( 0 ), rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ),
-    cs22t( 0 ), cs23t( 0 ), lambda_scaled( 0 ), md2g_scaled_22( 0 ),md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), 
-    md2q_scaled_23( 0 ), free( true ), init( true ), 
+    lambda_scaled( 0 ), free( true ), init( true ), 
+//     md2g_scaled_22( 0 ),md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), md2q_scaled_23( 0 ), 
     step( 0 ), tstep( 0 ), taustep( 0 ) {};
     
     /** @brief space time rapidity \eta */
@@ -93,21 +93,17 @@ class Particle : public ParticlePrototype
     /** @brief Mean 2->2 cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
     double cs22;
     /** @brief Mean 2->3 cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
-    double cs23; 
-    /** @brief Mean 2->2 transport cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
-    double cs22t;
-    /** @brief Mean 2->3 transport cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
-    double cs23t;
+    double cs23;
     /** @brief Mean lambda_scaled associated with this particle, averaged over cell in previous time step */
     double lambda_scaled;
-    /** @brief Mean md2g (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
-    double md2g_scaled_22;
-    /** @brief Mean md2q (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
-    double md2q_scaled_22;
-    /** @brief Mean md2g (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
-    double md2g_scaled_23;
-    /** @brief Mean md2q (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
-    double md2q_scaled_23;
+//     /** @brief Mean md2g (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
+//     double md2g_wo_as_scaled_22;
+//     /** @brief Mean md2q (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
+//     double md2q_wo_as_scaled_22;
+//     /** @brief Mean md2g (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
+//     double md2g_wo_as_scaled_23;
+//     /** @brief Mean md2q (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
+//     double md2q_wo_as_scaled_23;
     
     int step,tstep,taustep;//fm
     
@@ -130,11 +126,13 @@ class ParticleOffline : public Particle
     ParticleOffline() : Particle(), T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
     PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
     X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
+    lambda_added( -1 ), lambda_added_old( -1 ), rate_added( -1 ),
     Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
     
     ParticleOffline( const Particle& _particle ) : Particle( _particle ), T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
     PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
     X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
+    lambda_added( -1 ), lambda_added_old( -1 ), rate_added( -1 ),
     Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
     
     /** @brief counter for unique particle IDs of added particles (static) */
@@ -151,6 +149,15 @@ class ParticleOffline : public Particle
     
     /** @brief If c+cbar form a Jpsi the variable N_EVENT_pp of the cbar is stored in this variable to be still accessible, In particular if the Jpsi dissociates again. */
     int N_EVENT_Cbar;
+    
+    /** @brief Mean free path of the added particle in this time step */
+    double lambda_added; // fm
+    
+    /** @brief Mean free path of the added particle in the previous time step */
+    double lambda_added_old; // fm
+    
+    /** @brief Rate of the added particle in this time step */
+    double rate_added; // 1/fm
     
     /** stuff special to offline reconstruction */
     double T_creation;

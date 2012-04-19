@@ -61,14 +61,20 @@ void initialModel_Mcatnlo::sampleMomenta( std::vector< Particle >& _particles )
   
   readParticles.close();
   
-  // charm quarks in Pythia have a mass of 1.5 GeV
-  // make charm quarks from pythia lighter, if Mcharm is not 1.5 GeV
-  const double M_old_charm = 1.3;
-  changeCharmMass( _particles, M_old_charm );
-  
-  // make bottom quarks from pythia lighter, if Mbottom is not 4.8 GeV
-  const double M_old_bottom = 4.6;
-  changeBottomMass( _particles, M_old_bottom );
+  // charm quarks in MC@NLO have a mass of 1.3 GeV
+  // make charm quarks from pythia lighter, if Mcharm is not 1.3 GeV
+  if( Particle::N_heavy_flavor > 0 )
+  {
+    const double M_old_charm = 1.3;
+    changeCharmMass( _particles, M_old_charm );
+    
+    // make bottom quarks from pythia lighter, if Mbottom is not 4.6 GeV
+    if( Particle::N_heavy_flavor > 1 )
+    {
+      const double M_old_bottom = 4.6;
+      changeBottomMass( _particles, M_old_bottom );
+    }
+  }
 
 }
 

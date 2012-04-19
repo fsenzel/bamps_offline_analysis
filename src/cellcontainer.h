@@ -82,15 +82,13 @@ public:
   double alpha_s_22;
   double alpha_s_23;
 
-  double md2g_scaled_22;
-  double md2q_scaled_22;
-  double md2g_scaled_23;
-  double md2q_scaled_23;
+  double md2g_wo_as_scaled_22;
+  double md2q_wo_as_scaled_22;
+  double md2g_wo_as_scaled_23;
+  double md2q_wo_as_scaled_23;
 
   double sigma_22;
   double sigma_23;
-  double sigma_transport_22;
-  double sigma_transport_23;
 
   double lambdaScaled;
 

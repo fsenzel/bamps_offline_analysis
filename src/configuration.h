@@ -37,8 +37,8 @@ enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialSt
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
 
-/** @brief Enumeration type for different variants of computing the mean free path of high-pt particles */
-enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeMfpInterpolation };
+// /** @brief Enumeration type for different variants of computing the mean free path of high-pt particles */
+// enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeMfpInterpolation };
 
 /** @brief Enumeration type for different output schemes to decide which kind of output is printed 
  * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
@@ -247,11 +247,23 @@ class config : public configBase
   /** -------- miscellaneous options ------- */ 
   bool repeatTimesteps() const { return switch_repeatTimesteps; }
   
-  /** @brief Interface for config::interpolationBorder */
-  double getMFPInterpolationBorder() const {return interpolationBorder;}
+//   /** @brief Interface for config::mfp_added_set */
+//   bool mfpAddedIsSet() const {return mfp_added_set;}
+//   
+//   /** @brief Interface for config::mfp_added */
+//   double getMfpAdded() const {return mfp_added;}
   
-  /** @brief Interface for config::jetMfpComputationSwitch */
-  JET_MFP_COMPUTATION_TYPE getJetMfpComputationType() const {return jetMfpComputationSwitch;}
+  /** @brief Interface for config::mfpAddedRangeVariation */
+  double getMfpAddedRangeVariation() const {return mfpAddedRangeVariation;}
+  
+  /** @brief Interface for config::iterateMfpAdded */
+  bool isIterateMfpAdded() const {return  iterateMfpAdded;}
+  
+//   /** @brief Interface for config::interpolationBorder */
+//   double getMFPInterpolationBorder() const {return interpolationBorder;}
+//   
+//   /** @brief Interface for config::jetMfpComputationSwitch */
+//   JET_MFP_COMPUTATION_TYPE getJetMfpComputationType() const {return jetMfpComputationSwitch;}
   /** ------------------------------------ */
   
   /** -------- offline reconstruction options ------- */ 
@@ -532,18 +544,31 @@ class config : public configBase
   
   /** -------- miscellaneous options ------- */ 
   // provided by base class:
-  // bool localCluster
   
-  /** @brief X where interpolation of MFP is done for E > X*T */
-  double interpolationBorder; 
-   
-  /** @brief How to compute the mean free path high energy particles?
-   *
-   * 0 = computeMfpDefault = default, i.e. no special treatment
-   * 1 = computeMfpIteration = iterative computation
-   * 2 = computeMfpInterpolation = use tabulated mfp data and interpolation functions
+//   /** @brief Whether the mean free path of added particles is set by hand. Does not depend on energy of particle, only for testing. */
+//   bool mfp_added_set;
+//   
+//   /** @brief Mean free path of added particles set by hand. Does not depend on energy of particle, only for testing. */
+//   double mfp_added;
+  
+  /** @brief Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be. 
+   * For new value the region [oldvalue * (1 - mfpAddedRangeVariation/100) , oldvalue * (1 + mfpAddedRangeVariation/100) ] is tested. Used in iterate_mfp_bisection(),  
    */
-  JET_MFP_COMPUTATION_TYPE jetMfpComputationSwitch;
+  double mfpAddedRangeVariation;
+  
+  /** @brief Whether the mean free path of the added particle should be iterated in every time step. Otherwise use values from last time step if available.  */
+  bool iterateMfpAdded;
+  
+//   /** @brief X where interpolation of MFP is done for E > X*T */
+//   double interpolationBorder; 
+//    
+//   /** @brief How to compute the mean free path high energy particles?
+//    *
+//    * 0 = computeMfpDefault = default, i.e. no special treatment
+//    * 1 = computeMfpIteration = iterative computation
+//    * 2 = computeMfpInterpolation = use tabulated mfp data and interpolation functions
+//    */
+//   JET_MFP_COMPUTATION_TYPE jetMfpComputationSwitch;
   
   /** @brief Whether timesteps are repeated in cases where the probability has been > 1 */
   bool switch_repeatTimesteps;

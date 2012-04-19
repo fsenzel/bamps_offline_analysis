@@ -51,7 +51,13 @@ private:
   offlineOutputInterface* offlineInterface;
   
   config * const theConfig;
-  interpolation23 theI23;
+
+  /** @brief  interpolation23 object that provides access to tabulated values for the cross section of all 2->3 processes with running coupling */
+  interpolation23 theI23_massless;
+  interpolation23 theI23_charm_m1;
+  interpolation23 theI23_charm_m2;
+  interpolation23 theI23_bottom_m1;
+  interpolation23 theI23_bottom_m2;
   
   /** @brief  interpolation22 object that provides access to tabulated values for the cross section of all 2->2 processes with running coupling */
   interpolation22 theI22;
@@ -106,6 +112,7 @@ private:
   void jpsi_dissociation_td( const double time );
 
   double iterateMFP( std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, const int jetID, const double dt, const double dv );
+  double iterate_mfp_bisection( std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, const int jetID, const double dt, const double dv, const double lambda_old );
   
   void removeDeadParticles( analysis& _aa );
   

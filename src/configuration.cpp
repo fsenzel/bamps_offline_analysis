@@ -108,8 +108,12 @@ config::config() :
  hqCorrelationsOutput(false),
 // ---- miscellaneous options ----
  switch_repeatTimesteps(true),
- jetMfpComputationSwitch(computeMfpDefault),
- interpolationBorder(50),
+//  jetMfpComputationSwitch(computeMfpDefault),
+//  interpolationBorder(50),
+//  mfp_added_set( false ),
+//  mfp_added( 1.0 ),
+ mfpAddedRangeVariation( 100.0 ),
+ iterateMfpAdded( true ),
  // ---- offline reconstruction options ----
  pathdirOfflineData("offline_data"),
  originalName("default"),
@@ -238,18 +242,18 @@ void config::processProgramOptions()
     }
   }
 
-  if ( vm.count("misc.jet_mfp_computation") )
-  {
-    if ( vm["misc.jet_mfp_computation"].as<int>() < 3 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
-    {
-      jetMfpComputationSwitch = static_cast<JET_MFP_COMPUTATION_TYPE>( vm["misc.jet_mfp_computation"].as<int>() );
-    }
-    else
-    {
-      string errMsg = "parameter \"misc.jet_mfp_computation\" out of range";
-      throw eConfig_error( errMsg );      
-    }
-  }
+//   if ( vm.count("misc.jet_mfp_computation") )
+//   {
+//     if ( vm["misc.jet_mfp_computation"].as<int>() < 3 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
+//     {
+//       jetMfpComputationSwitch = static_cast<JET_MFP_COMPUTATION_TYPE>( vm["misc.jet_mfp_computation"].as<int>() );
+//     }
+//     else
+//     {
+//       string errMsg = "parameter \"misc.jet_mfp_computation\" out of range";
+//       throw eConfig_error( errMsg );      
+//     }
+//   }
   
   if ( vm.count("heavy_quark.shadowing_model") )
   {
@@ -340,9 +344,14 @@ void config::initializeProgramOptions()
   // Add some miscellaneous options
   misc_options.add_options()
   ("misc.repeat_timesteps", po::value<bool>( &switch_repeatTimesteps )->default_value( switch_repeatTimesteps ), "repeat timesteps in cases where the probability has been > 1" ) 
-  ("misc.interpolation_border", po::value<double>( &interpolationBorder )->default_value( interpolationBorder ), "X where interpolation of MFP is done for E > X*T")
-  ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "special treatment for the mean free path of high energy particles")
+//   ("misc.interpolation_border", po::value<double>( &interpolationBorder )->default_value( interpolationBorder ), "X where interpolation of MFP is done for E > X*T")
+//   ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "special treatment for the mean free path of high energy particles")
+//   ("misc.mfp_added_set", po::value<bool>( &mfp_added_set )->default_value( mfp_added_set ), "Whether the mean free path of added particles is set by hand. Does not depend on energy of particle, only for testing." )
+//   ("misc.mfp_added", po::value<double>( &mfp_added )->default_value( mfp_added ), "Mean free path of added particles set by hand. Does not depend on energy of particle" )
+  ("misc.mfpAddedRangeVariation", po::value<double>( &mfpAddedRangeVariation )->default_value( mfpAddedRangeVariation ), "Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be" )
+  ("misc.iterateMfpAdded", po::value<bool>( &iterateMfpAdded )->default_value( iterateMfpAdded ), "Whether the mean free path of the added particle should be iterated in every time step" )
   ;
+
   
   // Group offline reconstruction options
   offline_options.add_options()
@@ -464,6 +473,7 @@ void config::printUsedConfigurationParameters()
   printOptionsDescriptionToIniFormat( simulation_parameters, output );
   printOptionsDescriptionToIniFormat( initial_state_options, output );
   printOptionsDescriptionToIniFormat( output_options, output );
+  printOptionsDescriptionToIniFormat( parameters23, output );
   printOptionsDescriptionToIniFormat( misc_options, output );
   if( Particle::N_heavy_flavor > 0 )
     printOptionsDescriptionToIniFormat( heavy_quark_options, output );
