@@ -119,6 +119,9 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
       
     }
   }
+  
+  nGet23Errors = 0;
+  nGet32Errors = 0;
 }
 
 
@@ -555,6 +558,10 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
   aa.finalOutput( stoptime );
   aa.addJetEvents_final();
+  
+  
+  cout << "number of errors in get32(...) = " << nGet32Errors << endl;
+  cout << "number of errors in get23(...) = " << nGet23Errors << endl;
   
   // List particle numbers for all flavors
   cout << "==========================" << endl;
@@ -2701,7 +2708,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   addedParticles[jscat].Z_lastInt = addedParticles[jscat].Z;
   addedParticles[jscat].T_lastInt = addedParticles[jscat].T;
 
-  scatt23_obj.getMomenta23( pt1, pt3, y, phi, pz1, typ, F1, F2 );
+  nGet23Errors += scatt23_obj.getMomenta23( pt1, pt3, y, phi, pz1, typ, F1, F2 );
   scatt23_obj.setNewMomenta23( P1, P2, P3, R1, R2, pt1, pt3, y, phi, pz1 );
 
   double pt_out1 = sqrt( pow( P1[1], 2 ) + pow( P1[2], 2 ) );
@@ -3075,7 +3082,7 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
   addedParticles[kscat].Y = R3[2] + P3[2] * cc;
   addedParticles[kscat].Z = R3[3] + P3[3] * cc;
 
-  scatt32_obj.getMomenta32( u, phi, picked_ratio, typ, F1, F2 );
+  nGet32Errors += scatt32_obj.getMomenta32( u, phi, picked_ratio, typ, F1, F2 );
 
   if ( scatt32_obj.getCollisionStatus() )
   {

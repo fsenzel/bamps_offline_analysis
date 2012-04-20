@@ -61,6 +61,25 @@ private:
   
   /** @brief  interpolation22 object that provides access to tabulated values for the cross section of all 2->2 processes with running coupling */
   interpolation22 theI22;
+  
+  /** 
+   * @brief Accumulated number of sampling errors in
+   * scattering23::getMomenta23
+   *
+   * Can give hints on the validity of the envelope function. Should
+   * be "small".
+   */
+  int nGet23Errors;
+
+  /** 
+   * @brief Accumulated number of sampling errors in
+   * scattering32::getMomenta32
+   *
+   * Only needed for rejection sampling, 0 for Metropolis sampling per
+   * construction. For rejection sampling: can give hints on the
+   * validity of the envelope function. Should be "small". 
+   */
+  int nGet32Errors;
 
   //--parameters taken from config--------------------------------------------
   double stop;       //total simulated runtime in fm/c
