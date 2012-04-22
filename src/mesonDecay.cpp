@@ -128,8 +128,10 @@ void mesonDecay::decayToElectronsPythia()
         event.append(  id, 1, 0,   0, addedParticlesCopy[i].PX, addedParticlesCopy[i].PY,  addedParticlesCopy[i].PZ, ee, mm); // add particle to event, status=1 ensures that no message about non vanishing total charge pops up
 
         // Generate events. Quit if failure.
-        if (!pythia.next()) {
-          cout << " Event generation aborted prematurely, owing to error!\n"; 
+        if (!pythia.next()) 
+        {
+          std::string errMsg = "PYTHIA event generation aborted prematurely, owing to error!";
+          throw eMesonDecay_error( errMsg );
         }
     
 //         if(k_e < 10)
