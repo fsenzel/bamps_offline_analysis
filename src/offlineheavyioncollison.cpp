@@ -1842,8 +1842,26 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           addedParticles[jscat].lambda_added = iterate_mfp_bisection( _allParticlesList, _gluonList, jscat, dt, dv, addedParticles[jscat].lambda_added_old ); // fm
         else
         {
-          double velocity = sqrt( 1.0 - pow( addedParticles[jscat].m ,2.0) / pow( addedParticles[jscat].E ,2.0) );
-          addedParticles[jscat].lambda_added = velocity / addedParticles[jscat].rate_added; // fm
+          xt = sqrt( pow( addedParticles[jscat].X, 2 )  + pow( addedParticles[jscat].Y, 2 ) ) ;
+          ringIndex = rings.getIndex( xt );
+          // velocity of cell
+          double vx_cell = rings[ringIndex].getAveraged_v_x();
+          double vy_cell = rings[ringIndex].getAveraged_v_y();
+          double vz_cell = rings[ringIndex].getAveraged_v_z();
+          
+          // velocity of added particle in lab frame
+          double vx_jet = addedParticles[jscat].PX / addedParticles[jscat].E;
+          double vy_jet = addedParticles[jscat].PY / addedParticles[jscat].E;
+          double vz_jet = addedParticles[jscat].PZ / addedParticles[jscat].E;
+//           double velocity_lab = sqrt( 1.0 - pow( addedParticles[jscat].m ,2.0) / pow( addedParticles[jscat].E ,2.0) );
+          
+          // Compute velocity of added particle in rest frame of fluid. The general expression for adding two velocities is not symmetric in v1 and v2. Therefore compute both cases and take average.
+          double velocity_rest_1 = addVelocities( vx_cell, vy_cell, vz_cell, vx_jet, vy_jet, vz_jet );
+          double velocity_rest_2 = addVelocities( vx_jet, vy_jet, vz_jet, vx_cell, vy_cell, vz_cell );
+          double velocity_rest = ( velocity_rest_1 + velocity_rest_2 ) / 2.0;
+          
+          // mean free path in rest frame. Consequently the velocity in the rest frame is needed.
+          addedParticles[jscat].lambda_added = velocity_rest / addedParticles[jscat].rate_added; // fm
         }
       }
       else
@@ -3461,7 +3479,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
   deque<double> lambdaArray;
   double betaDistEntry;
   double M1, M2, P1P2; 
-  double velocity_jet;
+  double velocity_jet_restframe;
   
   int initialStateIndex = -1;
   FLAVOR_TYPE F1, F2, F3;
@@ -3761,16 +3779,24 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
     //-------------------------------------------------------------
     
     
-    // velocity of added particle
-    velocity_jet = sqrt( 1.0 - pow( addedParticles[jetID].m ,2.0) / pow( addedParticles[jetID].E ,2.0) );
+    // velocity of added particle in lab frame
+    double vx_jet = addedParticles[jetID].PX / addedParticles[jetID].E;
+    double vy_jet = addedParticles[jetID].PY / addedParticles[jetID].E;
+    double vz_jet = addedParticles[jetID].PZ / addedParticles[jetID].E;
+//     double velocity_lab = sqrt( 1.0 - pow( addedParticles[jetID].m ,2.0) / pow( addedParticles[jetID].E ,2.0) );
     
+    // Compute velocity of added particle in rest frame of fluid. The general expression for adding two velocities is not symmetric in v1 and v2. Therefore compute both cases and take average.
+    double velocity_rest_1 = addVelocities( vx, vy, vz, vx_jet, vy_jet, vz_jet );
+    double velocity_rest_2 = addVelocities( vx_jet, vy_jet, vz_jet, vx, vy, vz );
+    velocity_jet_restframe = ( velocity_rest_1 + velocity_rest_2 ) / 2.0;
+
     const double epsilon_rate = 1E-3; // 0.001 fm^-1 which corresponds to a lambda = 1000 fm
     // get new lambda which one obtains with the previous employed lambda for the cross section
     // If the cross sections are very small or 0, R22 = R23 = R32 = 0 or very small which causes lambda to be very large. Therefore, epsilon serves as a cut-off.  However, since the cross section is small probably no scattering would take place anyhow. So it does not matter which value is returned...
     if( (R22 + R23 + R32) < epsilon_rate ) 
-      lambda = velocity_jet / epsilon_rate; //fm
+      lambda = velocity_jet_restframe / epsilon_rate; //fm
     else
-      lambda = velocity_jet / (R22 + R23 + R32); //fm
+      lambda = velocity_jet_restframe / (R22 + R23 + R32); //fm
     
     if ( lambdaArray.size() < 4 )
     {
@@ -3840,7 +3866,7 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
   double as, Vrel, md2g_wo_as, md2q_wo_as;
   double betaDistEntry;
   double M1, M2, P1P2;
-  double velocity_jet;
+  double velocity_jet_restframe;
   
   int initialStateIndex = -1;
   FLAVOR_TYPE F1, F2, F3;
@@ -4125,16 +4151,24 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
     }
     //-------------------------------------------------------------
     
-    // velocity of added particle
-    velocity_jet = sqrt( 1.0 - pow( addedParticles[jetID].m ,2.0) / pow( addedParticles[jetID].E ,2.0) );
+    // velocity of added particle in lab frame
+    double vx_jet = addedParticles[jetID].PX / addedParticles[jetID].E;
+    double vy_jet = addedParticles[jetID].PY / addedParticles[jetID].E;
+    double vz_jet = addedParticles[jetID].PZ / addedParticles[jetID].E;
+//     double velocity_lab = sqrt( 1.0 - pow( addedParticles[jetID].m ,2.0) / pow( addedParticles[jetID].E ,2.0) );
+    
+    // Compute velocity of added particle in rest frame of fluid. The general expression for adding two velocities is not symmetric in v1 and v2. Therefore compute both cases and take average.
+    double velocity_rest_1 = addVelocities( vx, vy, vz, vx_jet, vy_jet, vz_jet );
+    double velocity_rest_2 = addVelocities( vx_jet, vy_jet, vz_jet, vx, vy, vz );
+    velocity_jet_restframe = ( velocity_rest_1 + velocity_rest_2 ) / 2.0;
     
     const double epsilon_rate = 1E-3; // 0.001 fm^-1 which corresponds to a lambda = 1000 fm
     // get new lambda which one obtains with the previous employed lambda for the cross section
     // If the cross sections are very small or 0, R22 = R23 = R32 = 0 or very small which causes lambda to be very large. Therefore, epsilon serves as a cut-off.  However, since the cross section is small probably no scattering would take place anyhow. So it does not matter which value is returned...
     if( (R22 + R23 + R32) < epsilon_rate ) 
-      lambdaRes = velocity_jet / epsilon_rate; //fm
+      lambdaRes = velocity_jet_restframe / epsilon_rate; //fm
     else
-      lambdaRes = velocity_jet / (R22 + R23 + R32); //fm
+      lambdaRes = velocity_jet_restframe / (R22 + R23 + R32); //fm
 
     // error checking  
     if( isnan(lambdaRes) || isinf(lambdaRes) || FPT_COMP_E( lambdaRes, 0.0 ) )
@@ -4157,7 +4191,7 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
       cout << "lambda is very large = " << lambdaRes  << "  " <<  sqrt( s )  << "  " <<  (R22 + R23 + R32) << endl;
 
       cout << "lambda = " << lambda << "  lambdaRes = " << lambdaRes << endl;
-      cout <<  "  " << velocity_jet << "  " << R22 <<"  " << R23 <<"  " << R32 <<"  " << endl;
+      cout <<  "  " << velocity_jet_restframe << "  " << R22 <<"  " << R23 <<"  " << R32 <<"  " << endl;
       cout << nTotal << endl;
       cout << vx << "  " << vy << "  " << vz << "  " << P1[0] << "  " << P2[0] << "  " << F1 << "  " << F2 << "  " <<  M1 << "  " <<  M2 << "  " <<  sqrt( s ) << "  " <<  md2g_wo_as / s << "  " <<  lambda_scaled << endl;
 
@@ -4300,6 +4334,46 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
 }
 
 
+// add two velocity relativistically
+// returns the absolut value of the added velocity
+// the general expression for this is not symmetric in v1 and v2
+double offlineHeavyIonCollision::addVelocities( const double vx_1, const double vy_1, const double vz_1, const double vx_2, const double vy_2, const double vz_2 )
+{
+  double v1[4], v2[4], v2_parallel[4], v2_perp[4], result[4];
+  double scalar_v1_v2, v1_squared, result_scalar;
+  
+  v1[1] = vx_1;
+  v1[2] = vy_1;
+  v1[3] = vz_1;
+  
+  v2[1] = vx_2;
+  v2[2] = vy_2;
+  v2[3] = vz_2;
+  
+  scalar_v1_v2 = 0;
+  for( int i = 1; i <= 3; i++ )
+    scalar_v1_v2 += v1[i] * v2[i];
+  
+  v1_squared = 0;
+  for( int i = 1; i <= 3; i++ )
+    v1_squared += v1[i] * v1[i];
+  
+  
+  for( int i = 1; i <= 3; i++ )
+    v2_parallel[i] = scalar_v1_v2 / v1_squared * v1[i];
+  
+  for( int i = 1; i <= 3; i++ )
+    v2_perp[i] = v2[i] - v2_parallel[i];
+  
+  for( int i = 1; i <= 3; i++ )
+    result[i] = ( v1[i] + v2_parallel[i] + sqrt( 1.0 - v1_squared ) * v2_perp[i] ) / ( 1.0 + scalar_v1_v2 );
+  
+  result_scalar = 0;
+  for( int i = 1; i <= 3; i++ )
+    result_scalar += result[i] * result[i];
+  
+  return sqrt( result_scalar );
+}
 
 
 // kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;

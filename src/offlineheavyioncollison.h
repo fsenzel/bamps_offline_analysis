@@ -136,6 +136,8 @@ private:
   void removeDeadParticles( analysis& _aa );
   
   int binomial( const int N, const int k ) const;
+  
+  double addVelocities( const double vx_1, const double vy_1, const double vz_1, const double vx_2, const double vy_2, const double vz_2 );
 };
 
 
