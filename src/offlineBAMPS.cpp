@@ -25,6 +25,7 @@
 #include "random.h"
 #include "offlineheavyioncollison.h"
 #include "offlineoutput.h"
+#include "revision.h"
 
 
 using namespace std;
@@ -35,6 +36,8 @@ int Ntest;
 
 int main( int argc, char *argv[] )
 {
+  cout << "# Version: SVN " << SVN_REVISION << endl;
+  
   try
   {
     int ng;
