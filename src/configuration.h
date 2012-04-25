@@ -50,7 +50,8 @@ alice_hq_electrons = 111,
 alice_hq_muons = 112,
 alice_hq_dmesons = 113,
 cms_hq_nonPromptJpsi = 114,
-phenix_jpsi = 131
+phenix_jpsi = 131,
+alice_jpsi = 141
 };
 
 

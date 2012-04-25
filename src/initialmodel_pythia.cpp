@@ -71,12 +71,18 @@ void initialModel_Pythia::sampleMomenta( std::vector< Particle >& _particles )
   
   // charm quarks in Pythia have a mass of 1.5 GeV
   // make charm quarks from pythia lighter, if Mcharm is not 1.5 GeV
-  const double M_old_charm = 1.5;
-  changeCharmMass( _particles, M_old_charm );
-  
-  // make bottom quarks from pythia lighter, if Mbottom is not 4.8 GeV
-  const double M_old_bottom = 4.8;
-  changeBottomMass( _particles, M_old_bottom );
+  if( Particle::N_heavy_flavor > 0 )
+  {
+    const double M_old_charm = 1.5;
+    changeCharmMass( _particles, M_old_charm );
+    
+    // make bottom quarks from pythia lighter, if Mbottom is not 4.8 GeV
+    if( Particle::N_heavy_flavor > 1 )
+    {
+      const double M_old_bottom = 4.8;
+      changeBottomMass( _particles, M_old_bottom );
+    }
+  }
 
 }
 
