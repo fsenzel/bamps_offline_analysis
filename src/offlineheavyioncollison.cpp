@@ -1876,6 +1876,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
       else
       {
         cout << "error in scattOfflinePartclWithAddedPartcl: lambda negative: lambda = " << addedParticles[jscat].lambda_added << "  " << addedParticles[jscat].lambda_added_old << endl;
+        cout << addedParticles[jscat].rate_added << "  " << iterate_mfp_bisection( _allParticlesList, _gluonList, jscat, dt, dv, addedParticles[jscat].lambda_added_old ) << endl;
         std::string errMsg = "Error in scattOfflinePartclWithAddedPartcl: lambda negative.";
         throw eHIC_error( errMsg );
       }
@@ -4357,6 +4358,9 @@ double offlineHeavyIonCollision::addVelocities( const double vx_1, const double 
   v1_squared = 0;
   for( int i = 1; i <= 3; i++ )
     v1_squared += v1[i] * v1[i];
+  
+  if( v1_squared == 0.0 )
+    return sqrt( vx_2 * vx_2 + vy_2 * vy_2 + vz_2 * vz_2 );
   
   
   for( int i = 1; i <= 3; i++ )
