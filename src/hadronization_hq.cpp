@@ -61,7 +61,9 @@ void hadronization_hq::heavyQuarkFragmentation()
           addedParticlesCopy[i].FLAVOR = bmeson_plus;
       }
       
-      addedParticlesCopy[i].m = ParticlePrototype::getMass( addedParticlesCopy[i].FLAVOR );        
+      // Just leave the mass of the meson as the mass of the heavy quark to avoid any energy gain due to the larger mass. For the final eta distribution this has no effect anyhow since only the direction counts. However, the rapidity y distribution depends on the energy and therefore also on the heavy meson mass. If this is artificially increased here, it leads to an strange strong increase at y=0. However, previous results on RAA (and also v2) seems to not depend on this effect since it is done both initially and finally.
+//       // give mesons there actual mass. However, by breaking energy conservation
+//       addedParticlesCopy[i].m = ParticlePrototype::getMass( addedParticlesCopy[i].FLAVOR );
         
       addedParticlesCopy[i].E = sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) + pow( addedParticlesCopy[i].m, 2.0 ) );
     }
