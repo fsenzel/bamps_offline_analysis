@@ -1686,7 +1686,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     alpha = alpha * 180 / M_PI;
     
     alphaIndex = static_cast<int>( alpha / deltaAlpha );
-    if ( alphaIndex > nAlphaBins )
+    if ( alphaIndex >= nAlphaBins )
     {
       alphaIndex = nAlphaBins - 1;
     }
