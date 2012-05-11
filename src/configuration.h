@@ -32,7 +32,7 @@
 
 
 /** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState };
+enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState };
 
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
@@ -51,7 +51,8 @@ alice_hq_muons = 112,
 alice_hq_dmesons = 113,
 cms_hq_nonPromptJpsi = 114,
 phenix_jpsi = 131,
-alice_jpsi = 141
+alice_jpsi = 141,
+cms_jpsi = 151
 };
 
 

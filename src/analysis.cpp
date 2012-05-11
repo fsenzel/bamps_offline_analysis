@@ -588,6 +588,27 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
       break;
+    case cms_jpsi:
+      studyJpsi = true;
+      studyHQ = true;
+      studyTempInTube = true;
+
+      rapidityRanges.clear();
+      yRange.reset( 0, 2.4 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.9 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 2.5, 4.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
     default:
       break;
   }
@@ -4098,6 +4119,12 @@ void analysis::analyseAngleDe()
 
 void analysis::jpsiEvolution( int step )
 {
+  double pt_min = 0;
+  
+  if( theConfig->getOutputScheme() == cms_jpsi )
+    pt_min = 6.5;
+  
+  
   int countJpsi_all = 0;
   int countJpsi_ini = 0;
 //   int countJpsi_midNormRap = 0;
@@ -4114,54 +4141,58 @@ void analysis::jpsiEvolution( int step )
   {
     if ( addedParticles[i].FLAVOR == 50 )
     {
-      countJpsi_all++;
+      double pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
       
+      countJpsi_all++;
+        
       if(addedParticles[i].initially_produced)
         countJpsi_ini++;
-
-      double pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
-      // pseudorapidity
-      double pseudorap = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
       
-      if ( fabs( pseudorap ) >= rapidityRanges[0].yleft && fabs( pseudorap ) <= rapidityRanges[0].yright )
+      if( pt >= pt_min )
       {
-        countJpsi_midPseudoRap_all++;
-        if(addedParticles[i].initially_produced)
-          countJpsi_midPseudoRap_ini++;
-      }
-      
-      if ( fabs( pseudorap ) >= rapidityRanges[1].yleft && fabs( pseudorap ) <= rapidityRanges[1].yright )
-      {
-        countJpsi_forwardPseudoRap_all++;
-        if(addedParticles[i].initially_produced)
-          countJpsi_forwardPseudoRap_ini++;
-      }
-      
-            
-      // normal rapidity
-      double normrap = 0.5 * log(( addedParticles[i].E + addedParticles[i].PZ ) / ( addedParticles[i].E - addedParticles[i].PZ ) );
-      
-      if ( fabs( normrap ) >= rapidityRanges[0].yleft && fabs( normrap ) <= rapidityRanges[0].yright )
-      {
-        countJpsi_midNormRap_all++;
-        if(addedParticles[i].initially_produced)
-          countJpsi_midNormRap_ini++;
-      }
-      
-      
-      if ( fabs( normrap ) >= rapidityRanges[1].yleft && fabs( normrap ) <= rapidityRanges[1].yright )
-      {
-        countJpsi_forwardNormRap_all++;
-        if(addedParticles[i].initially_produced)
-          countJpsi_forwardNormRap_ini++;
-      }
+        double pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
+        // pseudorapidity
+        double pseudorap = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
         
-      
-//       // space time rapidity
-//       double strap = 0.5 * log(( addedParticles[i].T + addedParticles[i].Z ) / ( addedParticles[i].T - addedParticles[i].Z ) );
-//       if( fabs(strap) < midrap )
-//         countJpsi_midSpaceTimeRap++;
-      
+        if ( fabs( pseudorap ) >= rapidityRanges[0].yleft && fabs( pseudorap ) <= rapidityRanges[0].yright )
+        {
+          countJpsi_midPseudoRap_all++;
+          if(addedParticles[i].initially_produced)
+            countJpsi_midPseudoRap_ini++;
+        }
+        
+        if ( fabs( pseudorap ) >= rapidityRanges[1].yleft && fabs( pseudorap ) <= rapidityRanges[1].yright )
+        {
+          countJpsi_forwardPseudoRap_all++;
+          if(addedParticles[i].initially_produced)
+            countJpsi_forwardPseudoRap_ini++;
+        }
+        
+              
+        // normal rapidity
+        double normrap = 0.5 * log(( addedParticles[i].E + addedParticles[i].PZ ) / ( addedParticles[i].E - addedParticles[i].PZ ) );
+        
+        if ( fabs( normrap ) >= rapidityRanges[0].yleft && fabs( normrap ) <= rapidityRanges[0].yright )
+        {
+          countJpsi_midNormRap_all++;
+          if(addedParticles[i].initially_produced)
+            countJpsi_midNormRap_ini++;
+        }
+        
+        
+        if ( fabs( normrap ) >= rapidityRanges[1].yleft && fabs( normrap ) <= rapidityRanges[1].yright )
+        {
+          countJpsi_forwardNormRap_all++;
+          if(addedParticles[i].initially_produced)
+            countJpsi_forwardNormRap_ini++;
+        }
+          
+        
+  //       // space time rapidity
+  //       double strap = 0.5 * log(( addedParticles[i].T + addedParticles[i].Z ) / ( addedParticles[i].T - addedParticles[i].Z ) );
+  //       if( fabs(strap) < midrap )
+  //         countJpsi_midSpaceTimeRap++;
+      }
     }
   }
 
