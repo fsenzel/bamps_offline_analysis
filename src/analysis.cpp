@@ -64,9 +64,20 @@ analysis::analysis( config* const c ):
   
   handle_output_studies( outputScheme );
   
+  if ( studyTempAndVelocity )
+  {
+    //equidistant output
+    nTimeSteps = 81;      //6 timesteps during the cascade, plus 1 before
+    for(int i=0; i < nTimeSteps-1; i++)
+    {
+      tstep[i] = double(i+1)/10;      //fm/c
+    }
+    tstep[nTimeSteps-1] = infinity; //fm/c
+
+  }
   // to create the tsteps use such a bash script:
   // for (( I=50; $I <= 80; I++ )); do   J=$(echo "scale=1; ($I+1)/10" | bc); echo "tstep[$I]=$J;" ; done
-  if( studyJpsi || study_dndy_time ) // jpsi evolution: more timesteps
+  else if( studyJpsi || study_dndy_time ) // jpsi evolution: more timesteps
   {
     tstep[0]=.10;
     tstep[1]=.15;
@@ -600,6 +611,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     case dndy_time:
       study_dndy_time = true;
       break;
+    case temperature_velocity_cells:
+      studyTempAndVelocity = true;
+      break;    
     case cms_jpsi:
       studyJpsi = true;
       studyHQ = true;
@@ -3875,7 +3889,7 @@ void analysis::writeTempAndVel( const int step  )
   for ( int i = 0; i < nCells; i++ )
   {
     file << temp_cell[i] << "\t";
-    file << tempWithQuarks_cell[i] << "\t";
+//     file << tempWithQuarks_cell[i] << "\t";
     file << vx_cell[i] << "\t";
     file << vy_cell[i] << "\t";
     file << vz_cell[i] << endl;
