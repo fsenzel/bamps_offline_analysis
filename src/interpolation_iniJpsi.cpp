@@ -59,6 +59,8 @@ void interpolation_iniJpsi_dndptdy::configure( const double sqrtS_arg, const dou
     name = name + "_b58";
   else if( impact_parameter == 8.2)
     name = name + "_b82";
+  else if( impact_parameter == 9.7)
+    name = name + "_b97";
   else if( impact_parameter == 10.3)
     name = name + "_b103";
   

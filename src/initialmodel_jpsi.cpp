@@ -110,6 +110,8 @@ void initialModel_Jpsi::populateParticleVector( std::vector< Particle >& _partic
     {
       if( impactParameter == 3.6)
         total_number_jpsi_one_Au_collision = 0.656866;
+      else if( impactParameter == 9.7)
+        total_number_jpsi_one_Au_collision = 0.101697;
     }
   }
   
