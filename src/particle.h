@@ -37,7 +37,7 @@ class Particle : public ParticlePrototype
     Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), N_EVENT_pp( 0 ), HARD( true ), 
     N_EVENT_AA( 0 ), edge( -1 ), coll_id( -1 ), collisionTime( 0 ), collisionPartner( -1 ), PXold( 0 ), 
     PYold( 0 ), PZold( 0 ), as22( 0 ), as23( 0 ), rate23v( 0 ), rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ),
-    cs22t( 0 ), cs23t( 0 ), lambda_scaled( 0 ), md2g_scaled_22( 0 ),md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), 
+    lambda_scaled( 0 ), md2g_scaled_22( 0 ),md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), 
     md2q_scaled_23( 0 ), free( true ), init( true ), 
     step( 0 ), tstep( 0 ), taustep( 0 ) {};
     
@@ -93,11 +93,7 @@ class Particle : public ParticlePrototype
     /** @brief Mean 2->2 cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
     double cs22;
     /** @brief Mean 2->3 cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
-    double cs23; 
-    /** @brief Mean 2->2 transport cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
-    double cs22t;
-    /** @brief Mean 2->3 transport cross section (1/GeV^2) associated with this particle, averaged over cell in previous time step */
-    double cs23t;
+    double cs23;
     /** @brief Mean lambda_scaled associated with this particle, averaged over cell in previous time step */
     double lambda_scaled;
     /** @brief Mean md2g (scaled with s) from 2->2 interactions, averaged over cell in previous time step */

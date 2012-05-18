@@ -25,8 +25,6 @@ cellContainer::cellContainer() :
     alpha_s_23( 0 ),
     sigma_22( 0 ),
     sigma_23( 0 ),
-    sigma_transport_22( 0 ),
-    sigma_transport_23( 0 ),
     md2g_scaled_22( 0 ),
     md2q_scaled_22( 0 ),
     md2g_scaled_23( 0 ),
@@ -52,8 +50,6 @@ void cellContainer::clear()
   alpha_s_23 = 0;
   sigma_22 = 0;
   sigma_23 = 0;
-  sigma_transport_22 = 0;
-  sigma_transport_23 = 0;
   md2g_scaled_22 = 0;
   md2q_scaled_22 = 0;
   md2g_scaled_23 = 0;
@@ -72,8 +68,6 @@ void cellContainer::resetStoredValues()
   alpha_s_23 = 0;
   sigma_22 = 0;
   sigma_23 = 0;
-  sigma_transport_22 = 0;
-  sigma_transport_23 = 0;
   md2g_scaled_22 = 0;
   md2q_scaled_22 = 0;
   md2g_scaled_23 = 0;
@@ -110,15 +104,11 @@ void cellContainer::prepareAverages()
     {
       sigma_22 /= static_cast<double>( nCollectedAll2223 );
       sigma_23 /= static_cast<double>( nCollectedAll2223 );
-      sigma_transport_22 /= static_cast<double>( nCollectedAll2223 );
-      sigma_transport_23 /= static_cast<double>( nCollectedAll2223 );
     }
     else
     {
       sigma_22 = 0;
       sigma_23 = 0;
-      sigma_transport_22 = 0;
-      sigma_transport_23 = 0;
     }
 
     if ( nCollected22 > 0 )
@@ -167,9 +157,7 @@ void cellContainer::writeAveragesToParticle( ParticleOffline& _particle ) const
   }
   
 //   _particle.cs22 = sigma_22;               //1/GeV^2
-//   _particle.cs22t = sigma_transport_22;    //1/GeV^2
 //   _particle.cs23 = sigma_23;               //1/GeV^2
-//   _particle.cs23t = sigma_transport_23;             //1/GeV^2
 //   _particle.md2g_scaled_22 = md2g_scaled_22;
 //   _particle.md2q_scaled_22 = md2q_scaled_22;
 //   _particle.md2g_scaled_23 = md2g_scaled_23;

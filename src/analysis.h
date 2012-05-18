@@ -387,8 +387,6 @@ private:
 
   int* numberJpsiDiss_time;
   int* numberJpsiDissTd_time;
-  
-  double midrap_jpsi_production;
 
   
 };

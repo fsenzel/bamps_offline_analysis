@@ -1758,7 +1758,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
   const double epsilon = 1.0e-4;
   int iscat, jscat, typ;
   double P1[4], P2[4];
-  double s, as, csgg, cs23, cs22, cs23t, cs22t, Vrel, lambda_scaled;
+  double s, as, csgg, cs23, cs22, Vrel, lambda_scaled;
   double M1, M2, P1P2;
   double probab22, probab23, probab2322;
   double averagedRate;
@@ -1854,7 +1854,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
       if ( s < 1.1*lambda2 )
       {
         probab2322 = -1.0;
-        cs22 = cs22t = cs23 = cs23t = 0.0; //1/GeV^2
+        cs22 = cs23 = 0.0; //1/GeV^2
       }
       else
       {
@@ -1879,12 +1879,10 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           cs22 = scatt22_object.getXSection22( initialStateIndex );
 
           probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
-          
-          cs22t = 18.0 * M_PI * as * as / s * ( log( 1.0 + 0.25 / md2g ) + 1.0 / ( 1.0 + 0.25 / md2g ) - 1.0 );//1/GeV^2
         }
         else
         {
-          cs22 = probab22 = cs22t = 0.0;
+          cs22 = probab22 = 0.0;
         }
         
 

@@ -89,8 +89,6 @@ public:
 
   double sigma_22;
   double sigma_23;
-  double sigma_transport_22;
-  double sigma_transport_23;
 
   double lambdaScaled;
 
