@@ -105,6 +105,7 @@ config::config() :
  jpsi_agN(0.1),
  shadowing_model(eps08),
  jpsi_formationTime(0.0),
+ jpsi_testparticles(1),
  hqCorrelationsOutput(false),
 // ---- miscellaneous options ----
  switch_repeatTimesteps(true),
@@ -334,6 +335,8 @@ void config::initializeProgramOptions()
   ("heavy_quark.jpsi_agN", po::value<double>( &jpsi_agN )->default_value( jpsi_agN ), "parameter for momentum broadening of initial J/psi")
   ("heavy_quark.shadowing_model", po::value<int>( )->default_value( static_cast<int>(shadowing_model) ), "shadowing model used for initial J/psi")
   ("heavy_quark.jpsi_formationTime", po::value<double>( &jpsi_formationTime )->default_value( jpsi_formationTime ), "formation time for initial J/psi in addition to the standard 1/M_T")
+  ("heavy_quark.jpsi_testparticles", po::value<int>( &jpsi_testparticles )->default_value( jpsi_testparticles ), "number of testparticles for J/psi (in addition to the number employed for the rest of added particles)")
+  
   ("heavy_quark.hqCorrelationsOutput", po::value<bool>( &hqCorrelationsOutput )->default_value( hqCorrelationsOutput ), "whether correlation analysis of heavy quark pairs is done")
   ;
   
