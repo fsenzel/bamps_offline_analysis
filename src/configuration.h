@@ -240,6 +240,9 @@ class config : public configBase
   /** @brief Interface for config::jpsi_formationTime */
   double getJpsiFormationTime() const  {return jpsi_formationTime;} 
   
+  /** @brief Interface for config::jpsi_testparticles */
+  int getJpsiTestparticles() const  {return jpsi_testparticles;} 
+  
   
   // heavy quark output
   /** @brief Interface for config::hqCorrelationsOutput */
@@ -525,6 +528,10 @@ class config : public configBase
 
   /** @brief Formation time for initial J/psi in addition to the standard 1/M_T */
   double jpsi_formationTime;
+  
+  /** @brief Number of testparticles for J/psi (in addition to the number employed for the rest of added particles) */
+  int jpsi_testparticles;
+  
   
   
   // heavy quark output

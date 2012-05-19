@@ -22,7 +22,7 @@ using namespace std;
 using namespace ns_casc;
 
 initialModel_Jpsi::initialModel_Jpsi( const config& _config, WoodSaxon& _WoodSaxonParameter )
-: initialModelWS(_config), sigmaAbs( _config.getSigmaAbs() ), agN( _config.getJpsiagN() ), shadowing_model( _config.getShadowingModel() ), nEventsAA( _config.getNaddedEvents() ), testparticles( _config.getTestparticles() )
+: initialModelWS(_config), sigmaAbs( _config.getSigmaAbs() ), agN( _config.getJpsiagN() ), shadowing_model( _config.getShadowingModel() ), nEventsAA( _config.getNaddedEvents() ), testparticles( _config.getTestparticles() * _config.getJpsiTestparticles() )
 {
   double Tab;
   
