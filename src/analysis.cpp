@@ -148,30 +148,76 @@ analysis::analysis( config* const c ):
     tstep[77]=20.0;
     tstep[78] = infinity; //fm/c
     nTimeSteps = 79;
+    
+    if( theConfig->getRuntime() > 20.0 )
+    {
+      tstep[78]=21;
+      tstep[79]=22;
+      tstep[80]=23;
+      tstep[81]=24;
+      tstep[82]=25;
+      tstep[83]=26;
+      tstep[84]=27;
+      tstep[85]=28;
+      tstep[86]=29;
+      tstep[87]=30;
+      tstep[88]=31;
+      tstep[89]=32;
+      tstep[90]=33;
+      tstep[91]=34;
+      tstep[92]=35;
+      tstep[93]=36;
+      tstep[94]=37;
+      tstep[95]=38;
+      tstep[96]=39;
+      tstep[97]=40;
+      tstep[98]=42;
+      tstep[99]=44;
+      tstep[100]=46;
+      tstep[101]=48;
+      tstep[102]=50;
+      tstep[103]=52;
+      tstep[104]=54;
+      tstep[105]=56;
+      tstep[106]=58;
+      tstep[107]=60;
+      tstep[108]=62;
+      tstep[109]=64;
+      tstep[110]=66;
+      tstep[111]=68;
+      tstep[112]=70;
+      tstep[113]=72;
+      tstep[114]=74;
+      tstep[115]=76;
+      tstep[116]=78;
+      tstep[117]=80;
+      tstep[118] = infinity; //fm/c
+      nTimeSteps = 119;
+    }
   }
   else
   {
-  tstep[0] = 0.1;      //fm/c
-  tstep[1] = 0.5;      //fm/c
-  tstep[2] = 1.0;      //fm/c
-  tstep[3] = 1.5;      //fm/c
-  tstep[4] = 2.0;      //fm/c
-  tstep[5] = 2.5;      //fm/c
-  tstep[6] = 3.0;      //fm/c
-  tstep[7] = 3.5;      //fm/c
-  tstep[8] = 4.0;      //fm/c
-  tstep[9] = 4.5;      //fm/c
-  tstep[10] = 5.0;      //fm/c
-  tstep[11] = 5.5;      //fm/c
-  tstep[12] = 6.0;      //fm/c
-  tstep[13] = 6.5;      //fm/c
-  tstep[14] = 7.0;      //fm/c
-  tstep[15] = 7.5;      //fm/c
-  tstep[16] = 8.0;      //fm/c
-  tstep[17] = 9.0;      //fm/c
-  tstep[18] = 10.0;
-  tstep[19] = infinity; //fm/c
-  nTimeSteps = 20;
+    tstep[0] = 0.1;      //fm/c
+    tstep[1] = 0.5;      //fm/c
+    tstep[2] = 1.0;      //fm/c
+    tstep[3] = 1.5;      //fm/c
+    tstep[4] = 2.0;      //fm/c
+    tstep[5] = 2.5;      //fm/c
+    tstep[6] = 3.0;      //fm/c
+    tstep[7] = 3.5;      //fm/c
+    tstep[8] = 4.0;      //fm/c
+    tstep[9] = 4.5;      //fm/c
+    tstep[10] = 5.0;      //fm/c
+    tstep[11] = 5.5;      //fm/c
+    tstep[12] = 6.0;      //fm/c
+    tstep[13] = 6.5;      //fm/c
+    tstep[14] = 7.0;      //fm/c
+    tstep[15] = 7.5;      //fm/c
+    tstep[16] = 8.0;      //fm/c
+    tstep[17] = 9.0;      //fm/c
+    tstep[18] = 10.0;
+    tstep[19] = infinity; //fm/c
+    nTimeSteps = 20;
   }
   //--------------------------------------
 
