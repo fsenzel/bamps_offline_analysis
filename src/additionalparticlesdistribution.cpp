@@ -61,6 +61,9 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
     case mcatnloInitialState:
       initialmodel = new initialModel_Mcatnlo( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
       break;
+    case onlyJpsiInitialState:
+      initialmodel = new initialModel_Jpsi( *configObject, _wsParameter );
+      break;
     default:
       std::string errMsg = "Model for sampling the initial state not implemented yet!";
       throw eInitialModel_error( errMsg );
@@ -70,7 +73,7 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   std::vector<Particle> tempParticleVector;
   initialmodel->populateParticleVector( tempParticleVector );
   
-  if( Particle::N_psi_states > 0 )
+  if( Particle::N_psi_states > 0 && initialStateType != onlyJpsiInitialState ) // for onlyJpsiInitialState Jpsi has been sampled above
   {
     initialModel_Jpsi theIni_Jpsi( *configObject, _wsParameter );
     theIni_Jpsi.populateParticleVector( tempParticleVector );

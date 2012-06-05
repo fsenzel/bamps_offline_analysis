@@ -18,8 +18,16 @@ void interpolation_iniJpsi_dndptdy::configure( const double sqrtS_arg, const dou
   sigmaAbs = sigmaAbs_arg;
   
   // total numbers of tabulated points on the a, b "axes"
-  n_i = 21; // y
-  n_j = 21; // pt
+  if( sqrtS == 200.0 )
+  {
+    n_i = 21; // y
+    n_j = 21; // pt
+  }
+  else if( sqrtS == 2760.0 )
+  {
+    n_i = 29; // y
+    n_j = 41; // pt
+  }
   
   // spacings of tabulated values in a, b-direction
   delta_a = 0.25;
@@ -43,12 +51,16 @@ void interpolation_iniJpsi_dndptdy::configure( const double sqrtS_arg, const dou
     name = name + "_b00";
   else if( impact_parameter == 3.3)
     name = name + "_b33";
+  else if( impact_parameter == 3.6)
+    name = name + "_b36";
   else if( impact_parameter == 4.6)
     name = name + "_b46";
   else if( impact_parameter == 5.8)
     name = name + "_b58";
   else if( impact_parameter == 8.2)
     name = name + "_b82";
+  else if( impact_parameter == 9.7)
+    name = name + "_b97";
   else if( impact_parameter == 10.3)
     name = name + "_b103";
   
@@ -66,6 +78,8 @@ void interpolation_iniJpsi_dndptdy::configure( const double sqrtS_arg, const dou
   
   if( shadowing_model == eps08 )
     name = name + "_eps08";
+  else if( shadowing_model == eps09 )
+    name = name + "_eps09";
   else if( shadowing_model == none )
     name = name + "_noshad";
   

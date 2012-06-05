@@ -22,7 +22,7 @@ using namespace std;
 using namespace ns_casc;
 
 initialModel_Jpsi::initialModel_Jpsi( const config& _config, WoodSaxon& _WoodSaxonParameter )
-: initialModelWS(_config), sigmaAbs( _config.getSigmaAbs() ), agN( _config.getJpsiagN() ), shadowing_model( _config.getShadowingModel() ), nEventsAA( _config.getNaddedEvents() ), testparticles( _config.getTestparticles() )
+: initialModelWS(_config), sigmaAbs( _config.getSigmaAbs() ), agN( _config.getJpsiagN() ), shadowing_model( _config.getShadowingModel() ), nEventsAA( _config.getNaddedEvents() ), testparticles( _config.getTestparticles() * _config.getJpsiTestparticles() )
 {
   double Tab;
   
@@ -82,15 +82,42 @@ void initialModel_Jpsi::populateParticleVector( std::vector< Particle >& _partic
     else if( sigmaAbs == 0.0 && agN == 0.0 && shadowing_model == none )
     {
       if( impactParameter == 0.0)
-        total_number_jpsi_one_Au_collision = 0.0862351;    
+        total_number_jpsi_one_Au_collision = 0.0862351;
       else if( impactParameter == 8.2)
         total_number_jpsi_one_Au_collision = 0.018879;
+    }
+  }
+  else if( sqrtS_perNN == 2760.0)
+  {
+    if( sigmaAbs == 2.8 && agN == 0.1 && shadowing_model == eps08 )
+    {
+
+    }
+    else if( sigmaAbs == 1.5 && agN == 0.1 && shadowing_model == eps08 )
+    {
+
+    }
+    else if( sigmaAbs == 0.0 && agN == 0.1 && shadowing_model == eps08 )
+    {
+
+    }
+    else if( sigmaAbs == 0.0 && agN == 0.0 && shadowing_model == eps09 )
+    {
+      if( impactParameter == 3.6)
+        total_number_jpsi_one_Au_collision = 0.46187;
+    }
+    else if( sigmaAbs == 0.0 && agN == 0.0 && shadowing_model == none )
+    {
+      if( impactParameter == 3.6)
+        total_number_jpsi_one_Au_collision = 0.656866;
+      else if( impactParameter == 9.7)
+        total_number_jpsi_one_Au_collision = 0.101697;
     }
   }
   
   if ( total_number_jpsi_one_Au_collision == 0.0 )
   {
-    std::string errMsg = "Impact parameter b too large. b > 2 R_A0";
+    std::string errMsg = "Number of initial Jpsi not set.";
     throw eJpsi_error( errMsg );
   }
 
@@ -145,13 +172,32 @@ void initialModel_Jpsi::sample_metropolis_dndptdy( double& pt_arg, double& y_arg
   double pt_new, y_new;
   double g = 0, g_new = 0;
   double ratio;
-
-  // the ranges in which the variables pt and y need to be sampled
-  const double pt_min = 0.0;
-  const double pt_max = 5.0;
-  // y is sampled in the positiv range only, since the distribution is symmetric around 0. Negativ y are taken into account at the conversin to pz
-  const double y_min = 0.0;
-  const double y_max = 5.0;
+  
+    // the ranges in which the variables pt and y need to be sampled
+  double pt_min, pt_max, y_min, y_max;
+  if( sqrtS_perNN == 200 )
+  {
+    // the ranges in which the variables pt and y need to be sampled
+    pt_min = 0.0;
+    pt_max = 5.0;
+    // y is sampled in the positiv range only, since the distribution is symmetric around 0. Negativ y are taken into account at the conversin to pz
+    y_min = 0.0;
+    y_max = 5.0;
+  }
+  else if( sqrtS_perNN == 2760 )
+  {
+    // the ranges in which the variables pt and y need to be sampled
+    pt_min = 0.0;
+    pt_max = 10.0;
+    // y is sampled in the positiv range only, since the distribution is symmetric around 0. Negativ y are taken into account at the conversin to pz
+    y_min = 0.0;
+    y_max = 7.0;
+  }
+  else
+  {
+    std::string errMsg = "Error in  initialModel_Jpsi::sample_metropolis_dndptdy().";
+    throw eJpsi_error( errMsg );
+  }
 
   // randomly select initial values of pt and y, such that
   do

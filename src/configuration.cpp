@@ -105,6 +105,7 @@ config::config() :
  jpsi_agN(0.1),
  shadowing_model(eps08),
  jpsi_formationTime(0.0),
+ jpsi_testparticles(1),
  hqCorrelationsOutput(false),
 // ---- miscellaneous options ----
  switch_repeatTimesteps(true),
@@ -218,7 +219,7 @@ void config::processProgramOptions()
   // some special conversions from integer type values to enum values
   if ( vm.count("initial_state.type") )
   {
-    if ( vm["initial_state.type"].as<int>() < 4 && vm["initial_state.type"].as<int>() >= 0 )
+    if ( vm["initial_state.type"].as<int>() < 5 && vm["initial_state.type"].as<int>() >= 0 )
     {
       initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
     }
@@ -296,7 +297,7 @@ void config::initializeProgramOptions()
   
   // Group some options related to the initial state
   initial_state_options.add_options()
-  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo)")
+  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo, 4 = onlyJpsi)")
   ("initial_state.PDFsource", po::value<unsigned short int>()->default_value( static_cast<unsigned short int>(PDFsource) ), "which source to use for the PDFs ( 0 = built-in GRV, 1 = PDFs from LHAPDF )")
   ("initial_state.LHAPDFset", po::value<string>( &LHAPDFdatasetName )->default_value( LHAPDFdatasetName ), "name of the LHAPDF data set that should be used")
   ("initial_state.LHAPDFmember", po::value<unsigned short int>( &LHAPDFmember )->default_value( LHAPDFmember ), "which member of the LHAPDF set should be used")
@@ -338,6 +339,8 @@ void config::initializeProgramOptions()
   ("heavy_quark.jpsi_agN", po::value<double>( &jpsi_agN )->default_value( jpsi_agN ), "parameter for momentum broadening of initial J/psi")
   ("heavy_quark.shadowing_model", po::value<int>( )->default_value( static_cast<int>(shadowing_model) ), "shadowing model used for initial J/psi")
   ("heavy_quark.jpsi_formationTime", po::value<double>( &jpsi_formationTime )->default_value( jpsi_formationTime ), "formation time for initial J/psi in addition to the standard 1/M_T")
+  ("heavy_quark.jpsi_testparticles", po::value<int>( &jpsi_testparticles )->default_value( jpsi_testparticles ), "number of testparticles for J/psi (in addition to the number employed for the rest of added particles)")
+  
   ("heavy_quark.hqCorrelationsOutput", po::value<bool>( &hqCorrelationsOutput )->default_value( hqCorrelationsOutput ), "whether correlation analysis of heavy quark pairs is done")
   ;
   
@@ -414,6 +417,12 @@ void config::checkOptionsForSanity()
   if( ( studyNonPromptJpsiInsteadOfElectrons && outputScheme != cms_hq_nonPromptJpsi ) || ( outputScheme == cms_hq_nonPromptJpsi && !studyNonPromptJpsiInsteadOfElectrons ) )
   {
     string errMsg = "Study Jpsi instead of electrons but no output for this or vice versa.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if( initialStateType == onlyJpsiInitialState && Particle::N_psi_states == 0 )
+  {
+    string errMsg = "Only Jpsi in initial state, but N_psi_states = 0.";
     throw eConfig_error( errMsg );
   }
 }
