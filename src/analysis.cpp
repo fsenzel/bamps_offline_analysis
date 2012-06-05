@@ -829,7 +829,7 @@ void analysis::finalOutput( const double _stoptime )
   if ( studyJpsi ) // to consider charm annihaltion is just useful if added particles can scatter
   {
     printJpsiEvolution();
-    jpsi_correlations();
+//     jpsi_correlations();
   }
   
 //   if ( charmTestJet )
@@ -3223,8 +3223,8 @@ void analysis::jpsi_correlations()
           // find partners of charm quarks in Jpsi
           if( ( addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_pp || addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_Cbar ) && i != j )
           {
-            if ( addedParticles[j].FLAVOR != 7 && addedParticles[j].FLAVOR != 8 )
-              cout << "error in analysis::jpsi_correlations() " << addedParticles[j].FLAVOR << "  " << addedParticles[i].FLAVOR << "  " << addedParticles[j].m << "  " << addedParticles[i].m << "  " << addedParticles[j].N_EVENT_pp << "  " << addedParticles[i].N_EVENT_pp << "  " << addedParticles[j].N_EVENT_Cbar << "  " << addedParticles[i].N_EVENT_Cbar << endl;
+//             if ( addedParticles[j].FLAVOR != 7 && addedParticles[j].FLAVOR != 8 )
+//               cout << "error in analysis::jpsi_correlations() " << addedParticles[j].FLAVOR << "  " << addedParticles[i].FLAVOR << "  " << addedParticles[j].m << "  " << addedParticles[i].m << "  " << addedParticles[j].N_EVENT_pp << "  " << addedParticles[i].N_EVENT_pp << "  " << addedParticles[j].N_EVENT_Cbar << "  " << addedParticles[i].N_EVENT_Cbar << endl;
             
             cos_delta_phi = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY ) 
             / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) 

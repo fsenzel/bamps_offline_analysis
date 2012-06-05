@@ -101,6 +101,13 @@ void initialModel_Jpsi::populateParticleVector( std::vector< Particle >& _partic
     {
 
     }
+    else if( sigmaAbs == 0.0 && agN == 0.1 && shadowing_model == eps09 )
+    {
+      if( impactParameter == 3.6)
+        total_number_jpsi_one_Au_collision = 0.46568;
+      else if( impactParameter == 9.7)
+        total_number_jpsi_one_Au_collision = 0.0815199;
+    }
     else if( sigmaAbs == 0.0 && agN == 0.0 && shadowing_model == eps09 )
     {
       if( impactParameter == 3.6)
@@ -115,6 +122,7 @@ void initialModel_Jpsi::populateParticleVector( std::vector< Particle >& _partic
     }
   }
   
+//   total_number_jpsi_one_Au_collision = 0;
   if ( total_number_jpsi_one_Au_collision == 0.0 )
   {
     std::string errMsg = "Number of initial Jpsi not set.";

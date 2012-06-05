@@ -254,7 +254,7 @@ void config::processProgramOptions()
   
   if ( vm.count("heavy_quark.shadowing_model") )
   {
-    if ( vm["heavy_quark.shadowing_model"].as<int>() < 3 && vm["heavy_quark.shadowing_model"].as<int>() >= 0 )
+    if ( vm["heavy_quark.shadowing_model"].as<int>() < 4 && vm["heavy_quark.shadowing_model"].as<int>() >= 0 )
     {
       shadowing_model = static_cast<shadowModelJpsi>( vm["heavy_quark.shadowing_model"].as<int>() );
     }
@@ -333,7 +333,7 @@ void config::initializeProgramOptions()
   ("heavy_quark.TdJpsi", po::value<double>( &TdJpsi )->default_value( TdJpsi ), "dissociation temperature of J/psi")
   ("heavy_quark.jpsi_sigmaAbs", po::value<double>( &jpsi_sigmaAbs )->default_value( jpsi_sigmaAbs ), "absorption cross section for initial J/psi in mb")
   ("heavy_quark.jpsi_agN", po::value<double>( &jpsi_agN )->default_value( jpsi_agN ), "parameter for momentum broadening of initial J/psi")
-  ("heavy_quark.shadowing_model", po::value<int>( )->default_value( static_cast<int>(shadowing_model) ), "shadowing model used for initial J/psi")
+  ("heavy_quark.shadowing_model", po::value<int>( )->default_value( static_cast<int>(shadowing_model) ), "shadowing model used for initial J/psi: 0 = none, 1 = eks98, 2 = eps08, 3 = eps09")
   ("heavy_quark.jpsi_formationTime", po::value<double>( &jpsi_formationTime )->default_value( jpsi_formationTime ), "formation time for initial J/psi in addition to the standard 1/M_T")
   ("heavy_quark.jpsi_testparticles", po::value<int>( &jpsi_testparticles )->default_value( jpsi_testparticles ), "number of testparticles for J/psi (in addition to the number employed for the rest of added particles)")
   
@@ -390,7 +390,7 @@ void config::checkOptionsForSanity()
   if( ( scatt_amongAddedParticles && Particle::N_psi_states == 0 ) || ( Particle::N_psi_states > 0 && !scatt_amongAddedParticles ) )
   {
     string errMsg = "Scatterings among added particles and Jpsi not active or vice versa.";
-    throw eConfig_error( errMsg );
+//     throw eConfig_error( errMsg );
   }
   
   if( mesonDecay && !hadronization_hq )
