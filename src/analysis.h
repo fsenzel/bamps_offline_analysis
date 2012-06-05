@@ -201,7 +201,7 @@ public:
   
   void volumeMidrap(const int ) const;
   
-  double tstep[90];
+  double tstep[120];
   double tstep_movie[500];
   
   analysisRingStructure rings;

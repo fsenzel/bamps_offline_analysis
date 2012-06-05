@@ -79,8 +79,8 @@ analysis::analysis( config* const c ):
   // for (( I=50; $I <= 80; I++ )); do   J=$(echo "scale=1; ($I+1)/10" | bc); echo "tstep[$I]=$J;" ; done
   else if( studyJpsi || study_dndy_time ) // jpsi evolution: more timesteps
   {
-    tstep[0]=.10;
-    tstep[1]=.15;
+    tstep[0]=.005;
+    tstep[1]=.006; // choose to be small that no analysis is performed, just start for all files at 0.2 in next step
     tstep[2]=.20;
     tstep[3]=.25;
     tstep[4]=.30;
@@ -159,30 +159,76 @@ analysis::analysis( config* const c ):
     tstep[77]=20.0;
     tstep[78] = infinity; //fm/c
     nTimeSteps = 79;
+    
+    if( theConfig->getRuntime() > 20.0 )
+    {
+      tstep[78]=21;
+      tstep[79]=22;
+      tstep[80]=23;
+      tstep[81]=24;
+      tstep[82]=25;
+      tstep[83]=26;
+      tstep[84]=27;
+      tstep[85]=28;
+      tstep[86]=29;
+      tstep[87]=30;
+      tstep[88]=31;
+      tstep[89]=32;
+      tstep[90]=33;
+      tstep[91]=34;
+      tstep[92]=35;
+      tstep[93]=36;
+      tstep[94]=37;
+      tstep[95]=38;
+      tstep[96]=39;
+      tstep[97]=40;
+      tstep[98]=42;
+      tstep[99]=44;
+      tstep[100]=46;
+      tstep[101]=48;
+      tstep[102]=50;
+      tstep[103]=52;
+      tstep[104]=54;
+      tstep[105]=56;
+      tstep[106]=58;
+      tstep[107]=60;
+      tstep[108]=62;
+      tstep[109]=64;
+      tstep[110]=66;
+      tstep[111]=68;
+      tstep[112]=70;
+      tstep[113]=72;
+      tstep[114]=74;
+      tstep[115]=76;
+      tstep[116]=78;
+      tstep[117]=80;
+      tstep[118] = infinity; //fm/c
+      nTimeSteps = 119;
+    }
   }
   else
   {
-  tstep[0] = 0.1;      //fm/c
-  tstep[1] = 0.5;      //fm/c
-  tstep[2] = 1.0;      //fm/c
-  tstep[3] = 1.5;      //fm/c
-  tstep[4] = 2.0;      //fm/c
-  tstep[5] = 2.5;      //fm/c
-  tstep[6] = 3.0;      //fm/c
-  tstep[7] = 3.5;      //fm/c
-  tstep[8] = 4.0;      //fm/c
-  tstep[9] = 4.5;      //fm/c
-  tstep[10] = 5.0;      //fm/c
-  tstep[11] = 5.5;      //fm/c
-  tstep[12] = 6.0;      //fm/c
-  tstep[13] = 6.5;      //fm/c
-  tstep[14] = 7.0;      //fm/c
-  tstep[15] = 7.5;      //fm/c
-  tstep[16] = 8.0;      //fm/c
-  tstep[17] = 9.0;      //fm/c
-  tstep[18] = 10.0;
-  tstep[19] = infinity; //fm/c
-  nTimeSteps = 20;
+    tstep[0] = 0.1;      //fm/c
+    tstep[1] = 0.5;      //fm/c
+    tstep[2] = 1.0;      //fm/c
+    tstep[3] = 1.5;      //fm/c
+    tstep[4] = 2.0;      //fm/c
+    tstep[5] = 2.5;      //fm/c
+    tstep[6] = 3.0;      //fm/c
+    tstep[7] = 3.5;      //fm/c
+    tstep[8] = 4.0;      //fm/c
+    tstep[9] = 4.5;      //fm/c
+    tstep[10] = 5.0;      //fm/c
+    tstep[11] = 5.5;      //fm/c
+    tstep[12] = 6.0;      //fm/c
+    tstep[13] = 6.5;      //fm/c
+    tstep[14] = 7.0;      //fm/c
+    tstep[15] = 7.5;      //fm/c
+    tstep[16] = 8.0;      //fm/c
+    tstep[17] = 9.0;      //fm/c
+    tstep[18] = 10.0;
+    tstep[19] = infinity; //fm/c
+    nTimeSteps = 20;
   }
   //--------------------------------------
 
@@ -1598,9 +1644,6 @@ void analysis::computeV2RAA( string name, const double _outputTime )
     theV2RAA.computeFor( charm, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     theV2RAA.computeFor( heavy_quark, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
-    
-    if ( studyJpsi ) // to consider charm annihaltion is just useful if added particles can scatter
-      theV2RAA.computeFor( jpsi, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
 
     if ( name == "initial" || name == "final" )
     {
@@ -1621,6 +1664,15 @@ void analysis::computeV2RAA( string name, const double _outputTime )
     // also take a look at light parton v2 of background
     theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+    
+    if ( studyJpsi )
+    {
+      theV2RAA.setPtBinProperties( 0.0, 15.0, 20 );
+      
+      theV2RAA.computeFor( jpsi, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
+      theV2RAA.computeFor( jpsi_ini, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
+      theV2RAA.computeFor( jpsi_sec, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
+    }
   }
   else
   {
@@ -1780,7 +1832,9 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
           ( _flavTypeToComputeFor == bottom && ( flavor == anti_bottom ) ) ||
           ( _flavTypeToComputeFor == heavy_quark && ( flavor == charm || flavor == bottom || flavor == anti_charm || flavor == anti_bottom ) ) ||
           ( _flavTypeToComputeFor == c_electron && ( ( flavor == electron || flavor == positron ) && ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( mother_flav ) ) == dmeson_gen ) ) ||
-          ( _flavTypeToComputeFor == b_electron && ( ( flavor == electron || flavor == positron ) && ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( mother_flav ) ) == bmeson_gen ) )
+          ( _flavTypeToComputeFor == b_electron && ( ( flavor == electron || flavor == positron ) && ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( mother_flav ) ) == bmeson_gen ) ) ||
+          ( _flavTypeToComputeFor == jpsi_ini && ( flavor == jpsi && _particles[i].initially_produced ) ) ||
+          ( _flavTypeToComputeFor == jpsi_sec && ( flavor == jpsi && !_particles[i].initially_produced ) )
         ) 
       )
     {
@@ -1926,6 +1980,9 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       
       if( _v2type == v2jets )
         nInBin = nInBin / theConfig->getNaddedEvents();
+      
+      if( Particle::mapToGenericFlavorType( _flavTypeToComputeFor ) == jpsi )
+        nInBin = nInBin / theConfig->getJpsiTestparticles();
       
       if( Particle::mapToGenericFlavorType( _flavTypeToComputeFor ) == electron_gen )
         nInBin = nInBin / theConfig->getNumberElectronStat();
@@ -2989,7 +3046,7 @@ void analysis::writeJpsiFugacityOutput( const int step )
   getJpsiFugacity( time, dr, dz, fugacity, n_jpsi, temp, enDen );
   printJpsiFugacity << fugacity;
   printJpsiFugacity << "\t";
-  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
 
   printJpsiFugacity << "\t";
   printJpsiFugacity << temp;
@@ -3009,7 +3066,7 @@ void analysis::writeJpsiFugacityOutput( const int step )
   getJpsiFugacity( time, dr, dz, fugacity, n_jpsi, temp, enDen );
   printJpsiFugacity << fugacity;
   printJpsiFugacity << "\t";
-  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
   printJpsiFugacity << "\t";
   printJpsiFugacity << temp;
   printJpsiFugacity << "\t";
@@ -3029,7 +3086,7 @@ void analysis::writeJpsiFugacityOutput( const int step )
   getJpsiFugacity( time, dr, dz, fugacity, n_jpsi, temp, enDen );
   printJpsiFugacity << fugacity;
   printJpsiFugacity << "\t";
-  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
   printJpsiFugacity << "\t";
   printJpsiFugacity << temp;
   printJpsiFugacity << "\t";
@@ -3049,7 +3106,7 @@ void analysis::writeJpsiFugacityOutput( const int step )
   getJpsiFugacity( time, dr, dz, fugacity, n_jpsi, temp, enDen );
   printJpsiFugacity << fugacity;
   printJpsiFugacity << "\t";
-  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
   printJpsiFugacity << "\t";
   printJpsiFugacity << temp;
   printJpsiFugacity << "\t";
@@ -3113,7 +3170,7 @@ void analysis::getJpsiFugacity( const double time, const double dr, const double
   n_jpsi_equ = theInterpolation_nJpsi.getN( temp ) * V;  // GeV^3/GeV^3 = 1
 
 
-  fugacity = double(n_jpsi)/ n_jpsi_equ / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+  fugacity = double(n_jpsi)/ n_jpsi_equ / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
 
 //   cout << "t=" << time << "  temp=" << temp << "  deltaTemp=" << deltaTemp <<  "  n_jpsi_equ=" << n_jpsi_equ << "  fugacity=" << fugacity << "  n_jpsi=" << n_jpsi << "  V=" << V << endl;
 
@@ -4267,40 +4324,40 @@ void analysis::printJpsiEvolution()
       else
         print_je << tstep[i-1];
       print_je.width( 15 );
-      print_je << double( numberJpsi_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+      print_je << double( numberJpsi_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
       print_je.width( 15 );
-      print_je << double( numberJpsi_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+      print_je << double( numberJpsi_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
       print_je.width( 15 );
-      print_je << double( numberJpsiProd_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+      print_je << double( numberJpsiProd_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
       print_je.width( 15 );
-      print_je << double( numberJpsiDiss_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+      print_je << double( numberJpsiDiss_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
       print_je.width( 15 );
-      print_je << double( numberJpsiDissTd_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+      print_je << double( numberJpsiDissTd_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
       print_je.width( 15 );
-      print_je << double( numberCCbGG_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+      print_je << double( numberCCbGG_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
 
       
       //  / (2.0*1.0) because the rapidity range is 1.0, but for + and . Therefore, times 2.
       print_je.width( 15 );
-      print_je << double( numberJpsi_midPseudoRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / delta_y_mid;
+      print_je << double( numberJpsi_midPseudoRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_mid;
       print_je.width( 15 );
-      print_je << double( numberJpsi_midPseudoRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / delta_y_mid;
+      print_je << double( numberJpsi_midPseudoRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_mid;
       print_je.width( 15 );
-      print_je << double( numberJpsi_forwardPseudoRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / delta_y_forward;
+      print_je << double( numberJpsi_forwardPseudoRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_forward;
       print_je.width( 15 );
-      print_je << double( numberJpsi_forwardPseudoRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / delta_y_forward;
+      print_je << double( numberJpsi_forwardPseudoRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_forward;
       
       print_je.width( 15 );
-      print_je << double( numberJpsi_midNormRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / delta_y_mid;
+      print_je << double( numberJpsi_midNormRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_mid;
       print_je.width( 15 );
-      print_je << double( numberJpsi_midNormRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / delta_y_mid;
+      print_je << double( numberJpsi_midNormRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_mid;
       print_je.width( 15 );
-      print_je << double( numberJpsi_forwardNormRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / delta_y_forward;
+      print_je << double( numberJpsi_forwardNormRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_forward;
       print_je.width( 15 );
-      print_je << double( numberJpsi_forwardNormRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / delta_y_forward;
+      print_je << double( numberJpsi_forwardNormRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_forward;
       
 //       print_je.width( 15 );
-//       print_je << double( numberJpsi_midSpaceTimeRap_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents();
+//       print_je << double( numberJpsi_midSpaceTimeRap_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
       print_je << endl;
     }
   }

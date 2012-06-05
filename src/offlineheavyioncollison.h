@@ -101,7 +101,7 @@ private:
 
   int scatt32_offlineWithAddedParticles_utility( scattering32& scatt32_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, const int iscat, const int jscat, const int kscat, int& n32, const double picked_ratio, const double nexttime  );
   int scatt23_offlineWithAddedParticles_utility( scattering23& scatt23_obj, cellContainer& _cell, int iscat, const int jscat, bool& again, const double nexttime );
-  void scatt22_offlineWithAddedParticles_utility( scattering22& scatt22_obj, const int iscat, const int jscat, int& typ, const double nexttime );
+  void scatt22_offlineWithAddedParticles_utility( scattering22& scatt22_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, const int iscat, const int jscat, int& typ, const double nexttime );
   void scatt22_amongAddedParticles_utility( scattering22& scatt22_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, const int iscat, const int jscat, int& typ, const double nexttime );
   
   /** @brief Goes through all added particles and decays J/psi if the temperature of the surrounding medium is larger than the dissocation temperature */
