@@ -45,6 +45,29 @@ private:
   double impactParameter;       //impact parameter in fm
   int numberOfTestparticles;    //number of testparticles per real particle
   INITIAL_STATE_TYPE initialStateType;
+  
+  /** @brief Cut-off time for shower evolution [GeV^-1] */
+  double insertionTime;
+  
+  /** @brief Random number generator seed for fixing PYTHIA seed */
+  long int seed;
+  
+  /** @brief Filename prefix, needed for initial unshowered particle output */
+  string filename_prefix; 
+  
+  /** @brief Routine for converting a particle vector consisting of back-to-back
+   *         parton pairs into dijet showers */
+  void showerParticles( std::vector< ParticleOffline >& _particles ); 
+  
+  /** @brief Routine for setting event flag for additional particles */
+  void setEventID( std::vector< ParticleOffline >& _particles );
+  
+  /** @brief Output routine of shower initiating partons before showering */
+  void initialShowerInitOutput( std::vector< ParticleOffline > _particles );
+  
+  /** @brief Routine for creating one dijet shower out of PYTHIA */
+  vector<ParticleOffline> createShowerEvent( const double _px, const double _py, const double _pz1, const double _pz2, const FLAVOR_TYPE _flavor1, const FLAVOR_TYPE _flavor2 );
+    
 };
 
 

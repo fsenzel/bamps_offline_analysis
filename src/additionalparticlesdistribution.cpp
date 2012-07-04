@@ -22,11 +22,17 @@
 #include "initialmodel_pythia.h"
 #include "initialmodel_cgc.h"
 #include "initialmodel_jpsi.h"
-#include "initialShower.h"
+#include "FPT_compare.h"
 
 using namespace ns_casc;
 using namespace std;
 
+extern "C" {
+  void shower_(const double *px, const double *py, const double *pz1, const double *pz2, int *pythiaFlavor1, int *pythiaFlavor2, double *tauf, long int *seed);
+  struct {
+    double pa[100][6];
+  } bamps_;
+}
 
 additionalParticlesDistribution::additionalParticlesDistribution( const config* const _config, const INITIAL_STATE_TYPE _initialStateType ) :
     initialStateType( _initialStateType ),
@@ -35,7 +41,10 @@ additionalParticlesDistribution::additionalParticlesDistribution( const config* 
     minimumPT( _config->getMinimumPT() ),
     minijet_P0( _config->getPtCutoff() ),
     impactParameter( _config->getImpactParameter() ),
-    numberOfTestparticles( _config->getTestparticles() )
+    numberOfTestparticles( _config->getTestparticles() ),
+    insertionTime( _config->getInsertionTime() ),
+    seed( _config->getSeed() ),
+    filename_prefix( _config->getStandardOutputDirectoryName() + "/" + _config->getJobName() )
 {
 }
 
@@ -48,6 +57,7 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   switch ( initialStateType )
   {
     case miniJetsInitialState:
+    {
       double usedMinimumPT;
       // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
       if( minimumPT > minijet_P0 )
@@ -56,6 +66,7 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
         usedMinimumPT = minijet_P0;
       initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
       break;
+    }
     case pythiaInitialState:
       initialmodel = new initialModel_Pythia( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
       break;
@@ -66,8 +77,16 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
       initialmodel = new initialModel_Jpsi( *configObject, _wsParameter );
       break;
     case showerInitialState:
+    {
+      double usedMinimumPT;
+      // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
+      if ( minimumPT > minijet_P0 )
+        usedMinimumPT = minimumPT;
+      else
+        usedMinimumPT = minijet_P0;
       initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
       break;
+    }
     default:
       std::string errMsg = "Model for sampling the initial state not implemented yet!";
       throw eInitialModel_error( errMsg );
@@ -92,6 +111,14 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   
   if( configObject->isStudyNonPromptJpsiInsteadOfElectrons() )
     deleteAllParticlesExceptBottom( _particles );
+
+  //     Showering of particles, if initialStateType = 5, unsure if before preparing or after...
+  if ( initialStateType == showerInitialState )
+  {
+    setEventID( addedParticles );
+    initialShowerInitOutput( addedParticles );
+    showerParticles( addedParticles );
+  }
 
   for ( int i = 0; i < _particles.size(); i++ )
   {
@@ -187,3 +214,212 @@ void additionalParticlesDistribution::deleteAllParticlesExceptBottom( std::vecto
     }
   }
 }
+
+
+void additionalParticlesDistribution::showerParticles(vector< ParticleOffline >& _particles)
+{
+  vector<ParticleOffline> tempParticles;
+  for (int i=0; i < _particles.size(); i+=2)
+  {
+    vector<ParticleOffline> particleShower;
+    double px = _particles[i].PX;
+    double py = _particles[i].PY;
+    double pz1 = _particles[i].PZ;
+    double pz2 = _particles[i+1].PZ;
+    FLAVOR_TYPE flavor1 = _particles[i].FLAVOR;
+    FLAVOR_TYPE flavor2 = _particles[i+1].FLAVOR;
+    particleShower = createShowerEvent(px,py,pz1,pz2,flavor1,flavor2);
+
+    for (int j=0; j < particleShower.size(); j++)
+    {
+      particleShower[j].N_EVENT_pp = _particles[i].N_EVENT_pp;
+      particleShower[j].X = _particles[i].X;
+      particleShower[j].Y = _particles[i].Y;
+      particleShower[j].Z = _particles[i].Z;
+      particleShower[j].T = _particles[i].T;
+
+      particleShower[j].X_init = particleShower[j].X;
+      particleShower[j].Y_init = particleShower[j].Y;
+      particleShower[j].Z_init = particleShower[j].Z;
+
+      particleShower[j].init = true;
+
+      particleShower[j].PX_init = particleShower[j].PX;
+      particleShower[j].PY_init = particleShower[j].PY;
+      particleShower[j].PZ_init = particleShower[j].PZ;
+      particleShower[j].E_init = particleShower[j].E;
+
+      tempParticles.push_back( particleShower[j] );
+    }
+  }
+  _particles.clear();
+  _particles = tempParticles;
+  cout << "#### " << _particles.size() << " showered particles added after showering" << endl;
+}
+
+
+vector<ParticleOffline> additionalParticlesDistribution::createShowerEvent( const double _px, const double _py, const double _pz1, const double _pz2, const FLAVOR_TYPE _flavor1, const FLAVOR_TYPE _flavor2 )
+{
+  vector<ParticleOffline> particlesToAdd;
+  int flavor1, flavor2;
+
+  switch (_flavor1)
+  {
+    case down:
+      flavor1 = 1;
+      break;
+    case anti_down:
+      flavor1 = -1;
+      break;
+    case up:
+      flavor1 = 2;
+      break;
+    case anti_up:
+      flavor1 = -2;
+      break;
+    case strange:
+      flavor1 = 3;
+      break;
+    case anti_strange:
+      flavor1 = -3;
+      break;
+    case gluon:
+      flavor1 = 21;
+      break;
+    default:
+      cout << "Unknown flavor type...." << endl;
+  }
+  
+  switch (_flavor2)
+  {
+    case down:
+      flavor2 = 1;
+      break;
+    case anti_down:
+      flavor2 = -1;
+      break;
+    case up:
+      flavor2 = 2;
+      break;
+    case anti_up:
+      flavor2 = -2;
+      break;
+    case strange:
+      flavor2 = 3;
+      break;
+    case anti_strange:
+      flavor2 = -3;
+      break;
+    case gluon:
+      flavor2 = 21;
+      break;
+    default:
+      cout << "Unknown flavor type...." << endl;
+  }
+
+  int attempt = 0;
+  do
+  {
+    particlesToAdd.clear();
+
+    shower_(&_px,&_py,&_pz1,&_pz2,&flavor1,&flavor2,&insertionTime,&seed);
+
+    int index = 0;
+    while (bamps_.pa[index][0] != 0)
+    {
+      ParticleOffline tempParticle;
+      switch (static_cast<int>(bamps_.pa[index][0]))
+      {
+        case 21:
+          tempParticle.FLAVOR = gluon;
+          break;
+        case 2:
+          tempParticle.FLAVOR = up;
+          break;
+        case 1:
+          tempParticle.FLAVOR = down;
+          break;
+        case -2:
+          tempParticle.FLAVOR = anti_up;
+          break;
+        case -1:
+          tempParticle.FLAVOR = anti_down;
+          break;
+        case 3:
+          tempParticle.FLAVOR = strange;
+          break;
+        case -3:
+          tempParticle.FLAVOR = anti_strange;
+          break;
+        default:
+          cout << "Unknown flavor type:\t" << bamps_.pa[index][0] << endl;
+      }
+
+      tempParticle.PX = bamps_.pa[index][1];
+      tempParticle.PY = bamps_.pa[index][2];
+      tempParticle.PZ = bamps_.pa[index][3];
+      tempParticle.E = sqrt( tempParticle.PX * tempParticle.PX + tempParticle.PY * tempParticle.PY + tempParticle.PZ * tempParticle.PZ);
+      tempParticle.m = 0.0;
+      particlesToAdd.push_back( tempParticle );
+      index++;
+    }
+
+    cout << "Created pythia shower with cut-off time tau_i = " << insertionTime;
+    cout << "PYTHIA seed:\t" << seed << endl;
+    attempt++;
+  } while (particlesToAdd.size() == 0);
+
+  if (attempt > 10)
+    cout << attempt << " Attempts needed to get an allowed shower." << endl;
+
+  double sumE = 0.0;
+  double E1 = sqrt( _px*_px + _py*_py + _pz1*_pz1 );
+  double E2 = sqrt( _px*_px + _py*_py + _pz2*_pz2 );
+  for (int i = 0; i < particlesToAdd.size(); i++)
+  {
+    sumE += particlesToAdd[i].E;
+  }
+  if (FPT_COMP_GE(abs(sumE-(E1+E2))/sumE,0.01))
+    cout << "Total energy of shower particles is unequal energy of shower-initiating partons:\t"
+         << sumE << "\t" << E1 + E2 << endl;
+
+  return particlesToAdd;
+}
+
+void additionalParticlesDistribution::setEventID(vector< ParticleOffline >& _particles)
+{
+  for ( int index = 0; index < _particles.size(); index+=2 )
+  {
+    _particles[index].N_EVENT_pp = _particles[index+1].N_EVENT_pp = static_cast<int>( index / 2 );
+  }
+}
+
+void additionalParticlesDistribution::initialShowerInitOutput(vector< ParticleOffline > _particles)
+{
+  time_t end;
+  time( &end );
+
+  string filename = filename_prefix + "_" + "unshoweredParticles";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
+
+  //---- print header if file is empty ----
+/*  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if ( size == 0 )
+    printHeader( file, rapidityDistribution, end );*/
+  //---------------------------------------
+  string sep = "\t";
+  
+  file << "#event" << sep << "px" << sep << "py" << sep << "pz" << sep << "E" << sep << "x" 
+       << sep << "y" << sep << "z" << sep << "t" << endl;
+  for ( int index=0; index < _particles.size(); index++)
+  {
+    file << _particles[index].N_EVENT_pp << sep << _particles[index].PX << sep << _particles[index].PY << sep << _particles[index].PZ << sep 
+    << _particles[index].E << sep << _particles[index].X << sep << _particles[index].Y << sep << _particles[index].Z << sep 
+    << _particles[index].T << endl;
+  }
+  file.close();
+
+}
+

@@ -2634,7 +2634,7 @@ void analysis::particleOutput( const int step )
   {
     file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep << addedParticles[i].T << sep << addedParticles[i].X << sep
     << addedParticles[i].Y << sep  << addedParticles[i].Z << sep << addedParticles[i].E << sep << addedParticles[i].PX << sep << addedParticles[i].PY << sep
-    << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << endl;
+    << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep << addedParticles[i].N_EVENT_pp << endl;
   }
   file.close();
 }
