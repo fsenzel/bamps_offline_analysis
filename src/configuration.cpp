@@ -81,6 +81,7 @@ config::config() :
  cgcParticleFile("-"),
  mcatnloParticleFile("-"),
  P0(1.4),
+ insertionTime(0.0),
 // ---- output options ----
  outputSwitch_progressLog( true ),
  outputSwitch_detailedParticleOutput(false),
@@ -306,6 +307,7 @@ void config::initializeProgramOptions()
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
   ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
+  ("initial_state.insertionTime", po::value<double>( &insertionTime )->default_value( insertionTime ), "cut-off time for shower evolution, needed when initial_state.type = 5")
   ;
   
   // Add some options related to the program output  

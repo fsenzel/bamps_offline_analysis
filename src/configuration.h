@@ -32,7 +32,7 @@
 
 
 /** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState };
+enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, showerInitialState };
 
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
@@ -172,6 +172,10 @@ class config : public configBase
   
   /** @brief Interface for config::P0 */
   double getPtCutoff() const { return P0; }
+  
+  /** @brief Interface for config::insertionTime */
+  double getInsertionTime() const { return insertionTime; };
+  
   /** ------------------------------- */
 
   /** -------- output options ------- */   
@@ -444,6 +448,10 @@ class config : public configBase
   
   /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
   double P0;  
+  
+  /** @brief If shower initial conditions, this time gives the duration of the shower */
+  double insertionTime;
+  
   /** ------------------------------- */
   
   /** -------- output options ------- */ 

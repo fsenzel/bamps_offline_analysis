@@ -22,6 +22,7 @@
 #include "initialmodel_pythia.h"
 #include "initialmodel_cgc.h"
 #include "initialmodel_jpsi.h"
+#include "initialShower.h"
 
 using namespace ns_casc;
 using namespace std;
@@ -63,6 +64,9 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
       break;
     case onlyJpsiInitialState:
       initialmodel = new initialModel_Jpsi( *configObject, _wsParameter );
+      break;
+    case showerInitialState:
+      initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
       break;
     default:
       std::string errMsg = "Model for sampling the initial state not implemented yet!";
