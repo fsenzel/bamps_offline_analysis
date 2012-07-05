@@ -2896,7 +2896,7 @@ void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
   case all:
     f << "#ID" << sep << "uniqueID" << sep << "Cell ID" << sep << "Flavor" << sep << "t" << sep << "x" << sep << "y" << sep << "z" << sep
     << "E"  << sep << "Px"  << sep << "Py"  << sep << "Pz" << sep << "md2g/alpha_s [GeV^2]" << sep
-    << "md2q/alpha_s [GeV^2]" << endl;
+    << "md2q/alpha_s [GeV^2]" << sep << "Init. eventID" << endl;
     break;
   default:
     f << endl;

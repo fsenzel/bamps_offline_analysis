@@ -75,6 +75,7 @@ int main( int argc, char *argv[] )
     else
     {
       seed = ran2.setSeed();
+      theConfig.setSeed( seed );
     }
     theAnalysis.setSeed( seed );
     cout << "seed: " << seed << endl;

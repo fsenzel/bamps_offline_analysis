@@ -330,6 +330,8 @@ class config : public configBase
   void readAndPrepareInitialSettings( offlineOutputInterface*const _offlineInterface );
   /** ------------------------------ */
 
+  /** Set seed chosen during runtime */
+  void setSeed ( uint32_t _seed ){ seed = _seed; };
   
  protected:
    /** ----- auxiliary routines ----- */

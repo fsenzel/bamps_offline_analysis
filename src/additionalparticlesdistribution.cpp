@@ -28,7 +28,7 @@ using namespace ns_casc;
 using namespace std;
 
 extern "C" {
-  void shower_(const double *px, const double *py, const double *pz1, const double *pz2, int *pythiaFlavor1, int *pythiaFlavor2, double *tauf, long int *seed);
+  void shower_(const double *px, const double *py, const double *pz1, const double *pz2, int *pythiaFlavor1, int *pythiaFlavor2, double *tauf, uint32_t *seed);
   struct {
     double pa[100][6];
   } bamps_;
@@ -84,6 +84,12 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
         usedMinimumPT = minimumPT;
       else
         usedMinimumPT = minijet_P0;
+      if ( numberOfParticlesToAdd % 2 != 0)
+      {
+	cout << "For shower initial conditions an even number of initial particles is needed. Number of Particles to add is increased by 1.... " << endl;
+	numberOfParticlesToAdd++;
+      }
+      
       initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
       break;
     }
@@ -233,6 +239,7 @@ void additionalParticlesDistribution::showerParticles(vector< ParticleOffline >&
     for (int j=0; j < particleShower.size(); j++)
     {
       particleShower[j].N_EVENT_pp = _particles[i].N_EVENT_pp;
+      particleShower[j].N_EVENT_AA = _particles[i].N_EVENT_AA;
       particleShower[j].X = _particles[i].X;
       particleShower[j].Y = _particles[i].Y;
       particleShower[j].Z = _particles[i].Z;
@@ -254,12 +261,18 @@ void additionalParticlesDistribution::showerParticles(vector< ParticleOffline >&
   }
   _particles.clear();
   _particles = tempParticles;
-  cout << "#### " << _particles.size() << " showered particles added after showering" << endl;
+  cout << "#### " << "After showering for " << insertionTime*0.198 << " fm, " << _particles.size() 
+       << " showered particles out of " << numberOfParticlesToAdd << " particles added..." << endl;
 }
 
 
 vector<ParticleOffline> additionalParticlesDistribution::createShowerEvent( const double _px, const double _py, const double _pz1, const double _pz2, const FLAVOR_TYPE _flavor1, const FLAVOR_TYPE _flavor2 )
 {
+
+// PYTHIA seed has max value 9E8
+  while ( seed > 900000000 )
+    seed -= 900000000;
+  
   vector<ParticleOffline> particlesToAdd;
   int flavor1, flavor2;
 
@@ -364,8 +377,6 @@ vector<ParticleOffline> additionalParticlesDistribution::createShowerEvent( cons
       index++;
     }
 
-    cout << "Created pythia shower with cut-off time tau_i = " << insertionTime;
-    cout << "PYTHIA seed:\t" << seed << endl;
     attempt++;
   } while (particlesToAdd.size() == 0);
 

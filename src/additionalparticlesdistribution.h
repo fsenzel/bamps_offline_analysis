@@ -50,7 +50,7 @@ private:
   double insertionTime;
   
   /** @brief Random number generator seed for fixing PYTHIA seed */
-  long int seed;
+  uint32_t seed;
   
   /** @brief Filename prefix, needed for initial unshowered particle output */
   string filename_prefix; 

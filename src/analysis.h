@@ -185,6 +185,7 @@ public:
   void collectEtDataInitial();
   
   void setSeed( uint32_t _s ) { seed = _s; }
+  uint32_t getSeed( ) { return seed; }
 
 
   int addJetEvent_in( const int ID_1, const int ID_2, const int ID_3, const jetTrackerCollType coll_type,
