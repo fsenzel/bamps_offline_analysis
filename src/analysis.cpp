@@ -23,6 +23,7 @@
 #include "binning2.h"
 #include "configuration.h"
 #include "FPT_compare.h"
+#include "random.h"
 
 #include <stdio.h> // for getenv()
 #include <stdlib.h> // for getenv()
@@ -503,7 +504,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyJets = false; // study jets
   studyCentralDensity = false; // density in central part of collision
   studyBackground = false; // print also properties like v2, RAA of background
-  
+  studyBackgroundOutput = false; // print background particles with N_test=1
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -655,6 +656,8 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
       break;
+    case background_jets:
+      studyBackgroundOutput = true;
     default:
       break;
   }
@@ -762,6 +765,8 @@ void analysis::initialOutput()
   if ( studyParticleOutput )
     particleOutput( 0 );
   
+  if ( studyBackgroundOutput )
+    backgroundOutput( 0 );   
 }
 
 
@@ -840,6 +845,9 @@ void analysis::finalOutput( const double _stoptime )
   
   if ( dndyOutput )
     print_dndy( "final" );
+  
+    if ( studyBackgroundOutput )
+    backgroundOutput( nTimeSteps );   
 }
 
 
@@ -4332,10 +4340,75 @@ void analysis::printJpsiEvolution()
 }
 
 
+void analysis::backgroundOutput( const int step )
+{
+  int backgroundparticlesToRecord = static_cast<int>( particles_atTimeNow.size() / theConfig->getTestparticles() );
+  int numberOfEvents = static_cast<int>(theConfig->getNumberOfParticlesToAdd()/2);
+  vector< vector< bool > > backgroundMatrix;
+  backgroundMatrix.resize(numberOfEvents);
+  
+  for (int i = 0; i < numberOfEvents; i++)
+  {
+    backgroundMatrix[i].resize( particles_atTimeNow.size(), false );
+    
+    int counter=0;
+    do
+    {
+      int index;
+      do
+      {
+         index = static_cast<int>(ran2() * particles_atTimeNow.size());
+      }
+      while ( particles_atTimeNow[index].showerInEvents[i] || backgroundMatrix[i][index] );
+      
+      backgroundMatrix[i][index] = true;
+      counter++;
+    }
+    while ( counter != backgroundparticlesToRecord );
+  }
+  
 
+  string name;
+  stringstream ss;
 
+  if ( step == 0 )
+    name = "initial";
+  else if ( step == nTimeSteps )
+    name = "final";
+  else
+  {
+    ss << step;
+    name = "step" + ss.str();
+  }
 
+  //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+  string filename = filename_prefix + "_" + name + ".f11";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
 
+  //---- print header if file is empty ----
+  time_t end;
+  time( &end );
+
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if ( size == 0 )
+    printHeader( file, all, end );
+  //---------------------------------------
+
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+    file << i << sep << particles_atTimeNow[i].unique_id << sep << particles_atTimeNow[i].FLAVOR << sep << particles_atTimeNow[i].T << sep << particles_atTimeNow[i].X << sep
+    << particles_atTimeNow[i].Y << sep  << particles_atTimeNow[i].Z << sep << particles_atTimeNow[i].E << sep << particles_atTimeNow[i].PX << sep << particles_atTimeNow[i].PY << sep
+    << particles_atTimeNow[i].PZ;
+    for ( int j = 0; j < numberOfEvents; j++)
+    {
+      file << sep << backgroundMatrix[j][i] ;
+    }
+    file << endl;
+  }
+  file.close();
+}
 
 
 jetTrackerSingleEvent::jetTrackerSingleEvent()

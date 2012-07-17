@@ -70254,8 +70254,9 @@ C...Loop over partons that may branch.
         KFLM=IABS(K(IM,2))
         IR=IREF(IM-NS)
         IF(KSH(IR).EQ.0) GOTO 290
-        IF(P(IM,5).LT.SQRT(PMTH(1,IR)**2+0.25D0*(QMIN**2))) GOTO 290
-! 	IF(P(IM,5).LT.SQRT(P(IM,4)/QMIN)) GOTO 290
+        IF ( QMIN .LT. 0 ) THEN
+          IF(P(IM,5).LT.SQRT(PMTH(1,IR)**2+0.25D0*(QMIN**2))) GOTO 290
+        END IF
         IF(P(IM,5).LT.PMTH(2,IR)) GOTO 290
         IGM=K(IM,3)
       ELSE

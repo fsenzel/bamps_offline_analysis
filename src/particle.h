@@ -19,7 +19,7 @@
 #define PARTICLE_H
 
 #include "particleprototype.h"
-
+#include <vector>
 
 
 
@@ -195,6 +195,8 @@ class ParticleOffline : public Particle
       }      
     }
     
+    std::vector<bool> showerInEvents;    
+  
   private:
 };
 

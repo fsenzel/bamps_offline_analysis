@@ -307,7 +307,7 @@ void config::initializeProgramOptions()
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
   ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
-  ("initial_state.insertionTime", po::value<double>( &insertionTime )->default_value( insertionTime ), "cut-off time for shower evolution [GeV^(-1)], needed when initial_state.type = 5")
+  ("initial_state.insertionTime", po::value<double>( &insertionTime )->default_value( insertionTime ), "cut-off time for shower evolution [GeV^(-1)], needed when initial_state.type = 5. if value is negative, no PYTHIA showers are not terminated")
   ;
   
   // Add some options related to the program output  
@@ -568,6 +568,7 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
     particles_init[i].PZ = (*(ptrInitialParticles->particleVector))[i].PZ;
     particles_init[i].md2g = (*(ptrInitialParticles->particleVector))[i].md2g;
     particles_init[i].md2q = (*(ptrInitialParticles->particleVector))[i].md2q;
+    particles_init[i].showerInEvents.resize(static_cast<int>(numberOfParticlesToAdd/2),false);
   }
   
   for ( int i = 0; i < particles_init.size(); i++ )

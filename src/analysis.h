@@ -207,6 +207,12 @@ public:
   
   analysisRingStructure rings;
   ringStructure centralRingsCopyFromCascade;
+  
+    //--------------------//
+  //for jet background analysis
+  void backgroundOutput(const int step);  
+  //--------------------//      
+
 
 private:
 
@@ -234,6 +240,7 @@ private:
   bool studyJets;
   bool studyCentralDensity;
   bool studyBackground;
+  bool studyBackgroundOutput;
   
   
   

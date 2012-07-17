@@ -52,7 +52,9 @@ alice_hq_dmesons = 113,
 cms_hq_nonPromptJpsi = 114,
 phenix_jpsi = 131,
 alice_jpsi = 141,
-cms_jpsi = 151
+cms_jpsi = 151,
+// jets:
+background_jets = 161
 };
 
 

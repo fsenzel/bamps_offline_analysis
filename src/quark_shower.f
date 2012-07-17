@@ -100,7 +100,11 @@ C         call qpygin0 ! generate initial nucleon-nucleon position.
 c
 
 	 ejet = max(sqrt(px**2+py**2+pz1**2),sqrt(px**2+py**2+pz2**2))
-	 minQ = sqrt(ejet/TAUF)
+         IF (TAUF .GT. 0.D0) THEN
+	   minQ = sqrt(ejet/TAUF)
+         ELSE
+           minQ = -1.D0
+         END IF
 
 C          DO 5 I=1, 10, 1
  4       CALL PYSHOW(1,2,2.D0*ejet,minQ)

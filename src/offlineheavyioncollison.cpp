@@ -185,6 +185,7 @@ void offlineHeavyIonCollision::initialize()
     addedParticles.clear();
     cout << "#### 0 particles added" << endl;    
   }
+  
 }
 
 
@@ -514,7 +515,6 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     
     simulationTime = nexttime;
   }
-  while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
 
   if( theConfig->isHadronizationHQ() )
   {
@@ -598,6 +598,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     particlesEvolving[k].init = particles_atTimeNow[k].init;
     particlesEvolving[k].edge = particles_atTimeNow[k].edge;
     particlesEvolving[k].free = particles_atTimeNow[k].free;
+    particlesEvolving[k].showerInEvents = particles_atTimeNow[k].showerInEvents;
   }
 
   if ( evolveToTime <= stoptime_last )
@@ -2600,6 +2601,8 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   double leftY = _cell.corner.y_min;
   double leftX = _cell.corner.x_min;
 
+  particles_atTimeNow[iscat].showerInEvents[ addedParticles[jscat].N_EVENT_pp ] = true;
+  
   particles_atTimeNow[iscat].getMomentumArray( P1 );
   particles_atTimeNow[iscat].getCoordinateArray( R1 );
   F1 = particles_atTimeNow[iscat].FLAVOR;
@@ -2760,6 +2763,8 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   double M1, M2;
   double t_hat;
 
+  particles_atTimeNow[iscat].showerInEvents[ addedParticles[jscat].N_EVENT_pp ] = true;
+  
   particles_atTimeNow[iscat].getMomentumArray( P1 );
   particles_atTimeNow[iscat].getCoordinateArray( R1 );
   F1 = particles_atTimeNow[iscat].FLAVOR;
@@ -2769,7 +2774,6 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   addedParticles[jscat].getCoordinateArray( R2 );
   F2 = addedParticles[jscat].FLAVOR;
   M2 = addedParticles[jscat].m;
-
 
   ncoll++;
   ncoll22++;
@@ -3127,7 +3131,10 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
   int order;
   FLAVOR_TYPE F1, F2, F3;
   int typ;
-
+  
+  particles_atTimeNow[iscat].showerInEvents[ addedParticles[kscat].N_EVENT_pp ] = true;
+  particles_atTimeNow[jscat].showerInEvents[ addedParticles[kscat].N_EVENT_pp ] = true;
+  
   particles_atTimeNow[iscat].getMomentumArray( P1 );
   particles_atTimeNow[iscat].getCoordinateArray( R1 );
   F1 = particles_atTimeNow[iscat].FLAVOR;
