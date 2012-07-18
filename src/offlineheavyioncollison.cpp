@@ -515,6 +515,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     
     simulationTime = nexttime;
   }
+  while ( simulationTime < stoptime && !endOfDataFiles );//fm/c 
 
   if( theConfig->isHadronizationHQ() )
   {
