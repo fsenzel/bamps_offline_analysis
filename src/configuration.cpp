@@ -33,7 +33,7 @@ using std::vector;
 namespace po = boost::program_options;
 using namespace ns_casc;
 
-/** @brief definition of particles vector, defined extern in configuration.h */
+/** @brief definition of particles vector, declared extern in configuration.h */
 std::vector<ParticleOffline> ns_casc::particlesEvolving;
 std::vector<ParticleOffline> ns_casc::particles_init;
 std::vector<ParticleOffline> ns_casc::particles_atTimeNow;
