@@ -2543,15 +2543,18 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
               }
               else if ( order == 1 || order == 3 )
               {
-                m1 = 0;
-                m2 = m1;        // reset loop for next addedParticle, do not reduce m3 because then next particle is considered
-
                 pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
                 pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
                 if ( jetEventIndex != -1 || pt_iscat > aa.getJetTracking_PT() || pt_jscat > aa.getJetTracking_PT() )
                 {
                   aa.addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
                 }
+                
+//                 hack for exiting both inner loops and continuing with next addedParticle
+                m1 = static_cast<int>( _allParticlesList.size() ) - 1;
+                m2 = _allParticlesList.size();       
+                m3--; // m3 is decreased because in the next loop step it is again increased by 1
+                
               }
             }
             else
