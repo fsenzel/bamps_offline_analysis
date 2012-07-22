@@ -3231,6 +3231,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
     {
       if ( pt_out1 > pt_out2 )
       {
+
+//         if jet particle changes to a gluon, it is added to gluon list in cell
+        if ( (addedParticles[kscat].FLAVOR != gluon) && (F1 == gluon))
+          _gluonListAdded.push_back( kscat );
+
         addedParticles[kscat].FLAVOR = F1;
         addedParticles[kscat].PX = P1[1];
         addedParticles[kscat].PY = P1[2];
@@ -3252,6 +3257,9 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       }
       else
       {
+        if ( (addedParticles[kscat].FLAVOR != gluon) && (F2 == gluon))
+          _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
+
         addedParticles[kscat].FLAVOR = F2;
         addedParticles[kscat].PX = P2[1];
         addedParticles[kscat].PY = P2[2];
@@ -3276,6 +3284,10 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
     {
       if ( pt_out1 > pt_out2 )
       {
+
+        if ( (addedParticles[kscat].FLAVOR != gluon) && (F1 == gluon))
+          _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
+        
         addedParticles[kscat].FLAVOR = F1;
         addedParticles[kscat].PX = P1[1];
         addedParticles[kscat].PY = P1[2];
@@ -3297,6 +3309,9 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       }
       else
       {
+        if ( (addedParticles[kscat].FLAVOR != gluon) && (F2 == gluon))
+          _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
+        
         addedParticles[kscat].FLAVOR = F2;
         addedParticles[kscat].PX = P2[1];
         addedParticles[kscat].PY = P2[2];
