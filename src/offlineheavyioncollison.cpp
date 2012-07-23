@@ -1909,9 +1909,9 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           double vy = rings[ringIndex].getAveraged_v_y();
           double vz = rings[ringIndex].getAveraged_v_z();
 
-          betaDistEntry = scatt23_object.setParameter( vx, vy, vz, P1, P2, F1, F2, sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
+          betaDistEntry = scatt23_object.setParameter( vx, vy, vz, P1, P2, F1, F2, sqrt( s ), md2g / s, lambda_scaled, as, _gluonList.size() );
 
-          cs23 = 1 / s * Ncolor * pow( as, 3 ) * scatt23_object.getIntegral23();
+          cs23 = scatt23_object.getXSection23();
 
           probab23 = pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
         }
@@ -3652,7 +3652,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
   int n32 = 0, n22 = 0, n23 = 0;
   double lambda_scaled, s;
   double probab22 = 0, probab23 = 0, probab32 = 0;
-  double cs22, cs23, I32, I23;
+  double cs22, cs23, I32;
   double R22, R23, R32;
   double as, Vrel, md2g, md2q;
   double lambda, lambdaAvr;
@@ -3802,9 +3802,8 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
             n23++;
             lambda_scaled = lambda * sqrt( s );
             
-            betaDistEntry = scatt23_object.setParameter( vx, vy, vz, P1, P2, F1, F2 , sqrt( s ), md2g / s, lambda_scaled, _gluonList.size() );
-            I23 = scatt23_object.getIntegral23( initialStateIndex );
-            cs23 = Ncolor * pow( as, 3 ) / s * I23;    //1/GeV^2
+            betaDistEntry = scatt23_object.setParameter( vx, vy, vz, P1, P2, F1, F2 , sqrt( s ), md2g / s, lambda_scaled, as, _gluonList.size() );
+            cs23 = scatt23_object.getXSection23( initialStateIndex );   //1/GeV^2
             probab23 += pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
           }
           else
