@@ -390,10 +390,10 @@ vector<ParticleOffline> additionalParticlesDistribution::createShowerEvent( cons
   {
     sumE += particlesToAdd[i].E;
   }
-  if (FPT_COMP_GE(abs(sumE-(E1+E2))/sumE,0.01))
+  if (FPT_COMP_GE(abs(sumE-(E1+E2))/sumE,0.05))
   {
     stringstream errMsg;
-    errMsg << "Total energy of shower particles is unequal energy of shower-initiating partons:\t" 
+    errMsg << "Total energy of shower particles differs from energy of shower-initiating partons more than 5%:\t" 
 	      << sumE << "\t" << E1 + E2 << "Unrecoverable error!" << endl;
     throw eInitialState_error( errMsg.str() );
   }
