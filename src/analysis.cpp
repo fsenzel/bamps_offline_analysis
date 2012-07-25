@@ -3653,13 +3653,31 @@ void analysis::writeTempAndVel( const int step  )
   // total length of grid system
   const double xlength = 24.6;
   const double ylength = 24.6;
-  const double zlength = 12.3;
-
+  
   // number of cells in given direction
   // in cascade IX=40   IY=40   IZ=47
   const int nCellsx = 41;
   const int nCellsy = 41;
-  const int nCellsz = 41;
+  
+  // z direction
+  double zlength;
+  int nCellsz;
+  if( theConfig->getRuntime() <= 6.0 )
+  {
+    zlength = 12.3;
+    nCellsz = 41;
+  }
+  else if( theConfig->getRuntime() <= 10.0 )
+  {
+    zlength = 22.3;
+    nCellsz = 80;
+  }
+  else
+  {
+    std::string errMsg = "length of cells in writeTempAndVel() not large enough for runtime.";
+    throw eAnalysis_error( errMsg );
+  }
+
   nCells = nCellsx * nCellsy * nCellsz;
   
   dv = xlength * ylength * zlength / nCells; // volume of each cell
