@@ -22,6 +22,7 @@
 #include "configuration.h"
 #include "coordinateBins.h"
 #include "cellcontainer.h"
+#include "coupling.h"
 #include "scattering22.h"
 #include "scattering23.h"
 #include "prefactors23.h"
@@ -1857,7 +1858,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
       {
         P1P2 = P1[0]*P2[0] - P1[1]*P2[1] - P1[2]*P2[2] - P1[3]*P2[3];
         Vrel = pow((pow(P1P2,2.0)-pow(M1,2.0)*pow(M2,2.0)),0.5)/(P1[0]*P2[0]); // general relative velocity
-        as = alpha_s( s );
+        as = coupling::get_constant_coupling();
 
         //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, therefore multiplied here
         md2g = as * ( particles_atTimeNow[iscat].md2g + addedParticles[jscat].md2g ) / 2.0;
@@ -2091,7 +2092,7 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
       {
         P1P2 = P1[0]*P2[0] - P1[1]*P2[1] - P1[2]*P2[2] - P1[3]*P2[3];
         Vrel = pow((pow(P1P2,2.0)-pow(M1,2.0)*pow(M2,2.0)),0.5)/(P1[0]*P2[0]); // general relative velocity
-        as = alpha_s( s );
+        as = coupling::get_constant_coupling();
 
         //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, therefore multiplied here
         md2g = as * ( addedParticles[iscat].md2g + addedParticles[jscat].md2g ) / 2.0;
@@ -2287,7 +2288,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
       }
       else
       {
-        as = alpha_s( s );
+        as = coupling::get_constant_coupling();
 
         //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, therefore multiplied here
         md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[kscat].md2g ) / 3.0;
@@ -2450,7 +2451,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
           }
           else
           {
-            as = alpha_s( s );
+            as = coupling::get_constant_coupling();
 
             //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, therefore multiplied here
             md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[kscat].md2g ) / 3.0;
@@ -3591,7 +3592,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
     P2[2] = particles_atTimeNow[iscat].PY;
     P2[3] = particles_atTimeNow[iscat].PZ;
     
-    as = alpha_s( s );
+    as = coupling::get_constant_coupling();
     md2g = as * ( addedParticles[jetID].md2g + particles_atTimeNow[iscat].md2g ) / 2.0;
     md2q = as * ( addedParticles[jetID].md2q + particles_atTimeNow[iscat].md2q ) / 2.0;
 
@@ -3633,7 +3634,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
           n22++;
           P1P2 = P1[0]*P2[0] - P1[1]*P2[1] - P1[2]*P2[2] - P1[3]*P2[3];
           Vrel = pow((pow(P1P2,2.0)-pow(M1,2.0)*pow(M2,2.0)),0.5)/(P1[0]*P2[0]); // general relative velocity
-          as = alpha_s( s );
+          as = coupling::get_constant_coupling();
           
           md2g = as * ( addedParticles[jetID].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
           md2q = as * ( addedParticles[jetID].md2q + particles_atTimeNow[jscat].md2q ) / 2.0;
@@ -3734,7 +3735,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
             n32++;
             lambda_scaled = lambda * sqrt( s );
             
-            as = alpha_s( s );
+            as = coupling::get_constant_coupling();
             
             md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0;
             md2g = as * ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q + addedParticles[jetID].md2q ) / 3.0;
@@ -3782,7 +3783,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
                   n32++;
                   lambda_scaled = lambda * sqrt( s );
                   
-                  as = alpha_s( s );
+                  as = coupling::get_constant_coupling();
                   
                   md2g = as * ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g + addedParticles[jetID].md2g ) / 3.0;
                   md2g = as * ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q + addedParticles[jetID].md2q ) / 3.0;
