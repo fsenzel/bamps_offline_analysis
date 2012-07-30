@@ -200,6 +200,9 @@ public:
   
   double getJetTracking_PT() const {return jetTracking_PT;}
   
+  void registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles,
+                                             const int _nMediumParticles );
+  
   void volumeMidrap(const int ) const;
   
   double tstep[120];
@@ -304,6 +307,7 @@ private:
   fstream oscarJets;
   fstream centralDensitiesOutputFile;
   fstream mfpJetsOutputFile;
+  fstream progressLogFile;
   
   
   

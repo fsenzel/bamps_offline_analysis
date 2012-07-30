@@ -471,7 +471,12 @@ analysis::analysis( config* const c ):
     
     theInterpolation_nJpsi.configure();
   }
-  
+ 
+  if ( theConfig->doOutput_progressLog() )
+  {
+    string filename = theConfig->getStandardOutputDirectoryName() + "/" + theConfig->getJobName() + "_progressLog";
+    progressLogFile.open( filename.c_str(), ios::out | ios::trunc );
+  }
 }
 
 
@@ -4336,6 +4341,24 @@ void analysis::printJpsiEvolution()
 //       print_je << double( numberJpsi_midSpaceTimeRap_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
       print_je << endl;
     }
+  }
+}
+
+
+void analysis::registerProgressInformationForOutput(const double _time, const double _dt, const int _nAddedParticles, const int _nMediumParticles)
+{
+  if ( progressLogFile.good() )
+  {
+    string sep = "\t";
+    progressLogFile << _time << sep;
+    progressLogFile << _dt << sep;
+    progressLogFile << _nAddedParticles << sep;
+    progressLogFile << _nMediumParticles << endl;
+  }
+  else
+  {
+    string errMsg = "error when attempting to write progress information log";
+    throw eAnalysis_error( errMsg );
   }
 }
 

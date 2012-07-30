@@ -465,6 +465,11 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
     removeDeadParticles( aa );
     
+    if ( theConfig->doOutput_progressLog() )
+    {
+      aa.registerProgressInformationForOutput( simulationTime, dt, addedParticles.size(), particles_atTimeNow.size() );
+    }
+    
     if ( doAnalysisStep )
     {
       aa.intermediateOutput( nn_ana );
