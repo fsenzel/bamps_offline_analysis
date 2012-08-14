@@ -195,7 +195,6 @@ class ParticleOffline : public Particle
       }      
     }
     
-    std::vector<bool> showerInEvents;    
   
   private:
 };

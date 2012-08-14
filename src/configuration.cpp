@@ -568,7 +568,6 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
     particles_init[i].PZ = (*(ptrInitialParticles->particleVector))[i].PZ;
     particles_init[i].md2g = (*(ptrInitialParticles->particleVector))[i].md2g;
     particles_init[i].md2q = (*(ptrInitialParticles->particleVector))[i].md2q;
-    particles_init[i].showerInEvents.resize(static_cast<int>(numberOfParticlesToAdd/2),false);
   }
   
   for ( int i = 0; i < particles_init.size(); i++ )

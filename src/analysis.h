@@ -201,7 +201,8 @@ public:
   double getJetTracking_PT() const {return jetTracking_PT;}
   
   void registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles,
-                                             const int _nMediumParticles );
+                                             const int _nMediumParticles, const int _nColl, const int _nColl22,
+					     const int _nColl23, const int _nColl32 );
   
   void volumeMidrap(const int ) const;
   
@@ -214,6 +215,7 @@ public:
     //--------------------//
   //for jet background analysis
   void backgroundOutput(const int step);  
+  void setShowerParticle( const int _event, const int _particleID );
   //--------------------//      
 
 
@@ -396,6 +398,7 @@ private:
   int* numberJpsiDiss_time;
   int* numberJpsiDissTd_time;
 
+  vector< vector < int > > showerParticlesInEvent;
   
 };
 

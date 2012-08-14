@@ -34,14 +34,14 @@
 class offlineHeavyIonCollision
 {
 public:
-  offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface );
+  offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface, analysis* const _analysis );
   ~offlineHeavyIonCollision();
 
   void initialize();
-  void mainFramework( analysis& aa );
+  void mainFramework();
 
   double evolveMedium( const double evolveToTime, bool& _endOfDataFiles );
-  void scattering( const double nexttime, bool& again, analysis& aa );
+  void scattering( const double nexttime, bool& again );
   void cell_ID( double time );
 
   void scatterEdgeParticles( std::list< int >& _offlineParticleList, std::list< int >& _addedParticleList, const double nexttime );
@@ -51,6 +51,9 @@ private:
   offlineOutputInterface* offlineInterface;
   
   config * const theConfig;
+  
+  analysis * const theAnalysis;
+  
   interpolation23 theI23;
   
   /** @brief  interpolation22 object that provides access to tabulated values for the cross section of all 2->2 processes with running coupling */
@@ -89,13 +92,13 @@ private:
 
   void scatt2223_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
                                      cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
-                                     const double scaleFactor, bool& again, analysis& aa, const double nexttime, analysisRingStructure& _analysisRings );
+                                     const double scaleFactor, bool& again, const double nexttime, analysisRingStructure& _analysisRings );
   
   void scatt22_amongAddedParticles( cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, const double scaleFactor, bool& again, const double nexttime );
 
   void scatt32_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
                                    cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
-                                   int& n32, bool& again, analysis& aa, const double nexttime );
+                                   int& n32, bool& again, const double nexttime );
 
   int scatt32_offlineWithAddedParticles_utility( scattering32& scatt32_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, const int iscat, const int jscat, const int kscat, int& n32, const double picked_ratio, const double nexttime  );
   int scatt23_offlineWithAddedParticles_utility( scattering23& scatt23_obj, cellContainer& _cell, int iscat, const int jscat, bool& again, const double nexttime );
@@ -107,7 +110,7 @@ private:
 
   double iterateMFP( std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, const int jetID, const double dt, const double dv );
   
-  void removeDeadParticles( analysis& _aa );
+  void removeDeadParticles();
   
   int binomial( const int N, const int k ) const;
 };

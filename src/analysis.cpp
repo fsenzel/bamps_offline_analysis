@@ -477,6 +477,8 @@ analysis::analysis( config* const c ):
     string filename = theConfig->getStandardOutputDirectoryName() + "/" + theConfig->getJobName() + "_progressLog";
     progressLogFile.open( filename.c_str(), ios::out | ios::trunc );
   }
+  
+  showerParticlesInEvent.resize( static_cast<int>( theConfig->getNumberOfParticlesToAdd() / 2 ) );
 }
 
 
@@ -4345,7 +4347,7 @@ void analysis::printJpsiEvolution()
 }
 
 
-void analysis::registerProgressInformationForOutput(const double _time, const double _dt, const int _nAddedParticles, const int _nMediumParticles)
+void analysis::registerProgressInformationForOutput(const double _time, const double _dt, const int _nAddedParticles, const int _nMediumParticles, const int _nColl, const int _nColl22, const int _nColl23, const int _nColl32)
 {
   if ( progressLogFile.good() )
   {
@@ -4353,7 +4355,11 @@ void analysis::registerProgressInformationForOutput(const double _time, const do
     progressLogFile << _time << sep;
     progressLogFile << _dt << sep;
     progressLogFile << _nAddedParticles << sep;
-    progressLogFile << _nMediumParticles << endl;
+    progressLogFile << _nMediumParticles << sep;
+    progressLogFile << _nColl << sep;
+    progressLogFile << _nColl22 << sep;
+    progressLogFile << _nColl23 << sep;
+    progressLogFile << _nColl32 << endl;
   }
   else
   {
@@ -4370,27 +4376,31 @@ void analysis::backgroundOutput( const int step )
   vector< vector< bool > > backgroundMatrix;
   backgroundMatrix.resize(numberOfEvents);
   
-  for (int i = 0; i < numberOfEvents; i++)
+  for ( int i = 0; i < numberOfEvents; i++ )
   {
     backgroundMatrix[i].resize( particles_atTimeNow.size(), false );
     
-    int counter=0;
-    do
+    for ( int n = 0; n < backgroundparticlesToRecord; n++ )
     {
+      bool matchingParticle = true;
       int index;
+      
       do
       {
-         index = static_cast<int>(ran2() * particles_atTimeNow.size());
-      }
-      while ( particles_atTimeNow[index].showerInEvents[i] || backgroundMatrix[i][index] );
+        int index = static_cast<int>( ran2() * particles_atTimeNow.size() );
+        
+        for ( int j = 0; j < showerParticlesInEvent[ i ].size(); j++)
+        {
+          if ( particles_atTimeNow[index].unique_id == showerParticlesInEvent[i][j] )
+            matchingParticle = false;
+        }
+      } 
+      while( !matchingParticle );
       
       backgroundMatrix[i][index] = true;
-      counter++;
     }
-    while ( counter != backgroundparticlesToRecord );
   }
   
-
   string name;
   stringstream ss;
 
@@ -4433,6 +4443,11 @@ void analysis::backgroundOutput( const int step )
   file.close();
 }
 
+
+void analysis::setShowerParticle(const int _event, const int _particleID)
+{
+  showerParticlesInEvent[ _event ].push_back( _particleID );
+}
 
 jetTrackerSingleEvent::jetTrackerSingleEvent()
 {
