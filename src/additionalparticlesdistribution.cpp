@@ -86,8 +86,8 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
         usedMinimumPT = minijet_P0;
       if ( numberOfParticlesToAdd % 2 != 0)
       {
-	cout << "For shower initial conditions an even number of initial particles is needed. Number of Particles to add is increased by 1.... " << endl;
-	numberOfParticlesToAdd++;
+        cout << "For shower initial conditions an even number of initial particles is needed. Number of Particles to add is increased by 1.... " << endl;
+        numberOfParticlesToAdd++;
       }
       
       initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
@@ -121,9 +121,9 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   //     Showering of particles, if initialStateType = 5, unsure if before preparing or after...
   if ( initialStateType == showerInitialState )
   {
-    setEventID( addedParticles );
-    initialShowerInitOutput( addedParticles );
-    showerParticles( addedParticles );
+    setEventID( _particles );
+    initialShowerInitOutput( _particles );
+    showerParticles( _particles );
   }
 
   for ( int i = 0; i < _particles.size(); i++ )
@@ -406,6 +406,7 @@ void additionalParticlesDistribution::setEventID(vector< ParticleOffline >& _par
   for ( int index = 0; index < _particles.size(); index+=2 )
   {
     _particles[index].N_EVENT_pp = _particles[index+1].N_EVENT_pp = static_cast<int>( index / 2 );
+    _particles[index].N_EVENT_AA = _particles[index+1].N_EVENT_AA = static_cast<int>( index / 2 );
   }
 }
 
