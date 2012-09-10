@@ -277,6 +277,8 @@ analysis::analysis( config* const c ):
   
   
   
+  
+  
   // movie output
   if( theConfig->doOutput_movieOutputBackground() )
     oscarName_background = filename_prefix + "_background.oscar";
@@ -523,6 +525,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyCentralDensity = false; // density in central part of collision
   studyBackground = false; // print also properties like v2, RAA of background
   study_dndy_time = false; // study background medium's dndy and dedy etc. as a function of time
+  study_spatial_density = false;
   
   
   //---- defining standard rapidity ranges ----
@@ -660,6 +663,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     case temperature_velocity_cells:
       studyTempAndVelocity = true;
       break;    
+    case spatial_density:
+      study_spatial_density = true;
+      break;
     case cms_jpsi:
       studyJpsi = true;
       studyHQ = true;
@@ -791,6 +797,9 @@ void analysis::initialOutput()
   if ( study_dndy_time )
     print_dndy_time( 0 );
   
+  if ( study_spatial_density )
+    print_spatial_density( "initial" );
+  
 }
 
 
@@ -826,6 +835,9 @@ void analysis::intermediateOutput( const int nn )
   
   if ( study_dndy_time )
     print_dndy_time( nn + 1 );
+
+  if ( study_spatial_density )
+    print_spatial_density( name );
 }
 
 
@@ -872,6 +884,9 @@ void analysis::finalOutput( const double _stoptime )
   
   if ( dndyOutput )
     print_dndy( "final" );
+
+  if ( study_spatial_density )
+    print_spatial_density( "final" );
 }
 
 
@@ -4098,6 +4113,34 @@ void analysis::print_dndy(const string subfix )
   dedy.print();
   dndpt.print();
 
+}
+
+
+
+
+
+// print dndy, detdy and mean pt of gluons
+void analysis::print_spatial_density(const string subfix )
+{
+  string filename;
+
+  filename = filename_prefix + "_dndxx_" + subfix;
+  binning dndx(filename, -10.0, 10.0, 200);
+  filename = filename_prefix + "_dndyy_" + subfix;
+  binning dndy(filename, -10.0, 10.0, 200);
+  filename = filename_prefix + "_dndzz_" + subfix;
+  binning dndz(filename, -10.0, 10.0, 200);
+  
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+    dndx.add( particles_atTimeNow[i].X );
+    dndy.add( particles_atTimeNow[i].Y );
+    dndz.add( particles_atTimeNow[i].Z );
+  }
+  
+  dndx.print();
+  dndy.print();
+  dndz.print();
 }
 
 

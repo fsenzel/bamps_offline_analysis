@@ -48,6 +48,7 @@ enum OUTPUT_SCHEME { no_output = 0,
 // medium output
 dndy_time = 201,
 temperature_velocity_cells = 202, // creates output used by Alex Meistrenko for his model
+spatial_density = 203,
 
 // heavy quarks:
 phenix_hq_electrons = 101,

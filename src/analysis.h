@@ -234,6 +234,7 @@ private:
   bool studyCentralDensity;
   bool studyBackground;
   bool study_dndy_time;
+  bool study_spatial_density;
   
   
   
@@ -307,6 +308,7 @@ private:
   void writeTempInTube( const int step  );
   void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  );
   void print_dndy(const string subfix );
+  void print_spatial_density(const string subfix );
   
   void print_dndy_time( int step );
   
