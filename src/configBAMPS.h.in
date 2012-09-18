@@ -1,0 +1,10 @@
+#cmakedefine Cuba_FOUND
+#cmakedefine LHAPDF_FOUND
+#define HAVE_RDTSCP ${HAVE_RDTSCP}
+
+#cmakedefine VECTOR_IMPL_TYPE ${VECTOR_IMPL_TYPE} 
+#define VECTOR_IMPL_${VECTOR_IMPL_TYPE}
+
+#cmakedefine Pythia_FOUND
+
+#define PYTHIA_XML_DIR "${Pythia_xmldoc_PATH}"
