@@ -22,9 +22,9 @@ void hadronization_hq::heavyQuarkFragmentation()
     if ( flav >= 7 && flav <= 10 )
     {
       z = getFragmentationZ( flav );
-      addedParticlesCopy[i].PX = addedParticlesCopy[i].PX * z;
-      addedParticlesCopy[i].PY = addedParticlesCopy[i].PY * z;
-      addedParticlesCopy[i].PZ = addedParticlesCopy[i].PZ * z;
+      addedParticlesCopy[i].Mom.Px() *= z;
+      addedParticlesCopy[i].Mom.Py() *= z;
+      addedParticlesCopy[i].Mom.Pz() *= z;
       
       // D+ = c dbar, D0 = c ubar, D0bar = cbar u, D- = cbar d
       // B+ = bbar u, B0 = bbar d, B0bar = b dbar, B- = b ubar 
@@ -65,7 +65,7 @@ void hadronization_hq::heavyQuarkFragmentation()
 //       // give mesons there actual mass. However, by breaking energy conservation
 //       addedParticlesCopy[i].m = ParticlePrototype::getMass( addedParticlesCopy[i].FLAVOR );
         
-      addedParticlesCopy[i].E = sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) + pow( addedParticlesCopy[i].m, 2.0 ) );
+      addedParticlesCopy[i].Mom.E() = sqrt( addedParticlesCopy[i].Mom.vec2() + pow( addedParticlesCopy[i].m, 2.0 ) );
     }
   }
 }

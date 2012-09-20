@@ -124,8 +124,8 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
 
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {    
-    particles_atTimeNow[i].eta = 0.5 * log(( particles_atTimeNow[i].T + particles_atTimeNow[i].Z ) / ( particles_atTimeNow[i].T - particles_atTimeNow[i].Z ) );
-    if ( particles_atTimeNow[i].T < ( _timenow + _dt ) )
+    particles_atTimeNow[i].eta = particles_atTimeNow[i].Pos.Rapidity();
+    if ( particles_atTimeNow[i].Pos.T() < ( _timenow + _dt ) )
     {
       _dNdEta.increase( particles_atTimeNow[i].eta );
     }

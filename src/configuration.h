@@ -26,7 +26,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "configurationbase.h"
-#include "particle.h"
+#include "particleOffline.h"
 #include "offlineoutput.h"
 #include "interpolation_iniJpsi.h"
 

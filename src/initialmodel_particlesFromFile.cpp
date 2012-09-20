@@ -117,7 +117,8 @@ void initialModel_ParticlesFromFile::samplePositions( std::vector< Particle >& _
   else
     nmb_of_events = 0;
   int event_tmp = 0;
-  double x_tmp, y_tmp, z_tmp, t_tmp, event_AA_tmp;
+  VectorTXYZ Pos_tmp;
+  double event_AA_tmp;
 
   bool soft_event[nmb_of_events + 1]; // array to store which events are soft and which not (true if event is soft)
   for ( int i = 1; i <= nmb_of_events; i++ )
@@ -135,11 +136,7 @@ void initialModel_ParticlesFromFile::samplePositions( std::vector< Particle >& _
       {
         sample_TXYZ_one_partcl( _particles[j], soft_event[_particles[j].N_EVENT_pp] );
 
-        x_tmp = _particles[j].X;
-        y_tmp = _particles[j].Y;
-        z_tmp = _particles[j].Z;
-        t_tmp = _particles[j].T;
-
+	Pos_tmp = _particles[j].Pos;
         partcl_soft_event[_particles[j].N_EVENT_pp] = j;
 
         // pp event to which the particle belongs
@@ -153,11 +150,7 @@ void initialModel_ParticlesFromFile::samplePositions( std::vector< Particle >& _
       }
       else // all other hard particles of same event get same positions
       {
-        _particles[j].X = x_tmp;
-        _particles[j].Y = y_tmp;
-        _particles[j].Z = z_tmp;
-        _particles[j].T = t_tmp;
-        
+	_particles[j].Pos = Pos_tmp;
         _particles[j].N_EVENT_AA = event_AA_tmp; // give particles the flag of the heavy ion event
       }
     }
@@ -232,10 +225,7 @@ void initialModel_ParticlesFromFile::samplePositions( std::vector< Particle >& _
         }
 
         // event is soft
-        _particles[s].X = _particles[partcl_soft_event[event]].X;
-        _particles[s].Y = _particles[partcl_soft_event[event]].Y;
-        _particles[s].Z = _particles[partcl_soft_event[event]].Z;
-        _particles[s].T = _particles[partcl_soft_event[event]].T;
+        _particles[s].Pos = _particles[partcl_soft_event[event]].Pos;
         if ( event < nmb_of_events )
         {
           event++;
@@ -296,16 +286,14 @@ void initialModel_ParticlesFromFile::changeCharmMass( std::vector< Particle >& _
     cout << "Make charm quarks lighter. Old mass=" << M_old << "  new mass=" << M_new << endl;
     for( int j = 0; j < _particles.size(); j++ )
     {
-      if( _particles[j].FLAVOR == charm || _particles[j].FLAVOR ==  anti_charm )
+      if( _particles[j].FLAVOR == charm || _particles[j].FLAVOR == anti_charm )
       {
-        const double pp_old = sqrt ( pow ( _particles[j].PX, 2.0 ) + pow ( _particles[j].PY, 2.0 ) + pow ( _particles[j].PZ, 2.0 ) );
-        const double pp_new = sqrt ( pow ( pp_old, 2.0 ) + pow ( M_old, 2.0 ) - pow ( M_new, 2.0 ) );
+        const double pp_old = sqrt( _particles[j].Mom.vec2() );
+        const double pp_new = sqrt( pow( pp_old, 2.0 ) + pow( M_old, 2.0 ) - pow( M_new, 2.0 ) );
 
         // scaling in order to conserve the energy when making quarks massles
-        _particles[j].PX = _particles[j].PX * pp_new / pp_old;
-        _particles[j].PY = _particles[j].PY * pp_new / pp_old;
-        _particles[j].PZ = _particles[j].PZ * pp_new / pp_old;
-        _particles[j].E = sqrt ( pow ( _particles[j].PX, 2.0 ) + pow ( _particles[j].PY, 2.0 ) + pow ( _particles[j].PZ, 2.0 ) + pow ( M_new, 2.0 ) );
+        _particles[j].Mom *= pp_new / pp_old;
+        _particles[j].Mom.E() = sqrt ( _particles[j].Mom.vec2() + pow ( M_new, 2.0 ) );
         _particles[j].m = M_new;
       }
     }
@@ -329,14 +317,12 @@ void initialModel_ParticlesFromFile::changeBottomMass( std::vector< Particle >& 
     {
       if( _particles[j].FLAVOR == bottom || _particles[j].FLAVOR == anti_bottom )
       {
-        const double pp_old = sqrt ( pow ( _particles[j].PX, 2.0 ) + pow ( _particles[j].PY, 2.0 ) + pow ( _particles[j].PZ, 2.0 ) );
-        const double pp_new = sqrt ( pow ( pp_old, 2.0 ) + pow ( M_old, 2.0 ) - pow ( M_new, 2.0 ) );
+	const double pp_old = sqrt( _particles[j].Mom.vec2() );
+        const double pp_new = sqrt( pow( pp_old, 2.0 ) + pow( M_old, 2.0 ) - pow( M_new, 2.0 ) );
 
         // scaling in order to conserve the energy when making quarks massles
-        _particles[j].PX = _particles[j].PX * pp_new / pp_old;
-        _particles[j].PY = _particles[j].PY * pp_new / pp_old;
-        _particles[j].PZ = _particles[j].PZ * pp_new / pp_old;
-        _particles[j].E = sqrt ( pow ( _particles[j].PX, 2.0 ) + pow ( _particles[j].PY, 2.0 ) + pow ( _particles[j].PZ, 2.0 ) + pow ( M_new, 2.0 ) );
+        _particles[j].Mom *= pp_new / pp_old;
+        _particles[j].Mom.E() = sqrt ( _particles[j].Mom.vec2() + pow ( M_new, 2.0 ) );
         _particles[j].m = M_new;
       }
     }

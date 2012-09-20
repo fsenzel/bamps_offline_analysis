@@ -1,12 +1,12 @@
-//---------------------------------------------
+//--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
-//---------------------------------------------
+//----------------------------------------------------------------------------
 //$HeadURL$
 //$LastChangedDate$
 //$LastChangedRevision$
 //$LastChangedBy$
-//---------------------------------------------
-//---------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 
 #ifndef ANALYSIS_H
@@ -132,18 +132,24 @@ class analysisRapidityRange
 
 class jetTrackerSingleEvent
 {
-  public:
-    jetTrackerSingleEvent();
-    ~jetTrackerSingleEvent();
-    
-    double R_proj[4];
-    
-    double P_proj_in[4];
-    double P_proj_out[4];
-    
-    double P1_in[4], P2_in[4];
-    double P1_out[4], P2_out[4];
-    
+public:
+  jetTrackerSingleEvent() : 
+    R_proj(), P_proj_in(),P_proj_out(), 
+    P1_in(), P2_in(), P1_out(), P2_out(),
+    xSection(-1), lambda(-1), cell_ID(-1)
+  { };
+  ~jetTrackerSingleEvent() {};
+  
+  VectorTXYZ R_proj;
+
+  VectorEPxPyPz P_proj_in;
+  VectorEPxPyPz P_proj_out;
+
+  VectorEPxPyPz P1_in;
+  VectorEPxPyPz P2_in;
+  VectorEPxPyPz P1_out;
+  VectorEPxPyPz P2_out;
+
     int flavor_in;
     int flavor_out;
     

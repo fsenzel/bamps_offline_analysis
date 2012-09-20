@@ -18,7 +18,7 @@ interpolation_nJpsi.cpp
 offlineBAMPS.cpp
 offlineheavyioncollison.cpp 
 offlineoutput.cpp
-particle.cpp
+particleOffline.cpp
 pdfinterface.cpp
 psf.cpp
 ringcontainer.cpp

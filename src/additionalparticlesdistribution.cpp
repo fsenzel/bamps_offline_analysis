@@ -104,11 +104,11 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
   double dtt = 0;
   double eta_max = 5.0;
 
-  double MT, y, cc;
+  double MT, y;
   double shift;
   for ( int j = 0; j < _particles.size(); j++ )
   {   
-    dtt = fabs( _particles[j].Z ) / tanh( eta_max ) - _particles[j].T;  //tanh(eta)=z/t
+    dtt = fabs( _particles[j].Pos.Z() ) / tanh( eta_max ) - _particles[j].Pos.T();  //tanh(eta)=z/t
     if ( dtt < configObject->getTimeshift() )
     {
       shift = configObject->getTimeshift();
@@ -121,46 +121,32 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
       cout << "shift only that particle by that timeshift." << endl;
     }
 
-    _particles[j].T += shift;
+    _particles[j].Pos.T() += shift;
     
     // last interaction spacetime point is point of creation
-    _particles[j].X_lastInt = _particles[j].X;
-    _particles[j].Y_lastInt = _particles[j].Y;
-    _particles[j].Z_lastInt = _particles[j].Z;
-    _particles[j].T_lastInt = _particles[j].T;
+    _particles[j].lastInt = _particles[j].Pos;
     
     //formation time 1/sqrt( p_T^2 + m^2) = 1/m_T
-    y = 0.5 * log(( _particles[j].E+_particles[j].PZ ) / ( _particles[j].E-_particles[j].PZ ) );
-    MT = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) + pow( _particles[j].m, 2 ) );   
+    y = _particles[j].Mom.Rapidity();
+    MT = sqrt( _particles[j].Mom.Pt2() + pow( _particles[j].m, 2 ) );
     dtt = 1 / MT * cosh( y ) * 0.197327;  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
     
     // additional formation time for Jpsi
     if( _particles[j].FLAVOR == jpsi )
       dtt += configObject->getJpsiFormationTime() * cosh( y ); //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
 
-    cc = dtt / _particles[j].E;
-    _particles[j].T = _particles[j].T + dtt;
-    _particles[j].X = _particles[j].X + _particles[j].PX * cc;
-    _particles[j].Y = _particles[j].Y + _particles[j].PY * cc;
-    _particles[j].Z = _particles[j].Z + _particles[j].PZ * cc;
+    _particles[j].Propagate( _particles[j].Pos.T() + dtt );
 
     _particles[j].init = true;
     
     // creation time is time at which the particle is allowed to scatter
-    _particles[j].T_creation = _particles[j].T;
+    _particles[j].T_creation = _particles[j].Pos.T();
   }
   
   for(int i = 0; i < _particles.size(); i++)
   {
-    _particles[i].X_init = _particles[i].X;
-    _particles[i].Y_init = _particles[i].Y;
-    _particles[i].Z_init = _particles[i].Z;
-    
-    _particles[i].E_init = _particles[i].E;
-    _particles[i].PX_init = _particles[i].PX;
-    _particles[i].PY_init = _particles[i].PY;
-    _particles[i].PZ_init = _particles[i].PZ;
-    
+    _particles[i].PosInit = _particles[i].Pos;
+    _particles[i].MomInit = _particles[i].Mom;
     _particles[i].X_traveled = 0.0;
   }
 }

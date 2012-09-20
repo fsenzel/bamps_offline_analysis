@@ -8,7 +8,7 @@
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
-
+// at revision 902, this file is identical to full/branches/vector4D/src/initialmodel.h
 
 #ifndef INITIALMODEL_H
 #define INITIALMODEL_H
@@ -40,9 +40,11 @@ public:
   initialModel( ) {};
 
   /** 
-   * @brief Reserve memory for the Particle vector and sample momenta and positions. 
+   * @brief Reserve memory for the Particle vector and sample momenta
+   * and positions. 
    *
-   * Pure virtual function. Any derived class must at least specify this routine.
+   * Pure virtual function. Any derived class must at least specify
+   * this routine.
    */
   virtual void populateParticleVector( std::vector<Particle>& _particles ) = 0;
 

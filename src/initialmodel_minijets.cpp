@@ -149,11 +149,7 @@ void initialModel_minijets::sample_TXYZ( std::vector< Particle >& _particles )
   for ( int index = 0; index < _particles.size(); index += 2 )
   {
     sample_TXYZ_singleParticle( _particles[index] );
-    
-    _particles[index + 1].T = _particles[index].T;
-    _particles[index + 1].X = _particles[index].X;
-    _particles[index + 1].Y = _particles[index].Y;
-    _particles[index + 1].Z = _particles[index].Z;
+    _particles[index + 1].Pos = _particles[index].Pos;
   }
 }
 
@@ -175,10 +171,10 @@ void initialModel_minijets::sample_PXYZE_FLAV( std::vector< Particle >& _particl
     // (1a): set pX and pY:
 
     double theta = 2.0 * M_PI * ran2();
-    _particles[index].PX = pT * cos( theta );
-    _particles[index].PY = pT * sin( theta );
-    _particles[index+1].PX = - _particles[index].PX;
-    _particles[index+1].PY = - _particles[index].PY;
+    _particles[index].Mom.Px() = pT * cos( theta );
+    _particles[index].Mom.Py() = pT * sin( theta );
+    _particles[index+1].Mom.Px() = - _particles[index].Mom.Px();
+    _particles[index+1].Mom.Py() = - _particles[index].Mom.Py();
 
     // (2): Sample y1 and y2:
     //sampling via rejection method: comparison function is
@@ -226,10 +222,10 @@ void initialModel_minijets::sample_PXYZE_FLAV( std::vector< Particle >& _particl
     }
     while ( XS < tryXS );
 
-    _particles[index].PZ = 0.5 * pT * ( exp( Y1 ) - exp( -Y1 ) );
-    _particles[index+1].PZ = 0.5 * pT * ( exp( Y2 ) - exp( -Y2 ) );
-    _particles[index].E = sqrt( pow( _particles[index].PZ, 2 ) + pow( pT, 2 ) );
-    _particles[index+1].E = sqrt( pow( _particles[index+1].PZ, 2 ) + pow( pT, 2 ) );
+    _particles[index].Mom.Pz()   = 0.5 * pT * ( exp( Y1 ) - exp( -Y1 ) );
+    _particles[index+1].Mom.Pz() = 0.5 * pT * ( exp( Y2 ) - exp( -Y2 ) );
+    _particles[index].Mom.E()    = sqrt( _particles[index].Mom.vec2() );
+    _particles[index+1].Mom.E()  = sqrt( _particles[index+1].Mom.vec2() );
 
 
     // (3): Sample the flavours:

@@ -163,14 +163,14 @@ void initialModel_Jpsi::sample_PXYZE_FLAV_singleParticle( Particle& _tempParticl
   phi = ran2() * 2.0 * M_PI;
 
   // momenta and energy
-  _tempParticle.PX = pt * sin( phi );
-  _tempParticle.PY = pt * cos( phi );
-  _tempParticle.PZ = sqrt( ( pow( pt, 2.0 ) + pow( _tempParticle.m, 2.0 ) ) * pow( exp( y ) - exp( -y ) , 2.0 ) / 4.0 );
+  _tempParticle.Mom.Px() = pt * sin( phi );
+  _tempParticle.Mom.Py() = pt * cos( phi );
+  _tempParticle.Mom.Pz() = sqrt( ( pow( pt, 2.0 ) + pow( _tempParticle.m, 2.0 ) ) * pow( exp( y ) - exp( -y ) , 2.0 ) / 4.0 );
   // consider also negativ pz. y is only sampled for positiv y since tables are only for positiv y and y is symmetric around 0. Here, substitute randomly pz by -pz:
   if ( ran2() < 0.5 )
-    _tempParticle.PZ = -_tempParticle.PZ;
+    _tempParticle.Mom.Pz() = -_tempParticle.Mom.Pz();
 
-  _tempParticle.E = sqrt( pow( _tempParticle.PX, 2.0 ) + pow( _tempParticle.PY, 2.0 ) + pow( _tempParticle.PZ, 2.0 ) + pow( _tempParticle.m, 2.0 ) );
+  _tempParticle.Mom.E() = sqrt( _tempParticle.Mom.vec2() + pow( _tempParticle.m, 2.0 ) );
 }
 
 

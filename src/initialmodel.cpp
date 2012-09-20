@@ -1,4 +1,8 @@
 
+
+// at revision 902 this file is identical to
+// full/branches/vector4D/src/initialmodel.cpp
+
 #include <math.h>
 #include <string>
 #include <iostream>
@@ -12,7 +16,7 @@ using std::endl;
 void initialModel::setUniqueID( std::vector<Particle>& _particles )
 {
   Particle::unique_id_counter = 0;
-  for ( int i = 0; i < _particles.size(); i++ )
+  for ( unsigned int i = 0; i < _particles.size(); i++ )
   {
     _particles[i].unique_id = Particle::unique_id_counter;
     ++Particle::unique_id_counter;
@@ -38,11 +42,11 @@ void initialModelWS::sample_XYZ_WoodSaxon(double T, double &X, double &Y, double
   double zmax, zmin, xmax, xmin, ymax, ymin, max;
   double c1, c2;
 
-  double densityA_max;
+  //  double densityA_max;
   
-  double m = 2.0;
+  //  double m = 2.0;
   //   double m = 2.718;
-  double L_z;// L_z is z component of radius where densityA is only 1/m-th of maximum value
+  //  double L_z;// L_z is z component of radius where densityA is only 1/m-th of maximum value
 
   const double RA0 = WoodSaxonParameter.RA0; // just a shortcut
   double RR;
@@ -128,12 +132,9 @@ void initialModelWS::sample_TXYZ_singleParticle( Particle& _particle )
   double T, X, Y, Z;
   
   sample_T_WoodSaxon(T);
-  _particle.T = T;
-  
   sample_XYZ_WoodSaxon(T, X,Y,Z);
-  _particle.X = X - impactParameter / 2.0;    // shift into the correct coordinate system 
-  _particle.Y = Y;
-  _particle.Z = Z;
+
+  _particle.Pos = VectorTXYZ(T, X - impactParameter / 2.0, Y, Z); // shift into the correct coordinate system 
 }
 
 
@@ -151,7 +152,7 @@ void initialModelWS::generateTimeDistributionWS(double &T_AB)
   if ( !distrTime ) // only do this stuff if the distribution has not been computed before (i.e. the shared_ptr is empty)
   {
     int nn, ncut;
-    double dt, tmp;
+    double dt;
     double tgral, sd, chi2a; // for VEGAS
     double *dist, *tt, *distin;
     
@@ -213,6 +214,10 @@ void initialModelWS::generateTimeDistributionWS(double &T_AB)
     distrTime.reset( new ranGen_Distr(&tt[ncut], &distin[ncut], nn-ncut+1, interp_cspline) );
     
     cout << "---- generateTimeDistributionWS: finished" << endl;
+    
+    delete[] tt;
+    delete[] dist;
+    delete[] distin;
   }
 }
 
@@ -220,7 +225,7 @@ void initialModelWS::generateTimeDistributionWS(double &T_AB)
 
 void integrand_time::operator()( const int *ndim, const double xx[], const int *ncomp, double ff[] ) const
 {
-  double wgt;
+  double wgt = 0;
   ff[0] = this->operator()( xx, wgt );
 }
 
