@@ -492,7 +492,7 @@ analysis::~analysis()
 
 void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
 {
-  // By default switches are set off:
+  // By default switches are set off (please do not edit here, but define output scheme and change below, for more information see https://th.physik.uni-frankfurt.de/~bamps/cgi-bin/trac/wiki/RestrictedWiki/AnalysisOutputScheme):
   studyHQ = false; // heavy quarks
   studyJpsi = false; // jpsi
   studyTempInTube = false; // temperature in a centred tube in heavy ion collision
@@ -525,6 +525,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   //---- defining rapidity ranges ----
 
   
+  // add a new case for your outpute scheme which you can create in configuration.h
   switch ( _outputScheme )
   {
     case phenix_hq_electrons:

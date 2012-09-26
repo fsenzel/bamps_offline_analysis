@@ -109,5 +109,4 @@ class Particle : public ParticlePrototype
 };
 
 
-
 #endif
