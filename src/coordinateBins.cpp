@@ -8,7 +8,9 @@
 //---------------------------------------------
 //---------------------------------------------
 
-
+// at revision 902, this file is identical to full/trunk/src/coordinateBins.h
+//
+// every usage of 'particles' is replaced by 'particles_atTimeNow'
 
 #include <stdexcept>
 #include <vector>
@@ -26,8 +28,10 @@ using namespace ns_casc;
 
 
 coordinateBins::coordinateBins( const int _size, const double _min, const double _max ) :
-    _negative_indices( false ), _min_real( _min ), _max_real( _max ), _min_index_limit( 0 ), _max_index_limit( _size - 1 ),
-    _min_index_active( 0 ), _max_index_active( _size - 1 )
+  _min_real( _min ), _max_real( _max ), 
+  _min_index_limit( 0 ), _max_index_limit( _size - 1 ),
+  _min_index_active( 0 ), _max_index_active( _size - 1 ), 
+  _negative_indices( false )
 {
   bins.resize( _size );
 
@@ -122,9 +126,10 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
 
   _dNdEta.reshape( n_eta, -eta_max, + eta_max );
 
-  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  for ( unsigned int i = 0; i < particles_atTimeNow.size(); i++ )
   {    
     particles_atTimeNow[i].eta = particles_atTimeNow[i].Pos.Rapidity();
+
     if ( particles_atTimeNow[i].Pos.T() < ( _timenow + _dt ) )
     {
       _dNdEta.increase( particles_atTimeNow[i].eta );
@@ -133,7 +138,7 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
 
   int centralIndex = this->getCentralIndex();
   
-  for ( int i = 0; i < bins.size(); ++i )
+  for ( unsigned int i = 0; i < bins.size(); ++i )
   {
     bins[i].setLeftRight( -infinity, infinity );
   }
@@ -286,7 +291,7 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
     throw eCoordBins_error( errMsg );
   }
 
-  _dt = 0.1 * _dt;
+  _dt = timestepScaling * _dt;
 }
 
 

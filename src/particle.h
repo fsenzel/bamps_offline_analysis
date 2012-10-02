@@ -78,7 +78,7 @@ class Particle : public ParticlePrototype
     int collisionPartner;
 
     /** @brief Momentum and mass prior to geometric collision, needed for particles in "edge cell"*/
-    VectorMPxPyPz Old;
+    VectorEPxPyPz Old;
 
     /** @brief Mean alpha_s for 2->2 interactions associated with this particle, averaged over cell in previous time step */ 
     double as22;

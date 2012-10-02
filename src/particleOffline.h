@@ -32,14 +32,14 @@ class ParticleOffline : public Particle
 			PosInit( 0,0,0,0 ), X_traveled( 0 ),
 			MomInit( 0,0,0,0 ), 
 			lastInt( 0,0,0,0 ),
-    Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
+    rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
     
     ParticleOffline( const Particle& _particle ) : 
       Particle( _particle ), T_creation( 0 ), 
       PosInit( 0,0,0,0 ), X_traveled( 0 ),
       MomInit( 0,0,0,0 ),
       lastInt( 0,0,0,0 ),	   
-      Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
+      rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
     
     /** @brief counter for unique particle IDs of added particles (static) */
     static long int unique_id_counter_added;
@@ -63,7 +63,6 @@ class ParticleOffline : public Particle
   VectorEPxPyPz MomInit;
   VectorTXYZ lastInt;
     
-    double Eold;
     double rate, ratev;
     
     

@@ -15,7 +15,7 @@
 /** @author Oliver Fochler */
 
 
-#include "particle.h"
+#include "particleOffline.h"
 
 /**
 * Initialize static member for unique numbering of particles
