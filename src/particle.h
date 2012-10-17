@@ -126,12 +126,12 @@ class ParticleOffline : public Particle
     ParticleOffline() : Particle(), T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
     PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
     X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
-    Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
+    Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ), surroundingPT( 0.0 ) {};
     
     ParticleOffline( const Particle& _particle ) : Particle( _particle ), T_creation( 0 ), X_init( 0 ), Y_init( 0 ), Z_init( 0 ), X_traveled( 0 ),
     PX_init( 0 ), PY_init( 0 ), PZ_init( 0 ), E_init( 0 ),
     X_lastInt( 0 ), Y_lastInt( 0 ), Z_lastInt( 0 ), T_lastInt( 0 ),
-    Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
+    Eold( 0 ), rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ), surroundingPT( 0.0 ) {};
     
     /** @brief counter for unique particle IDs of added particles (static) */
     static long int unique_id_counter_added;
@@ -147,6 +147,9 @@ class ParticleOffline : public Particle
     
     /** @brief If c+cbar form a Jpsi the variable N_EVENT_pp of the cbar is stored in this variable to be still accessible, In particular if the Jpsi dissociates again. */
     int N_EVENT_Cbar;
+    
+    /** @brief Average pt in the surrounding medium */
+    int surroundingPT;
     
     /** stuff special to offline reconstruction */
     double T_creation;

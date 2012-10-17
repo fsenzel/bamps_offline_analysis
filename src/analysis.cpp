@@ -511,7 +511,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyJets = false; // study jets
   studyCentralDensity = false; // density in central part of collision
   studyBackground = false; // print also properties like v2, RAA of background
-  studyBackgroundOutput = false; // print background particles with N_test=1
+  studyScatteredMediumParticles = false; // print scattered medium particles
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -664,7 +664,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       break;
     case background_jets:
-      studyBackgroundOutput = true;
+      studyScatteredMediumParticles = true;
     default:
       break;
   }
@@ -771,9 +771,6 @@ void analysis::initialOutput()
   
   if ( studyParticleOutput )
     particleOutput( 0 );
-  
-  if ( studyBackgroundOutput )
-    backgroundOutput( 0 );   
 }
 
 
@@ -853,8 +850,10 @@ void analysis::finalOutput( const double _stoptime )
   if ( dndyOutput )
     print_dndy( "final" );
   
-    if ( studyBackgroundOutput )
-    backgroundOutput( nTimeSteps );   
+  if ( studyScatteredMediumParticles )
+  {
+    scatteredMediumParticlesOutput( nTimeSteps );
+  }
 }
 
 
@@ -4369,38 +4368,8 @@ void analysis::registerProgressInformationForOutput(const double _time, const do
 }
 
 
-void analysis::backgroundOutput( const int step )
+void analysis::scatteredMediumParticlesOutput( const int step )
 {
-  int backgroundparticlesToRecord = static_cast<int>( particles_atTimeNow.size() / theConfig->getTestparticles() );
-  int numberOfEvents = static_cast<int>(theConfig->getNumberOfParticlesToAdd()/2);
-  vector< vector< bool > > backgroundMatrix;
-  backgroundMatrix.resize(numberOfEvents);
-  
-  for ( int i = 0; i < numberOfEvents; i++ )
-  {
-    backgroundMatrix[i].resize( particles_atTimeNow.size(), false );
-    
-    for ( int n = 0; n < backgroundparticlesToRecord; n++ )
-    {
-      bool matchingParticle = true;
-      int index;
-      
-      do
-      {
-        int index = static_cast<int>( ran2() * particles_atTimeNow.size() );
-        
-        for ( int j = 0; j < showerParticlesInEvent[ i ].size(); j++)
-        {
-          if ( particles_atTimeNow[index].unique_id == showerParticlesInEvent[i][j] )
-            matchingParticle = false;
-        }
-      } 
-      while( !matchingParticle );
-      
-      backgroundMatrix[i][index] = true;
-    }
-  }
-  
   string name;
   stringstream ss;
 
@@ -4415,7 +4384,7 @@ void analysis::backgroundOutput( const int step )
   }
 
   //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
-  string filename = filename_prefix + "_" + name + ".f11";
+  string filename = filename_prefix + "_" + name + "_medium.f1";
   fstream file( filename.c_str(), ios::out | ios::trunc );
 
   //---- print header if file is empty ----
@@ -4429,25 +4398,15 @@ void analysis::backgroundOutput( const int step )
     printHeader( file, all, end );
   //---------------------------------------
 
-  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  for ( int i = 0; i < mediumParticles.size(); i++ )
   {
-    file << i << sep << particles_atTimeNow[i].unique_id << sep << particles_atTimeNow[i].FLAVOR << sep << particles_atTimeNow[i].T << sep << particles_atTimeNow[i].X << sep
-    << particles_atTimeNow[i].Y << sep  << particles_atTimeNow[i].Z << sep << particles_atTimeNow[i].E << sep << particles_atTimeNow[i].PX << sep << particles_atTimeNow[i].PY << sep
-    << particles_atTimeNow[i].PZ;
-    for ( int j = 0; j < numberOfEvents; j++)
-    {
-      file << sep << backgroundMatrix[j][i] ;
-    }
-    file << endl;
+    file << i << sep << mediumParticles[i].unique_id << sep << mediumParticles[i].cell_id << sep << mediumParticles[i].FLAVOR << sep << mediumParticles[i].T << sep << mediumParticles[i].X << sep
+    << mediumParticles[i].Y << sep  << mediumParticles[i].Z << sep << mediumParticles[i].E << sep << mediumParticles[i].PX << sep << mediumParticles[i].PY << sep
+    << mediumParticles[i].PZ << sep << mediumParticles[i].md2g << sep << mediumParticles[i].md2q << sep << mediumParticles[i].N_EVENT_pp << endl;
   }
   file.close();
 }
 
-
-void analysis::setShowerParticle(const int _event, const int _particleID)
-{
-  showerParticlesInEvent[ _event ].push_back( _particleID );
-}
 
 jetTrackerSingleEvent::jetTrackerSingleEvent()
 {

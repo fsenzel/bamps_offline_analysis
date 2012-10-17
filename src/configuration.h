@@ -75,6 +75,7 @@ namespace ns_casc
   extern std::vector<ParticleOffline> addedParticlesCopy;
 //   extern std::vector<ParticleHFelectron> addedPartcl_electron;
   extern std::vector<ParticleOffline> addedPartcl_electron;
+	extern std::vector<ParticleOffline> mediumParticles;
 }
 //--------------------------------------------------------//
 
@@ -192,7 +193,10 @@ class config : public configBase
   
   /** @brief Interface for config::outputSwitch_movieOutput */
   bool doOutput_movieOutputBackground() const {return outputSwitch_movieOutputBackground;}
-  
+
+  /** @brief Interface for config::outputSwitch_scatteredMediumParticlesOutput */
+  bool doOutput_scatteredMediumParticles() const {return outputSwitch_scatteredMediumParticlesOutput;}
+
   /** @brief Interface for config::v2RAAoutput */
   bool isV2RAAoutput() const {return  v2RAAoutput;}
   
@@ -291,6 +295,8 @@ class config : public configBase
   int getNaddedEvents() const { return numberOfAddedEvents; }
   /** @brief Interface for config::minimumPT */
   double getMinimumPT() const { return minimumPT; }
+  /** @brief Interface for config::stopSurrounding */
+  double isStopSurrounding() const { return stopSurrounding; }
   
   /** @brief Interface for config::ringNumber */
   int getRingNumber() const { return ringNumber; }
@@ -473,6 +479,9 @@ class config : public configBase
   
   /** @brief Specify whether movie output should be written (for the reconstructed background) */
   bool outputSwitch_movieOutputBackground;
+
+  /** @brief Specify whether scattered medium particles output should be written */
+  bool outputSwitch_scatteredMediumParticlesOutput;
   
   /** @brief Whether v2 and RAA output are printed */
   bool v2RAAoutput;
@@ -606,7 +615,9 @@ class config : public configBase
   */
   int numberOfAddedEvents;
   /** @brief Minimum p_T [GeV] of the added particles */
-  double minimumPT; 
+  double minimumPT;
+  /** @brief Whether shower evolution is stopped when reaching average transverse momentum in surrounding eta slice*/
+  bool stopSurrounding;
   
   
   // the following parameters are read at runtime from the offline data recorded by the original run, 
