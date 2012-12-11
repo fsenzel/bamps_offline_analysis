@@ -12,9 +12,6 @@
 * @brief Declarations for the Particle class
 */
 
-/** @author Oliver Fochler */
-
-
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
@@ -25,7 +22,6 @@
 
 /**
 * @brief Provides properties of a particle needed in the simulations.
-* @author Oliver Fochler
 *
 * This class encapsulates properties of particles that are needed for the simulation process, such as position and momentum variables.
 * It is derived from ParticlePrototype (and extends it) that provides general properties of particles.
@@ -114,7 +110,6 @@ class Particle : public ParticlePrototype
 
 /**
 * @brief Provides properties of a particle needed in the offline reconstruction of BAMPS events.
-* @author Oliver Fochler
 *
 * This class extends the Particle class that is used in the standard BAMPS simulations to include some
 * variables that are needed for the offline reconstruction.
@@ -211,7 +206,6 @@ class ParticleOffline : public Particle
 
 /**
 * @brief Provides basic properties of a particle, used for electrons from heavy flavor decays.
-* @author Oliver Fochler
 *
 * Use only basic properties of the ParticlePrototype class to minimize memory allocation. This is possible because heavy flavor electrons are not propagated through the medium. 
 */
