@@ -90,6 +90,7 @@ config::config() :
  dndyOutput(false),
  outputScheme(no_output),
 // ---- heavy quark options ----
+ couplingRunningHeavyQuarksInput(false),
  hadronization_hq(false),
  mesonDecay(false),
  numberElectronStat(20),
@@ -320,6 +321,7 @@ void config::initializeProgramOptions()
   
   // Add heavy quark options
   heavy_quark_options.add_options()
+  ("heavy_quark.running_coupling", po::value<bool>( &couplingRunningHeavyQuarksInput )->default_value( couplingRunningHeavyQuarksInput ), "Running coupling for all heavy flavor processes")
   ("heavy_quark.hadronization_hq", po::value<bool>( &hadronization_hq )->default_value( hadronization_hq ), "whether hadronization of heavy quarks to D and B mesons is carried out")
   ("heavy_quark.mesonDecay", po::value<bool>( &mesonDecay )->default_value( mesonDecay ), "whether decay of heavy mesons from charm and bottom to electrons is performed")
   ("heavy_quark.numberElectronStat", po::value<int>( &numberElectronStat )->default_value( numberElectronStat ), "one meson decays to numberElectronStat electrons")
@@ -420,7 +422,33 @@ void config::checkOptionsForSanity()
 
 void config::processHeavyQuarkOptions()
 {
-  configBase::processHeavyQuarkOptions();  
+  configBase::processHeavyQuarkOptions(); 
+
+  // see if running coupling for all particles and running coupling for heavy quarks are both set simultaneously
+  if( ( !( vm["simulation.running_coupling"].defaulted() || vm["simulation.running_coupling"].empty() ) ) && 
+      ( !( vm["heavy_quark.running_coupling"].defaulted() || vm["heavy_quark.running_coupling"].empty() ) ) )
+  {
+    if( couplingRunning != couplingRunningHeavyQuarksInput )
+    {
+      string errMsg = "Different coupling scheme for heavy and light particles is not implemented.";
+      throw eConfig_error( errMsg );
+    }
+  }
+  // if it is only set for heavy quarks and no light quarks are present, set it globally.
+  else if ( !( vm["heavy_quark.running_coupling"].defaulted() || vm["heavy_quark.running_coupling"].empty() ) )
+  {
+    if( N_light_flavors_input < 0 )
+    {
+      cout << "Although the coupling scheme has just been set for heavy quarks, it is adapted for all particles since there are no other particles, N_f_light = " << N_light_flavors_input << "." << endl;
+      couplingRunning = couplingRunningHeavyQuarksInput;
+      coupling::set_isRunning( couplingRunning );
+    }
+    else
+    {
+      string errMsg = "Heavy flavor coupling is set, but also light partons are present.";
+      throw eConfig_error( errMsg );
+    }
+  }
 
   if( mesonDecay )
   {
