@@ -4494,6 +4494,11 @@ double offlineHeavyIonCollision::addVelocities( const double vx_1, const double 
   if( v1_squared == 0.0 )
     return sqrt( vx_2 * vx_2 + vy_2 * vy_2 + vz_2 * vz_2 );
   
+  if( v1_squared >= 1.01 ) // velocity larger than 1
+    cout << "error in addVelocities: velocity larger than 1: " << v1_squared << endl;
+  else if( v1_squared >= 1.0 ) // avoid rounding errors, set velocity to 1
+    v1_squared = 1.0;
+  
   
   for( int i = 1; i <= 3; i++ )
     v2_parallel[i] = scalar_v1_v2 / v1_squared * v1[i];

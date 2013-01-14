@@ -44,6 +44,7 @@ enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
  * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
 */
 enum OUTPUT_SCHEME { no_output = 0, 
+light_parton_lhc = 20,
 // heavy quarks:
 phenix_hq_electrons = 101,
 alice_hq_electrons = 111,
