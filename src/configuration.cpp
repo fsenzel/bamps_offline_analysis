@@ -220,7 +220,7 @@ void config::processProgramOptions()
   // some special conversions from integer type values to enum values
   if ( vm.count ( "initial_state.type" ) )
   {
-    if ( vm["initial_state.type"].as<int>() < 6 && vm["initial_state.type"].as<int>() >= 0 )
+    if ( vm["initial_state.type"].as<int>() < 7 && vm["initial_state.type"].as<int>() >= 0 )
     {
       initialStateType = static_cast<INITIAL_STATE_TYPE> ( vm["initial_state.type"].as<int>() );
     }
@@ -299,7 +299,7 @@ void config::initializeProgramOptions()
 
   // Group some options related to the initial state
   initial_state_options.add_options()
-  ( "initial_state.type", po::value<int>()->default_value ( static_cast<int> ( initialStateType ) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo, 4 = onlyJpsi, 5 = minijets+PYSHOW)" )
+  ( "initial_state.type", po::value<int>()->default_value ( static_cast<int> ( initialStateType ) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo, 4 = onlyJpsi, 5 = minijets+PYSHOW, 6 = fixed parton)" )
   ( "initial_state.PDFsource", po::value<unsigned short int>()->default_value ( static_cast<unsigned short int> ( PDFsource ) ), "which source to use for the PDFs ( 0 = built-in GRV, 1 = PDFs from LHAPDF )" )
   ( "initial_state.LHAPDFset", po::value<string> ( &LHAPDFdatasetName )->default_value ( LHAPDFdatasetName ), "name of the LHAPDF data set that should be used" )
   ( "initial_state.LHAPDFmember", po::value<unsigned short int> ( &LHAPDFmember )->default_value ( LHAPDFmember ), "which member of the LHAPDF set should be used" )
@@ -311,6 +311,7 @@ void config::initializeProgramOptions()
   ( "initial_state.cgc_file", po::value<string> ( &cgcParticleFile )->default_value ( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2" )
   ( "initial_state.mcatnlo_file", po::value<string> ( &mcatnloParticleFile )->default_value ( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3" )
   ( "initial_state.insertionTime", po::value<double> ( &insertionTime )->default_value ( insertionTime ), "cut-off time for shower evolution [GeV^(-1)], needed when initial_state.type = 5. if value is negative, no PYTHIA showers are not terminated" )
+  ( "initial_state.initialPartonPt", po::value<double> ( &initialPartonPt )->default_value ( initialPartonPt ), "parton pt of fixed initial parton pt" )
   ;
 
   // Add some options related to the program output

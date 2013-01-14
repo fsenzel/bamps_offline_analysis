@@ -252,6 +252,7 @@ class analysis
     //--------------------//
     //for jet background analysis
     void scatteredMediumParticlesOutput ( const int step );
+    void mediumParticlesOutput ( const int step );
     //--------------------//
 
 

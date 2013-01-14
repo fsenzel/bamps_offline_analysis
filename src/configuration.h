@@ -32,7 +32,7 @@
 
 
 /** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, showerInitialState };
+enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, showerInitialState, fixedPartonState };
 
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
@@ -178,6 +178,9 @@ class config : public configBase
   
   /** @brief Interface for config::insertionTime */
   double getInsertionTime() const { return insertionTime; };
+  
+  /** @brief Interface for config::initialPartonPt */
+  double getInitialPartonPt() const { return initialPartonPt; };
   
   /** ------------------------------- */
 
@@ -461,6 +464,9 @@ class config : public configBase
   
   /** @brief If shower initial conditions, this time gives the duration of the shower */
   double insertionTime;
+  
+  /** @brief Transverse momentum of initial parton pair */
+  double initialPartonPt;
   
   /** ------------------------------- */
   

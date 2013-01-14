@@ -45,6 +45,7 @@ private:
   double impactParameter;       //impact parameter in fm
   int numberOfTestparticles;    //number of testparticles per real particle
   INITIAL_STATE_TYPE initialStateType;
+  double initialPartonPt;
   
   /** @brief Cut-off time for shower evolution [GeV^-1] */
   double insertionTime;

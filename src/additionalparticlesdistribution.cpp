@@ -45,7 +45,8 @@ additionalParticlesDistribution::additionalParticlesDistribution ( const config*
   numberOfTestparticles ( _config->getTestparticles() ),
   insertionTime ( _config->getInsertionTime() ),
   seed ( _config->getSeed() ),
-  filename_prefix ( _config->getStandardOutputDirectoryName() + "/" + _config->getJobName() )
+  filename_prefix ( _config->getStandardOutputDirectoryName() + "/" + _config->getJobName() ),
+  initialPartonPt( _config->getInitialPartonPt() )
 {
 }
 
@@ -94,6 +95,23 @@ void additionalParticlesDistribution::populateParticleVector ( std::vector< Part
     initialmodel = new initialModel_minijets ( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
     break;
   }
+  case fixedPartonState:
+  {
+    double usedMinimumPT;
+    // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
+    if ( minimumPT > minijet_P0 )
+      usedMinimumPT = minimumPT;
+    else
+      usedMinimumPT = minijet_P0;
+    if ( numberOfParticlesToAdd % 2 != 0 )
+    {
+      string errMsg = "For shower initial conditions an even number of initial particles is needed!";
+      throw eInitialState_error ( errMsg );
+    }
+
+    initialmodel = new initialModel_minijets ( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
+    break;
+  }
   default:
     std::string errMsg = "Model for sampling the initial state not implemented yet!";
     throw eInitialModel_error ( errMsg );
@@ -126,7 +144,21 @@ void additionalParticlesDistribution::populateParticleVector ( std::vector< Part
     initialShowerInitOutput ( _particles );
     showerParticles ( _particles );
   }
-
+  else if ( initialStateType == fixedPartonState )
+  {
+    for ( int i = 0; i < _particles.size(); i+=2 )
+    {
+      _particles[i].PX = initialPartonPt;
+      _particles[i+1].PX = -initialPartonPt;
+      _particles[i].PY = _particles[i+1].PY = 0.0;
+      _particles[i].PZ = _particles[i+1].PZ = 0.0;
+      _particles[i].E = _particles[i+1].E = initialPartonPt;
+      _particles[i].FLAVOR = _particles[i+1].FLAVOR = gluon;
+    }
+    setEventID( _particles );
+    initialShowerInitOutput( _particles );
+  }
+  
   for ( int i = 0; i < _particles.size(); i++ )
   {
     _particles[i].unique_id = ParticleOffline::unique_id_counter_added;

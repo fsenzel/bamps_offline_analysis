@@ -853,6 +853,7 @@ void analysis::finalOutput( const double _stoptime )
   if ( studyScatteredMediumParticles )
   {
     scatteredMediumParticlesOutput( nTimeSteps );
+    mediumParticlesOutput( nTimeSteps );
   }
 }
 
@@ -4384,7 +4385,7 @@ void analysis::scatteredMediumParticlesOutput( const int step )
   }
 
   //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
-  string filename = filename_prefix + "_" + name + "_medium.f1";
+  string filename = filename_prefix + "_" + name + "_scatteredMediumParticles.f1";
   fstream file( filename.c_str(), ios::out | ios::trunc );
 
   //---- print header if file is empty ----
@@ -4403,6 +4404,46 @@ void analysis::scatteredMediumParticlesOutput( const int step )
     file << i << sep << mediumParticles[i].unique_id << sep << mediumParticles[i].cell_id << sep << mediumParticles[i].FLAVOR << sep << mediumParticles[i].T << sep << mediumParticles[i].X << sep
     << mediumParticles[i].Y << sep  << mediumParticles[i].Z << sep << mediumParticles[i].E << sep << mediumParticles[i].PX << sep << mediumParticles[i].PY << sep
     << mediumParticles[i].PZ << sep << mediumParticles[i].md2g << sep << mediumParticles[i].md2q << sep << mediumParticles[i].N_EVENT_pp << endl;
+  }
+  file.close();
+}
+
+
+void analysis::mediumParticlesOutput( const int step )
+{
+  string name;
+  stringstream ss;
+
+  if ( step == 0 )
+    name = "initial";
+  else if ( step == nTimeSteps )
+    name = "final";
+  else
+  {
+    ss << step;
+    name = "step" + ss.str();
+  }
+
+  //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+  string filename = filename_prefix + "_" + name + "_allMediumParticles.f1";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
+
+  //---- print header if file is empty ----
+  time_t end;
+  time( &end );
+
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if ( size == 0 )
+    printHeader( file, all, end );
+  //---------------------------------------
+
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+    file << i << sep << particles_atTimeNow[i].unique_id << sep << particles_atTimeNow[i].cell_id << sep << particles_atTimeNow[i].FLAVOR << sep << particles_atTimeNow[i].T << sep << particles_atTimeNow[i].X << sep
+    << particles_atTimeNow[i].Y << sep  << particles_atTimeNow[i].Z << sep << particles_atTimeNow[i].E << sep << particles_atTimeNow[i].PX << sep << particles_atTimeNow[i].PY << sep
+    << particles_atTimeNow[i].PZ << sep << particles_atTimeNow[i].md2g << sep << particles_atTimeNow[i].md2q << sep << particles_atTimeNow[i].N_EVENT_pp << endl;
   }
   file.close();
 }
