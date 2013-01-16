@@ -33,7 +33,7 @@
 #include "hadronization_hq.h"
 #include "lorentz.h"
 
-#include "config.h"
+#include "configBAMPS.h"
 #ifdef Pythia_FOUND
 #include "mesonDecay.h"
 #endif

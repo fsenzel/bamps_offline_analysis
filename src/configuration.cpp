@@ -18,7 +18,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "config.h"
+#include "configBAMPS.h"
 #include "configuration.h"
 #include "particle.h"
 #include "parameter.h"

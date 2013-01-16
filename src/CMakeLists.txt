@@ -62,8 +62,8 @@ ENDIF ( NOT DISABLE_BUILD_EXTRAS )
 # revision.h is a generated file
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/revision.h PROPERTIES GENERATED TRUE HEADER_FILE_ONLY TRUE)
 
-######### create a config.h #########
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+######### create a configBAMPS.h #########
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/configBAMPS.h.in ${CMAKE_CURRENT_BINARY_DIR}/configBAMPS.h)
 
 ######### Build the executable #########
 ADD_EXECUTABLE(offlineBAMPS ${project_SRCS} )
