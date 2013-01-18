@@ -1830,7 +1830,8 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
     }
     
     
-    if( theConfig->doScattering_23() && ( addedParticles[jscat].FLAVOR > 2 * Particle::max_N_light_flavor ) && ( addedParticles[jscat].FLAVOR <= ( 2 * Particle::max_N_light_flavor + 2 * Particle::N_heavy_flavor ) ) ) // heavy quark
+//     if( theConfig->doScattering_23() && ( addedParticles[jscat].FLAVOR > 2 * Particle::max_N_light_flavor ) && ( addedParticles[jscat].FLAVOR <= ( 2 * Particle::max_N_light_flavor + 2 * Particle::N_heavy_flavor ) ) ) // heavy quark
+    if( theConfig->doScattering_23() )
     {
       addedParticles[jscat].lambda_added_old = addedParticles[jscat].lambda_added;
                 
@@ -1880,30 +1881,30 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         throw eHIC_error( errMsg );
       }
     }
-    else if ( theConfig->doScattering_23() &&  pt_addedParticle > 8.0 && theConfig->isIterateMfpAdded() )
-    {
-      lambdaJet = iterateMFP( _allParticlesList, _gluonList, jscat, dt, dv ); //fm
-      
-      xt = sqrt( pow( addedParticles[jscat].X, 2 )  + pow( addedParticles[jscat].Y, 2 ) );
-      ringIndex = rings.getIndex( xt );
-      
-      if ( addedParticles[jscat].FLAVOR == gluon )
-      {
-        _analysisRings[ringIndex].lambdaGluon += lambdaJet / 0.197; // 1/GeV
-        _analysisRings[ringIndex].collectedGluon++;
-      }
-      else
-      {
-        _analysisRings[ringIndex].lambdaQuark += lambdaJet / 0.197; // 1/GeV
-        _analysisRings[ringIndex].collectedQuark++;
-      }
-      
-//       lambdaJet = 0;
-    }
-    else
-    {
-      lambdaJet = -1;
-    }
+//     else if ( theConfig->doScattering_23() &&  pt_addedParticle > 8.0 && theConfig->isIterateMfpAdded() )
+//     {
+//       lambdaJet = iterateMFP( _allParticlesList, _gluonList, jscat, dt, dv ); //fm
+//       
+//       xt = sqrt( pow( addedParticles[jscat].X, 2 )  + pow( addedParticles[jscat].Y, 2 ) );
+//       ringIndex = rings.getIndex( xt );
+//       
+//       if ( addedParticles[jscat].FLAVOR == gluon )
+//       {
+//         _analysisRings[ringIndex].lambdaGluon += lambdaJet / 0.197; // 1/GeV
+//         _analysisRings[ringIndex].collectedGluon++;
+//       }
+//       else
+//       {
+//         _analysisRings[ringIndex].lambdaQuark += lambdaJet / 0.197; // 1/GeV
+//         _analysisRings[ringIndex].collectedQuark++;
+//       }
+//       
+// //       lambdaJet = 0;
+//     }
+//     else
+//     {
+//       lambdaJet = -1;
+//     }
 
     for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ); i++ )
     {
