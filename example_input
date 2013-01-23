@@ -6,9 +6,19 @@ seed = 0
 time = 1.1
 
 [offline]
-name = original_name
-offline_data_dir = offline_data
-nAdded = 0
+name = lhc276_b36_pythia_08shadowing_20fm_nf3_1
+offline_data_dir = recorded_events/LHC_2_76TeV/b3_6
+minPT_added = 8
+nAdded = 5
 
 [output]
 directory = output
+
+[misc]
+switch_32 = 0
+iterateMfpAdded = 0
+
+[parameters23]
+gluonFormationTimeTyp23 = bamps_org_extended
+matrixElement23 = GBimproved
+md2_counter_term_in_I23 = 0
