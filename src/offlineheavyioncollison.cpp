@@ -298,7 +298,9 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   {
     if ( addedParticles[i].Pos.T() <= simulationTime )
     {
-      addedParticles[i].Propagate( simulationTime, addedParticles[i].X_traveled );
+      double travelDist;
+      addedParticles[i].Propagate( simulationTime, travelDist );
+      addedParticles[i].X_traveled += travelDist;
       aa.addJetEvent_initial( i );
     }
   }
