@@ -25,11 +25,10 @@ ENDIF( NOT CMAKE_BUILD_TYPE )
 
 ## CMAKE_BUILD_TYPE == DebugProf :
 
-SET(CMAKE_CXX_FLAGS_DEBUGPROF "-O3 -g -pg" CACHE STRING 
+SET(CMAKE_CXX_FLAGS_DEBUGPROF "-O3 -g -pg -Wall -Wunused-variable" CACHE STRING 
   "Flags used by the compiler during profiling builds.")
-SET(CMAKE_C_FLAGS_DEBUGPROF "-O3 -g -pg" CACHE STRING 
+SET(CMAKE_C_FLAGS_DEBUGPROF "-O3 -g -pg -Wall -Wunused-variable" CACHE STRING 
   "Flags used by the compiler during profiling builds.")
-
 
 #########
 

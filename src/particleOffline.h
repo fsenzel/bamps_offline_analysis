@@ -9,8 +9,8 @@
 //----------------------------------------------------------------------------
 
 /** @file
-* @brief Declarations for the Offline Particle class
-*/
+ * @brief Declarations for the Offline Particle class
+ */
 
 #ifndef PARTICLEOFFLINE_H
 #define PARTICLEOFFLINE_H
@@ -19,99 +19,112 @@
 
 
 /**
-* @brief Provides properties of a particle needed in the offline reconstruction of BAMPS events.
-*
-* This class extends the Particle class that is used in the standard BAMPS simulations to include some
-* variables that are needed for the offline reconstruction.
-*/
+ * @brief Provides properties of a particle needed in the offline reconstruction of BAMPS events.
+ *
+ * This class extends the Particle class that is used in the standard BAMPS simulations to include some
+ * variables that are needed for the offline reconstruction.
+ */
 class ParticleOffline : public Particle
 {
-  public:
-    /** @brief Provide standard constructor (for completeness) */
-    ParticleOffline() : Particle(), T_creation( 0 ), 
-			PosInit( 0,0,0,0 ), X_traveled( 0 ),
-			MomInit( 0,0,0,0 ), 
-			lastInt( 0,0,0,0 ),
-    rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
+public:
+  /** @brief Provide standard constructor (for completeness) */
+  ParticleOffline() : 
+    Particle(), 
+    temperature(0), 
+    initially_produced( true ), 
+    jpsi_dissociation_number( -1 ),
+    T_creation( 0 ), 
+    X_traveled( 0 ),
+    PosInit( 0,0,0,0 ),
+    MomInit( 0,0,0,0 ),
+    lastInt( 0,0,0,0 ),	   
+    rate( 0 ), ratev( 0 ) 
+  {};
     
-    ParticleOffline( const Particle& _particle ) : 
-      Particle( _particle ), T_creation( 0 ), 
-      PosInit( 0,0,0,0 ), X_traveled( 0 ),
-      MomInit( 0,0,0,0 ),
-      lastInt( 0,0,0,0 ),	   
-      rate( 0 ), ratev( 0 ), temperature(0), initially_produced( true ), jpsi_dissociation_number( -1 ) {};
+  ParticleOffline( const Particle& _particle ) : 
+    Particle( _particle ), 
+    temperature(0), 
+    initially_produced( true ), 
+    jpsi_dissociation_number( -1 ),
+    T_creation( 0 ), 
+    X_traveled( 0 ),
+    PosInit( 0,0,0,0 ),
+    MomInit( 0,0,0,0 ),
+    lastInt( 0,0,0,0 ),	   
+    rate( 0 ), ratev( 0 ) 
+  {};
     
-    /** @brief counter for unique particle IDs of added particles (static) */
-    static long int unique_id_counter_added;
+  /** @brief counter for unique particle IDs of added particles (static) */
+  static long int unique_id_counter_added;
 
-    /** @brief Temperature of the surrounding medium, needed for J/psi melting */
-    double temperature;
+  /** @brief Temperature of the surrounding medium, needed for J/psi melting */
+  double temperature;
     
-    /** @brief Whether the particle was initially produced or later in a secondary process */
-    bool initially_produced;
+  /** @brief Whether the particle was initially produced or later in a secondary process */
+  bool initially_produced;
     
-    /** @brief Unique number of jpsi dissociation such that the same c+cbar do not reunite directly */
-    int jpsi_dissociation_number;
+  /** @brief Unique number of jpsi dissociation such that the same c+cbar do not reunite directly */
+  int jpsi_dissociation_number;
     
-    /** @brief If c+cbar form a Jpsi the variable N_EVENT_pp of the cbar is stored in this variable to be still accessible, In particular if the Jpsi dissociates again. */
-    int N_EVENT_Cbar;
+  /** @brief If c+cbar form a Jpsi the variable N_EVENT_pp of the cbar is stored in this variable to be still accessible, In particular if the Jpsi dissociates again. */
+  int N_EVENT_Cbar;
     
-    /** stuff special to offline reconstruction */
-    double T_creation;
+  /** stuff special to offline reconstruction */
+  double T_creation;
   double X_traveled;//fm
   VectorTXYZ PosInit;
   VectorEPxPyPz MomInit;
   VectorTXYZ lastInt;
     
-    double rate, ratev;
+  double rate, ratev;
     
     
-    static int mapToPDGCodes( const FLAVOR_TYPE _flav )
+  static int mapToPDGCodes( const FLAVOR_TYPE _flav )
+  {
+    switch ( _flav )
     {
-      switch ( _flav )
-      {
-        case gluon:
-          return 21;
-          break;
-        case up:
-          return 2;
-          break;
-        case anti_up:
-          return -2;
-          break;
-        case down:
-          return 1;
-          break;
-        case anti_down:
-          return -1;
-          break;
-        case strange:
-          return 3;
-          break;
-        case anti_strange:
-          return -3;
-          break;
-        case charm:
-          return 4;
-          break;
-        case anti_charm:
-          return -4;
-          break;
-        default:
-          return 0;
-          break;
-      }      
-    }
+      case gluon:
+	return 21;
+	break;
+      case up:
+	return 2;
+	break;
+      case anti_up:
+	return -2;
+	break;
+      case down:
+	return 1;
+	break;
+      case anti_down:
+	return -1;
+	break;
+      case strange:
+	return 3;
+	break;
+      case anti_strange:
+	return -3;
+	break;
+      case charm:
+	return 4;
+	break;
+      case anti_charm:
+	return -4;
+	break;
+      default:
+	return 0;
+	break;
+    }      
+  }
     
-  private:
+private:
 };
 
 /**
-* @brief Provides basic properties of a particle, used for electrons from heavy flavor decays.
-* @author Oliver Fochler
-*
-* Use only basic properties of the ParticlePrototype class to minimize memory allocation. This is possible because heavy flavor electrons are not propagated through the medium. 
-*/
+ * @brief Provides basic properties of a particle, used for electrons from heavy flavor decays.
+ * @author Oliver Fochler
+ *
+ * Use only basic properties of the ParticlePrototype class to minimize memory allocation. This is possible because heavy flavor electrons are not propagated through the medium. 
+ */
 // class ParticleHFelectron : public ParticlePrototype
 class ParticleHFelectron : public ParticleOffline
 {

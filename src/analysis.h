@@ -134,30 +134,34 @@ class jetTrackerSingleEvent
 {
 public:
   jetTrackerSingleEvent() : 
-    R_proj(), P_proj_in(),P_proj_out(), 
+    R_proj(), 
+    P_proj_in(),
+    P_proj_out(), 
     P1_in(), P2_in(), P1_out(), P2_out(),
-    xSection(-1), lambda(-1), cell_ID(-1)
+    lambda(-1), 
+    xSection(-1), 
+    cell_ID(-1)
   { };
   ~jetTrackerSingleEvent() {};
   
   VectorTXYZ R_proj;
-
+  
   VectorEPxPyPz P_proj_in;
   VectorEPxPyPz P_proj_out;
-
+  
   VectorEPxPyPz P1_in;
   VectorEPxPyPz P2_in;
   VectorEPxPyPz P1_out;
   VectorEPxPyPz P2_out;
-
-    int flavor_in;
-    int flavor_out;
-    
-    jetTrackerCollType coll_type;
-    double lambda;
-    double xSection;
-    int cell_ID;
-    int jet_ID_in, jet_ID_out;
+  
+  int flavor_in;
+  int flavor_out;
+  
+  jetTrackerCollType coll_type;
+  double lambda;
+  double xSection;
+  int cell_ID;
+  int jet_ID_in, jet_ID_out;
 };
 
 
@@ -207,6 +211,11 @@ public:
   
   void volumeMidrap(const int ) const;
   
+private:
+  config * const theConfig ;
+
+public:
+
   double tstep[120];
   double tstep_movie[500];
   
@@ -215,8 +224,6 @@ public:
 
 private:
 
-  config * const theConfig ;
-  
   uint32_t seed;
   time_t start;
   

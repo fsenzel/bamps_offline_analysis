@@ -196,10 +196,10 @@ interfacePDF_LHAPDF::interfacePDF_LHAPDF ( const std::string& name, const unsign
 
 void interfacePDF_LHAPDF::eval(double Q2, double x1, double x2, int nuc1, int nuc2, double F1[13], double F2[13])
 {
+#ifdef LHAPDF_FOUND
   double F[13];
   double Q = sqrt(Q2);
 
-#ifdef LHAPDF_FOUND
   if ( useNuclearPDFs && A1 > 1) 
   {
     LHAPDF::xfxa(x1, Q, A1, F);

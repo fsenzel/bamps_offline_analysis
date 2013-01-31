@@ -4,6 +4,14 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules/")
 ######### This sets custom build flags and includes options for various compilers #########
 INCLUDE(SetCompilersAndBuildFlags.cmake)
 
+######### Check whether CPU has RDTSCP command  #########
+execute_process(COMMAND cat /proc/cpuinfo
+    COMMAND grep flags
+    COMMAND grep -c rdtscp
+    OUTPUT_VARIABLE HAVE_RDTSCP)
+
+MESSAGE(STATUS "** CPU has RDTSCP opcode: ${HAVE_RDTSCP}")
+
 ######### Set project name  #########
 PROJECT(offlineBAMPS)
 

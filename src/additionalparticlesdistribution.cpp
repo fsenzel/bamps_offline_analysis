@@ -80,7 +80,7 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   }
   
   _particles.reserve( tempParticleVector.size() );
-  for ( int i = 0; i < tempParticleVector.size(); i++ )
+  for ( unsigned int i = 0; i < tempParticleVector.size(); i++ )
   {
     ParticleOffline tempParticle( tempParticleVector[i] );
     _particles.push_back( tempParticle );
@@ -89,7 +89,7 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   if( configObject->isStudyNonPromptJpsiInsteadOfElectrons() )
     deleteAllParticlesExceptBottom( _particles );
 
-  for ( int i = 0; i < _particles.size(); i++ )
+  for ( unsigned int i = 0; i < _particles.size(); i++ )
   {
     _particles[i].unique_id = ParticleOffline::unique_id_counter_added;
     --ParticleOffline::unique_id_counter_added;
@@ -100,13 +100,13 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
 
 void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOffline >& _particles )
 {
-  double max = 0;
   double dtt = 0;
   double eta_max = 5.0;
 
   double MT, y;
   double shift;
-  for ( int j = 0; j < _particles.size(); j++ )
+
+  for ( unsigned int j = 0; j < _particles.size(); j++ )
   {   
     dtt = fabs( _particles[j].Pos.Z() ) / tanh( eta_max ) - _particles[j].Pos.T();  //tanh(eta)=z/t
     if ( dtt < configObject->getTimeshift() )
@@ -143,7 +143,7 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     _particles[j].T_creation = _particles[j].Pos.T();
   }
   
-  for(int i = 0; i < _particles.size(); i++)
+  for(unsigned int i = 0; i < _particles.size(); i++)
   {
     _particles[i].PosInit = _particles[i].Pos;
     _particles[i].MomInit = _particles[i].Mom;
@@ -154,7 +154,7 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
 
 void additionalParticlesDistribution::deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles )
 {
-  for(int j = 0; j < addedParticles.size(); j++ )
+  for(unsigned int j = 0; j < addedParticles.size(); j++ )
   {
     if( !( addedParticles[j].FLAVOR == bottom || addedParticles[j].FLAVOR == anti_bottom ) )
     {

@@ -1239,8 +1239,6 @@ namespace boost {
     template<class Archive>
     void save(Archive & ar, const ParticlePrototype & g, const unsigned int version)
     {
-      double x, y, z, t;
-
       ar & make_nvp( "unique_id", g.unique_id );
       ar & make_nvp( "cell_id", g.cell_id );
       ar & make_nvp( "FLAVOR", g.FLAVOR );

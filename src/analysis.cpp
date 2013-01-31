@@ -292,7 +292,7 @@ analysis::analysis( config* const c ):
     numberBinsPT = int(( maxPT - minPT + 0.001 ) / binWidthPT );
     
     tArrayOfDoubleVec tmpArray;
-    for ( int i = 0; i < rapidityRanges.size(); i++ )
+    for ( unsigned int i = 0; i < rapidityRanges.size(); i++ )
     {
       tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_gluons.push_back( tmpArray );
@@ -314,7 +314,7 @@ analysis::analysis( config* const c ):
       ptBins_all.push_back( tmpArray );
     }
 
-    for ( int ny = 0; ny < rapidityRanges.size(); ny++ )
+    for ( unsigned int ny = 0; ny < rapidityRanges.size(); ny++ )
     {
       for ( int nt = 0; nt < nTimeSteps + 2; nt++ )
       {
@@ -340,7 +340,6 @@ analysis::analysis( config* const c ):
     
     
     //---- initialisation of softPT-binning ----
-    maxPTSoft;
     binWidthSoftPT = 0.1;
     numberBinsSoftPT = int(( maxPTSoft + 0.001 ) / binWidthSoftPT );
     ptBinsSoftAll_gluons = new vector<double>[nTimeSteps+1];
@@ -958,7 +957,7 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
 
   // populate temporary _ptBins with temporary "references" to the actual data structures according to the requested flavor
   tVecOfArrayOfDoubleVec _ptBins;
-  for ( int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
+  for ( unsigned int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
   {
     switch ( _flavTypeToComputeFor )
     {
@@ -1046,7 +1045,7 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   //---------------------------------------
 
   //------------- the actual output ---------------
-  for ( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
+  for ( unsigned int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
   {
     file << "#y in +- [" << rapidityRanges[yRangeIndex].yleft << ", " << rapidityRanges[yRangeIndex].yright << "]" << endl;
     for ( int i = 0; i < numberBinsPT; i++ )
@@ -1245,7 +1244,7 @@ void analysis::onePartclCorrelations()
   double q_hat_scal_sum = 0.0, q_hat_vec_sum = 0.0;
   int count_q_hat_sum = 0;
 
-  for ( int i = 0;i < addedParticles.size();i++ )
+  for ( unsigned int i = 0;i < addedParticles.size();i++ )
   {
 //     if(addedParticles[i].T <= time)
 //     {
@@ -1379,7 +1378,7 @@ void analysis::twoPartclCorrelations()
   binning dNdrI_ptbar5_dpt02( filename, 0.0, 15.0, 60 );
 
   // 2 particle correlations, charm and anti-charm which are produced in same reaction
-  for ( int i = 0;i < addedParticles.size();i++ )
+  for ( unsigned int i = 0;i < addedParticles.size();i++ )
   {
 //     if(addedParticles[i].T <= time)
 //     {
@@ -1387,7 +1386,7 @@ void analysis::twoPartclCorrelations()
 
     if ( fabs( eta ) <= eta_max )
     {
-      for ( int j = i + 1;j < addedParticles.size();j++ )
+      for ( unsigned int j = i + 1;j < addedParticles.size();j++ )
       {
 //         if ( addedParticles[i].N_EVENT_pp == addedParticles[j].N_EVENT_pp )
         if ( true )
@@ -1988,8 +1987,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     double y, pt;
     for ( int i = 1; i <= n_particles; i++ )
     {
-      pt = sqrt( pow( _particles[i].PX, 2.0 ) + pow( _particles[i].PY, 2.0 ) );
-      y = 0.5 * log(( _particles[i].E + _particles[i].PZ ) / ( _particles[i].E - _particles[i].PZ ) );
+      pt = _particles[i].Mom.Pt();
+      y  = _particles[i].Mom.Rapidity();
       
       if( fabs( y ) < 2.4 && pt > 6.5 && pt < 30.0 )
         count_jpsi++;
@@ -3251,13 +3250,13 @@ void analysis::ini_charm_correlations()
   filename = filename_prefix + "_etabins_detaIniCharm";
   binning etabins_detaIniCharm(filename, 0.0, 20.0, 70);
 
-  for ( int i = 0; i < addedParticles.size(); i++ )
+  for ( unsigned int i = 0; i < addedParticles.size(); i++ )
   {
     if ( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
     {
       eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
       
-      for ( int j = i+1; j < addedParticles.size(); j++ )
+      for ( unsigned int j = i+1; j < addedParticles.size(); j++ )
       {
         if( addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_pp &&  ( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 ) )
         {
@@ -3940,7 +3939,7 @@ void analysis::print_dndy(const string subfix )
   filename = filename_prefix + "_dndpt_" + subfix;
   binning dndpt(filename, 0.0, 20.0, 200);
   
-  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  for ( unsigned int i = 0; i < particles_atTimeNow.size(); i++ )
   {
     pt = particles_atTimeNow[i].Mom.Pt();
     y  = particles_atTimeNow[i].Mom.Rapidity();
@@ -3988,7 +3987,7 @@ void analysis::analyseAngleDe()
   filename = filename_prefix + "_dmeson_electron_cosPhiTrans";
   binningValues binsCosPhi(filename, 0.0, 10.0, 200);
   
-  for ( int i = 0; i < addedParticles.size(); i++ )
+  for ( unsigned int i = 0; i < addedParticles.size(); i++ )
   {
     if ( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
     {
@@ -4103,7 +4102,8 @@ void analysis::jpsiEvolution( int step )
   int countJpsi_forwardNormRap_all = 0;
   int countJpsi_forwardNormRap_ini = 0;
 //   int countJpsi_midSpaceTimeRap = 0;
-  for ( int i = 0; i < addedParticles.size(); i++ )
+
+  for ( unsigned int i = 0; i < addedParticles.size(); i++ )
   {
     if ( addedParticles[i].FLAVOR == 50 )
     {
@@ -4271,9 +4271,9 @@ void analysis::jetTrackerOutput()
     printHeader( file, jets, end );
   //---------------------------------------
   
-  for ( int jet = 0; jet < jetTracker.size(); jet++ )
+  for ( unsigned int jet = 0; jet < jetTracker.size(); jet++ )
   {
-    for ( int event = 0; event < jetTracker[jet].size(); event++ )
+    for ( unsigned int event = 0; event < jetTracker[jet].size(); event++ )
     {
       file << jetTracker[jet][event].jet_ID_in << sep << jetTracker[jet][event].jet_ID_out << sep
       << jetTracker[jet][event].coll_type << sep;
@@ -4306,7 +4306,7 @@ analysisRingStructure::analysisRingStructure( const int _nRings, const double _c
   rings[0].relocate( 0, _centralRadius );
 
   totalRadius = _centralRadius + ( _nRings - 1 ) * deltaR;
-  for ( int i = 1; i < rings.size(); i++ )
+  for ( unsigned int i = 1; i < rings.size(); i++ )
   {
     rings[i].relocate( rings[i-1].maxRadius, rings[i-1].maxRadius + deltaR );
   }
@@ -4326,7 +4326,7 @@ void analysisRingStructure::resize( const int _nRings, const double _centralRadi
   rings[0].relocate( 0, _centralRadius );
 
   totalRadius = _centralRadius + ( _nRings - 1 ) * deltaR;
-  for ( int i = 1; i < rings.size(); i++ )
+  for ( unsigned int i = 1; i < rings.size(); i++ )
   {
     rings[i].relocate( rings[i-1].maxRadius, rings[i-1].maxRadius + deltaR );
   }
@@ -4336,7 +4336,7 @@ void analysisRingStructure::resize( const int _nRings, const double _centralRadi
 
 int analysisRingStructure::getIndex( const double _xt ) const
 {
-  int index = getIndexPure( _xt );
+  unsigned int index = getIndexPure( _xt );
   if ( index >= rings.size() )
   {
     return ( static_cast<int>( rings.size() ) - 1 );
