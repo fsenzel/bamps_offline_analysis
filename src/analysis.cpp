@@ -1199,7 +1199,7 @@ void analysis::onePartclCorrelations()
 //  const double eta_max = 10000.0;//
 
   string filename;
-  double pp, pt_fin, pt_init, eta, dpt_vec, dpt_scal, rt_init, dE;
+  double pt_fin, pt_init, eta, dpt_vec, dpt_scal, rt_init, dE;
 
 
   filename = filename_prefix + "_ptIni_ptFin_1correl";
@@ -1320,7 +1320,7 @@ void analysis::twoPartclCorrelations()
   const double pt_min_dNdr = 5.0;//GeV, cut on particle for dN/dr_t
 
   string filename;
-  double pp, eta, rt_init;
+  double eta, rt_init;
   double dpt_ini, dpt_fin, dp_ini, dp_fin, dphi_fin, dphi_ini, scal_prod, length1, length2, pt_fin_i, pt_fin_j;
 
   filename = filename_prefix + "_dpt_partons";
