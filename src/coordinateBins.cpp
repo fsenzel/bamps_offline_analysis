@@ -45,7 +45,7 @@ coordinateBins::coordinateBins( const int _size, const double _min, const double
   }
 
   double tmp = _min_real;
-  for ( int i = _min_index_limit; i <= _max_index_limit; i++ )
+  for ( unsigned int i = _min_index_limit; i <= _max_index_limit; i++ )
   {
     bins[i].left = tmp;
     tmp += _delta_x;
@@ -78,7 +78,7 @@ void coordinateBins::reshape( const int _size, const double _min, const double _
   }
 
   double tmp = _min_real;
-  for ( int i = _min_index_limit; i <= _max_index_limit; i++ )
+  for ( unsigned int i = _min_index_limit; i <= _max_index_limit; i++ )
   {
     bins[i].left = tmp;
     tmp += _delta_x;
@@ -149,8 +149,8 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   _dt = _dx;
 
   int np, npr, npl;
-  int nsum1 = 0, nsum2 = 0;
-  int nMax = NinEtaBin;
+  unsigned int nsum1 = 0, nsum2 = 0;
+  unsigned int nMax = NinEtaBin;
   const int dNdEta_centralIndex = static_cast<int>( _dNdEta.size() ) / 2;
   const double dEta = _dNdEta.get_dx();
 
@@ -193,8 +193,8 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   //---------- populate central eta bin ----------
   
 
-  int nRest;
-  int index = centralIndex;
+  unsigned int nRest;
+  unsigned int index = centralIndex;
   //---------- populate bins with eta > 0 ----------
   nRest = 0;
   for ( int i = npr + 1; i < _dNdEta.size(); i++ )
@@ -344,7 +344,7 @@ int coordinateEtaBins::getCentralIndex() const
 
 int coordinateEtaBins::getIndex( const double _eta ) const
 {
-  int index = this->getCentralIndex();
+  unsigned int index = this->getCentralIndex();
   if ( _eta >= 0 )
   {
     while ( _eta >= bins[index].right && index < _max_index_limit )

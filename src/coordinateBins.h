@@ -97,11 +97,11 @@ protected:
   double _max_real;
   double _delta_x;
 
-  int _min_index_limit;
-  int _max_index_limit;
+  unsigned int _min_index_limit;
+  unsigned int _max_index_limit;
 
-  int _min_index_active;
-  int _max_index_active;
+  unsigned int _min_index_active;
+  unsigned int _max_index_active;
 
   bool _negative_indices;
  
@@ -143,7 +143,7 @@ public:
   int getNinEtaBin() const { return NinEtaBin; }
 
 private:
-  int NinEtaBin;
+  unsigned int NinEtaBin;
   
   double timestepScaling;
   
