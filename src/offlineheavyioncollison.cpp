@@ -298,9 +298,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
   {
     if ( addedParticles[i].Pos.T() <= simulationTime )
     {
-      double travelDist;
-      addedParticles[i].Propagate( simulationTime, travelDist );
-      addedParticles[i].X_traveled += travelDist;
+      addedParticles[i].Propagate( simulationTime, addedParticles[i].X_traveled );
       aa.addJetEvent_initial( i );
     }
   }
@@ -586,7 +584,6 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
   double timei = 0;
   double timej = 0;
   VectorEPxPyPz Mom1, Mom2;
-  //  double pxi, pyi, pzi, pxj, pyj, pzj;
   FLAVOR_TYPE F1, F2, F3;
   double c;
 
@@ -1747,10 +1744,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
       }
       else
       {
-	//        P1P2 = P1[0]*P2[0] - P1[1]*P2[1] - P1[2]*P2[2] - P1[3]*P2[3];
-	//        Vrel = pow((pow(P1P2,2.0)-pow(M1,2.0)*pow(M2,2.0)),0.5)/(P1[0]*P2[0]);        // general relative velocity
-	//	Vrel = s / ( 2.0 * particles_atTimeNow[iscat].Mom.E() * addedParticles[jscat].Mom.E() );
-	Vrel = sqrt( s*s - M1*M1 * M2*M2 ) / ( particles_atTimeNow[iscat].Mom.E() * addedParticles[jscat].Mom.E() );
+	Vrel = VelRel(particles_atTimeNow[iscat].Mom, addedParticles[jscat].Mom, M1, M2); 
         as = coupling::get_constant_coupling();
 
         //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, therefore multiplied here
@@ -2504,9 +2498,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   Tmax = std::max( particles_atTimeNow[iscat].Pos.T(), addedParticles[jscat].Pos.T());
   TT = ( nexttime - Tmax ) * ran2() + Tmax;
 
-  double TravelDist;
-  addedParticles[jscat].Propagate( TT, TravelDist );
-  addedParticles[jscat].X_traveled += TravelDist;
+  addedParticles[jscat].Propagate( TT, addedParticles[jscat].X_traveled );
 
   // at this point scattering take place, therefore set properties of
   // last scattering point
@@ -2604,10 +2596,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
 
   Tmax = std::max( particles_atTimeNow[iscat].Pos.T(), addedParticles[jscat].Pos.T() );
   TT = ( nexttime - Tmax ) * ran2() + Tmax;
-
-  double TravelDist;
-  addedParticles[jscat].Propagate( TT, TravelDist );
-  addedParticles[jscat].X_traveled += TravelDist;
+  addedParticles[jscat].Propagate( TT, addedParticles[jscat].X_traveled );
 
   // at this point scattering take place, therefore set properties of
   // last scattering point
@@ -2731,13 +2720,8 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22
 
   Tmax = std::max( addedParticles[iscat].Pos.T(), addedParticles[jscat].Pos.T() );
   TT = ( nexttime - Tmax ) * ran2() + Tmax;
-
-  double TravelDist;
-  addedParticles[iscat].Propagate( TT, TravelDist );
-  addedParticles[iscat].X_traveled += TravelDist;
-
-  addedParticles[jscat].Propagate( TT, TravelDist );
-  addedParticles[jscat].X_traveled += TravelDist;
+  addedParticles[iscat].Propagate( TT, addedParticles[iscat].X_traveled );
+  addedParticles[jscat].Propagate( TT, addedParticles[jscat].X_traveled );
 
   // at this point scattering take place, therefore set properties of last scattering point
   addedParticles[iscat].lastInt = addedParticles[iscat].Pos;

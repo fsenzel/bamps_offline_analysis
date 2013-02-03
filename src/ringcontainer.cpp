@@ -61,7 +61,6 @@ void ringContainer::clear()
 {
   averagesPrepared = false;
   numberOfParticles = 0;
-  numberOfActiveParticles = 0;
   numberOfGluons = 0;
   numberOfQuarks = 0;
   particleDensity = 0;

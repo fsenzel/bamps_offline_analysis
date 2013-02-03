@@ -1400,8 +1400,8 @@ void analysis::twoPartclCorrelations()
           {
 //                 dpt_ini = sqrt( pow(addedParticles[i].MomInit.Px()-addedParticles[j].MomInit.Px(),2.0) + pow(addedParticles[i].MomInit.Py()-addedParticles[j].MomInit.Py(),2.0) );
 //                 dpt_fin = sqrt( pow(addedParticles[i].Mom.Px()-addedParticles[j].Mom.Px(),2.0) + pow(addedParticles[i].Mom.Py()-addedParticles[j].Mom.Py(),2.0) );
-            dpt_ini = fabs( sqrt( pow( addedParticles[i].MomInit.Px(), 2.0 ) + pow( addedParticles[i].MomInit.Py(), 2.0 ) ) - sqrt( pow( addedParticles[j].MomInit.Px(), 2.0 ) + pow( addedParticles[j].MomInit.Py(), 2.0 ) ) );
-            dpt_fin = fabs( sqrt( pow( addedParticles[i].Mom.Px(), 2.0 ) + pow( addedParticles[i].Mom.Py(), 2.0 ) ) - sqrt( pow( addedParticles[j].Mom.Px(), 2.0 ) + pow( addedParticles[j].Mom.Py(), 2.0 ) ) );
+            dpt_ini = fabs( addedParticles[i].MomInit.Pt() - addedParticles[j].MomInit.Pt() );
+            dpt_fin = fabs( addedParticles[i].Mom.Pt() - addedParticles[j].Mom.Pt() );
 
 	    dp_ini = sqrt( (addedParticles[i].MomInit - addedParticles[j].MomInit).vec2() );
 	    dp_fin = sqrt( (addedParticles[i].Mom - addedParticles[j].Mom).vec2() );
@@ -1536,15 +1536,10 @@ void analysis::twoPartclCorrelations()
   {
     eta = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
 
-    double x1 = 0.0;
-    double y1 = 1.0;
-
+    VectorXYZ V = VectorXYZ( 0.0, 1.0, 0.0 );
     if ( fabs( eta ) <= eta_max )
     {
-      scal_prod = x1 * addedParticles[j].Mom.Px() + y1 * addedParticles[j].Mom.Py();
-      length1 = pow( x1, 2.0 ) + pow( y1, 2.0 );
-      length2 = addedParticles[j].Mom.Pt2();
-      dphi_fin = acos( scal_prod / sqrt( length1*length2 ) );
+      dphi_fin = acos( CosPhi(addedParticles[j].Mom, V) );
       dphiiso.add( dphi_fin );
     }
   }

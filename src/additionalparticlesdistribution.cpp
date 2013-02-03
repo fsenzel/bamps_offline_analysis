@@ -128,7 +128,7 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     
     //formation time 1/sqrt( p_T^2 + m^2) = 1/m_T
     y = _particles[j].Mom.Rapidity();
-    MT = sqrt( _particles[j].Mom.Pt2() + pow( _particles[j].m, 2 ) );
+    MT = _particles[j].Mom.Mt( _particles[j].m );
     dtt = 1 / MT * cosh( y ) * 0.197327;  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
     
     // additional formation time for Jpsi
