@@ -57,6 +57,13 @@ full/branches/vector4D/src/offlineoutput.h
 // except some commenting out in writeAveragesToParticle(...)
 
 
+// at revision 1004 this is identical to
+// full/branches/vector4D/src/pdfinterface.h
+
+// at revision 1004 this is identical to
+// full/branches/vector4D/src/pdfinterface.cpp
+
+
 funny stuff:
 
 offlineheavyioncollison.cpp:

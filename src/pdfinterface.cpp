@@ -8,6 +8,9 @@
 //---------------------------------------------
 //---------------------------------------------
 
+// at revision 1004 this is identical to
+// full/branches/vector4D/src/pdfinterface.cpp
+
 
 #include <math.h>
 #include "pdfinterface.h"

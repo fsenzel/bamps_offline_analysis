@@ -20,7 +20,6 @@ offlineheavyioncollison.cpp
 offlineoutput.cpp
 particleOffline.cpp
 pdfinterface.cpp
-psf.cpp
 ringcontainer.cpp
 ringstructure.cpp
 woodsaxon.cpp
