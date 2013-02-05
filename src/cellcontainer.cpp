@@ -9,6 +9,10 @@
 //---------------------------------------------
 
 
+// at rev 1004, this is identical to
+// full/branches/vector4D/src/cellcontainer.cpp,
+// except some commenting out in writeAveragesToParticle(...)
+
 #include <math.h>
 #include <string>
 
@@ -18,19 +22,19 @@
 
 
 cellContainer::cellContainer() :
-    nCollectedAll2223( 0 ),
-    nCollected22( 0 ),
-    nCollected23( 0 ),
-    alpha_s_22( 0 ),
-    alpha_s_23( 0 ),
-    sigma_22( 0 ),
-    sigma_23( 0 ),
-    md2g_scaled_22( 0 ),
-    md2q_scaled_22( 0 ),
-    md2g_scaled_23( 0 ),
-    md2q_scaled_23( 0 ),
-    lambdaScaled( 0 ),
-    averagesPrepared( 0 )
+  averagesPrepared( 0 ),
+  nCollectedAll2223( 0 ),
+  nCollected22( 0 ),
+  nCollected23( 0 ),
+  alpha_s_22( 0 ),
+  alpha_s_23( 0 ),
+  md2g_scaled_22( 0 ),
+  md2q_scaled_22( 0 ),
+  md2g_scaled_23( 0 ),
+  md2q_scaled_23( 0 ),
+  sigma_22( 0 ),
+  sigma_23( 0 ),
+  lambdaScaled( 0 )
 {
   particleList.clear();
 }
@@ -148,7 +152,7 @@ void cellContainer::prepareAverages()
 
 
 
-void cellContainer::writeAveragesToParticle( ParticleOffline& _particle ) const
+void cellContainer::writeAveragesToParticle( Particle& _particle ) const
 {
   if ( !averagesPrepared )
   {

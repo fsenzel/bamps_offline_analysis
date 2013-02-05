@@ -1,13 +1,14 @@
-//---------------------------------------------
+//--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
-//---------------------------------------------
+//----------------------------------------------------------------------------
 //$HeadURL$
 //$LastChangedDate$
 //$LastChangedRevision$
 //$LastChangedBy$
-//---------------------------------------------
-//---------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
+// at revision 1004, this is identical to full/branches/vector4D/src/cellcontainer.h
 
 #ifndef CELLCONTAINER_H
 #define CELLCONTAINER_H
@@ -17,7 +18,8 @@
 
 #include "ratesmanager.h"
 #include "coordinateBins.h"
-#include "particleOffline.h"
+#include "particle.h"
+
 
 
 class cornerCoordinates
@@ -66,7 +68,7 @@ public:
   int size() const { return particleList.size(); }
   void setCoordinates( const int _index, const double _dx, const int _nx, const double _sizeX, const double _dy, const int _ny, const double _sizeY );
   void prepareAverages();
-  void writeAveragesToParticle( ParticleOffline& _particle ) const;
+  void writeAveragesToParticle( Particle& _particle ) const;
 
 
   double volume;

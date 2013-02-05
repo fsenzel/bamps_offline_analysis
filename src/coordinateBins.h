@@ -12,6 +12,8 @@
 //
 // in order to be consistent with the old version, we had to set the
 // default of 'timestepScaling = 0.1'(instead of 0.2)
+//
+
 
 #ifndef COORDINATE_BINS_H
 #define COORDINATE_BINS_H
@@ -97,11 +99,11 @@ protected:
   double _max_real;
   double _delta_x;
 
-  unsigned int _min_index_limit;
-  unsigned int _max_index_limit;
+  int _min_index_limit;
+  int _max_index_limit;
 
-  unsigned int _min_index_active;
-  unsigned int _max_index_active;
+  int _min_index_active;
+  int _max_index_active;
 
   bool _negative_indices;
  

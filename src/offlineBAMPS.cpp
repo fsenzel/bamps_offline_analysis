@@ -40,13 +40,6 @@ int main( int argc, char *argv[] )
   
   try
   {
-    int ng;
-    double stoptime, time, nexttime;
-    bool readCellStructure = false;
-    bool again;
-    bool dodo = false;
-    int nn_ana = 0;
-    
     //--------------------------------------------------------------
     // create and initialize the main objects needed for
     // configuration,execution and analysis of the simulation

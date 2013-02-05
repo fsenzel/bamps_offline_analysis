@@ -18,8 +18,8 @@
 
 // if BINARY_OFFLINE_OUTPUT==0, i.e. with text output,
 // you may switch to XML format (for output only)
-// #define XML_OFFLINE_OUTPUT 0
-#define XML_OFFLINE_OUTPUT 1
+#define XML_OFFLINE_OUTPUT 0
+// #define XML_OFFLINE_OUTPUT 1
 
 #define DEFAULT_EVENT_NUMBER_ESTIMATE 1000000
 #define DEFAULT_TEMPORARY_EVENT_NUMBER_ESTIMATE 100

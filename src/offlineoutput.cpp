@@ -49,7 +49,7 @@ offlineOutputInterface::~offlineOutputInterface()
 
 void offlineOutputInterface::collectAndOutputEventList()
 {
-  for ( int i = 0; i < eventList.size(); i++ )
+  for ( unsigned int i = 0; i < eventList.size(); i++ )
   {
     offlineDataEventType collectEventType( eventList[i] );
     this->submitOfflineDataForOutput( &collectEventType );

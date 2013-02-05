@@ -69,7 +69,7 @@ void ringStructure::setLongitudinalGeometry(const double _y_left, const double _
 
 int ringStructure::getIndex( const double _xt ) const
 {
-  int index = getIndexPure( _xt );
+  unsigned int index = getIndexPure( _xt );
   if ( index >= rings.size() )
   {
     return ( static_cast<int>( rings.size() ) - 1 );

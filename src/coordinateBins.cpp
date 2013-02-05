@@ -8,7 +8,7 @@
 //---------------------------------------------
 //---------------------------------------------
 
-// at revision 902, this file is identical to full/trunk/src/coordinateBins.h
+// at revision 902, this file is identical to full/trunk/src/coordinateBins.cpp
 //
 // every usage of 'particles' is replaced by 'particles_atTimeNow'
 
@@ -90,8 +90,7 @@ void coordinateBins::reshape( const int _size, const double _min, const double _
 
 int coordinateBins::getIndex( const double _x ) const
 {
-  int index = -1;
-  index = static_cast<int>(( _x - _min_real ) / _delta_x );
+  int index = static_cast<int>(( _x - _min_real ) / _delta_x );
 
   index -= _min_index_limit;
 
