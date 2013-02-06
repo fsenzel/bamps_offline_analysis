@@ -298,8 +298,6 @@ class config : public configBase
   int getNaddedEvents() const { return numberOfAddedEvents; }
   /** @brief Interface for config::minimumPT */
   double getMinimumPT() const { return minimumPT; }
-  /** @brief Interface for config::stopSurrounding */
-  double isStopSurrounding() const { return stopSurrounding; }
   
   /** @brief Interface for config::ringNumber */
   int getRingNumber() const { return ringNumber; }
@@ -622,8 +620,6 @@ class config : public configBase
   int numberOfAddedEvents;
   /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT;
-  /** @brief Whether shower evolution is stopped when reaching average transverse momentum in surrounding eta slice*/
-  bool stopSurrounding;
   
   
   // the following parameters are read at runtime from the offline data recorded by the original run, 

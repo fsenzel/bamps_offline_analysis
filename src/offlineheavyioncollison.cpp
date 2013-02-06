@@ -1801,12 +1801,6 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
 
     pt_addedParticle = sqrt( pow( addedParticles[jscat].PX, 2.0 ) + pow( addedParticles[jscat].PY, 2.0 ) );
 
-//  Check if particle transverse momentum is smaller than average momentum in vicinity to prevent jet contamination
-    if ( pt_addedParticle < addedParticles[jscat].surroundingPT && theConfig->isStopSurrounding() )
-    {
-      continue; // jump to next particle in the list
-    }
-
     if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead )
     {
       continue; // jump to next particle in the list
@@ -2192,20 +2186,6 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
   {
     double pt_addedParticle =  sqrt( pow( addedParticles[_allParticlesListAdded[i]].PX, 2.0 ) + pow( addedParticles[_allParticlesListAdded[i]].PY, 2.0 ) ); 
 
-//     Check if particle transverse momentum is smaller than average momentum in vicinity to prevent jet contamination
-    if ( pt_addedParticle < addedParticles[_allParticlesListAdded[i]].surroundingPT && theConfig->isStopSurrounding() )
-    {
-      -- nTotalAdded;
-      if ( addedParticles[_allParticlesListAdded[i]].FLAVOR == gluon )
-      {
-        --nGluonsAdded;
-      }
-      else
-      {
-        --nAllQuarksAdded;
-      }
-    }
-
     if ( pt_addedParticle < theConfig->getMinimumPT() )
     {
       -- nTotalAdded;
@@ -2298,10 +2278,6 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
       while ( !( F1 == gluon || F2 == gluon || F3 == gluon ) );
       
       pt_addedParticle = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) ); 
-      if ( pt_addedParticle < addedParticles[kscat].surroundingPT && theConfig->isStopSurrounding() )
-      {
-        continue; //go to next particle triplet 
-      }
       
       if ( pt_addedParticle < theConfig->getMinimumPT() )
       {
@@ -2438,10 +2414,6 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
     {
       kscat = _allParticlesListAdded[m3];
       pt_addedParticle = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) ); 
-      if ( pt_addedParticle < addedParticles[kscat].surroundingPT && theConfig->isStopSurrounding() )
-      {
-        continue; // go to next particle triplet
-      }
       if ( pt_addedParticle < theConfig->getMinimumPT() )
       {
         continue; //go to next particle triplet 
