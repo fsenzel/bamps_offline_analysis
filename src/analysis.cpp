@@ -1394,7 +1394,7 @@ void analysis::twoPartclCorrelations()
 
           //           if(addedParticles[i].T <= time)
           //           {
-	  eta = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
+          eta = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
 
           if ( fabs( eta ) <= eta_max )
           {
@@ -1403,8 +1403,8 @@ void analysis::twoPartclCorrelations()
             dpt_ini = fabs( addedParticles[i].MomInit.Pt() - addedParticles[j].MomInit.Pt() );
             dpt_fin = fabs( addedParticles[i].Mom.Pt() - addedParticles[j].Mom.Pt() );
 
-	    dp_ini = sqrt( (addedParticles[i].MomInit - addedParticles[j].MomInit).vec2() );
-	    dp_fin = sqrt( (addedParticles[i].Mom - addedParticles[j].Mom).vec2() );
+            dp_ini = sqrt( (addedParticles[i].MomInit - addedParticles[j].MomInit).vec2() );
+            dp_fin = sqrt( (addedParticles[i].Mom - addedParticles[j].Mom).vec2() );
 
             rt_init =  addedParticles[i].PosInit.Pt(); // same for both particles
 
@@ -1465,8 +1465,8 @@ void analysis::twoPartclCorrelations()
 
 
             // azimuthal angle between two charm quarks
-	    dphi_ini = acos( CosPhi( addedParticles[i].MomInit, addedParticles[j].MomInit ) );
-	    dphi_fin = acos( CosPhi( addedParticles[i].Mom, addedParticles[j].Mom ) );
+            dphi_ini = acos( CosPhi( addedParticles[i].MomInit, addedParticles[j].MomInit ) );
+            dphi_fin = acos( CosPhi( addedParticles[i].Mom, addedParticles[j].Mom ) );
 
             // total angle between two charm quarks
 //                 scal_prod = addedParticles[i].PX_init*addedParticles[j].PX_init + addedParticles[i].PY_init*addedParticles[j].PY_init + addedParticles[i].PZ_init*addedParticles[j].PZ_init;
@@ -1490,8 +1490,8 @@ void analysis::twoPartclCorrelations()
               dphiF22.add( dphi_fin );
               dphiI22.add( dphi_ini );
 
-	      if (( addedParticles[i].Mom.Pt2() >= pow( pt_min_trig, 2.0 ) && addedParticles[j].Mom.Pt2() >= pow( pt_min_assoc, 2.0 )) ||
-		  ( addedParticles[i].Mom.Pt2() >= pow( pt_min_assoc, 2.0 ) && addedParticles[j].Mom.Pt2() >= pow( pt_min_trig, 2.0 )))
+              if (( addedParticles[i].Mom.Pt2() >= pow( pt_min_trig, 2.0 ) && addedParticles[j].Mom.Pt2() >= pow( pt_min_assoc, 2.0 )) ||
+                  ( addedParticles[i].Mom.Pt2() >= pow( pt_min_assoc, 2.0 ) && addedParticles[j].Mom.Pt2() >= pow( pt_min_trig, 2.0 )))
               {
                 dphiF42.add( dphi_fin );
                 dphiI42.add( dphi_ini );
@@ -2576,11 +2576,11 @@ void analysis::particleOutput( const int step )
   for ( int i = 0; i < addedParticles.size(); i++ )
   {
     file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep 
-	 << addedParticles[i].Pos.T() << sep << addedParticles[i].Pos.X() << sep
-	 << addedParticles[i].Pos.Y() << sep << addedParticles[i].Pos.Z() << sep 
-	 << addedParticles[i].Mom.E() << sep << addedParticles[i].Mom.Px() << sep 
-	 << addedParticles[i].Mom.Py() << sep << addedParticles[i].Mom.Pz() << sep 
-	 << addedParticles[i].md2g << sep << addedParticles[i].md2q << endl;
+         << addedParticles[i].Pos.T() << sep << addedParticles[i].Pos.X() << sep
+         << addedParticles[i].Pos.Y() << sep << addedParticles[i].Pos.Z() << sep 
+         << addedParticles[i].Mom.E() << sep << addedParticles[i].Mom.Px() << sep 
+         << addedParticles[i].Mom.Py() << sep << addedParticles[i].Mom.Pz() << sep 
+         << addedParticles[i].md2g << sep << addedParticles[i].md2q << endl;
   }
   file.close();
 }
@@ -2686,19 +2686,19 @@ void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const in
           nCount_selected = 1;
 
           _oscar << ::std::scientific << ::std::uppercase << ::std::setprecision( 6 )
-		 << setw( width ) << _particles[i].Mom.Px() 
-		 << setw( width ) << _particles[i].Mom.Py() 
-		 << setw( width ) << _particles[i].Mom.Pz() 
-		 << setw( width ) << _particles[i].Mom.E() 
-		 << setw( width ) << _particles[i].m;
+                 << setw( width ) << _particles[i].Mom.Px() 
+                 << setw( width ) << _particles[i].Mom.Py() 
+                 << setw( width ) << _particles[i].Mom.Pz() 
+                 << setw( width ) << _particles[i].Mom.E() 
+                 << setw( width ) << _particles[i].m;
 
-	  if ( _particles[i].Pos.T() < time )
-	  {
-	    cout << "error in write movie particle data, particles from the past" << endl;
+          if ( _particles[i].Pos.T() < time )
+          {
+            cout << "error in write movie particle data, particles from the past" << endl;
             cout << "timestep=" << time << "   time _particles=" << _particles[i].Pos.T() << endl;
-	  }
-	  
-	  Pos = _particles[i].Pos + _particles[i].Mom * (( time - _particles[i].Pos.T() )/_particles[i].Mom.E() );
+          }
+          
+          Pos = _particles[i].Pos + _particles[i].Mom * (( time - _particles[i].Pos.T() )/_particles[i].Mom.E() );
 
 
           _oscar << setw( width ) << Pos.X() << setw( width ) << Pos.Y() << setw( width ) << Pos.Z() << setw( width ) << Pos.T();
@@ -2707,11 +2707,11 @@ void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const in
           //         _oscar << zero << sep << zero << sep << zero << sep << zero << sep << zero << ::std::setw( 10 ) << int(zero) << endl;
           //         _oscar << zero << sep << _particles[i].X_lastInt << sep << _particles[i].Y_lastInt << sep << _particles[i].Z_lastInt << sep << _particles[i].T_lastInt << ::std::setw( 10 ) << int(zero) << endl;
           _oscar << setw( width ) << zero 
-		 << setw( width ) << _particles[i].lastInt.X()
-		 << setw( width ) << _particles[i].lastInt.Y() 
-		 << setw( width ) << _particles[i].lastInt.Z() 
-		 << setw( width ) << _particles[i].lastInt.T() 
-		 << ::std::setw( 10 ) << -(_particles[i].unique_id) << endl;
+                 << setw( width ) << _particles[i].lastInt.X()
+                 << setw( width ) << _particles[i].lastInt.Y() 
+                 << setw( width ) << _particles[i].lastInt.Z() 
+                 << setw( width ) << _particles[i].lastInt.T() 
+                 << ::std::setw( 10 ) << -(_particles[i].unique_id) << endl;
           // --------------------------------------------------->>
         }
       }
@@ -3148,7 +3148,7 @@ void analysis::jpsi_correlations()
       else
       {
         ptbins_secJpsi.add(pt);
-	
+        
         for ( int j = 0; j < addedParticles.size(); j++ )
         {
           // find partners of charm quarks in Jpsi
@@ -3157,14 +3157,14 @@ void analysis::jpsi_correlations()
 //             if ( addedParticles[j].FLAVOR != 7 && addedParticles[j].FLAVOR != 8 )
 //               cout << "error in analysis::jpsi_correlations() " << addedParticles[j].FLAVOR << "  " << addedParticles[i].FLAVOR << "  " << addedParticles[j].m << "  " << addedParticles[i].m << "  " << addedParticles[j].N_EVENT_pp << "  " << addedParticles[i].N_EVENT_pp << "  " << addedParticles[j].N_EVENT_Cbar << "  " << addedParticles[i].N_EVENT_Cbar << endl;
             
-	    cos_delta_phi = CosPhi( addedParticles[i].Mom, addedParticles[j].Mom );
+            cos_delta_phi = CosPhi( addedParticles[i].Mom, addedParticles[j].Mom );
             phibins_deltaPhiJpsiCharm.add( acos(cos_delta_phi) );
-	    
-	    cos_delta_theta = CosTheta( addedParticles[i].Mom, addedParticles[j].Mom );
+            
+            cos_delta_theta = CosTheta( addedParticles[i].Mom, addedParticles[j].Mom );
             phibins_deltaThetaJpsiCharm.add( acos(cos_delta_theta) );
             
             // delta eta
-	    eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
+            eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaJpsiCharm.add( delta_eta );
             etabins_detaJpsiCharm2d.add( eta, eta_charm );
@@ -3174,7 +3174,7 @@ void analysis::jpsi_correlations()
           if( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 )
           {
             // delta eta
-	    eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
+            eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaSecJpsiAllCharm.add( delta_eta );
           }
@@ -3185,7 +3185,7 @@ void analysis::jpsi_correlations()
     {
       if( addedParticles[i].jpsi_dissociation_number != -1 ) // produced in Jpsi dissociation
       {
-	eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
+        eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
         
         for ( int j = 0; j < addedParticles.size(); j++ )
         {
@@ -3201,7 +3201,7 @@ void analysis::jpsi_correlations()
             phibins_deltaThetaCharmCharm.add( acos(cos_delta_theta) );
             
             // delta eta
-	    eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
+            eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaCharmCharm.add( delta_eta );
             
@@ -3255,14 +3255,14 @@ void analysis::ini_charm_correlations()
       {
         if( addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_pp &&  ( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 ) )
         {
-	  cos_delta_phi = CosPhi( addedParticles[i].Mom, addedParticles[j].Mom );
+          cos_delta_phi = CosPhi( addedParticles[i].Mom, addedParticles[j].Mom );
           phibins_deltaPhiIniCharm.add( acos(cos_delta_phi) );
           
-	  cos_delta_theta = CosTheta( addedParticles[i].Mom, addedParticles[j].Mom );
+          cos_delta_theta = CosTheta( addedParticles[i].Mom, addedParticles[j].Mom );
           phibins_deltaThetaIniCharm.add( acos(cos_delta_theta) );
           
           // delta eta
-	  eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
+          eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
           delta_eta = fabs( eta - eta_charm );
           etabins_detaIniCharm.add( delta_eta );
         }
@@ -3443,7 +3443,7 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
         else
         {
           pr = ( particles_atTimeNow[i].Mom.Px() * particles_atTimeNow[i].Pos.X()
-		 + particles_atTimeNow[i].Mom.Py() * particles_atTimeNow[i].Pos.Y() ) / XT;
+                 + particles_atTimeNow[i].Mom.Py() * particles_atTimeNow[i].Pos.Y() ) / XT;
         }
         vr_cell[cell_id] += pr / particles_atTimeNow[i].Mom.E();
         vx_cell[cell_id] += particles_atTimeNow[i].Mom.Px() / particles_atTimeNow[i].Mom.E();
@@ -3678,7 +3678,7 @@ void analysis::writeTempAndVel( const int step  )
         else
         {
           pr = ( particles_atTimeNow[i].Mom.Px() * particles_atTimeNow[i].Pos.X()
-		 + particles_atTimeNow[i].Mom.Py() * particles_atTimeNow[i].Pos.Y() ) / XT;
+                 + particles_atTimeNow[i].Mom.Py() * particles_atTimeNow[i].Pos.Y() ) / XT;
         }
         vr_cell[cell_id] += pr / particles_atTimeNow[i].Mom.E();
         vx_cell[cell_id] += particles_atTimeNow[i].Mom.Px() / particles_atTimeNow[i].Mom.E();
@@ -3990,7 +3990,7 @@ void analysis::analyseAngleDe()
       for(int k = 0; k < theConfig->getNumberElectronStat(); k++)
       {      
         k_e = ( i ) * theConfig->getNumberElectronStat() + k ;
-	costheta = CosTheta( addedParticlesCopy[i].Mom, addedPartcl_electron[k_e].Mom );
+        costheta = CosTheta( addedParticlesCopy[i].Mom, addedPartcl_electron[k_e].Mom );
         
         cosphi = CosPhi( addedParticlesCopy[i].Mom, addedPartcl_electron[k_e].Mom );
 
@@ -4111,7 +4111,7 @@ void analysis::jpsiEvolution( int step )
       
       if( pt >= pt_min )
       {
-	double pseudorap = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
+        double pseudorap = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
         
         if ( fabs( pseudorap ) >= rapidityRanges[0].yleft && fabs( pseudorap ) <= rapidityRanges[0].yright )
         {

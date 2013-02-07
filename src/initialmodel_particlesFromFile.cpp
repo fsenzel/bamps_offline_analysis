@@ -136,7 +136,7 @@ void initialModel_ParticlesFromFile::samplePositions( std::vector< Particle >& _
       {
         sample_TXYZ_one_partcl( _particles[j], soft_event[_particles[j].N_EVENT_pp] );
 
-	Pos_tmp = _particles[j].Pos;
+        Pos_tmp = _particles[j].Pos;
         partcl_soft_event[_particles[j].N_EVENT_pp] = j;
 
         // pp event to which the particle belongs
@@ -150,7 +150,7 @@ void initialModel_ParticlesFromFile::samplePositions( std::vector< Particle >& _
       }
       else // all other hard particles of same event get same positions
       {
-	_particles[j].Pos = Pos_tmp;
+        _particles[j].Pos = Pos_tmp;
         _particles[j].N_EVENT_AA = event_AA_tmp; // give particles the flag of the heavy ion event
       }
     }
@@ -317,7 +317,7 @@ void initialModel_ParticlesFromFile::changeBottomMass( std::vector< Particle >& 
     {
       if( _particles[j].FLAVOR == bottom || _particles[j].FLAVOR == anti_bottom )
       {
-	const double pp_old = sqrt( _particles[j].Mom.vec2() );
+        const double pp_old = sqrt( _particles[j].Mom.vec2() );
         const double pp_new = sqrt( pow( pp_old, 2.0 ) + pow( M_old, 2.0 ) - pow( M_new, 2.0 ) );
 
         // scaling in order to conserve the energy when making quarks massles

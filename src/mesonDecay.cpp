@@ -144,7 +144,7 @@ void mesonDecay::decayToElectronsPythia()
         p_tmp[1] = addedParticlesCopy[i].PX;
         p_tmp[2] = addedParticlesCopy[i].PY;
         p_tmp[3] = addedParticlesCopy[i].PZ;
-	
+        
         
         bool found_electron = false; // just for error checking if there are 2 electrons
         // Loop over all particles from this decay and search for the electron

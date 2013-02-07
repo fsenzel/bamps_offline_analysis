@@ -398,9 +398,9 @@ public:
     F1(gluon), F2(gluon) {};
 
   offlineDataInteraction22( const int _iscat, const int _jscat, const double _time, 
-			    const VectorEPxPyPz & _Mom1,
-			    const VectorEPxPyPz & _Mom2,
-			    const FLAVOR_TYPE _F1, const FLAVOR_TYPE _F2 ) : 
+                            const VectorEPxPyPz & _Mom1,
+                            const VectorEPxPyPz & _Mom2,
+                            const FLAVOR_TYPE _F1, const FLAVOR_TYPE _F2 ) : 
     offlineDataGeneric(),
     iscat(_iscat), jscat(_jscat), time(_time),
     Mom1( _Mom1 ),
@@ -499,12 +499,12 @@ public:
     F1(gluon), F2(gluon), F3(gluon) {};
 
   offlineDataInteraction23( const int _iscat, const int _jscat, const int _newp, 
-			    const double _time, 
-			    const VectorEPxPyPz & _Mom1,
-			    const VectorEPxPyPz & _Mom2,
-			    const VectorTXYZ & _Pos3,
-			    const VectorEPxPyPz & _Mom3,
-			    const FLAVOR_TYPE _F1, const FLAVOR_TYPE _F2, const FLAVOR_TYPE _F3 ) : 
+                            const double _time, 
+                            const VectorEPxPyPz & _Mom1,
+                            const VectorEPxPyPz & _Mom2,
+                            const VectorTXYZ & _Pos3,
+                            const VectorEPxPyPz & _Mom3,
+                            const FLAVOR_TYPE _F1, const FLAVOR_TYPE _F2, const FLAVOR_TYPE _F3 ) : 
     offlineDataGeneric(),
     iscat(_iscat), jscat(_jscat), newp(_newp), time(_time), 
     Mom1( _Mom1 ),
@@ -636,10 +636,10 @@ public:
     F1(gluon), F2(gluon) {};
 
   offlineDataInteraction32( const int _iscat, const int _jscat, const int _dead, 
-			    const double _time, 
-			    const VectorEPxPyPz & _Mom1,
-			    const VectorEPxPyPz & _Mom2,
-			    const FLAVOR_TYPE _F1, const FLAVOR_TYPE _F2 ) : 
+                            const double _time, 
+                            const VectorEPxPyPz & _Mom1,
+                            const VectorEPxPyPz & _Mom2,
+                            const FLAVOR_TYPE _F1, const FLAVOR_TYPE _F2 ) : 
     offlineDataGeneric(),
     iscat(_iscat), jscat(_jscat), dead(_dead), 
     time(_time), 
@@ -741,9 +741,9 @@ public:
     Mom2(-999,-999,-999,-999) {};
 
   offlineDataInteractionElastic( const int _iscat, const int _jscat, 
-				 const double _ct_i, const double _ct_j, 
-				 const VectorEPxPyPz & _Mom1,
-				 const VectorEPxPyPz & _Mom2) :
+                                 const double _ct_i, const double _ct_j, 
+                                 const VectorEPxPyPz & _Mom1,
+                                 const VectorEPxPyPz & _Mom2) :
     offlineDataGeneric(),
     iscat(_iscat), jscat(_jscat), 
     ct_i(_ct_i), ct_j(_ct_j), 
@@ -831,10 +831,10 @@ public:
     randomShiftX(0), randomShiftY(0), randomShiftEta(0) {};
 
   offlineDataCellConfiguration( const double _timenow, const double _timenext, 
-				const double _randomshiftX, 
-				const double _randomShiftY, 
-				const double _randomShiftEta,
-				const coordinateEtaBins& _etaBins ) :
+                                const double _randomshiftX, 
+                                const double _randomShiftY, 
+                                const double _randomShiftEta,
+                                const coordinateEtaBins& _etaBins ) :
     offlineDataGeneric(),
     timenow(_timenow), timenext(_timenext),
     randomShiftX(_randomshiftX), randomShiftY(_randomShiftY), 
@@ -924,10 +924,10 @@ public:
     nParticlesActive(0), nParticlesInActiveCells(0),
     edgeCellSizes(0), nFreeParticles( 0 ) {};
   offlineDataParticleNumbers( const double _time, const double _dt, const int _nTotalParticles,
-			      const int _nParticlesInFormationIntialProduction, 
-			      const int _nParticlesInFormationGeometricCollisions, const int _nParticlesActive,
-			      const int _nParticlesInActiveCells, const std::vector<int>& _edgeCellSizes,
-			      const int _nFreeParticles ) : 
+                              const int _nParticlesInFormationIntialProduction, 
+                              const int _nParticlesInFormationGeometricCollisions, const int _nParticlesActive,
+                              const int _nParticlesInActiveCells, const std::vector<int>& _edgeCellSizes,
+                              const int _nFreeParticles ) : 
     offlineDataGeneric(),
     time(_time), dt(_dt), nTotalParticles(_nTotalParticles),
     nParticlesInFormationIntialProduction(_nParticlesInFormationIntialProduction),
@@ -991,7 +991,7 @@ public:
     nCollisions22( 0 ), nCollisions23( 0 ), nCollisions32( 0 ),
     nCollisionsElastic( 0 ) {};
   offlineDataCollisionNumbers( const double _time, const int _nCollisions22, const int _nCollisions23, 
-			       const int _nCollisions32, const int _nCollisionsElastic ) : 
+                               const int _nCollisions32, const int _nCollisionsElastic ) : 
     offlineDataGeneric(), time( _time ),
     nCollisions22( _nCollisions22 ), nCollisions23( _nCollisions23 ), nCollisions32( _nCollisions32 ),
     nCollisionsElastic( _nCollisionsElastic ) {};
@@ -1034,8 +1034,8 @@ class offlineDataInteractionRates : public offlineDataGeneric
 public:
   offlineDataInteractionRates( ) : offlineDataGeneric() {};
   offlineDataInteractionRates( std::vector< vector<double> >& _gluonRates,
-			       std::vector< vector<double> >& _quarkRates,
-			       std::vector< vector<double> >& _antiQuarkRates ) : 
+                               std::vector< vector<double> >& _quarkRates,
+                               std::vector< vector<double> >& _antiQuarkRates ) : 
     offlineDataGeneric(),
     gluonRates(_gluonRates),
     quarkRates(_quarkRates), antiQuarkRates(_antiQuarkRates) {};
@@ -1079,12 +1079,12 @@ public:
     ringStructureDeltaR(0), cellSizeDeltaX(0), cellSizeDeltaY(0),
     transversalSize(0), gridSizeX(0), gridSizeY(0), gridSizeZ(0) {};
   offlineDataSimulationParameters( const uint32_t _seed, const double _sqrtS, const double _impactParameter,
-				   const double _massNumberNucleusA, const double _atomicNumberNucleusA, const double _massNumberNucleusB,
-				   const double _atomicNumberNucleusB, const int _numberOfTestparticles, const int _initialNumberOfParticles,
-				   const double _firstTimeStep, const double _timeShift, const double _freezeOutEnergyDensity,
-				   const int _ringStructureSize, const double _ringStructureCentralRadius, const double _ringStructureDeltaR,
-				   const double _cellSizeDeltaX, const double _cellSizeDeltaY, const double _transversalSize,
-				   const double _gridSizeX, const double _gridSizeY, const double _gridSizeZ, const int _N_light_flav, const int _N_heavy_flav ) : 
+                                   const double _massNumberNucleusA, const double _atomicNumberNucleusA, const double _massNumberNucleusB,
+                                   const double _atomicNumberNucleusB, const int _numberOfTestparticles, const int _initialNumberOfParticles,
+                                   const double _firstTimeStep, const double _timeShift, const double _freezeOutEnergyDensity,
+                                   const int _ringStructureSize, const double _ringStructureCentralRadius, const double _ringStructureDeltaR,
+                                   const double _cellSizeDeltaX, const double _cellSizeDeltaY, const double _transversalSize,
+                                   const double _gridSizeX, const double _gridSizeY, const double _gridSizeZ, const int _N_light_flav, const int _N_heavy_flav ) : 
     offlineDataGeneric(),
     seed( _seed ), sqrtS(_sqrtS),
     impactParameter(_impactParameter), massNumberNucleusA(_massNumberNucleusA), atomicNumberNucleusA(_atomicNumberNucleusA),
@@ -1211,28 +1211,28 @@ namespace boost {
 
       switch (version)
       {
-	case 0:
-	{
-	  double x, y, z, t;
+        case 0:
+        {
+          double x, y, z, t;
 
-	  ar & make_nvp( "T", t );
-	  ar & make_nvp( "X", x );
-	  ar & make_nvp( "Y", y );
-	  ar & make_nvp( "Z", z );
-	  g.Pos.SetTXYZ(t,x,y,z);
+          ar & make_nvp( "T", t );
+          ar & make_nvp( "X", x );
+          ar & make_nvp( "Y", y );
+          ar & make_nvp( "Z", z );
+          g.Pos.SetTXYZ(t,x,y,z);
 
-	  ar & make_nvp( "E", t );
-	  ar & make_nvp( "PX", x );
-	  ar & make_nvp( "PY", y );
-	  ar & make_nvp( "PZ", z );
-	  g.Mom.SetTXYZ(t,x,y,z);
-	} break;
+          ar & make_nvp( "E", t );
+          ar & make_nvp( "PX", x );
+          ar & make_nvp( "PY", y );
+          ar & make_nvp( "PZ", z );
+          g.Mom.SetTXYZ(t,x,y,z);
+        } break;
 
-	default:
-	{
-	  ar & make_nvp( "Pos", g.Pos );
-	  ar & make_nvp( "Mom", g.Mom );
-	} break;
+        default:
+        {
+          ar & make_nvp( "Pos", g.Pos );
+          ar & make_nvp( "Mom", g.Mom );
+        } break;
       }
     }
 
@@ -1250,28 +1250,28 @@ namespace boost {
 
       switch (version)
       {
-	case 0:
-	{
-	  double x, y, z, t;
+        case 0:
+        {
+          double x, y, z, t;
 
-	  g.Pos.GetTXYZ(t,x,y,z);
-	  ar & make_nvp( "T", t );
-	  ar & make_nvp( "X", x );
-	  ar & make_nvp( "Y", y );
-	  ar & make_nvp( "Z", z );
+          g.Pos.GetTXYZ(t,x,y,z);
+          ar & make_nvp( "T", t );
+          ar & make_nvp( "X", x );
+          ar & make_nvp( "Y", y );
+          ar & make_nvp( "Z", z );
 
-	  g.Mom.GetTXYZ(t,x,y,z);
-	  ar & make_nvp( "E", t );
-	  ar & make_nvp( "PX", x );
-	  ar & make_nvp( "PY", y );
-	  ar & make_nvp( "PZ", z );
-	} break;
+          g.Mom.GetTXYZ(t,x,y,z);
+          ar & make_nvp( "E", t );
+          ar & make_nvp( "PX", x );
+          ar & make_nvp( "PY", y );
+          ar & make_nvp( "PZ", z );
+        } break;
 
-	default:
-	{
-	  ar & make_nvp( "Pos", g.Pos );
-	  ar & make_nvp( "Mom", g.Mom );
-	} break;
+        default:
+        {
+          ar & make_nvp( "Pos", g.Pos );
+          ar & make_nvp( "Mom", g.Mom );
+        } break;
       }
     }
 

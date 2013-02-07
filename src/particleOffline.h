@@ -37,7 +37,7 @@ public:
     X_traveled( 0 ),
     PosInit( 0,0,0,0 ),
     MomInit( 0,0,0,0 ),
-    lastInt( 0,0,0,0 ),	   
+    lastInt( 0,0,0,0 ),    
     rate( 0 ), ratev( 0 ) 
   {};
     
@@ -50,7 +50,7 @@ public:
     X_traveled( 0 ),
     PosInit( 0,0,0,0 ),
     MomInit( 0,0,0,0 ),
-    lastInt( 0,0,0,0 ),	   
+    lastInt( 0,0,0,0 ),    
     rate( 0 ), ratev( 0 ) 
   {};
     
@@ -84,35 +84,35 @@ public:
     switch ( _flav )
     {
       case gluon:
-	return 21;
-	break;
+        return 21;
+        break;
       case up:
-	return 2;
-	break;
+        return 2;
+        break;
       case anti_up:
-	return -2;
-	break;
+        return -2;
+        break;
       case down:
-	return 1;
-	break;
+        return 1;
+        break;
       case anti_down:
-	return -1;
-	break;
+        return -1;
+        break;
       case strange:
-	return 3;
-	break;
+        return 3;
+        break;
       case anti_strange:
-	return -3;
-	break;
+        return -3;
+        break;
       case charm:
-	return 4;
-	break;
+        return 4;
+        break;
       case anti_charm:
-	return -4;
-	break;
+        return -4;
+        break;
       default:
-	return 0;
-	break;
+        return 0;
+        break;
     }      
   }
     
