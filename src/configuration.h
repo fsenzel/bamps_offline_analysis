@@ -43,7 +43,8 @@ enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeM
 /** @brief Enumeration type for different output schemes to decide which kind of output is printed 
  * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
 */
-enum OUTPUT_SCHEME { no_output = 0, 
+enum OUTPUT_SCHEME { no_output = 0,  
+light_parton_lhc = 20,
 // heavy quarks:
 phenix_hq_electrons = 101,
 alice_hq_electrons = 111,
