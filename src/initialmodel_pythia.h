@@ -26,14 +26,14 @@
 class initialModel_Pythia : public initialModel_ParticlesFromFile
 {
   public:
-    initialModel_Pythia ( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT = 0.0, const int _nToGenerate = -1 ) :
-      initialModel_ParticlesFromFile ( _config.getPythiaParticleFile(), _config, _WoodSaxonParameter, _minimumPT, _nToGenerate ) {};
+    initialModel_Pythia( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT = 0.0, const int _nToGenerate = -1 ) :
+    initialModel_ParticlesFromFile( _config.getPythiaParticleFile(), _config, _WoodSaxonParameter, _minimumPT, _nToGenerate) {};
 
   private:
     /**
      * @brief Set the momenta of the particles
      */
-    void sampleMomenta ( std::vector<Particle>& _particles );
+    void sampleMomenta( std::vector<Particle>& _particles );
 
 };
 

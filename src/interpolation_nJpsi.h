@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------
 
-/** @file
+/** @file 
  * @brief Declarations for the class interpolation_iniQNLO.
  */
 
@@ -26,7 +26,7 @@ class interpolation_nJpsi : interpolation1d // based on interpolation2d
   public:
     void configure();
 
-    double getN ( const double T ) const;
+    double getN(const double T) const;
 
   private:
 

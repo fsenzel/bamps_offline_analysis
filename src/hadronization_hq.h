@@ -7,8 +7,8 @@ class hadronization_hq
     void heavyQuarkFragmentation();
 
   private:
-    double getFragmentationZ ( const int flav );
-    double getFragmentationFunction ( const double z, const int flav );
+    double getFragmentationZ(const int flav);
+    double getFragmentationFunction( const double z, const int flav );
 };
 
 #endif // HADRONIZATION_HQ_H

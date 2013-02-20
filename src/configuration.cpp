@@ -88,7 +88,7 @@ config::config() :
   outputSwitch_detailedParticleOutput ( false ),
   outputSwitch_movieOutputJets ( false ),
   outputSwitch_movieOutputBackground ( false ),
-  outputSwitch_scatteredMediumParticlesOutput ( false ),
+  outputSwitch_scatteredMediumParticlesOutput( false ),
   v2RAAoutput ( true ),
   v2RAAoutputIntermediateSteps ( false ),
   dndyOutput ( false ),
@@ -201,12 +201,11 @@ void config::processProgramOptions()
     string errMsg = "Both initial number of particles and initial number of events are set. Do not know which one to use.";
     throw eConfig_error ( errMsg );
   }
-  else
-    if ( !ini_number_added_set && ini_number_added_events_set )
-    {
-      // set initial number of particles to a negative value to use the number of added events instead
-      numberOfParticlesToAdd = -1;
-    }
+  else if ( !ini_number_added_set && ini_number_added_events_set )
+  {
+    // set initial number of particles to a negative value to use the number of added events instead
+    numberOfParticlesToAdd = -1;
+  }
 
   if ( switch_fixed_dt )
   {

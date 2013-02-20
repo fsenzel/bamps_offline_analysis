@@ -26,14 +26,14 @@
 class initialModel_Mcatnlo : public initialModel_ParticlesFromFile
 {
   public:
-    initialModel_Mcatnlo ( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT = 0.0, const int _nToGenerate = -1 ) :
-      initialModel_ParticlesFromFile ( _config.getMcatnloParticleFile(), _config, _WoodSaxonParameter, _minimumPT, _nToGenerate ) {};
+    initialModel_Mcatnlo( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT = 0.0, const int _nToGenerate = -1 ) :
+    initialModel_ParticlesFromFile( _config.getMcatnloParticleFile(), _config, _WoodSaxonParameter, _minimumPT, _nToGenerate) {};
 
   private:
     /**
      * @brief Set the momenta of the particles
      */
-    void sampleMomenta ( std::vector<Particle>& _particles );
+    void sampleMomenta( std::vector<Particle>& _particles );
 
 };
 

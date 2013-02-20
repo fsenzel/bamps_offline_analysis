@@ -34,10 +34,10 @@ using namespace ns_casc;
 int Ntest;
 
 
-int main ( int argc, char* argv[] )
+int main( int argc, char *argv[] )
 {
   cout << "# Version: SVN " << SVN_REVISION << endl;
-
+  
   try
   {
     int ng;
@@ -46,20 +46,20 @@ int main ( int argc, char* argv[] )
     bool again;
     bool dodo = false;
     int nn_ana = 0;
-
+    
     //--------------------------------------------------------------
     // create and initialize the main objects needed for
     // configuration,execution and analysis of the simulation
     config theConfig;
-    theConfig.readAndProcessProgramOptions ( argc, argv );
+    theConfig.readAndProcessProgramOptions( argc, argv );
+    
+    offlineOutputInterface offlineInterface( theConfig.getPathdirOfflineDataChar() );
+    offlineInterface.setAdditionalFilenameTag( theConfig.getOriginalName() );    
+    
+    theConfig.readAndPrepareInitialSettings( &offlineInterface );
 
-    offlineOutputInterface offlineInterface ( theConfig.getPathdirOfflineDataChar() );
-    offlineInterface.setAdditionalFilenameTag ( theConfig.getOriginalName() );
-
-    theConfig.readAndPrepareInitialSettings ( &offlineInterface );
-
-    analysis theAnalysis ( &theConfig );
-    offlineHeavyIonCollision theHIC ( &theConfig, &offlineInterface, &theAnalysis );
+    analysis theAnalysis( &theConfig );
+    offlineHeavyIonCollision theHIC( &theConfig, &offlineInterface, &theAnalysis );
     //--------------------------------------------------------------
 
     //--------------------------------------------------------------
@@ -70,14 +70,14 @@ int main ( int argc, char* argv[] )
     if ( theConfig.getSeed() != 0 )
     {
       seed = theConfig.getSeed();
-      ran2.setSeed ( seed );
+      ran2.setSeed( seed );
     }
     else
     {
       seed = ran2.setSeed();
-      theConfig.setSeed ( seed );
+      theConfig.setSeed( seed );
     }
-    theAnalysis.setSeed ( seed );
+    theAnalysis.setSeed( seed );
     cout << "seed: " << seed << endl;
     //--------------------------------------------------------------
 
@@ -96,7 +96,7 @@ int main ( int argc, char* argv[] )
   * handle exceptions
   *
   */
-  catch ( int e ) // provided to handle program termination after displaying usage and help messages
+  catch (int e) // provided to handle program termination after displaying usage and help messages
   {
     if ( e == HELP_MESSAGE_REQUESTED )
     {
@@ -105,8 +105,8 @@ int main ( int argc, char* argv[] )
     else
     {
       return EXIT_FAILURE;
-    }
-  }
+    }    
+  }  
   catch ( std::exception& e )
   {
     // output of the error information provided by the exception class
@@ -123,4 +123,4 @@ int main ( int argc, char* argv[] )
   return EXIT_SUCCESS;
 }
 
-// kate: indent-mode cstyle; indent-width 2; replace-tabs on; 
+// kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;
