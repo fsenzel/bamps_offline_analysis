@@ -45,153 +45,153 @@ namespace ns_heavy_quarks
 
 
 analysis::analysis( config* const c ):
-  theConfig( c ),
-  rings( c->getRingNumber(), c->getCentralRingRadius(), c->getDeltaR() ),
-  centralRingsCopyFromCascade( c->getRingNumber(), c->getCentralRingRadius(), c->getDeltaR() ),
-  filename_prefix( c->getStandardOutputDirectoryName() + "/" + c->getJobName() ),
-  v2output( c->isV2RAAoutput() ),
-  dndyOutput( c->isDndyOutput() ),
-  particleCorrelationsOutput( false ),
-  hadronization_hq( c->isHadronizationHQ() ),
-  mesonDecay( c->isMesonDecay() ),
+    theConfig( c ),
+    rings( c->getRingNumber(), c->getCentralRingRadius(), c->getDeltaR() ),
+    centralRingsCopyFromCascade( c->getRingNumber(), c->getCentralRingRadius(), c->getDeltaR() ),
+    filename_prefix( c->getStandardOutputDirectoryName() + "/" + c->getJobName() ),
+    v2output( c->isV2RAAoutput() ),
+    dndyOutput( c->isDndyOutput() ),
+    particleCorrelationsOutput( false ),
+    hadronization_hq( c->isHadronizationHQ() ),
+    mesonDecay( c->isMesonDecay() ),
 //     charmTestJet( theConfig->isCharmTestJet() ),
-  v2outputIntermediateSteps( c->isV2RAAoutputIntermediateSteps() ),
-  studyParticleOutput( c->doOutput_detailedParticleOutput() ),
-  outputScheme( c->getOutputScheme() )
+    v2outputIntermediateSteps( c->isV2RAAoutputIntermediateSteps() ),
+    studyParticleOutput( c->doOutput_detailedParticleOutput() ),
+    outputScheme( c->getOutputScheme() )
 {
   //---get time and date---
   time( &start );
   //-----------------------
-
+  
   handle_output_studies( outputScheme );
-
+  
   // to create the tsteps use such a bash script:
   // for (( I=50; $I <= 80; I++ )); do   J=$(echo "scale=1; ($I+1)/10" | bc); echo "tstep[$I]=$J;" ; done
   if( studyJpsi ) // jpsi evolution: more timesteps
   {
-    tstep[0] = .005;
-    tstep[1] = .006; // choose to be small that no analysis is performed, just start for all files at 0.2 in next step
-    tstep[2] = .20;
-    tstep[3] = .25;
-    tstep[4] = .30;
-    tstep[5] = .35;
-    tstep[6] = .40;
-    tstep[7] = .45;
-    tstep[8] = .50;
-    tstep[9] = .55;
-    tstep[10] = .60;
-    tstep[11] = .65;
-    tstep[12] = .70;
-    tstep[13] = .75;
-    tstep[14] = .80;
-    tstep[15] = .85;
-    tstep[16] = .90;
-    tstep[17] = .95;
-    tstep[18] = 1.00;
-    tstep[19] = 1.1;
-    tstep[20] = 1.2;
-    tstep[21] = 1.3;
-    tstep[22] = 1.4;
-    tstep[23] = 1.5;
-    tstep[24] = 1.6;
-    tstep[25] = 1.7;
-    tstep[26] = 1.8;
-    tstep[27] = 1.9;
-    tstep[28] = 2.0;
-    tstep[29] = 2.1;
-    tstep[30] = 2.2;
-    tstep[31] = 2.3;
-    tstep[32] = 2.4;
-    tstep[33] = 2.5;
-    tstep[34] = 2.6;
-    tstep[35] = 2.7;
-    tstep[36] = 2.8;
-    tstep[37] = 2.9;
-    tstep[38] = 3.0;
-    tstep[39] = 3.3;
-    tstep[40] = 3.7;
-    tstep[41] = 4.0;
-    tstep[42] = 4.3;
-    tstep[43] = 4.7;
-    tstep[44] = 5.0;
-    tstep[45] = 5.3;
-    tstep[46] = 5.7;
-    tstep[47] = 6.0;
-    tstep[48] = 6.3;
-    tstep[49] = 6.7;
-    tstep[50] = 7.0;
-    tstep[51] = 7.3;
-    tstep[52] = 7.7;
-    tstep[53] = 8.0;
-    tstep[54] = 8.5;
-    tstep[55] = 9.0;
-    tstep[56] = 9.5;
-    tstep[57] = 10.0;
-    tstep[58] = 10.5;
-    tstep[59] = 11.0;
-    tstep[60] = 11.5;
-    tstep[61] = 12.0;
-    tstep[62] = 12.5;
-    tstep[63] = 13.0;
-    tstep[64] = 13.5;
-    tstep[65] = 14.0;
-    tstep[66] = 14.5;
-    tstep[67] = 15.0;
-    tstep[68] = 15.5;
-    tstep[69] = 16.0;
-    tstep[70] = 16.5;
-    tstep[71] = 17.0;
-    tstep[72] = 17.5;
-    tstep[73] = 18.0;
-    tstep[74] = 18.5;
-    tstep[75] = 19.0;
-    tstep[76] = 19.5;
-    tstep[77] = 20.0;
+    tstep[0]=.005;
+    tstep[1]=.006; // choose to be small that no analysis is performed, just start for all files at 0.2 in next step
+    tstep[2]=.20;
+    tstep[3]=.25;
+    tstep[4]=.30;
+    tstep[5]=.35;
+    tstep[6]=.40;
+    tstep[7]=.45;
+    tstep[8]=.50;
+    tstep[9]=.55;
+    tstep[10]=.60;
+    tstep[11]=.65;
+    tstep[12]=.70;
+    tstep[13]=.75;
+    tstep[14]=.80;
+    tstep[15]=.85;
+    tstep[16]=.90;
+    tstep[17]=.95;
+    tstep[18]=1.00;
+    tstep[19]=1.1;
+    tstep[20]=1.2;
+    tstep[21]=1.3;
+    tstep[22]=1.4;
+    tstep[23]=1.5;
+    tstep[24]=1.6;
+    tstep[25]=1.7;
+    tstep[26]=1.8;
+    tstep[27]=1.9;
+    tstep[28]=2.0;
+    tstep[29]=2.1;
+    tstep[30]=2.2;
+    tstep[31]=2.3;
+    tstep[32]=2.4;
+    tstep[33]=2.5;
+    tstep[34]=2.6;
+    tstep[35]=2.7;
+    tstep[36]=2.8;
+    tstep[37]=2.9;
+    tstep[38]=3.0;
+    tstep[39]=3.3;
+    tstep[40]=3.7;
+    tstep[41]=4.0;
+    tstep[42]=4.3;
+    tstep[43]=4.7;
+    tstep[44]=5.0;
+    tstep[45]=5.3;
+    tstep[46]=5.7;
+    tstep[47]=6.0;
+    tstep[48]=6.3;
+    tstep[49]=6.7;
+    tstep[50]=7.0;
+    tstep[51]=7.3;
+    tstep[52]=7.7;
+    tstep[53]=8.0;
+    tstep[54]=8.5;
+    tstep[55]=9.0;
+    tstep[56]=9.5;
+    tstep[57]=10.0;
+    tstep[58]=10.5;                                                                                                                                                                     
+    tstep[59]=11.0;                                                                                                                                                                     
+    tstep[60]=11.5;                                                                                                                                                                     
+    tstep[61]=12.0;                                                                                                                                                                     
+    tstep[62]=12.5;                                                                                                                                                                     
+    tstep[63]=13.0;                                                                                                                                                                     
+    tstep[64]=13.5;                                                                                                                                                                     
+    tstep[65]=14.0;                                                                                                                                                                     
+    tstep[66]=14.5;                                                                                                                                                                     
+    tstep[67]=15.0;                                                                                                                                                                     
+    tstep[68]=15.5;                                                                                                                                                                     
+    tstep[69]=16.0;                                                                                                                                                                     
+    tstep[70]=16.5;                                                                                                                                                                     
+    tstep[71]=17.0;                                                                                                                                                                     
+    tstep[72]=17.5;                                                                                                                                                                     
+    tstep[73]=18.0;                                                                                                                                                                     
+    tstep[74]=18.5;                                                                                                                                                                     
+    tstep[75]=19.0;                                                                                                                                                                     
+    tstep[76]=19.5;                                                                                                                                                                     
+    tstep[77]=20.0;
     tstep[78] = infinity; //fm/c
     nTimeSteps = 79;
-
+    
     if( theConfig->getRuntime() > 20.0 )
     {
-      tstep[78] = 21;
-      tstep[79] = 22;
-      tstep[80] = 23;
-      tstep[81] = 24;
-      tstep[82] = 25;
-      tstep[83] = 26;
-      tstep[84] = 27;
-      tstep[85] = 28;
-      tstep[86] = 29;
-      tstep[87] = 30;
-      tstep[88] = 31;
-      tstep[89] = 32;
-      tstep[90] = 33;
-      tstep[91] = 34;
-      tstep[92] = 35;
-      tstep[93] = 36;
-      tstep[94] = 37;
-      tstep[95] = 38;
-      tstep[96] = 39;
-      tstep[97] = 40;
-      tstep[98] = 42;
-      tstep[99] = 44;
-      tstep[100] = 46;
-      tstep[101] = 48;
-      tstep[102] = 50;
-      tstep[103] = 52;
-      tstep[104] = 54;
-      tstep[105] = 56;
-      tstep[106] = 58;
-      tstep[107] = 60;
-      tstep[108] = 62;
-      tstep[109] = 64;
-      tstep[110] = 66;
-      tstep[111] = 68;
-      tstep[112] = 70;
-      tstep[113] = 72;
-      tstep[114] = 74;
-      tstep[115] = 76;
-      tstep[116] = 78;
-      tstep[117] = 80;
+      tstep[78]=21;
+      tstep[79]=22;
+      tstep[80]=23;
+      tstep[81]=24;
+      tstep[82]=25;
+      tstep[83]=26;
+      tstep[84]=27;
+      tstep[85]=28;
+      tstep[86]=29;
+      tstep[87]=30;
+      tstep[88]=31;
+      tstep[89]=32;
+      tstep[90]=33;
+      tstep[91]=34;
+      tstep[92]=35;
+      tstep[93]=36;
+      tstep[94]=37;
+      tstep[95]=38;
+      tstep[96]=39;
+      tstep[97]=40;
+      tstep[98]=42;
+      tstep[99]=44;
+      tstep[100]=46;
+      tstep[101]=48;
+      tstep[102]=50;
+      tstep[103]=52;
+      tstep[104]=54;
+      tstep[105]=56;
+      tstep[106]=58;
+      tstep[107]=60;
+      tstep[108]=62;
+      tstep[109]=64;
+      tstep[110]=66;
+      tstep[111]=68;
+      tstep[112]=70;
+      tstep[113]=72;
+      tstep[114]=74;
+      tstep[115]=76;
+      tstep[116]=78;
+      tstep[117]=80;
       tstep[118] = infinity; //fm/c
       nTimeSteps = 119;
     }
@@ -232,42 +232,42 @@ analysis::analysis( config* const c ):
     tstep_movie[tempCount_tstep] = tstep_movie[tempCount_tstep - 1] + 0.1;
   }
   while( tstep_movie[tempCount_tstep] <= 10.0 );
-
+  
   ++tempCount_tstep;
   tstep_movie[tempCount_tstep] = infinity;
-
+  
   nTimeSteps_movie = tempCount_tstep + 1;
   //--------------------------------------
-
-
+ 
+  
   //--------------------------------------
   string name_fug, name_temp, mfpName, centralDensitiesName, oscarName_jet, oscarName_background;
-  if( studyJpsi )
+  if ( studyJpsi )
     name_fug = filename_prefix + "_jpsi_fugacity";
   else
     name_fug = "/dev/null";
-
+  
   if( studyTempInTube )
     name_temp = filename_prefix + "_temperature";
   else
     name_temp = "/dev/null";
-
+  
   if( studyJets )
     mfpName = filename_prefix + "_mfp_jets";
   else
     mfpName = "/dev/null";
-
+  
   if( studyCentralDensity )
     centralDensitiesName = filename_prefix + "_central_density";
   else
     centralDensitiesName = "/dev/null";
-
+  
   // movie output
   if( theConfig->doOutput_movieOutputBackground() )
     oscarName_background = filename_prefix + "_background.oscar";
   else
     oscarName_background = "/dev/null";
-
+  
   if( theConfig->doOutput_movieOutputJets() )
     oscarName_jet = filename_prefix + "_jets.oscar";
   else
@@ -282,8 +282,8 @@ analysis::analysis( config* const c ):
   //--------------------------------------
 
   jetTracking_PT = 10.0;
-
-
+  
+  
 
   if( studyPtSpectra )
   {
@@ -292,34 +292,34 @@ analysis::analysis( config* const c ):
     maxPTSoft = 3.0;
     maxPT = 34.4;
     binWidthPT = 1.0;
-    numberBinsPT = int( ( maxPT - minPT + 0.001 ) / binWidthPT );
-
+    numberBinsPT = int(( maxPT - minPT + 0.001 ) / binWidthPT );
+    
     tArrayOfDoubleVec tmpArray;
-    for( int i = 0; i < rapidityRanges.size(); i++ )
+    for ( int i = 0; i < rapidityRanges.size(); i++ )
     {
-      tmpArray.reset( new vector<double>[nTimeSteps + 2] );   //+2 because of initial and final timesteps
+      tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_gluons.push_back( tmpArray );
-      tmpArray.reset( new vector<double>[nTimeSteps + 2] );   //+2 because of initial and final timesteps
+      tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_quarks.push_back( tmpArray );
-      tmpArray.reset( new vector<double>[nTimeSteps + 2] );   //+2 because of initial and final timesteps
+      tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_ups.push_back( tmpArray );
-      tmpArray.reset( new vector<double>[nTimeSteps + 2] );   //+2 because of initial and final timesteps
+      tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_downs.push_back( tmpArray );
-      tmpArray.reset( new vector<double>[nTimeSteps + 2] );   //+2 because of initial and final timesteps
+      tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_stranges.push_back( tmpArray );
-      tmpArray.reset( new vector<double>[nTimeSteps + 2] );   //+2 because of initial and final timesteps
+      tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_anti_ups.push_back( tmpArray );
-      tmpArray.reset( new vector<double>[nTimeSteps + 2] );   //+2 because of initial and final timesteps
+      tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_anti_downs.push_back( tmpArray );
-      tmpArray.reset( new vector<double>[nTimeSteps + 2] );   //+2 because of initial and final timesteps
+      tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_anti_stranges.push_back( tmpArray );
-      tmpArray.reset( new vector<double>[nTimeSteps + 2] );   //+2 because of initial and final timesteps
+      tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_all.push_back( tmpArray );
     }
 
-    for( int ny = 0; ny < rapidityRanges.size(); ny++ )
+    for ( int ny = 0; ny < rapidityRanges.size(); ny++ )
     {
-      for( int nt = 0; nt < nTimeSteps + 2; nt++ )
+      for ( int nt = 0; nt < nTimeSteps + 2; nt++ )
       {
         ptBins_gluons[ny][nt].resize( numberBinsPT + 1, 0 );
         ptBins_quarks[ny][nt].resize( numberBinsPT + 1, 0 );
@@ -332,31 +332,31 @@ analysis::analysis( config* const c ):
         ptBins_all[ny][nt].resize( numberBinsPT + 1, 0 );
       }
     }
-
+    
     //write the bin labels
-    for( int i = 0; i < numberBinsPT; i++ )
+    for ( int i = 0; i < numberBinsPT; i++ )
     {
       ptBinLabels.push_back( minPT + ( i * binWidthPT ) + ( binWidthPT / 2 ) );
     }
     cout << "number of bins: " << numberBinsPT << "  binWidth: " << binWidthPT << endl;
     //---- initialisation of PT-binning ----
-
-
+    
+    
     //---- initialisation of softPT-binning ----
     maxPTSoft;
     binWidthSoftPT = 0.1;
-    numberBinsSoftPT = int( ( maxPTSoft + 0.001 ) / binWidthSoftPT );
-    ptBinsSoftAll_gluons = new vector<double>[nTimeSteps + 1];
-    ptBinsSoftAll_quarks = new vector<double>[nTimeSteps + 1];
-    ptBinsSoftAll_ups = new vector<double>[nTimeSteps + 1];
-    ptBinsSoftAll_downs = new vector<double>[nTimeSteps + 1];
-    ptBinsSoftAll_stranges = new vector<double>[nTimeSteps + 1];
-    ptBinsSoftAll_anti_ups = new vector<double>[nTimeSteps + 1];
-    ptBinsSoftAll_anti_downs = new vector<double>[nTimeSteps + 1];
-    ptBinsSoftAll_anti_stranges = new vector<double>[nTimeSteps + 1];
-    ptBinsSoftAll_all = new vector<double>[nTimeSteps + 1];
-    for( int j = 0; j < nTimeSteps + 1; j++ )           //+1 because of initial timestep
-      for( int i = 0; i < numberBinsSoftPT; i++ )
+    numberBinsSoftPT = int(( maxPTSoft + 0.001 ) / binWidthSoftPT );
+    ptBinsSoftAll_gluons = new vector<double>[nTimeSteps+1];
+    ptBinsSoftAll_quarks = new vector<double>[nTimeSteps+1];
+    ptBinsSoftAll_ups = new vector<double>[nTimeSteps+1];
+    ptBinsSoftAll_downs = new vector<double>[nTimeSteps+1];
+    ptBinsSoftAll_stranges = new vector<double>[nTimeSteps+1];
+    ptBinsSoftAll_anti_ups = new vector<double>[nTimeSteps+1];
+    ptBinsSoftAll_anti_downs = new vector<double>[nTimeSteps+1];
+    ptBinsSoftAll_anti_stranges = new vector<double>[nTimeSteps+1];
+    ptBinsSoftAll_all = new vector<double>[nTimeSteps+1];
+    for ( int j = 0; j < nTimeSteps + 1; j++ )          //+1 because of initial timestep
+      for ( int i = 0; i < numberBinsSoftPT; i++ )
       {
         ptBinsSoftAll_gluons[j].push_back( 0 );
         ptBinsSoftAll_quarks[j].push_back( 0 );
@@ -369,37 +369,37 @@ analysis::analysis( config* const c ):
         ptBinsSoftAll_all[j].push_back( 0 );
       }
     //write the bin labels
-    for( int i = 0; i < numberBinsSoftPT; i++ )
+    for ( int i = 0; i < numberBinsSoftPT; i++ )
     {
-      ptSoftBinLabels.push_back( ( i * binWidthSoftPT ) + ( binWidthSoftPT / 2 ) );
+      ptSoftBinLabels.push_back(( i * binWidthSoftPT ) + ( binWidthSoftPT / 2 ) );
     }
     //--------------------------------------
   }
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
   if( studyYDistribution || studyEtSpectra )
   {
     //------ initialisation of rapidity binning ------
     minY = -6.0;
     maxY = 6.0;
     binWidthY = 0.1;
-    numberBinsY = int( ( maxY - minY + 0.00001 ) / binWidthY );
-
-    yBins_gluon = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-    yBins_up = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-    yBins_down = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-    yBins_strange = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-    yBins_anti_up = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-    yBins_anti_down = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-    yBins_anti_strange = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-
-    for( int j = 0; j < nTimeSteps + 2; j++ )           //+2 because of initial and final timesteps
+    numberBinsY = int(( maxY - minY + 0.00001 ) / binWidthY );
+      
+    yBins_gluon = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    yBins_up = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    yBins_down = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    yBins_strange = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    yBins_anti_up = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    yBins_anti_down = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    yBins_anti_strange = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    
+    for ( int j = 0; j < nTimeSteps + 2; j++ )          //+2 because of initial and final timesteps
     {
-      for( int i = 0; i <= numberBinsY; i++ )
+      for ( int i = 0; i <= numberBinsY; i++ )
       {
         yBins_gluon[j].push_back( 0 );
         yBins_up[j].push_back( 0 );
@@ -410,9 +410,9 @@ analysis::analysis( config* const c ):
         yBins_anti_strange[j].push_back( 0 );
       }
     }
-
+    
     //write the bin labels
-    for( int i = 0; i < numberBinsY; i++ )
+    for ( int i = 0; i < numberBinsY; i++ )
     {
       yBinLabels.push_back( minY + ( i * binWidthY ) + ( binWidthY / 2 ) );
     }
@@ -424,13 +424,13 @@ analysis::analysis( config* const c ):
   {
     //------ initialisation of transverse energy binning ------
     //------ use the same bins as for rapidity binning ------
-    transverseEnergyGluons = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-    transverseEnergyQuarks = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-    transverseEnergyAntiQuarks = new vector<double>[nTimeSteps + 2];        //+2 because of initial and final timesteps
-
-    for( int j = 0; j < nTimeSteps + 2; j++ )           //+2 because of initial and final timesteps
+    transverseEnergyGluons = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    transverseEnergyQuarks = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    transverseEnergyAntiQuarks = new vector<double>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    
+    for ( int j = 0; j < nTimeSteps + 2; j++ )          //+2 because of initial and final timesteps
     {
-      for( int i = 0; i <= numberBinsY; i++ )
+      for ( int i = 0; i <= numberBinsY; i++ )
       {
         transverseEnergyGluons[j].push_back( 0 );
         transverseEnergyQuarks[j].push_back( 0 );
@@ -443,43 +443,42 @@ analysis::analysis( config* const c ):
 
   if( studyJpsi )
   {
-    numberJpsi_all_time = new int[nTimeSteps + 1];
-    numberJpsi_ini_time = new int[nTimeSteps + 1];
-    numberJpsi_midPseudoRap_all_time = new int[nTimeSteps + 1];
-    numberJpsi_midPseudoRap_ini_time = new int[nTimeSteps + 1];
-    numberJpsi_forwardPseudoRap_all_time = new int[nTimeSteps + 1];
-    numberJpsi_forwardPseudoRap_ini_time = new int[nTimeSteps + 1];
-    numberJpsi_midNormRap_all_time = new int[nTimeSteps + 1];
-    numberJpsi_midNormRap_ini_time = new int[nTimeSteps + 1];
-    numberJpsi_forwardNormRap_all_time = new int[nTimeSteps + 1];
-    numberJpsi_forwardNormRap_ini_time = new int[nTimeSteps + 1];
-    //   numberJpsi_midSpaceTimeRap_time = new int[nTimeSteps+1];
-    numberJpsiProd_time = new int[nTimeSteps + 1];
-    numberJpsiDiss_time = new int[nTimeSteps + 1];
-    numberJpsiDissTd_time = new int[nTimeSteps + 1];
-    numberCCbGG_time = new int[nTimeSteps + 1];
-    timestepAnalysed = new bool[nTimeSteps + 1];
-    //   charmJetEnergy = new double[nTimeSteps+1];
+    numberJpsi_all_time = new int[nTimeSteps+1];
+    numberJpsi_ini_time = new int[nTimeSteps+1];
+    numberJpsi_midPseudoRap_all_time = new int[nTimeSteps+1];
+    numberJpsi_midPseudoRap_ini_time = new int[nTimeSteps+1];
+    numberJpsi_forwardPseudoRap_all_time = new int[nTimeSteps+1];
+    numberJpsi_forwardPseudoRap_ini_time = new int[nTimeSteps+1];
+    numberJpsi_midNormRap_all_time = new int[nTimeSteps+1];
+    numberJpsi_midNormRap_ini_time = new int[nTimeSteps+1];
+    numberJpsi_forwardNormRap_all_time = new int[nTimeSteps+1];
+    numberJpsi_forwardNormRap_ini_time = new int[nTimeSteps+1];
+  //   numberJpsi_midSpaceTimeRap_time = new int[nTimeSteps+1];
+    numberJpsiProd_time = new int[nTimeSteps+1];
+    numberJpsiDiss_time = new int[nTimeSteps+1];
+    numberJpsiDissTd_time = new int[nTimeSteps+1];
+    numberCCbGG_time = new int[nTimeSteps+1];
+    timestepAnalysed = new bool[nTimeSteps+1];
+  //   charmJetEnergy = new double[nTimeSteps+1];
 
-    for( int i = 0; i < nTimeSteps + 1; i++ )
+    for ( int i = 0; i < nTimeSteps + 1; i++ )
     {
-      numberJpsi_all_time[i] = numberJpsi_ini_time[i] = numberJpsiDiss_time[i] = numberJpsiDissTd_time[i] =
-                                 numberJpsi_midPseudoRap_all_time[i] = numberJpsi_midPseudoRap_ini_time[i] = numberJpsi_forwardPseudoRap_all_time[i] = numberJpsi_forwardPseudoRap_ini_time[i] =
-                                       numberJpsi_midNormRap_all_time[i] = numberJpsi_midNormRap_ini_time[i] = numberJpsi_forwardNormRap_all_time[i] = numberJpsi_forwardNormRap_ini_time[i] =
-                                             numberJpsiProd_time[i] = numberCCbGG_time[i] = 0;
+      numberJpsi_all_time[i] = numberJpsi_ini_time[i] = numberJpsiDiss_time[i] = numberJpsiDissTd_time[i] = 
+      numberJpsi_midPseudoRap_all_time[i] = numberJpsi_midPseudoRap_ini_time[i] = numberJpsi_forwardPseudoRap_all_time[i] = numberJpsi_forwardPseudoRap_ini_time[i] = 
+      numberJpsi_midNormRap_all_time[i] = numberJpsi_midNormRap_ini_time[i] = numberJpsi_forwardNormRap_all_time[i] = numberJpsi_forwardNormRap_ini_time[i] = 
+      numberJpsiProd_time[i] = numberCCbGG_time[i] = 0;
       timestepAnalysed[i] = false;
-      //     charmJetEnergy[i] = 0.0;
+  //     charmJetEnergy[i] = 0.0;
     }
-
+    
     theInterpolation_nJpsi.configure();
   }
-
+  
   if( theConfig->doOutput_progressLog() )
   {
     string filename = theConfig->getStandardOutputDirectoryName() + "/" + theConfig->getJobName() + "_progressLog";
     progressLogFile.open( filename.c_str(), ios::out | ios::trunc );
   }
-
   showerParticlesInEvent.resize( static_cast<int>( theConfig->getNumberOfParticlesToAdd() / 2 ) );
 }
 
@@ -514,175 +513,175 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyCentralDensity = false; // density in central part of collision
   studyBackground = false; // print also properties like v2, RAA of background
   studyScatteredMediumParticles = false; // print scattered medium particles
-
+  
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
   analysisRapidityRange yRange;
   yRange.reset( 0, 0.5 );
-  rapidityRanges.push_back( yRange );
+  rapidityRanges.push_back(yRange);
   yRange.reset( 0, 0.8 );
-  rapidityRanges.push_back( yRange );
+  rapidityRanges.push_back(yRange);
   yRange.reset( 0, 1.0 );
-  rapidityRanges.push_back( yRange );
+  rapidityRanges.push_back(yRange);
   yRange.reset( 0, 1.5 );
-  rapidityRanges.push_back( yRange );
+  rapidityRanges.push_back(yRange);
   yRange.reset( 0, 2.0 );
-  rapidityRanges.push_back( yRange );
+  rapidityRanges.push_back(yRange);
   yRange.reset( 0, 2.5 );
-  rapidityRanges.push_back( yRange );
+  rapidityRanges.push_back(yRange);  
   yRange.reset( 0, infinity );
-  rapidityRanges.push_back( yRange );
+  rapidityRanges.push_back(yRange);  
   //---- defining rapidity ranges ----
 
-
+  
   // add a new case for your outpute scheme which you can create in configuration.h
-  switch( _outputScheme )
+  switch ( _outputScheme )
   {
-  case phenix_hq_electrons:
-    studyHQ = true;
+    case phenix_hq_electrons:
+      studyHQ = true;
+      
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+    case alice_hq_electrons:
+      studyHQ = true;
+      
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.8 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      break;
+    case alice_hq_muons:
+      studyHQ = true;
 
-    rapidityRanges.clear();
-    yRange.reset( 0, 0.35 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.5 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 1.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 2.0 );
-    rapidityRanges.push_back( yRange );
-    break;
-  case alice_hq_electrons:
-    studyHQ = true;
+      rapidityRanges.clear();
+      yRange.reset( 2.5, 4.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.8 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+    case alice_hq_dmesons:
+      studyHQ = true;
+      
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.8 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+    case cms_hq_nonPromptJpsi:
+      studyHQ = true;
+      
+      rapidityRanges.clear();
+      yRange.reset( 0, 2.4 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+    case phenix_jpsi:
+      studyJpsi = true;
+      studyHQ = true;
+      studyTempInTube = true;
 
-    rapidityRanges.clear();
-    yRange.reset( 0, 0.8 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 1.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 2.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.5 );
-    rapidityRanges.push_back( yRange );
-    break;
-  case alice_hq_muons:
-    studyHQ = true;
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 1.2, 2.2 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+    case alice_jpsi:
+      studyJpsi = true;
+      studyHQ = true;
+      studyTempInTube = true;
 
-    rapidityRanges.clear();
-    yRange.reset( 2.5, 4.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.35 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.5 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.8 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 1.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 2.0 );
-    rapidityRanges.push_back( yRange );
-    break;
-  case alice_hq_dmesons:
-    studyHQ = true;
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.9 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 2.5, 4.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+    case cms_jpsi:
+      studyJpsi = true;
+      studyHQ = true;
+      studyTempInTube = true;
 
-    rapidityRanges.clear();
-    yRange.reset( 0, 0.5 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.8 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 1.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 2.0 );
-    rapidityRanges.push_back( yRange );
-    break;
-  case cms_hq_nonPromptJpsi:
-    studyHQ = true;
-
-    rapidityRanges.clear();
-    yRange.reset( 0, 2.4 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.35 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.5 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 1.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 2.0 );
-    rapidityRanges.push_back( yRange );
-    break;
-  case phenix_jpsi:
-    studyJpsi = true;
-    studyHQ = true;
-    studyTempInTube = true;
-
-    rapidityRanges.clear();
-    yRange.reset( 0, 0.35 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 1.2, 2.2 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.5 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 1.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 2.0 );
-    rapidityRanges.push_back( yRange );
-    break;
-  case alice_jpsi:
-    studyJpsi = true;
-    studyHQ = true;
-    studyTempInTube = true;
-
-    rapidityRanges.clear();
-    yRange.reset( 0, 0.9 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 2.5, 4.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.35 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.5 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 1.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 2.0 );
-    rapidityRanges.push_back( yRange );
-    break;
-  case cms_jpsi:
-    studyJpsi = true;
-    studyHQ = true;
-    studyTempInTube = true;
-
-    rapidityRanges.clear();
-    yRange.reset( 0, 2.4 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.9 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 2.5, 4.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.35 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.5 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 1.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 2.0 );
-    rapidityRanges.push_back( yRange );
-    break;
-
-  case background_jets:
-    studyScatteredMediumParticles = true;
-
-  case light_parton_lhc:
-    rapidityRanges.clear();
-    yRange.reset( 0, 0.8 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 0.5 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 1.0 );
-    rapidityRanges.push_back( yRange );
-    yRange.reset( 0, 2.0 );
-    rapidityRanges.push_back( yRange );
-    break;
-  default:
-    break;
+      rapidityRanges.clear();
+      yRange.reset( 0, 2.4 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.9 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 2.5, 4.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+      
+    case background_jets:
+      studyScatteredMediumParticles = true;
+      break;
+    case light_parton_lhc:      
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.8 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+    default:
+      break;
   }
 
 }
@@ -769,23 +768,23 @@ void analysis::collectEtData( const int step )
 
 void analysis::initialOutput()
 {
-  if( v2output )
-    computeV2RAA( "initial", 0 );
+  if ( v2output )
+    computeV2RAA( "initial", 0  );
 
-  if( studyJpsi )  // to consider charm annihaltion is just useful if added particles can scatter
-  {
+  if ( studyJpsi ) // to consider charm annihaltion is just useful if added particles can scatter
+  { 
     jpsiEvolution( 0 );
     ini_charm_correlations();
     writeJpsiFugacityOutput( 0 );
   }
-
-  if( studyTempInTube )
-    writeTempInTube( 0 );
-
-  if( dndyOutput )
+  
+  if( studyTempInTube)
+     writeTempInTube( 0 );
+  
+  if ( dndyOutput )
     print_dndy( "initial" );
-
-  if( studyParticleOutput )
+  
+  if ( studyParticleOutput )
     particleOutput( 0 );
   
 }
@@ -800,25 +799,25 @@ void analysis::intermediateOutput( const int nn )
   ss << tstep[nn];
   name = ss.str() + "fm";
 
-  if( v2output && v2outputIntermediateSteps )
+  if ( v2output && v2outputIntermediateSteps )
     computeV2RAA( name, tstep[nn] );
 
-  if( studyJpsi )  // to consider charm annihaltion is just useful if added particles can scatter
+  if ( studyJpsi ) // to consider charm annihaltion is just useful if added particles can scatter
   {
     jpsiEvolution( nn + 1 );
     writeJpsiFugacityOutput( nn + 1 );
   }
-
-  if( studyTempInTube )
-    writeTempInTube( nn + 1 );
-
-  if( studyTempAndVelocity )  // hydro
-    writeTempAndVel( nn + 1 );
-
+  
+  if( studyTempInTube)
+     writeTempInTube( nn + 1 ); 
+  
+  if ( studyTempAndVelocity ) // hydro
+    writeTempAndVel( nn + 1  );
+  
 //   if ( charmTestJet )
 //    analyseCharmTestJetEvolution( nn + 1 );
-
-  if( dndyOutput )
+  
+  if ( dndyOutput )
     print_dndy( name );
 }
 
@@ -826,9 +825,9 @@ void analysis::intermediateOutput( const int nn )
 
 void analysis::finalOutput( const double _stoptime )
 {
-
+  
   if( studyPtSpectra )
-  {
+  {  
     printPtSpectra( gluon );
     printPtSpectra( light_quark );
     printPtSpectra( allFlavors );
@@ -836,37 +835,36 @@ void analysis::finalOutput( const double _stoptime )
     printSoftPtSpectra( light_quark );
     printSoftPtSpectra( allFlavors );
   }
-
-  if( studyParticleOutput )
+  
+  if ( studyParticleOutput )
     particleOutput( nTimeSteps );
-
+  
   if( studyYDistribution )
     printYDistribution();
-
-  if( v2output )
+  
+  if ( v2output )
     computeV2RAA( "final", _stoptime );
 
-  if( particleCorrelationsOutput )
+  if ( particleCorrelationsOutput )
   {
     onePartclCorrelations();
     twoPartclCorrelations();
   }
 
-  if( studyJpsi )  // to consider charm annihaltion is just useful if added particles can scatter
+  if ( studyJpsi ) // to consider charm annihaltion is just useful if added particles can scatter
   {
     printJpsiEvolution();
 //     jpsi_correlations();
   }
-
+  
 //   if ( charmTestJet )
 //    analyseCharmTestJet();
-
+  
   if( hadronization_hq && mesonDecay )
     analyseAngleDe();
-
-  if( dndyOutput )
+  
+  if ( dndyOutput )
     print_dndy( "final" );
-
   if( studyScatteredMediumParticles )
   {
     scatteredMediumParticlesOutput( nTimeSteps );
@@ -902,66 +900,66 @@ void analysis::printYDistribution()
   file.seekp( 0, ios::end );
   long size = file.tellp();
   file.seekp( 0, ios::beg );
-  if( size == 0 )
+  if ( size == 0 )
     printHeader( file, rapidityDistribution, end );
   //---------------------------------------
-
-
-  for( int j = 0; j <= nTimeSteps; j++ )
+  
+  
+  for ( int j = 0; j <= nTimeSteps; j++ )
   {
-    if( tstep[j - 1] <= theConfig->getRuntime() || j == 0 || j == nTimeSteps )
+    if ( tstep[j-1] <= theConfig->getRuntime() || j == 0 || j == nTimeSteps )
     {
-      if( j == 0 )
+      if ( j == 0 )
       {
         file << "#t = 0" << endl;
       }
       else
       {
-        file << "#t = " << tstep[j - 1] << endl;
+        file << "#t = " << tstep[j-1] << endl;
       }
-      for( int i = 0; i < numberBinsY; i++ )
+      for ( int i = 0; i < numberBinsY; i++ )
       {
-        file << yBinLabels[i] << sep << yBins_gluon[j][i] << sep << yBins_up[j][i] << sep << yBins_down[j][i]
-             << sep << yBins_strange[j][i] << sep << yBins_anti_up[j][i] << sep << yBins_anti_down[j][i] << sep
-             << yBins_anti_strange[j][i] << endl;
+        file << yBinLabels[i] << sep << yBins_gluon[j][i] << sep << yBins_up[j][i] << sep << yBins_down[j][i] 
+        << sep << yBins_strange[j][i] << sep << yBins_anti_up[j][i] << sep << yBins_anti_down[j][i] << sep 
+        << yBins_anti_strange[j][i] << endl; 
       }
       file << endl << endl;
     }
   }
-
+  
   file.close();
-
-
+  
+  
   //-------- quark numbers summed over all rapidities
-
+  
   filename =  filename_prefix + "_" + "_quarkNumbers";
   file.open( filename.c_str(), ios::out | ios::trunc );
-
+  
   //---- print header if file is empty ----
   file.seekp( 0, ios::end );
   size = file.tellp();
   file.seekp( 0, ios::beg );
-  if( size == 0 )
+  if ( size == 0 )
     printHeader( file, quarkNumbers, end );
   //---------------------------------------
-
+  
   double nGluons, nUps, nDowns, nStranges, nAntiUps, nAntiDowns, nAntiStranges;
-
-  for( int j = 0; j <= nTimeSteps; j++ )
+  
+  for ( int j = 0; j <= nTimeSteps; j++ )
   {
     nGluons = nUps = nDowns = nStranges = nAntiUps = nAntiDowns = nAntiStranges = 0;
-    if( tstep[j - 1] <= theConfig->getRuntime() || j == 0 || j == nTimeSteps )
+    if ( tstep[j-1] <= theConfig->getRuntime() || j == 0 || j == nTimeSteps )
     {
-      if( j == 0 )
+      if ( j == 0 )
       {
         file << 0 << sep;
       }
       else
       {
-        file << tstep[j - 1] << sep;
+        file << tstep[j-1] << sep;
       }
-
-      for( int i = 0; i < numberBinsY; i++ )
+      
+      for ( int i = 0; i < numberBinsY; i++ )
       {
         nGluons += yBins_gluon[j][i];
         nUps += yBins_up[j][i];
@@ -971,11 +969,11 @@ void analysis::printYDistribution()
         nAntiDowns += yBins_anti_down[j][i];
         nAntiStranges += yBins_anti_strange[j][i];
       }
-      file << nGluons << sep << nUps << sep << nDowns << sep << nStranges << sep << nAntiUps << sep << nAntiDowns << sep << nAntiStranges << endl;
+      file << nGluons << sep << nUps << sep << nDowns << sep << nStranges << sep << nAntiUps << sep << nAntiDowns << sep << nAntiStranges << endl;    
     }
   }
-
-
+  
+  
   file.close();
 }
 
@@ -989,46 +987,46 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
 
   // populate temporary _ptBins with temporary "references" to the actual data structures according to the requested flavor
   tVecOfArrayOfDoubleVec _ptBins;
-  for( int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
+  for ( int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
   {
-    switch( _flavTypeToComputeFor )
+    switch ( _flavTypeToComputeFor )
     {
-    case gluon:
-      _ptBins.push_back( ptBins_gluons[yRange] );
-      break;
-    case light_quark:
-      _ptBins.push_back( ptBins_quarks[yRange] );
-      break;
-    case up:
-      _ptBins.push_back( ptBins_ups[yRange] );
-      break;
-    case down:
-      _ptBins.push_back( ptBins_downs[yRange] );
-      break;
-    case strange:
-      _ptBins.push_back( ptBins_stranges[yRange] );
-      break;
-    case anti_up:
-      _ptBins.push_back( ptBins_anti_ups[yRange] );
-      break;
-    case anti_down:
-      _ptBins.push_back( ptBins_anti_downs[yRange] );
-      break;
-    case anti_strange:
-      _ptBins.push_back( ptBins_anti_stranges[yRange] );
-      break;
-    case allFlavors:
-      _ptBins.push_back( ptBins_all[yRange] );
-      break;
-    default:
-      string errMsg = "error in ptDistribution, flavor not specified";
-      throw eAnalysis_error( errMsg );
-      break;
+      case gluon:
+        _ptBins.push_back( ptBins_gluons[yRange] );
+        break;
+      case light_quark:
+        _ptBins.push_back( ptBins_quarks[yRange] );
+        break;
+      case up:
+        _ptBins.push_back( ptBins_ups[yRange] );
+        break;
+      case down:
+        _ptBins.push_back( ptBins_downs[yRange] );
+        break;
+      case strange:
+        _ptBins.push_back( ptBins_stranges[yRange] );
+        break;
+      case anti_up:
+        _ptBins.push_back( ptBins_anti_ups[yRange] );
+        break;
+      case anti_down:
+        _ptBins.push_back( ptBins_anti_downs[yRange] );
+        break;  
+      case anti_strange:
+        _ptBins.push_back( ptBins_anti_stranges[yRange] );
+        break;
+      case allFlavors:
+        _ptBins.push_back(ptBins_all[yRange]);
+        break;
+      default:
+        string errMsg = "error in ptDistribution, flavor not specified";
+        throw eAnalysis_error( errMsg );
+        break;
     }
   }
 
   string type;
-  if( _flavTypeToComputeFor == gluon )
+  if ( _flavTypeToComputeFor == gluon )
   {
     type = "gluon";
   }
@@ -1036,27 +1034,27 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   {
     type = "quark";
   }
-  if( _flavTypeToComputeFor == up )
+  if ( _flavTypeToComputeFor == up )
   {
     type = "up";
   }
-  if( _flavTypeToComputeFor == down )
+  if ( _flavTypeToComputeFor == down )
   {
     type = "down";
   }
-  if( _flavTypeToComputeFor == strange )
+  if ( _flavTypeToComputeFor == strange )
   {
     type = "strange";
   }
-  if( _flavTypeToComputeFor == anti_up )
+  if ( _flavTypeToComputeFor == anti_up )
   {
     type = "anti_up";
   }
-  if( _flavTypeToComputeFor == anti_down )
+  if ( _flavTypeToComputeFor == anti_down )
   {
     type = "anti_down";
   }
-  if( _flavTypeToComputeFor == anti_strange )
+  if ( _flavTypeToComputeFor == anti_strange )
   {
     type = "anti_strange";
   }
@@ -1072,23 +1070,23 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   file.seekp( 0, ios::end );
   long size = file.tellp();
   file.seekp( 0, ios::beg );
-  if( size == 0 )
+  if ( size == 0 )
     printHeader( file, ptSpectrum, end );
   //---------------------------------------
 
   //------------- the actual output ---------------
-  for( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
+  for ( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
   {
     file << "#y in +- [" << rapidityRanges[yRangeIndex].yleft << ", " << rapidityRanges[yRangeIndex].yright << "]" << endl;
-    for( int i = 0; i < numberBinsPT; i++ )
+    for ( int i = 0; i < numberBinsPT; i++ )
     {
       file << ptBinLabels[i] << sep;
-      for( int j = 0; j <= nTimeSteps; j++ )
+      for ( int j = 0; j <= nTimeSteps; j++ )
       {
-        if( j == 0 || j == nTimeSteps )
+        if ( j == 0 || j == nTimeSteps )
           file << _ptBins[yRangeIndex][j][i] << sep;
         else if ( tstep[j-1] <= theConfig->getRuntime() )
-            file << _ptBins[yRangeIndex][j][i] << sep;
+          file << _ptBins[yRangeIndex][j][i] << sep;
       }
       file << endl;
     }
@@ -1108,86 +1106,85 @@ void analysis::printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
 
   vector<double> * _ptBinsSoftAll;
 
-  if( _flavTypeToComputeFor == gluon )
+  if ( _flavTypeToComputeFor == gluon )
   {
     _ptBinsSoftAll = ptBinsSoftAll_gluons;
   }
   else if ( _flavTypeToComputeFor == light_quark )
-    {
-      _ptBinsSoftAll = ptBinsSoftAll_quarks;
-    }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_quarks;
+  }
   else if ( _flavTypeToComputeFor == up )
-      {
-        _ptBinsSoftAll = ptBinsSoftAll_ups;
-      }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_ups;
+  }
   else if ( _flavTypeToComputeFor == down )
-        {
-          _ptBinsSoftAll = ptBinsSoftAll_downs;
-        }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_downs;
+  }
   else if ( _flavTypeToComputeFor == strange )
-          {
-            _ptBinsSoftAll = ptBinsSoftAll_stranges;
-          }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_stranges;
+  }
   else if ( _flavTypeToComputeFor == anti_up )
-            {
-              _ptBinsSoftAll = ptBinsSoftAll_anti_ups;
-            }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_anti_ups;
+  }
   else if ( _flavTypeToComputeFor == anti_down )
-              {
-                _ptBinsSoftAll = ptBinsSoftAll_anti_downs;
-              }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_anti_downs;
+  }
   else if ( _flavTypeToComputeFor == anti_strange )
-                {
-                  _ptBinsSoftAll = ptBinsSoftAll_anti_stranges;
-                }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_anti_stranges;
+  }
   else if ( _flavTypeToComputeFor == allFlavors )
-                  {
-                    _ptBinsSoftAll = ptBinsSoftAll_all;
-                  }
-                  else
-                  {
-                    string errMsg = "error in printSoftPtSpectra, flavor not specified";
-                    throw eAnalysis_error( errMsg );
-                  }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_all;
+  }
+  else
+  {
+    string errMsg = "error in printSoftPtSpectra, flavor not specified";
+    throw eAnalysis_error( errMsg );
+  }
 
   string type;
-  if( _flavTypeToComputeFor == gluon )
+  if ( _flavTypeToComputeFor == gluon )
   {
     type = "gluon";
   }
-  else
-    if( _flavTypeToComputeFor == light_quark || _flavTypeToComputeFor == anti_light_quark )
-    {
-      type = "quark";
-    }
-  if( _flavTypeToComputeFor == up )
+  else if ( _flavTypeToComputeFor == light_quark || _flavTypeToComputeFor == anti_light_quark )
+  {
+    type = "quark";
+  }
+  if ( _flavTypeToComputeFor == up )
   {
     type = "up";
   }
-  if( _flavTypeToComputeFor == down )
+  if ( _flavTypeToComputeFor == down )
   {
     type = "down";
   }
-  if( _flavTypeToComputeFor == strange )
+  if ( _flavTypeToComputeFor == strange )
   {
     type = "strange";
   }
-  if( _flavTypeToComputeFor == anti_up )
+  if ( _flavTypeToComputeFor == anti_up )
   {
     type = "anti_up";
   }
-  if( _flavTypeToComputeFor == anti_down )
+  if ( _flavTypeToComputeFor == anti_down )
   {
     type = "anti_down";
   }
-  if( _flavTypeToComputeFor == anti_strange )
+  if ( _flavTypeToComputeFor == anti_strange )
   {
     type = "anti_strange";
   }
   else if ( _flavTypeToComputeFor == allFlavors )
-    {
-      type = "allFlavors";
-    }
+  {
+    type = "allFlavors";
+  }
 
   string filename = filename_prefix + "_" + type + "_soft_spectra.f2";
   fstream file( filename.c_str(), ios::out | ios::trunc );
@@ -1196,22 +1193,22 @@ void analysis::printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   file.seekp( 0, ios::end );
   long size = file.tellp();
   file.seekp( 0, ios::beg );
-  if( size == 0 )
+  if ( size == 0 )
     printHeader( file, ptSpectrum, end );
   //---------------------------------------
 
 
   //---------------------- y in [-inf,inf] ---------------------
   file << "#y in [-inf,inf]" << endl;
-  for( int i = 0; i < numberBinsSoftPT; i++ )
+  for ( int i = 0;i < numberBinsSoftPT;i++ )
   {
     file << ptSoftBinLabels[i] << sep;
-    for( int j = 0; j <= nTimeSteps; j++ )
+    for ( int j = 0; j <= nTimeSteps; j++ )
     {
-      if( j == 0 || j == nTimeSteps )
+      if ( j == 0 || j == nTimeSteps )
         file << _ptBinsSoftAll[j][i] << sep;
       else if ( tstep[j-1] <= theConfig->getRuntime() )
-          file << _ptBinsSoftAll[j][i] << sep;
+        file << _ptBinsSoftAll[j][i] << sep;
     }
     file << endl;
   }
@@ -1277,16 +1274,16 @@ void analysis::onePartclCorrelations()
   double q_hat_scal_sum = 0.0, q_hat_vec_sum = 0.0;
   int count_q_hat_sum = 0;
 
-  for( int i = 0; i < addedParticles.size(); i++ )
+  for ( int i = 0;i < addedParticles.size();i++ )
   {
 //     if(addedParticles[i].T <= time)
 //     {
     pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
 
     // pseudorapidity
-    eta = 0.5 * log( ( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+    eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
 
-    if( fabs( eta ) <= eta_max )
+    if ( fabs( eta ) <= eta_max )
     {
       pt_init = sqrt( pow( addedParticles[i].PX_init, 2.0 ) + pow( addedParticles[i].PY_init, 2.0 ) );
       pt_fin = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
@@ -1310,7 +1307,7 @@ void analysis::onePartclCorrelations()
 
       ptFinptFin.add( pt_init, pt_fin, dpt_scal );
 
-      if( addedParticles[i].X_traveled > 0.0 )
+      if ( addedParticles[i].X_traveled > 0.0 )
       {
         q_hat_scal_sum += pow( dpt_scal, 2.0 ) / addedParticles[i].X_traveled;
         q_hat_vec_sum += pow( dpt_vec, 2.0 ) / addedParticles[i].X_traveled;
@@ -1411,21 +1408,21 @@ void analysis::twoPartclCorrelations()
   binning dNdrI_ptbar5_dpt02( filename, 0.0, 15.0, 60 );
 
   // 2 particle correlations, charm and anti-charm which are produced in same reaction
-  for( int i = 0; i < addedParticles.size(); i++ )
+  for ( int i = 0;i < addedParticles.size();i++ )
   {
 //     if(addedParticles[i].T <= time)
 //     {
     pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
 
     // pseudorapidity
-    eta = 0.5 * log( ( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+    eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
 
-    if( fabs( eta ) <= eta_max )
+    if ( fabs( eta ) <= eta_max )
     {
-      for( int j = i + 1; j < addedParticles.size(); j++ )
+      for ( int j = i + 1;j < addedParticles.size();j++ )
       {
 //         if ( addedParticles[i].N_EVENT_pp == addedParticles[j].N_EVENT_pp )
-        if( true )
+        if ( true )
         {
 
           //           if(addedParticles[i].T <= time)
@@ -1433,9 +1430,9 @@ void analysis::twoPartclCorrelations()
           pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
 
           // pseudorapidity
-          eta = 0.5 * log( ( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+          eta = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
 
-          if( fabs( eta ) <= eta_max )
+          if ( fabs( eta ) <= eta_max )
           {
 //                 dpt_ini = sqrt( pow(addedParticles[i].PX_init-addedParticles[j].PX_init,2.0) + pow(addedParticles[i].PY_init-addedParticles[j].PY_init,2.0) );
 //                 dpt_fin = sqrt( pow(addedParticles[i].PX-addedParticles[j].PX,2.0) + pow(addedParticles[i].PY-addedParticles[j].PY,2.0) );
@@ -1530,12 +1527,12 @@ void analysis::twoPartclCorrelations()
             dphiFall.add( dphi_fin );
             dphiIall.add( dphi_ini );
 
-            if( sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) >= pt_min_assoc && sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) )  >= pt_min_assoc )
+            if ( sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) >= pt_min_assoc && sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) )  >= pt_min_assoc )
             {
               dphiF22.add( dphi_fin );
               dphiI22.add( dphi_ini );
 
-              if( ( sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) >= pt_min_trig && sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) )  >= pt_min_assoc ) ||
+              if (( sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) >= pt_min_trig && sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) )  >= pt_min_assoc ) ||
                   ( sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) >= pt_min_assoc && sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) )  >= pt_min_trig ) )
               {
                 dphiF42.add( dphi_fin );
@@ -1543,7 +1540,7 @@ void analysis::twoPartclCorrelations()
               }
             }
 
-            if( rt_init )
+            if ( rt_init )
             {
               dphiFrt3.add( dphi_fin );
               dphiIrt3.add( dphi_ini );
@@ -1558,11 +1555,11 @@ void analysis::twoPartclCorrelations()
             pt_fin_j = sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) );
 
             dNdrI_all.add( rt_init );
-            if( pt_fin_i > pt_min_dNdr )
+            if ( pt_fin_i > pt_min_dNdr )
               dNdrI_pt5.add( rt_init );
-            if( ( pt_fin_i + pt_fin_j ) / 2.0 > pt_min_dNdr )
+            if (( pt_fin_i + pt_fin_j ) / 2.0 > pt_min_dNdr )
               dNdrI_ptbar5.add( rt_init );
-            if( ( ( pt_fin_i + pt_fin_j ) / 2.0 > pt_min_dNdr ) && ( dpt_fin / ( ( pt_fin_i + pt_fin_j ) / 2.0 ) < 0.2 ) )
+            if ((( pt_fin_i + pt_fin_j ) / 2.0 > pt_min_dNdr ) && ( dpt_fin / (( pt_fin_i + pt_fin_j ) / 2.0 ) < 0.2 ) )
               dNdrI_ptbar5_dpt02.add( rt_init );
 
           }
@@ -1577,18 +1574,18 @@ void analysis::twoPartclCorrelations()
 
 
 
-  for( int j = 0; j < addedParticles.size(); j++ )
+  for ( int j = 0;j < addedParticles.size();j++ )
   {
 
     pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
 
     // pseudorapidity
-    eta = 0.5 * log( ( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+    eta = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
 
     double x1 = 0.0;
     double y1 = 1.0;
 
-    if( fabs( eta ) <= eta_max )
+    if ( fabs( eta ) <= eta_max )
     {
       scal_prod = x1 * addedParticles[j].PX + y1 * addedParticles[j].PY;
       length1 = sqrt( pow( x1, 2.0 ) + pow( y1, 2.0 ) );
@@ -1629,11 +1626,11 @@ void analysis::twoPartclCorrelations()
 void analysis::computeV2RAA( string name, const double _outputTime )
 {
   v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
-
+  
   if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() )
   {
     theV2RAA.setPtBinProperties( 0.0, 30.0, 60 );
-
+    
     theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     if( mesonDecay )
       theV2RAA.computeFor( electron_gen, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );
@@ -1641,19 +1638,19 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   if( studyHQ || studyJpsi )
   {
     theV2RAA.setPtBinProperties( 0.0, 30.0, 60 );
-
+    
     theV2RAA.computeFor( charm, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     theV2RAA.computeFor( heavy_quark, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
 
-    if( name == "initial" || name == "final" )
+    if ( name == "initial" || name == "final" )
     {
       if( hadronization_hq )
       {
         theV2RAA.computeFor( dmeson_gen, addedParticlesCopy, addedParticlesCopy.size(), "added", _outputTime, v2jets );
         theV2RAA.computeFor( bmeson_gen, addedParticlesCopy, addedParticlesCopy.size(), "added", _outputTime, v2jets );
       }
-
+      
       if( mesonDecay )
       {
         theV2RAA.computeFor( electron_gen, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );
@@ -1661,15 +1658,15 @@ void analysis::computeV2RAA( string name, const double _outputTime )
         theV2RAA.computeFor( b_electron, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );  // electrons from bottom quarks (B mesons actually)
       }
     }
-
+    
     // also take a look at light parton v2 of background
     theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-
-    if( studyJpsi )
+    
+    if ( studyJpsi )
     {
       theV2RAA.setPtBinProperties( 0.0, 15.0, 20 );
-
+      
       theV2RAA.computeFor( jpsi, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
       theV2RAA.computeFor( jpsi_ini, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
       theV2RAA.computeFor( jpsi_sec, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
@@ -1686,7 +1683,7 @@ void analysis::computeV2RAA( string name, const double _outputTime )
 //     theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
 //     theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
   }
-
+  
   if( studyBackground )
   {
     theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
@@ -1702,8 +1699,8 @@ void analysis::computeV2RAA( string name, const double _outputTime )
 
 
 
-v2RAA::v2RAA( config* const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg, const double pt_min_arg, const double pt_max_arg, const int n_g_arg, const double pt_min_background_arg, const double pt_max_background_arg, const int n_g_background_arg ):
-  theConfig( c ), name( name_arg ), filename_prefix( filename_prefix_arg ), rapidityRanges( rapidityRanges_arg ), pt_min( pt_min_arg ), pt_max( pt_max_arg ), n_g( n_g_arg ), pt_min_background( pt_min_arg ), pt_max_background( pt_max_arg ), n_g_background( n_g_arg )
+v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg, const double pt_min_arg, const double pt_max_arg, const int n_g_arg, const double pt_min_background_arg, const double pt_max_background_arg, const int n_g_background_arg ):
+    theConfig( c ), name( name_arg ), filename_prefix( filename_prefix_arg ), rapidityRanges( rapidityRanges_arg ), pt_min( pt_min_arg ), pt_max( pt_max_arg ), n_g( n_g_arg ), pt_min_background( pt_min_arg ), pt_max_background( pt_max_arg ), n_g_background( n_g_arg )
 {
   eta_bins = rapidityRanges.size();
 }
@@ -1717,14 +1714,14 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   double sinAlpha, alpha;
   int dummy, flavor, n_bins;
   int alphaIndex;
-
+  
   double _pt_min, _pt_max;
 
   string filename_v2, filename_v2_summed, filename_v2_tot, filename_yield, filename_pt_angleDependence, type;
-
+  
   type = Particle::getName( _flavTypeToComputeFor );
-
-  if( _v2type == v2background )
+  
+  if ( _v2type == v2background )
   {
     n_bins = n_g_background;
     _pt_max = pt_max_background;
@@ -1736,52 +1733,52 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     _pt_max = pt_max;
     _pt_min = pt_min;
   }
-
+  
   // avoid problem with binning pt logaritmitically: cannot deal with pt = 0
   if( _pt_min < 0.1 )
     _pt_min = 0.1;
-
+  
   const double d_ln_pt = ( log( _pt_max ) - log( _pt_min ) ) / n_bins;
 
   double v2sum[eta_bins];
   int NmbInRange[eta_bins];
   int NmbInnerRegion = 0;
-  for( int j = 0; j < eta_bins; j++ )
+  for ( int j = 0;j < eta_bins;j++ )
   {
     v2sum[j] = 0.0;
     NmbInRange[j] = 0;
   }
 
-  double ptBinsV2[eta_bins][n_bins + 1];
-  int ptBinsNmb[eta_bins][n_bins + 1];
-  int ptBinsInnerRegion[n_bins + 1];
-  for( int j = 0; j < n_bins + 1; j++ )
+  double ptBinsV2[eta_bins][n_bins+1];
+  int ptBinsNmb[eta_bins][n_bins+1];
+  int ptBinsInnerRegion[n_bins+1];
+  for ( int j = 0;j < n_bins + 1;j++ )
   {
     ptBinsInnerRegion[j] = 0;
-    for( int i = 0; i < eta_bins; i++ )
+    for ( int i = 0;i < eta_bins;i++ )
     {
       ptBinsV2[i][j] = 0.0;
       ptBinsNmb[i][j] = 0.0;
     }
   }
-
+  
   const double deltaAlpha = 15; // degrees
   const int nAlphaBins = 6;  // 90° / 15°
-  double ptBinsAngleDep[eta_bins][nAlphaBins][n_bins + 1];
-  for( int i = 0; i < eta_bins; i++ )
+  double ptBinsAngleDep[eta_bins][nAlphaBins][n_bins+1];
+  for ( int i = 0; i < eta_bins; i++ )
   {
-    for( int j = 0; j < nAlphaBins; j++ )
+    for ( int j = 0; j < nAlphaBins; j++ )
     {
-      for( int k = 0; k < n_bins + 1; k++ )
+      for ( int k = 0; k < n_bins + 1; k++ )
       {
         ptBinsAngleDep[i][j][k] = 0;
       }
     }
   }
-
+  
 
   // compute v2 and bin it into pt bins
-  for( int i = 0; i < n_particles; i++ )
+  for ( int i = 0; i < n_particles; i++ )
   {
     pp = sqrt( pow( _particles[i].E, 2.0 ) - pow( _particles[i].m, 2.0 ) );
     pt = sqrt( pow( _particles[i].PX, 2.0 ) + pow( _particles[i].PY, 2.0 ) );
@@ -1790,16 +1787,16 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     sinAlpha = _particles[i].PY / pt;
     alpha = asin( fabs( sinAlpha ) );
     alpha = alpha * 180 / M_PI;
-
+    
     alphaIndex = static_cast<int>( alpha / deltaAlpha );
-    if( alphaIndex >= nAlphaBins )
+    if ( alphaIndex >= nAlphaBins )
     {
       alphaIndex = nAlphaBins - 1;
     }
-
+        
     // for most particle species we are interested in the pseudorapidity (for massless particle it does not matter anyhow)
-    eta = 0.5 * log( ( pp + _particles[i].PZ ) / ( pp - _particles[i].PZ ) );
-
+    eta = 0.5 * log(( pp + _particles[i].PZ ) / ( pp - _particles[i].PZ ) );
+    
     // for some scenarios however explicitly the rapidity is measured. So substitute eta by the rapidity:
     if( ( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() &&
           ( _flavTypeToComputeFor == charm ||
@@ -1807,18 +1804,18 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
             _flavTypeToComputeFor == heavy_quark ||
             _flavTypeToComputeFor == c_electron ||
             _flavTypeToComputeFor == b_electron ||
-            _flavTypeToComputeFor == electron_gen
+            _flavTypeToComputeFor == electron_gen 
           ) ) ||
         ParticleOffline::mapToGenericFlavorType( _flavTypeToComputeFor ) == dmeson_gen ||
         ParticleOffline::mapToGenericFlavorType( _flavTypeToComputeFor ) == bmeson_gen ||
         ParticleOffline::mapToGenericFlavorType( _flavTypeToComputeFor ) == jpsi
-      )
-      eta = 0.5 * log( ( _particles[i].E + _particles[i].PZ ) / ( _particles[i].E - _particles[i].PZ ) );
+    )
+      eta = 0.5 * log(( _particles[i].E + _particles[i].PZ ) / ( _particles[i].E - _particles[i].PZ ) );
 
     v2 = ( pow( _particles[i].PX, 2.0 ) - pow( _particles[i].PY, 2.0 ) ) / pow( pt, 2.0 );
 
     flavor = _particles[i].FLAVOR;
-
+    
     FLAVOR_TYPE mother_flav;
     if( _flavTypeToComputeFor == c_electron || _flavTypeToComputeFor == b_electron )
     {
@@ -1826,8 +1823,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       mother_flav = addedParticlesCopy[mother_id].FLAVOR;
     }
 
-    if( ( pt <= _pt_max && pt > _pt_min ) &&
-        ( ( _flavTypeToComputeFor == flavor ) ||
+    if( ( pt <= _pt_max && pt > _pt_min ) &&  
+        ( ( _flavTypeToComputeFor == flavor ) || 
           ( _flavTypeToComputeFor == ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) ) ) ||
           ( _flavTypeToComputeFor == charm && ( flavor == anti_charm ) ) ||
           ( _flavTypeToComputeFor == bottom && ( flavor == anti_bottom ) ) ||
@@ -1836,18 +1833,18 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
           ( _flavTypeToComputeFor == b_electron && ( ( flavor == electron || flavor == positron ) && ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( mother_flav ) ) == bmeson_gen ) ) ||
           ( _flavTypeToComputeFor == jpsi_ini && ( flavor == jpsi && _particles[i].initially_produced ) ) ||
           ( _flavTypeToComputeFor == jpsi_sec && ( flavor == jpsi && !_particles[i].initially_produced ) )
-        )
+        ) 
       )
     {
       // individually check for each rapidity range whether this particle needs to be binned
-      for( int yRangeIndex = 0; yRangeIndex < eta_bins; yRangeIndex++ )
+      for ( int yRangeIndex = 0; yRangeIndex < eta_bins; yRangeIndex++ )
       {
-        if( fabs( eta ) >= rapidityRanges[yRangeIndex].yleft && fabs( eta ) <= rapidityRanges[yRangeIndex].yright )
+        if ( fabs( eta ) >= rapidityRanges[yRangeIndex].yleft && fabs( eta ) <= rapidityRanges[yRangeIndex].yright )
         {
           v2sum[yRangeIndex] += v2;
           NmbInRange[yRangeIndex]++;
 
-          dummy = int( ( log( pt ) - log( _pt_min ) ) / d_ln_pt );
+          dummy = int(( log( pt ) - log( _pt_min ) ) / d_ln_pt );
           ptBinsV2[yRangeIndex][dummy] += v2;
           ptBinsNmb[yRangeIndex][dummy]++;
           ptBinsAngleDep[yRangeIndex][alphaIndex][dummy]++;
@@ -1858,13 +1855,13 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
 
   int binMax = 0;
   int binMin = n_particles;
-  for( int k = 0; k < n_bins + 1; k++ )
+  for ( int k = 0; k < n_bins + 1; k++ )
   {
-    if( ptBinsNmb[0][k] > binMax )
+    if ( ptBinsNmb[0][k] > binMax )
     {
       binMax = ptBinsNmb[0][k];
     }
-    if( ptBinsNmb[0][k] < binMin && ptBinsNmb[0][k] != 0 )
+    if ( ptBinsNmb[0][k] < binMin && ptBinsNmb[0][k] != 0 )
     {
       binMin = ptBinsNmb[0][k];
     }
@@ -1893,9 +1890,9 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
 
   print_v2_tot << _pt_min;
   print_v2_tot.width( 15 );
-  for( int i = 0; i < eta_bins; i++ )
+  for ( int i = 0;i < eta_bins;i++ )
   {
-    if( NmbInRange[i] > 0 )
+    if ( NmbInRange[i] > 0 )
     {
       print_v2_tot <<  v2sum[i] / NmbInRange[i];
     }
@@ -1905,7 +1902,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     }
     print_v2_tot.width( 15 );
   }
-  for( int i = 0; i < eta_bins; i++ )
+  for ( int i = 0;i < eta_bins;i++ )
   {
     print_v2_tot <<  v2sum[i];
     print_v2_tot.width( 15 );
@@ -1916,9 +1913,9 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
 
   print_v2_tot << _pt_max;
   print_v2_tot.width( 15 );
-  for( int i = 0; i < eta_bins; i++ )
+  for ( int i = 0;i < eta_bins;i++ )
   {
-    if( NmbInRange[i] > 0 )
+    if ( NmbInRange[i] > 0 )
     {
       print_v2_tot <<  v2sum[i] / NmbInRange[i];
     }
@@ -1928,7 +1925,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     }
     print_v2_tot.width( 15 );
   }
-  for( int i = 0; i < eta_bins; i++ )
+  for ( int i = 0;i < eta_bins;i++ )
   {
     print_v2_tot <<  v2sum[i];
     print_v2_tot.width( 15 );
@@ -1945,12 +1942,12 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_v2_summed.width( 14 );
   print_v2_summed << "pt       summed v_2 and number in bin for different rapidity bins" << endl;
 
-  for( int k = 0; k < n_bins + 1; k++ )
+  for ( int k = 0;k < n_bins + 1;k++ )
   {
     print_v2_summed.width( 15 );
     pt_out = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
     print_v2_summed << pt_out;
-    for( int i = 0; i < eta_bins; i++ )
+    for ( int i = 0;i < eta_bins;i++ )
     {
       print_v2_summed.width( 15 );
       print_v2_summed << ptBinsV2[i][k];
@@ -1967,86 +1964,86 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_yield.width( 14 );
   print_yield << "pt       yield for different rapidity bins" << endl;
 
-  for( int k = 0; k < n_bins + 1; k++ )
+  for ( int k = 0;k < n_bins + 1;k++ )
   {
     print_yield.width( 15 );
     pt_out = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
     print_yield << pt_out;
     const double dpt = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt ) - exp( double( k ) * d_ln_pt + log( _pt_min ) );
-    for( int i = 0; i < eta_bins; i++ )
+    for ( int i = 0;i < eta_bins;i++ )
     {
       const double delta_eta = 2.0 * ( rapidityRanges[i].yright - rapidityRanges[i].yleft );
-
+      
       double nInBin = double( ptBinsNmb[i][k] ) / theConfig->getTestparticles() / dpt / delta_eta;
-
+      
       if( _v2type == v2jets )
         nInBin = nInBin / theConfig->getNaddedEvents();
-
+      
       if( Particle::mapToGenericFlavorType( _flavTypeToComputeFor ) == jpsi )
         nInBin = nInBin / theConfig->getJpsiTestparticles();
-
+      
       if( Particle::mapToGenericFlavorType( _flavTypeToComputeFor ) == electron_gen )
         nInBin = nInBin / theConfig->getNumberElectronStat();
-
+      
       print_yield.width( 15 );
       print_yield << nInBin;
     }
     print_yield << endl;
   }
-
-
+  
+  
   // print yield for RAA for different angles with respect to the reaction plane
   print_pt_angleDependence << "# " << type << " yield distribution for different angles (alpha) with respect to the reaction plane" << endl;
   print_pt_angleDependence << "# t = " << _outputTime << endl;
   print_pt_angleDependence << "#";
   print_pt_angleDependence.width( 14 );
   print_pt_angleDependence << "pt       yield for different rapidity bins" << endl;
-  for( int j = 0; j < nAlphaBins; j++ )
+  for ( int j = 0; j < nAlphaBins; j++ )
   {
-    print_pt_angleDependence << "#alpha in [ " << j* deltaAlpha << "°, " << ( j + 1 )*deltaAlpha << "° ] " << endl;
-    for( int k = 0; k < n_bins + 1; k++ )
+    print_pt_angleDependence << "#alpha in [ " << j * deltaAlpha << "°, " << (j+1)*deltaAlpha << "° ] "<< endl;
+    for ( int k = 0;k < n_bins + 1;k++ )
     {
       print_pt_angleDependence.width( 15 );
       pt_out = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
       print_pt_angleDependence << pt_out;
       const double dpt = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt ) - exp( double( k ) * d_ln_pt + log( _pt_min ) );
-      for( int i = 0; i < eta_bins; i++ )
+      for ( int i = 0;i < eta_bins;i++ )
       {
         const double delta_eta = 2.0 * ( rapidityRanges[i].yright - rapidityRanges[i].yleft );
-
+        
         print_pt_angleDependence.width( 15 );
         print_pt_angleDependence << double( ptBinsAngleDep[i][j][k] ) / theConfig->getTestparticles() / dpt / delta_eta;
       }
       print_pt_angleDependence << endl;
-    }
+    }    
     print_pt_angleDependence << endl;
     print_pt_angleDependence << endl;
   }
-
-  //CMS pt cut for non prompt jpsi: 6.5GeV < pt < 30 GeV, y cut: |y|<2.4
+  
+    //CMS pt cut for non prompt jpsi: 6.5GeV < pt < 30 GeV, y cut: |y|<2.4
   if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() && _flavTypeToComputeFor == electron_gen )
   {
     string filename_yield_cmsNonPromptJpsi = filename_prefix + "_nonPromptJpsiCMScuts_yield_" + name;
     fstream print_cmsNonPromptJpsi( filename_yield_cmsNonPromptJpsi.c_str(), ios::out | ios::trunc );
-
+    
     print_cmsNonPromptJpsi << "# yield of non prompt jpsi from B meson decays" << endl;
     print_cmsNonPromptJpsi << "# with same acceptance cuts as for CMS:  6.5GeV < pt < 30 GeV,  |y|<2.4" << endl;
-
+    
     int count_jpsi = 0;
     double delta_eta_cms = 2.0 * 2.4;
     double y, pt;
-    for( int i = 1; i <= n_particles; i++ )
+    for ( int i = 1; i <= n_particles; i++ )
     {
       pt = sqrt( pow( _particles[i].PX, 2.0 ) + pow( _particles[i].PY, 2.0 ) );
-      y = 0.5 * log( ( _particles[i].E + _particles[i].PZ ) / ( _particles[i].E - _particles[i].PZ ) );
-
+      y = 0.5 * log(( _particles[i].E + _particles[i].PZ ) / ( _particles[i].E - _particles[i].PZ ) );
+      
       if( fabs( y ) < 2.4 && pt > 6.5 && pt < 30.0 )
         count_jpsi++;
     }
-
+    
     print_cmsNonPromptJpsi << double( count_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getNumberElectronStat() / delta_eta_cms << endl;
   }
-
+  
 
 }
 
@@ -2073,7 +2070,7 @@ void analysis::volumeMidrap( const int step ) const
   binning zBins( filename_z, numberOfBins );
   binning tBins( filename_t, numberOfBins );
 
-  for( int i = 0; i < particles_atTimeNow.size(); i++ )
+  for ( int i = 0;i < particles_atTimeNow.size();i++ )
   {
 //     y = 0.5*log( (particles_atTimeNow[i].E + particles_atTimeNow[i].PZ) / (particles_atTimeNow[i].E - particles_atTimeNow[i].PZ) );
 //     if(fabs(y) <= y_max)
@@ -2083,11 +2080,11 @@ void analysis::volumeMidrap( const int step ) const
 //       tBins.add(xt);
 //     }
 
-    if( particles_atTimeNow[i].T <= tstep[step] )
+    if ( particles_atTimeNow[i].T <= tstep[step] )
     {
 
-      y = 0.5 * log( ( particles_atTimeNow[i].E + particles_atTimeNow[i].PZ ) / ( particles_atTimeNow[i].E - particles_atTimeNow[i].PZ ) );
-      if( fabs( y ) <= y_max )
+      y = 0.5 * log(( particles_atTimeNow[i].E + particles_atTimeNow[i].PZ ) / ( particles_atTimeNow[i].E - particles_atTimeNow[i].PZ ) );
+      if ( fabs( y ) <= y_max )
       {
         zBins.add( fabs( particles_atTimeNow[i].Z ) );
         xt = sqrt( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) );
@@ -2113,79 +2110,79 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
   FLAVOR_TYPE genFlavor;
   double pt, y;
   tVecOfArrayOfDoubleVec _ptBins;
-
+  
   // populate temporary _ptBins with temporary "references" to the actual data structures according to the requested flavor
-  for( int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
+  for ( int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
   {
-    switch( _flavTypeToComputeFor )
+    switch ( _flavTypeToComputeFor )
     {
-    case gluon:
-      _ptBins.push_back( ptBins_gluons[yRange] );
-      break;
-    case light_quark:
-      _ptBins.push_back( ptBins_quarks[yRange] );
-      break;
-    case up:
-      _ptBins.push_back( ptBins_ups[yRange] );
-      break;
-    case down:
-      _ptBins.push_back( ptBins_downs[yRange] );
-      break;
-    case strange:
-      _ptBins.push_back( ptBins_stranges[yRange] );
-      break;
-    case anti_up:
-      _ptBins.push_back( ptBins_anti_ups[yRange] );
-      break;
-    case anti_down:
-      _ptBins.push_back( ptBins_anti_downs[yRange] );
-      break;
-    case anti_strange:
-      _ptBins.push_back( ptBins_anti_stranges[yRange] );
-      break;
-    case allFlavors:
-      _ptBins.push_back( ptBins_all[yRange] );
-      break;
-    default:
-      string errMsg = "error in ptDistribution, flavor not specified";
-      throw eAnalysis_error( errMsg );
-      break;
+      case gluon:
+        _ptBins.push_back( ptBins_gluons[yRange] );
+        break;
+      case light_quark:
+        _ptBins.push_back( ptBins_quarks[yRange] );
+        break;
+      case up:
+        _ptBins.push_back( ptBins_ups[yRange] );
+        break;
+      case down:
+        _ptBins.push_back( ptBins_downs[yRange] );
+        break;
+      case strange:
+        _ptBins.push_back( ptBins_stranges[yRange] );
+        break;
+      case anti_up:
+        _ptBins.push_back( ptBins_anti_ups[yRange] );
+        break;
+      case anti_down:
+        _ptBins.push_back( ptBins_anti_downs[yRange] );
+        break;  
+      case anti_strange:
+        _ptBins.push_back( ptBins_anti_stranges[yRange] );
+        break;
+      case allFlavors:
+        _ptBins.push_back(ptBins_all[yRange]);
+        break;
+      default:
+        string errMsg = "error in ptDistribution, flavor not specified";
+        throw eAnalysis_error( errMsg );
+        break;
     }
   }
-
+  
   // loop over all particles and bin them according to their pt
-  for( int j = 0; j < n_particles; j++ )
+  for ( int j = 0; j < n_particles; j++ )
   {
     pt = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
-    y = 0.5 * log( ( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
-
+    y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
+    
     // check whether particle has the correct flavor
     genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
-    if( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor ||
-        ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
+    if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
+      ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
       // is it in the possible pt range at all?
-      if( pt < maxPT && pt >= minPT )
+      if ( pt < maxPT && pt >= minPT )
       {
         // individually check for each rapidity range whether this particle needs to be binned
-        for( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
+        for ( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
         {
-          if( fabs( y ) >= rapidityRanges[yRangeIndex].yleft && fabs( y ) <= rapidityRanges[yRangeIndex].yright )
+          if ( fabs( y ) >= rapidityRanges[yRangeIndex].yleft && fabs( y ) <= rapidityRanges[yRangeIndex].yright )
           {
-            if( pt == minPT )   // a special case
+            if ( pt == minPT )  // a special case
             {
               ++_ptBins[yRangeIndex][step][0];  // actually bin the pt of the particle
             }
             else
             {
-              ++_ptBins[yRangeIndex][step][int( ( pt - minPT ) / binWidthPT )]; // actually bin the pt of the particle
+              ++_ptBins[yRangeIndex][step][int(( pt - minPT )/binWidthPT )];  // actually bin the pt of the particle
             }
           }
         }
       }
     }
   }
-
+  
 }
 
 
@@ -2196,70 +2193,70 @@ void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vect
 
   vector<double>* _ptBinsSoftAll;
 
-  if( _flavTypeToComputeFor == gluon )
+  if ( _flavTypeToComputeFor == gluon )
   {
     _ptBinsSoftAll = ptBinsSoftAll_gluons;
   }
   else if ( _flavTypeToComputeFor == light_quark )
-    {
-      _ptBinsSoftAll = ptBinsSoftAll_quarks;
-    }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_quarks;
+  }
   else if ( _flavTypeToComputeFor == up )
-      {
-        _ptBinsSoftAll = ptBinsSoftAll_ups;
-      }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_ups;
+  }
   else if ( _flavTypeToComputeFor == down )
-        {
-          _ptBinsSoftAll = ptBinsSoftAll_downs;
-        }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_downs;
+  }
   else if ( _flavTypeToComputeFor == strange )
-          {
-            _ptBinsSoftAll = ptBinsSoftAll_stranges;
-          }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_stranges;
+  }
   else if ( _flavTypeToComputeFor == anti_up )
-            {
-              _ptBinsSoftAll = ptBinsSoftAll_anti_ups;
-            }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_anti_ups;
+  }
   else if ( _flavTypeToComputeFor == anti_down )
-              {
-                _ptBinsSoftAll = ptBinsSoftAll_anti_downs;
-              }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_anti_downs;
+  }
   else if ( _flavTypeToComputeFor == anti_strange )
-                {
-                  _ptBinsSoftAll = ptBinsSoftAll_anti_stranges;
-                }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_anti_stranges;
+  }
   else if ( _flavTypeToComputeFor == allFlavors )
-                  {
-                    _ptBinsSoftAll = ptBinsSoftAll_all;
-                  }
-                  else
-                  {
-                    string errMsg = "error in ptSoftDistribution, flavor not specified";
-                    throw eAnalysis_error( errMsg );
-                  }
+  {
+    _ptBinsSoftAll = ptBinsSoftAll_all;
+  }
+  else
+  {
+    string errMsg = "error in ptSoftDistribution, flavor not specified";
+    throw eAnalysis_error( errMsg );
+  }
 
   FLAVOR_TYPE genFlavor;
-  for( int j = 0; j < n_particles; j++ )
+  for ( int j = 0; j < n_particles; j++ )
   {
     pt = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
 
     genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
-    if( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor ||
-        ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
+    if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
+      ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
       //------------------------ y in [-inf,inf] -----------------------
-      if( pt <= maxPTSoft && pt >= 0 )
+      if ( pt <= maxPTSoft && pt >= 0 )
       {
-        if( pt == maxPTSoft )
+        if ( pt == maxPTSoft )
         {
           ++_ptBinsSoftAll[step][numberBinsSoftPT - 1];
         }
         else
         {
-          if( pt == 0 )
+          if ( pt == 0 )
             ++_ptBinsSoftAll[step][0];
           else
-            ++_ptBinsSoftAll[step][int( pt / binWidthSoftPT )];
+            ++_ptBinsSoftAll[step][int( pt/binWidthSoftPT )];
         }
       }
       //----------------------------------------------------------------
@@ -2275,58 +2272,58 @@ void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Pa
   vector<double> * _yBins;
 
 
-  if( _flavTypeToComputeFor == gluon )
+  if ( _flavTypeToComputeFor == gluon )
   {
     _yBins = yBins_gluon;
   }
   else if ( _flavTypeToComputeFor == up )
-    {
-      _yBins = yBins_up;
-    }
-  else if ( _flavTypeToComputeFor == down )
-      {
-        _yBins = yBins_down;
-      }
-  else if ( _flavTypeToComputeFor == strange )
-        {
-          _yBins = yBins_strange;
-        }
-  else if ( _flavTypeToComputeFor == anti_up )
-          {
-            _yBins = yBins_anti_up;
-          }
-  else if ( _flavTypeToComputeFor == anti_down )
-            {
-              _yBins = yBins_anti_down;
-            }
-  else if ( _flavTypeToComputeFor == anti_strange )
-              {
-                _yBins = yBins_anti_strange;
-              }
-              else
-              {
-                string errMsg = "error in yDistribution, flavor not specified";
-                throw eAnalysis_error( errMsg );
-              }
-
-  for( int j = 0; j < n_particles; j++ )
   {
-    y = 0.5 * log( ( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
+    _yBins = yBins_up;
+  }
+  else if ( _flavTypeToComputeFor == down )
+  {
+    _yBins = yBins_down;
+  }
+  else if ( _flavTypeToComputeFor == strange )
+  {
+    _yBins = yBins_strange;
+  }
+  else if ( _flavTypeToComputeFor == anti_up )
+  {
+    _yBins = yBins_anti_up;
+  }
+  else if ( _flavTypeToComputeFor == anti_down )
+  {
+    _yBins = yBins_anti_down;
+  }
+  else if ( _flavTypeToComputeFor == anti_strange )
+  {
+    _yBins = yBins_anti_strange;
+  }
+  else
+  {
+    string errMsg = "error in yDistribution, flavor not specified";
+    throw eAnalysis_error( errMsg );
+  }
 
-    if( _particles[j].FLAVOR == _flavTypeToComputeFor )
+  for ( int j = 0; j < n_particles; j++ )
+  {
+    y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
+
+    if ( _particles[j].FLAVOR == _flavTypeToComputeFor )
     {
-      if( y <= maxY && y >= minY )
+      if ( y <= maxY && y >= minY)
       {
-        if( y == maxY )
+        if ( y == maxY )
         {
           ++_yBins[step][numberBinsPT - 1];
         }
         else
         {
-          if( y == minY )
+          if ( y == minY )
             ++_yBins[step][0];
           else
-            ++_yBins[step][int( ( y - minY ) / binWidthY )];
+            ++_yBins[step][int(( y - minY )/binWidthY )];
         }
       }
       //----------------------------------------------------------------
@@ -2341,44 +2338,44 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
 {
   double Et, y;
   vector<double> * _EtBins;
-
-  if( _flavTypeToComputeFor == gluon )
+  
+  if ( _flavTypeToComputeFor == gluon )
   {
     _EtBins = transverseEnergyGluons;
   }
   else if ( _flavTypeToComputeFor == light_quark )
-    {
-      _EtBins = transverseEnergyQuarks;
-    }
-  else if ( _flavTypeToComputeFor == anti_light_quark )
-      {
-        _EtBins = transverseEnergyAntiQuarks;
-      }
-      else
-      {
-        string errMsg = "error in yDistribution, flavor not specified";
-        throw eAnalysis_error( errMsg );
-      }
-
-  for( int j = 0; j < n_particles; j++ )
   {
-    Et = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
-    y = 0.5 * log( ( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
-
-    if( ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR ) == _flavTypeToComputeFor )
+    _EtBins = transverseEnergyQuarks;
+  }
+  else if ( _flavTypeToComputeFor == anti_light_quark )
+  {
+    _EtBins = transverseEnergyAntiQuarks;
+  }
+  else
+  {
+    string errMsg = "error in yDistribution, flavor not specified";
+    throw eAnalysis_error( errMsg );
+  }
+  
+  for ( int j = 0; j < n_particles; j++ )
+  {
+    Et = sqrt( pow( _particles[j].PX, 2) + pow( _particles[j].PY, 2) );
+    y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
+    
+    if ( ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR ) == _flavTypeToComputeFor )
     {
-      if( y <= maxY && y >= minY )
+      if ( y <= maxY && y >= minY)
       {
-        if( y == maxY )
+        if ( y == maxY )
         {
           _EtBins[step][numberBinsPT - 1] += Et;
         }
         else
         {
-          if( y == minY )
+          if ( y == minY )
             _EtBins[step][0] += Et;
           else
-            _EtBins[step][int( ( y - minY ) / binWidthY )] += Et;
+            _EtBins[step][int(( y - minY )/binWidthY )] += Et;
         }
       }
       //----------------------------------------------------------------
@@ -2410,12 +2407,12 @@ void analysis::restoreJetTracker()
 void analysis::exchangeJetID( const int oldID, const int newID )
 {
   int entity_index = 0;
-  while( entity_index < jetTracker.size() && jetTracker[entity_index].back().jet_ID_out != -addedParticles[oldID].unique_id )
+  while ( entity_index < jetTracker.size() && jetTracker[entity_index].back().jet_ID_out != -addedParticles[oldID].unique_id )
   {
     entity_index++;
   }
 
-  if( entity_index < jetTracker.size() )
+  if ( entity_index < jetTracker.size() )
   {
     jetTracker[entity_index].back().jet_ID_out = -addedParticles[newID].unique_id;
   }
@@ -2434,7 +2431,7 @@ void analysis::addJetEvent_initial( const int jetID )
   tempEvent.jet_ID_in = -1;
   tempEvent.jet_ID_out = -addedParticles[jetID].unique_id;
   tempEvent.coll_type = initial_jet;
-
+  
   tempEvent.flavor_in = -1;
   tempEvent.flavor_out = static_cast<int>( addedParticles[jetID].FLAVOR );
 
@@ -2457,10 +2454,10 @@ void analysis::addJetEvent_initial( const int jetID )
 void analysis::addJetEvents_final()
 {
   double pt;
-  for( int i = 0; i < addedParticles.size(); i++ )
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
     pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
-    if( pt > jetTracking_PT )
+    if ( pt > jetTracking_PT )
     {
       jetTrackerSingleEvent tempEvent;
       tempEvent.jet_ID_in = -addedParticles[i].unique_id;
@@ -2474,20 +2471,20 @@ void analysis::addJetEvents_final()
       tempEvent.P_proj_in[1] = addedParticles[i].PX;
       tempEvent.P_proj_in[2] = addedParticles[i].PY;
       tempEvent.P_proj_in[3] = addedParticles[i].PZ;
-
+      
       tempEvent.flavor_out = -1;
       tempEvent.flavor_in = static_cast<int>( addedParticles[i].FLAVOR );
-
+      
       tempEvent.coll_type = final_jet;
 
 
       int entity_index = 0;
-      while( entity_index < jetTracker.size() && jetTracker[entity_index].back().jet_ID_out != -addedParticles[i].unique_id )
+      while ( entity_index < jetTracker.size() && jetTracker[entity_index].back().jet_ID_out != -addedParticles[i].unique_id )
       {
         entity_index++;
       }
 
-      if( entity_index < jetTracker.size() )
+      if ( entity_index < jetTracker.size() )
       {
         jetTracker[entity_index].push_back( tempEvent );
       }
@@ -2532,7 +2529,7 @@ int analysis::addJetEvent_in( const int ID_1, const int ID_2, const int added_ID
   tempEvent.P1_in[2] = particles_atTimeNow[partner1].PY;
   tempEvent.P1_in[3] = particles_atTimeNow[partner1].PZ;
 
-  if( coll_type == c3to2 )
+  if ( coll_type == c3to2 )
   {
     tempEvent.P2_in[0] = particles_atTimeNow[partner2].E;
     tempEvent.P2_in[1] = particles_atTimeNow[partner2].PX;
@@ -2544,16 +2541,16 @@ int analysis::addJetEvent_in( const int ID_1, const int ID_2, const int added_ID
   tempEvent.xSection = cross_section;
   tempEvent.cell_ID = cell_ID;
   tempEvent.coll_type = coll_type;
-
+  
 
 
   int entity_index = 0;
-  while( entity_index < jetTracker.size() && jetTracker[entity_index].back().jet_ID_out != -addedParticles[jetID].unique_id )
+  while ( entity_index < jetTracker.size() && jetTracker[entity_index].back().jet_ID_out != -addedParticles[jetID].unique_id )
   {
     entity_index++;
   }
 
-  if( entity_index < jetTracker.size() )
+  if ( entity_index < jetTracker.size() )
   {
     jetTracker[entity_index].push_back( tempEvent );
   }
@@ -2574,7 +2571,7 @@ void analysis::addJetEvent_out( const int entity_ID, const int added_ID, const i
   double pt2 = sqrt( pow( particles_atTimeNow[ID_2].PX, 2.0 ) + pow( particles_atTimeNow[ID_2].PY, 2.0 ) );
 
   double pt3 = -1;
-  if( coll_type == c2to3 )
+  if ( coll_type == c2to3 )
   {
     pt3 = sqrt( pow( addedParticles[ID_3].PX, 2.0 ) + pow( addedParticles[ID_3].PY, 2.0 ) );
   }
@@ -2585,14 +2582,14 @@ void analysis::addJetEvent_out( const int entity_ID, const int added_ID, const i
   jetID = added_ID;
   partner1 = ID_2;
   partner2 = ID_3;
-
-  if( pt3 > pt1 )
+  
+  if ( pt3 > pt1 )
   {
     jetID = ID_3;
     partner2 = added_ID;
   }
 
-  if( entity_ID != -1 )
+  if ( entity_ID != -1 )
   {
     jetTracker[entity_ID].back().jet_ID_out = -addedParticles[jetID].unique_id;
 
@@ -2600,16 +2597,16 @@ void analysis::addJetEvent_out( const int entity_ID, const int added_ID, const i
     jetTracker[entity_ID].back().P_proj_out[1] = addedParticles[jetID].PX;
     jetTracker[entity_ID].back().P_proj_out[2] = addedParticles[jetID].PY;
     jetTracker[entity_ID].back().P_proj_out[3] = addedParticles[jetID].PZ;
-
+    
     jetTracker[entity_ID].back().flavor_out = static_cast<int>( addedParticles[jetID].FLAVOR );
-
+    
 
     jetTracker[entity_ID].back().P1_out[0] = particles_atTimeNow[partner1].E;
     jetTracker[entity_ID].back().P1_out[1] = particles_atTimeNow[partner1].PX;
     jetTracker[entity_ID].back().P1_out[2] = particles_atTimeNow[partner1].PY;
     jetTracker[entity_ID].back().P1_out[3] = particles_atTimeNow[partner1].PZ;
 
-    if( coll_type == c2to3 )
+    if ( coll_type == c2to3 )
     {
       jetTracker[entity_ID].back().P2_out[0] = addedParticles[partner2].E;
       jetTracker[entity_ID].back().P2_out[1] = addedParticles[partner2].PX;
@@ -2618,40 +2615,40 @@ void analysis::addJetEvent_out( const int entity_ID, const int added_ID, const i
     }
   }
   else if ( sqrt( pow( addedParticles[jetID].PX, 2.0 ) + pow( addedParticles[jetID].PY, 2.0 ) ) > jetTracking_PT )
+  {
+    jetTrackerSingleEvent tempEvent;
+    tempEvent.jet_ID_in = -1;
+    tempEvent.jet_ID_out = -addedParticles[jetID].unique_id;
+    tempEvent.coll_type = production;
+    tempEvent.R_proj[0] = addedParticles[jetID].T;
+    tempEvent.R_proj[1] = addedParticles[jetID].X;
+    tempEvent.R_proj[2] = addedParticles[jetID].Y;
+    tempEvent.R_proj[3] = addedParticles[jetID].Z;
+    tempEvent.flavor_in = -1;
+    tempEvent.flavor_out = static_cast<int>( addedParticles[jetID].FLAVOR );
+
+    tempEvent.P_proj_out[0] = addedParticles[jetID].E;
+    tempEvent.P_proj_out[1] = addedParticles[jetID].PX;
+    tempEvent.P_proj_out[2] = addedParticles[jetID].PY;
+    tempEvent.P_proj_out[3] = addedParticles[jetID].PZ;
+
+    tempEvent.P1_out[0] = particles_atTimeNow[partner1].E;
+    tempEvent.P1_out[1] = particles_atTimeNow[partner1].PX;
+    tempEvent.P1_out[2] = particles_atTimeNow[partner1].PY;
+    tempEvent.P1_out[3] = particles_atTimeNow[partner1].PZ;
+
+    if ( coll_type == c2to3 )
     {
-      jetTrackerSingleEvent tempEvent;
-      tempEvent.jet_ID_in = -1;
-      tempEvent.jet_ID_out = -addedParticles[jetID].unique_id;
-      tempEvent.coll_type = production;
-      tempEvent.R_proj[0] = addedParticles[jetID].T;
-      tempEvent.R_proj[1] = addedParticles[jetID].X;
-      tempEvent.R_proj[2] = addedParticles[jetID].Y;
-      tempEvent.R_proj[3] = addedParticles[jetID].Z;
-      tempEvent.flavor_in = -1;
-      tempEvent.flavor_out = static_cast<int>( addedParticles[jetID].FLAVOR );
-
-      tempEvent.P_proj_out[0] = addedParticles[jetID].E;
-      tempEvent.P_proj_out[1] = addedParticles[jetID].PX;
-      tempEvent.P_proj_out[2] = addedParticles[jetID].PY;
-      tempEvent.P_proj_out[3] = addedParticles[jetID].PZ;
-
-      tempEvent.P1_out[0] = particles_atTimeNow[partner1].E;
-      tempEvent.P1_out[1] = particles_atTimeNow[partner1].PX;
-      tempEvent.P1_out[2] = particles_atTimeNow[partner1].PY;
-      tempEvent.P1_out[3] = particles_atTimeNow[partner1].PZ;
-
-      if( coll_type == c2to3 )
-      {
-        tempEvent.P2_out[0] = addedParticles[partner2].E;
-        tempEvent.P2_out[1] = addedParticles[partner2].PX;
-        tempEvent.P2_out[2] = addedParticles[partner2].PY;
-        tempEvent.P2_out[3] = addedParticles[partner2].PZ;
-      }
-
-      vector< jetTrackerSingleEvent > tempEntity;
-      tempEntity.push_back( tempEvent );
-      jetTracker.push_back( tempEntity );
+      tempEvent.P2_out[0] = addedParticles[partner2].E;
+      tempEvent.P2_out[1] = addedParticles[partner2].PX;
+      tempEvent.P2_out[2] = addedParticles[partner2].PY;
+      tempEvent.P2_out[3] = addedParticles[partner2].PZ;
     }
+
+    vector< jetTrackerSingleEvent > tempEntity;
+    tempEntity.push_back( tempEvent );
+    jetTracker.push_back( tempEntity );
+  }
 }
 
 
@@ -2661,15 +2658,15 @@ void analysis::particleOutput( const int step )
   string name;
   stringstream ss;
 
-  if( step == 0 )
+  if ( step == 0 )
     name = "initial";
   else if ( step == nTimeSteps )
-      name = "final";
-    else
-    {
-      ss << step;
-      name = "step" + ss.str();
-    }
+    name = "final";
+  else
+  {
+    ss << step;
+    name = "step" + ss.str();
+  }
 
   //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
   string filename = filename_prefix + "_" + name + ".f1";
@@ -2682,15 +2679,15 @@ void analysis::particleOutput( const int step )
   file.seekp( 0, ios::end );
   long size = file.tellp();
   file.seekp( 0, ios::beg );
-  if( size == 0 )
+  if ( size == 0 )
     printHeader( file, all, end );
   //---------------------------------------
 
-  for( int i = 0; i < addedParticles.size(); i++ )
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
     file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep << addedParticles[i].T << sep << addedParticles[i].X << sep
-         << addedParticles[i].Y << sep  << addedParticles[i].Z << sep << addedParticles[i].E << sep << addedParticles[i].PX << sep << addedParticles[i].PY << sep
-         << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep << addedParticles[i].N_EVENT_pp << endl;
+    << addedParticles[i].Y << sep  << addedParticles[i].Z << sep << addedParticles[i].E << sep << addedParticles[i].PX << sep << addedParticles[i].PY << sep
+    << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep << addedParticles[i].N_EVENT_pp << endl;
   }
   file.close();
 }
@@ -2710,33 +2707,33 @@ void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const in
   const int nOutput = 1; // every nOutput-th particle is writen to particle file, eg nOutput=2 every second particle, nOutput=1 for every particle
   int nCount_selected = nOutput; // dummy variable for counting
 
-  if( step == 0 )
+  if ( step == 0 )
   {
     time = 0.0;
   }
   else if ( step == nTimeSteps_movie - 1 )
-    {
-      return;
-    }
-    else
-    {
-      time = tstep_movie[step];
-    }
+  {
+    return;
+  }
+  else
+  {
+    time = tstep_movie[step];
+  }
 
   // determine number of timesteps, nTimeSteps is too large if runtime is shorter than last timestep
   int numberOfTimeSteps = 0;
-  while( theConfig->getRuntime() >= tstep_movie[numberOfTimeSteps] && numberOfTimeSteps < nTimeSteps_movie - 1 )
+  while ( theConfig->getRuntime() >= tstep_movie[numberOfTimeSteps] && numberOfTimeSteps < nTimeSteps_movie - 1 )
   {
     numberOfTimeSteps++;
   }
   numberOfTimeSteps -= jumpSteps;
 
   int numberActiveParticles = 0;
-  for( int i = 0; i < n_particles; i++ )
+  for ( int i = 0; i < n_particles; i++ )
   {
-    if( _particles[i].T_creation <= time )
+    if ( _particles[i].T_creation <= time )
     {
-      if( nCount_selected != nOutput )  // do not write particle to file, increase count by one
+      if ( nCount_selected != nOutput ) // do not write particle to file, increase count by one
       {
         nCount_selected++;
       }
@@ -2754,7 +2751,7 @@ void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const in
   // <<---------------------------------------------------
   // oscar output
 
-  if( step == 0 )  // header, no particles yet
+  if ( step == 0 ) // header, no particles yet
   {
     // file header
     _oscar << "OSC1997A    " << endl;
@@ -2763,43 +2760,43 @@ void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const in
     // code name etc.
     // code_name version (aproj, zproj)+(atarg, ztarg) refframe, ebeam, ntestpart
     _oscar << ::std::scientific << ::std::uppercase
-           << "BAMPS        0.2    (" << ::std::setw( 3 ) << int( theConfig->getA() ) << "," << ::std::setw( 6 )
-           <<  int( theConfig->getAatomic() ) << ")+(" << ::std::setw( 3 ) << int( theConfig->getB() ) << ","
-           << ::std::setw( 6 ) << int( theConfig->getBatomic() ) << ")  CMS " << ::std::setprecision( 4 )
-           << theConfig->getSqrtS() << "  " << ::std::setw( 8 ) << theConfig->getTestparticles() << endl;
+    << "BAMPS        0.2    (" << ::std::setw( 3 ) << int( theConfig->getA() ) << "," << ::std::setw( 6 )
+    <<  int( theConfig->getAatomic() ) << ")+(" << ::std::setw( 3 ) << int( theConfig->getB() ) << ","
+    << ::std::setw( 6 ) << int( theConfig->getBatomic() ) << ")  CMS " << ::std::setprecision( 4 )
+    << theConfig->getSqrtS() << "  " << ::std::setw( 8 ) << theConfig->getTestparticles() << endl;
   }
   else // all other timesteps
   {
     // event header for this timestep
     // event npart bimp phi #timesteps timestep
     _oscar << "          1  " << ::std::setw( 10 ) << numberActiveParticles << "  " << ::std::resetiosflags( ::std::ios::scientific )
-           << ::std::setw( 8 ) << ::std::fixed << ::std::setprecision( 3 ) << theConfig->getImpactParameter() << "  "
-           << ::std::setw( 8 ) << ::std::fixed << ::std::setprecision( 3 ) << 0.000 << "  "  << ::std::setw( 4 )
-           << numberOfTimeSteps << "  " << ::std::setw( 4 ) << step << endl;
+    << ::std::setw( 8 ) << ::std::fixed << ::std::setprecision( 3 ) << theConfig->getImpactParameter() << "  "
+    << ::std::setw( 8 ) << ::std::fixed << ::std::setprecision( 3 ) << 0.000 << "  "  << ::std::setw( 4 )
+    << numberOfTimeSteps << "  " << ::std::setw( 4 ) << step << endl;
 
 
     // write particle data
     // ipart, id, px, py, pz, p0, mass, x, y, z, t, flag#1, x_f, y_f, z_f, t_f, iflag#1
-    for( int i = 0; i < n_particles; i++ )
+    for ( int i = 0; i < n_particles; i++ )
     {
-      if( _particles[i].T_creation <= time )
+      if ( _particles[i].T_creation <= time )
       {
         // find out if particle should be written to file (in case nOutput is not 1)
-        if( nCount_selected != nOutput )  // do not write particle to file, increase count by one
+        if ( nCount_selected != nOutput ) // do not write particle to file, increase count by one
         {
           nCount_selected++;
         }
         else // write particle to file
         {
-          _oscar << ::std::setw( 11 ) << i + 1;
+          _oscar << ::std::setw( 11 ) << i+1;
           _oscar << ::std::setw( 12 ) << ParticleOffline::mapToPDGCodes( _particles[i].FLAVOR ); //PDG group codes
           nCount_selected = 1;
 
           _oscar << ::std::scientific << ::std::uppercase << ::std::setprecision( 6 )
-                 << setw( width ) << _particles[i].PX << setw( width ) << _particles[i].PY << setw( width ) << _particles[i].PZ << setw( width )
-                 << _particles[i].E << setw( width ) << _particles[i].m;
+          << setw( width ) << _particles[i].PX << setw( width ) << _particles[i].PY << setw( width ) << _particles[i].PZ << setw( width )
+          << _particles[i].E << setw( width ) << _particles[i].m;
 
-          if( _particles[i].T == time )
+          if ( _particles[i].T == time )
           {
             t = _particles[i].T;
             x = _particles[i].X;
@@ -2807,32 +2804,32 @@ void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const in
             z = _particles[i].Z;
           }
           else if ( _particles[i].T > time )
-            {
-              dt = time - _particles[i].T;
-              cc = dt / _particles[i].E;
-              t = _particles[i].T + dt;
-              x = _particles[i].X + _particles[i].PX * cc;
-              y = _particles[i].Y + _particles[i].PY * cc;
-              z = _particles[i].Z + _particles[i].PZ * cc;
-            }
-            else
-            {
-              cout << "error in write movie particle data, particles from the past" << endl;
-              cout << "timestep=" << time << "   time _particles=" << _particles[i].T << endl;
-              dt = time - _particles[i].T;
-              cc = dt / _particles[i].E;
-              t = _particles[i].T + dt;
-              x = _particles[i].X + _particles[i].PX * cc;
-              y = _particles[i].Y + _particles[i].PY * cc;
-              z = _particles[i].Z + _particles[i].PZ * cc;
-            }
+          {
+            dt = time - _particles[i].T;
+            cc = dt / _particles[i].E;
+            t = _particles[i].T + dt;
+            x = _particles[i].X + _particles[i].PX * cc;
+            y = _particles[i].Y + _particles[i].PY * cc;
+            z = _particles[i].Z + _particles[i].PZ * cc;
+          }
+          else
+          {
+            cout << "error in write movie particle data, particles from the past" << endl;
+            cout << "timestep=" << time << "   time _particles=" << _particles[i].T << endl;
+            dt = time - _particles[i].T;
+            cc = dt / _particles[i].E;
+            t = _particles[i].T + dt;
+            x = _particles[i].X + _particles[i].PX * cc;
+            y = _particles[i].Y + _particles[i].PY * cc;
+            z = _particles[i].Z + _particles[i].PZ * cc;
+          }
 
           _oscar << setw( width ) << x << setw( width ) << y << setw( width ) << z << setw( width ) << t;
 
           //       _oscar << "0.0" << sep << "0.0" << sep << "0.0" << sep << "0.0" << sep << "0.0" << sep << "0" << endl;
           //         _oscar << zero << sep << zero << sep << zero << sep << zero << sep << zero << ::std::setw( 10 ) << int(zero) << endl;
           //         _oscar << zero << sep << _particles[i].X_lastInt << sep << _particles[i].Y_lastInt << sep << _particles[i].Z_lastInt << sep << _particles[i].T_lastInt << ::std::setw( 10 ) << int(zero) << endl;
-          _oscar << setw( width ) << zero << setw( width ) << _particles[i].X_lastInt << setw( width ) << _particles[i].Y_lastInt << setw( width ) << _particles[i].Z_lastInt << setw( width ) << _particles[i].T_lastInt << ::std::setw( 10 ) << -( _particles[i].unique_id ) << endl;
+          _oscar << setw( width ) << zero << setw( width ) << _particles[i].X_lastInt << setw( width ) << _particles[i].Y_lastInt << setw( width ) << _particles[i].Z_lastInt << setw( width ) << _particles[i].T_lastInt << ::std::setw( 10 ) << -(_particles[i].unique_id) << endl;
           // --------------------------------------------------->>
         }
       }
@@ -2845,9 +2842,9 @@ void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const in
 
 
 
-void analysis::printHeader( fstream& f, const anaType mode, const time_t end )
+void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
 {
-  switch( mode )
+  switch ( mode )
   {
   case ptSpectrum:
     f << "#pt-spectra " << endl;
@@ -2861,7 +2858,7 @@ void analysis::printHeader( fstream& f, const anaType mode, const time_t end )
   case all:
     f << "#information on particle locations, momenta etc. at step indicated by filename" << endl;
     f << "#initial = 0 fm/c" << endl;
-    for( int i = 0; i < nTimeSteps - 1; i++ )
+    for ( int i = 0;i < nTimeSteps - 1;i++ )
       f << "#step " << ( i + 1 ) << " = " << tstep[i] << " fm/c" << endl;
     f << "#final = " << theConfig->getRuntime() << " fm/c" << endl;
     break;
@@ -2869,7 +2866,7 @@ void analysis::printHeader( fstream& f, const anaType mode, const time_t end )
     f << "#rapidity distribution " << endl;
     f << "#one block per timestep " << endl;
     break;
-  case quarkNumbers:
+  case quarkNumbers:  
     f << "#quark numbers summed over all rapidities" << endl;
     break;
   default:
@@ -2886,13 +2883,13 @@ void analysis::printHeader( fstream& f, const anaType mode, const time_t end )
   f << "#P0= " << theConfig->getPtCutoff() << " GeV" << endl;
   f << "#b= " << theConfig->getImpactParameter() << " fm" << endl;
   f << "#(" << theConfig->getA() << "," << theConfig->getAatomic() << ") on ("
-    << theConfig->getB() << "," << theConfig->getBatomic() << ")" << endl;
+  << theConfig->getB() << "," << theConfig->getBatomic() << ")" << endl;
   f << "#seed for random generator ran2(): " << seed << endl;
   f << "#" << endl;
 
   stringstream ss;
 
-  switch( mode )
+  switch ( mode )
   {
   case ptSpectrum:
     f << "#numbers NOT yet corrected for width of bins and number of testparticles!" << endl;
@@ -2900,18 +2897,18 @@ void analysis::printHeader( fstream& f, const anaType mode, const time_t end )
     f << "#testparticles= " << theConfig->getTestparticles() << endl;
     f << "#" << endl;
     f << "#pt [GeV]" << sep;
-    for( int j = 0; j <= nTimeSteps; j++ )
+    for ( int j = 0; j <= nTimeSteps; j++ )
     {
-      if( j == 0 )
+      if ( j == 0 )
         f << "initial" << sep;
       else if ( j == nTimeSteps )
-          f << "final = " << theConfig->getRuntime() << " fm/c";
+        f << "final = " << theConfig->getRuntime() << " fm/c";
       else if ( tstep[j-1] <= theConfig->getRuntime() )
-          {
-            ss << tstep[j - 1];
-            f << ss.str() << " fm/c" << sep;
-            ss.str( "" );
-          }
+      {
+        ss << tstep[j-1];
+        f << ss.str() << " fm/c" << sep;
+        ss.str( "" );
+      }
     }
     f << endl;
     break;
@@ -2921,27 +2918,27 @@ void analysis::printHeader( fstream& f, const anaType mode, const time_t end )
     f << "#testparticles= " << theConfig->getTestparticles() << endl;
     f << "#" << endl;
     f << "#pt [GeV]" << sep;
-    for( int j = 0; j <= nTimeSteps; j++ )
+    for ( int j = 0; j <= nTimeSteps; j++ )
     {
-      if( j == 0 )
+      if ( j == 0 )
         f << "initial" << sep;
       else if ( j == nTimeSteps )
-          f << "final = " << theConfig->getRuntime() << " fm/c";
+        f << "final = " << theConfig->getRuntime() << " fm/c";
       else if ( tstep[j-1] <= theConfig->getRuntime() )
-          {
-            ss << tstep[j - 1];
-            f << ss.str() << " fm/c" << sep;
-            ss.str( "" );
-          }
+      {
+        ss << tstep[j-1];
+        f << ss.str() << " fm/c" << sep;
+        ss.str( "" );
+      }
     }
     f << endl;
     break;
   case jets:
     f << "#jetID_in" << sep << "jetID_out" << sep << "coll_type" << sep
-      << "P_in[0]" << sep << "P_in[1]" << sep << "P_in[2]" << sep  << "P_in[3]" << sep
-      << "P_out[0]" << sep << "P_out[1]" << sep << "P_out[2]" << sep  << "P_out[3]" << sep
-      << "R[0]" << sep << "R[1]" << sep << "R[2]" << sep << "R[3]" << sep
-      << "xSection" << sep << "lambda" << endl;
+    << "P_in[0]" << sep << "P_in[1]" << sep << "P_in[2]" << sep  << "P_in[3]" << sep
+    << "P_out[0]" << sep << "P_out[1]" << sep << "P_out[2]" << sep  << "P_out[3]" << sep
+    << "R[0]" << sep << "R[1]" << sep << "R[2]" << sep << "R[3]" << sep
+    << "xSection" << sep << "lambda" << endl;
     break;
   case rapidityDistribution:
     f << "# y   gluon   up   down   strange   anti-up   anti-down   anti-strange" << endl;
@@ -2951,8 +2948,8 @@ void analysis::printHeader( fstream& f, const anaType mode, const time_t end )
     break;
   case all:
     f << "#ID" << sep << "uniqueID" << sep << "Cell ID" << sep << "Flavor" << sep << "t" << sep << "x" << sep << "y" << sep << "z" << sep
-      << "E"  << sep << "Px"  << sep << "Py"  << sep << "Pz" << sep << "md2g/alpha_s [GeV^2]" << sep
-      << "md2q/alpha_s [GeV^2]" << sep << "Init. eventID" << endl;
+    << "E"  << sep << "Px"  << sep << "Py"  << sep << "Pz" << sep << "md2g/alpha_s [GeV^2]" << sep
+    << "md2q/alpha_s [GeV^2]" << sep << "Init. eventID" << endl;
     break;
   default:
     f << endl;
@@ -2967,57 +2964,57 @@ void analysis::mfpJetsOutput( const int step, const int jumpSteps )
   const string sep = "\t ";
   double time;
 
-  if( step == 0 )
+  if ( step == 0 )
   {
     time = 0.0;
   }
   else if ( step == nTimeSteps_movie - 1 )
-    {
-      return;
-    }
-    else
-    {
-      time = tstep_movie[step];
-    }
-
-  mfpJetsOutputFile << time;
-  for( int i = 0; i < rings.size(); i++ )
   {
-    if( rings[i].collectedGluon != 0 )
+    return;
+  }
+  else
+  {
+    time = tstep_movie[step];
+  }
+  
+  mfpJetsOutputFile << time;
+  for ( int i = 0; i < rings.size(); i++ )
+  {
+    if ( rings[i].collectedGluon != 0 )
     {
       mfpJetsOutputFile << sep << rings[i].lambdaGluon / rings[i].collectedGluon;
     }
     else
     {
-      mfpJetsOutputFile << sep << 0;
+      mfpJetsOutputFile << sep << 0; 
     }
-    if( rings[i].collectedQuark != 0 )
+    if ( rings[i].collectedQuark != 0 )
     {
       mfpJetsOutputFile << sep << rings[i].lambdaQuark / rings[i].collectedQuark;
     }
     else
     {
-      mfpJetsOutputFile << sep << 0;
+      mfpJetsOutputFile << sep << 0; 
     }
-    mfpJetsOutputFile << sep << rings[i].collectedGluon << sep << rings[i].collectedQuark;
+    mfpJetsOutputFile << sep << rings[i].collectedGluon << sep << rings[i].collectedQuark;  
   }
   mfpJetsOutputFile << endl;
-
+  
   rings.clear();
 
 }
 
 
 
-void analysis::printCentralDensities( const double _time )
+void analysis::printCentralDensities(const double _time)
 {
   const string sep = "\t ";
-
-  centralDensitiesOutputFile << _time << sep << centralRingsCopyFromCascade.y_left << sep << centralRingsCopyFromCascade.y_right;
-  for( int i = 0; i < centralRingsCopyFromCascade.size(); i++ )
+  
+  centralDensitiesOutputFile << _time << sep << centralRingsCopyFromCascade.y_left << sep << centralRingsCopyFromCascade.y_right; 
+  for ( int i = 0; i < centralRingsCopyFromCascade.size(); i++ )
   {
-    centralDensitiesOutputFile << sep << centralRingsCopyFromCascade[i].getEnergyDensity() << sep
-                               << centralRingsCopyFromCascade[i].getGluonDensity() << sep << centralRingsCopyFromCascade[i].getQuarkDensity();
+    centralDensitiesOutputFile << sep << centralRingsCopyFromCascade[i].getEnergyDensity() << sep 
+    << centralRingsCopyFromCascade[i].getGluonDensity() << sep << centralRingsCopyFromCascade[i].getQuarkDensity(); 
   }
   centralDensitiesOutputFile << endl;
 
@@ -3040,14 +3037,14 @@ void analysis::writeJpsiFugacityOutput( const int step )
 
 
   double time;
-  if( step == 0 )
+  if ( step == 0 )
     time = 0.0;
   else if ( step == nTimeSteps )
-      return;
-    else
-      time = tstep[step - 1];
+    return;
+  else
+    time = tstep[step-1];
 
-  if( step == 0 )
+  if ( step == 0 )
   {
     // file header
     printJpsiFugacity << "#Jpsi fugacities" << endl;
@@ -3057,7 +3054,7 @@ void analysis::writeJpsiFugacityOutput( const int step )
 
   printJpsiFugacity.width( 10 );
   printJpsiFugacity << time ;
-  printJpsiFugacity << "\t";
+  printJpsiFugacity<< "\t";
 
 
   dr = 2.0; //fm
@@ -3070,7 +3067,7 @@ void analysis::writeJpsiFugacityOutput( const int step )
   getJpsiFugacity( time, dr, dz, fugacity, n_jpsi, temp, enDen );
   printJpsiFugacity << fugacity;
   printJpsiFugacity << "\t";
-  printJpsiFugacity << double( n_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
+  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
 
   printJpsiFugacity << "\t";
   printJpsiFugacity << temp;
@@ -3090,7 +3087,7 @@ void analysis::writeJpsiFugacityOutput( const int step )
   getJpsiFugacity( time, dr, dz, fugacity, n_jpsi, temp, enDen );
   printJpsiFugacity << fugacity;
   printJpsiFugacity << "\t";
-  printJpsiFugacity << double( n_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
+  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
   printJpsiFugacity << "\t";
   printJpsiFugacity << temp;
   printJpsiFugacity << "\t";
@@ -3110,7 +3107,7 @@ void analysis::writeJpsiFugacityOutput( const int step )
   getJpsiFugacity( time, dr, dz, fugacity, n_jpsi, temp, enDen );
   printJpsiFugacity << fugacity;
   printJpsiFugacity << "\t";
-  printJpsiFugacity << double( n_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
+  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
   printJpsiFugacity << "\t";
   printJpsiFugacity << temp;
   printJpsiFugacity << "\t";
@@ -3130,7 +3127,7 @@ void analysis::writeJpsiFugacityOutput( const int step )
   getJpsiFugacity( time, dr, dz, fugacity, n_jpsi, temp, enDen );
   printJpsiFugacity << fugacity;
   printJpsiFugacity << "\t";
-  printJpsiFugacity << double( n_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
+  printJpsiFugacity << double(n_jpsi) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
   printJpsiFugacity << "\t";
   printJpsiFugacity << temp;
   printJpsiFugacity << "\t";
@@ -3155,29 +3152,29 @@ void analysis::getJpsiFugacity( const double time, const double dr, const double
 
 
 
-  for( int i = 0; i < addedParticles.size(); i++ )
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
-    if( addedParticles[i].T_creation <= time )
+    if ( addedParticles[i].T_creation <= time )
     {
-      if( ( pow( addedParticles[i].X, 2.0 ) + pow( addedParticles[i].Y, 2.0 ) < pow( dr, 2.0 ) )  && ( fabs( addedParticles[i].Z ) < dz ) )
+      if (( pow( addedParticles[i].X, 2.0 ) + pow( addedParticles[i].Y, 2.0 ) < pow( dr, 2.0 ) )  && ( fabs( addedParticles[i].Z ) < dz ) )
       {
         // number of jpsi
-        if( addedParticles[i].FLAVOR == 50 )
+        if ( addedParticles[i].FLAVOR == 50 )
         {
           n_jpsi++;
         }
       }
     }
   }
-
-  for( int i = 0; i < particles_atTimeNow.size(); i++ )
+  
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    if( particles_atTimeNow[i].T <= time )
+    if ( particles_atTimeNow[i].T <= time )
     {
-      if( ( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( dr, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Z ) < dz ) )
+      if (( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( dr, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Z ) < dz ) )
       {
         // compute temp
-        if( particles_atTimeNow[i].FLAVOR == 0 )  // gluon
+        if ( particles_atTimeNow[i].FLAVOR == 0 ) // gluon
         {
           e_g += particles_atTimeNow[i].E;
           n_g++;
@@ -3190,11 +3187,11 @@ void analysis::getJpsiFugacity( const double time, const double dr, const double
   enDen = e_g / V / pow( 0.197, 3.0 ); // GeV/fm^3
 
 
-
+  
   n_jpsi_equ = theInterpolation_nJpsi.getN( temp ) * V;  // GeV^3/GeV^3 = 1
 
 
-  fugacity = double( n_jpsi ) / n_jpsi_equ / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
+  fugacity = double(n_jpsi)/ n_jpsi_equ / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
 
 //   cout << "t=" << time << "  temp=" << temp << "  deltaTemp=" << deltaTemp <<  "  n_jpsi_equ=" << n_jpsi_equ << "  fugacity=" << fugacity << "  n_jpsi=" << n_jpsi << "  V=" << V << endl;
 
@@ -3208,63 +3205,63 @@ void analysis::jpsi_correlations()
   string filename;
 
   filename = filename_prefix + "_jpsi_corr_ptbins_iniJpsi";
-  binning ptbins_iniJpsi( filename, 0.0, 6.0, 40 );
+  binning ptbins_iniJpsi(filename, 0.0, 6.0, 40);
   filename = filename_prefix + "_jpsi_corr_ptbins_secJpsi";
-  binning ptbins_secJpsi( filename, 0.0, 6.0, 40 );
+  binning ptbins_secJpsi(filename, 0.0, 6.0, 40);
   filename = filename_prefix + "_jpsi_corr_phibins_deltaPhiJpsiCharm";
-  binning phibins_deltaPhiJpsiCharm( filename, 0.0, M_PI, 30 );
+  binning phibins_deltaPhiJpsiCharm(filename, 0.0, M_PI, 30);
   filename = filename_prefix + "_jpsi_corr_phibins_deltaPhiCharmCharm";
-  binning phibins_deltaPhiCharmCharm( filename, 0.0, M_PI, 30 );
+  binning phibins_deltaPhiCharmCharm(filename, 0.0, M_PI, 30);
   filename = filename_prefix + "_jpsi_corr_phibins_deltaThetaJpsiCharm";
-  binning phibins_deltaThetaJpsiCharm( filename, 0.0, M_PI, 30 );
+  binning phibins_deltaThetaJpsiCharm(filename, 0.0, M_PI, 30);
   filename = filename_prefix + "_jpsi_corr_phibins_deltaThetaCharmCharm";
-  binning phibins_deltaThetaCharmCharm( filename, 0.0, M_PI, 30 );
+  binning phibins_deltaThetaCharmCharm(filename, 0.0, M_PI, 30);
   filename = filename_prefix + "_jpsi_corr_ptbins_charmFromJpsi";
-  binning ptbins_charmFromJpsi( filename, 0.0, 6.0, 40 );
-
+  binning ptbins_charmFromJpsi(filename, 0.0, 6.0, 40);
+  
   filename = filename_prefix + "_jpsi_corr_etabins_detaJpsiCharm";
-  binning etabins_detaJpsiCharm( filename, 0.0, 20.0, 70 );
+  binning etabins_detaJpsiCharm(filename, 0.0, 20.0, 70);
   filename = filename_prefix + "_jpsi_corr_etabins_detaCharmCharm";
-  binning etabins_detaCharmCharm( filename, 0.0, 20.0, 70 );
+  binning etabins_detaCharmCharm(filename, 0.0, 20.0, 70);
   filename = filename_prefix + "_jpsi_corr_etabins_detaSecJpsiAllCharm";
-  binning etabins_detaSecJpsiAllCharm( filename, 0.0, 20.0, 70 );
+  binning etabins_detaSecJpsiAllCharm(filename, 0.0, 20.0, 70);
   filename = filename_prefix + "_jpsi_corr_etabins_detaIniJpsiAllCharm";
-  binning etabins_detaIniJpsiAllCharm( filename, 0.0, 20.0, 70 );
+  binning etabins_detaIniJpsiAllCharm(filename, 0.0, 20.0, 70);
   filename = filename_prefix + "_jpsi_corr_etabins_detaJpsiCharm_2d";
-  binning2d etabins_detaJpsiCharm2d( filename, 0.0, 10.0, 40, 0.0, 10.0, 40 );
-
-
+  binning2d etabins_detaJpsiCharm2d(filename, 0.0, 10.0, 40, 0.0, 10.0, 40);
+  
+  
   filename = filename_prefix + "_jpsi_corr_eta_test";
-  binning eta_test( filename, -7.0, 7.0, 100 );
+  binning eta_test(filename, -7.0, 7.0, 100);
   filename = filename_prefix + "_jpsi_corr_y_test";
-  binning y_test( filename, -7.0, 7.0, 100 );
-
-
-  for( int i = 0; i < addedParticles.size(); i++ )
+  binning y_test(filename, -7.0, 7.0, 100);
+  
+  
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
-    if( addedParticles[i].FLAVOR == 50 )  // jpsi
+    if ( addedParticles[i].FLAVOR == 50 ) // jpsi
     {
       pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
       pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
       // pseudorapidity
-      eta = 0.5 * log( ( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
-      double y = 0.5 * log( ( addedParticles[i].E + addedParticles[i].PZ ) / ( addedParticles[i].E - addedParticles[i].PZ ) );
-
-      eta_test.add( eta );
-      y_test.add( y );
-
+      eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+      double y = 0.5 * log(( addedParticles[i].E + addedParticles[i].PZ ) / ( addedParticles[i].E - addedParticles[i].PZ ) );
+      
+      eta_test.add(eta);
+      y_test.add(y);
+      
       if( addedParticles[i].initially_produced ) // initial Jpsi
       {
-        ptbins_iniJpsi.add( pt );
-
-        for( int j = 0; j < addedParticles.size(); j++ )
+        ptbins_iniJpsi.add(pt);
+        
+        for ( int j = 0; j < addedParticles.size(); j++ )
         {
           // all charm quarks
           if( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 )
           {
             // delta eta
             pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-            eta_charm = 0.5 * log( ( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+            eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaIniJpsiAllCharm.add( delta_eta );
           }
@@ -3272,88 +3269,88 @@ void analysis::jpsi_correlations()
       }
       else
       {
-        ptbins_secJpsi.add( pt );
+        ptbins_secJpsi.add(pt);
 
-        for( int j = 0; j < addedParticles.size(); j++ )
+        for ( int j = 0; j < addedParticles.size(); j++ )
         {
           // find partners of charm quarks in Jpsi
           if( ( addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_pp || addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_Cbar ) && i != j )
           {
 //             if ( addedParticles[j].FLAVOR != 7 && addedParticles[j].FLAVOR != 8 )
 //               cout << "error in analysis::jpsi_correlations() " << addedParticles[j].FLAVOR << "  " << addedParticles[i].FLAVOR << "  " << addedParticles[j].m << "  " << addedParticles[i].m << "  " << addedParticles[j].N_EVENT_pp << "  " << addedParticles[i].N_EVENT_pp << "  " << addedParticles[j].N_EVENT_Cbar << "  " << addedParticles[i].N_EVENT_Cbar << endl;
-
-            cos_delta_phi = ( addedParticles[i].PX * addedParticles[j].PX + addedParticles[i].PY * addedParticles[j].PY )
-                            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) )
-                            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) ;
-            phibins_deltaPhiJpsiCharm.add( acos( cos_delta_phi ) );
-
-            cos_delta_theta = ( addedParticles[i].PX * addedParticles[j].PX + addedParticles[i].PY * addedParticles[j].PY + addedParticles[i].PZ * addedParticles[j].PZ )
-                              / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) + pow( addedParticles[i].PZ, 2.0 ) )
-                              / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) + pow( addedParticles[j].PZ, 2.0 ) ) ;
-            phibins_deltaThetaJpsiCharm.add( acos( cos_delta_theta ) );
-
+            
+            cos_delta_phi = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY ) 
+            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) 
+            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) ;
+            phibins_deltaPhiJpsiCharm.add( acos(cos_delta_phi) );
+      
+            cos_delta_theta = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY + addedParticles[i].PZ*addedParticles[j].PZ ) 
+            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) + pow( addedParticles[i].PZ, 2.0 ) ) 
+            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) + pow( addedParticles[j].PZ, 2.0 ) ) ;
+            phibins_deltaThetaJpsiCharm.add( acos(cos_delta_theta) );
+            
             // delta eta
             pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-            eta_charm = 0.5 * log( ( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+            eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaJpsiCharm.add( delta_eta );
             etabins_detaJpsiCharm2d.add( eta, eta_charm );
           }
-
+          
           // all charm quarks
           if( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 )
           {
             // delta eta
             pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-            eta_charm = 0.5 * log( ( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+            eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaSecJpsiAllCharm.add( delta_eta );
+          }
+        }  
+      }
+    }
+    else if ( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
+    {
+      if( addedParticles[i].jpsi_dissociation_number != -1 ) // produced in Jpsi dissociation
+      {
+        pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
+        // pseudorapidity
+        eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+        
+        for ( int j = 0; j < addedParticles.size(); j++ )
+        {
+          if( addedParticles[j].jpsi_dissociation_number == addedParticles[i].jpsi_dissociation_number && i != j )
+          {
+            if ( addedParticles[j].FLAVOR != 7 && addedParticles[j].FLAVOR != 8 )
+              cout << "error2 in analysis::jpsi_correlations() " << addedParticles[j].FLAVOR << "  " << addedParticles[j].m << "  " << addedParticles[i].FLAVOR << "  " << addedParticles[i].m << "  " << addedParticles[j].jpsi_dissociation_number << endl;
+            
+            cos_delta_phi = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY) 
+            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) 
+            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) ;
+            phibins_deltaPhiCharmCharm.add( acos(cos_delta_phi) );
+      
+            cos_delta_theta = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY + addedParticles[i].PZ*addedParticles[j].PZ ) 
+            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) + pow( addedParticles[i].PZ, 2.0 ) ) 
+            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) + pow( addedParticles[j].PZ, 2.0 ) ) ;
+            phibins_deltaThetaCharmCharm.add( acos(cos_delta_theta) );
+            
+            // delta eta
+            pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
+            eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+            delta_eta = fabs( eta - eta_charm );
+            etabins_detaCharmCharm.add( delta_eta );
+            
+            pt = sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) );
+            ptbins_charmFromJpsi.add(pt);
+            pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
+            ptbins_charmFromJpsi.add(pt);
           }
         }
       }
     }
-    else if ( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
-      {
-        if( addedParticles[i].jpsi_dissociation_number != -1 ) // produced in Jpsi dissociation
-        {
-          pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
-          // pseudorapidity
-          eta = 0.5 * log( ( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
-
-          for( int j = 0; j < addedParticles.size(); j++ )
-          {
-            if( addedParticles[j].jpsi_dissociation_number == addedParticles[i].jpsi_dissociation_number && i != j )
-            {
-              if( addedParticles[j].FLAVOR != 7 && addedParticles[j].FLAVOR != 8 )
-                cout << "error2 in analysis::jpsi_correlations() " << addedParticles[j].FLAVOR << "  " << addedParticles[j].m << "  " << addedParticles[i].FLAVOR << "  " << addedParticles[i].m << "  " << addedParticles[j].jpsi_dissociation_number << endl;
-
-              cos_delta_phi = ( addedParticles[i].PX * addedParticles[j].PX + addedParticles[i].PY * addedParticles[j].PY )
-                              / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) )
-                              / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) ;
-              phibins_deltaPhiCharmCharm.add( acos( cos_delta_phi ) );
-
-              cos_delta_theta = ( addedParticles[i].PX * addedParticles[j].PX + addedParticles[i].PY * addedParticles[j].PY + addedParticles[i].PZ * addedParticles[j].PZ )
-                                / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) + pow( addedParticles[i].PZ, 2.0 ) )
-                                / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) + pow( addedParticles[j].PZ, 2.0 ) ) ;
-              phibins_deltaThetaCharmCharm.add( acos( cos_delta_theta ) );
-
-              // delta eta
-              pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-              eta_charm = 0.5 * log( ( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
-              delta_eta = fabs( eta - eta_charm );
-              etabins_detaCharmCharm.add( delta_eta );
-
-              pt = sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) );
-              ptbins_charmFromJpsi.add( pt );
-              pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
-              ptbins_charmFromJpsi.add( pt );
-            }
-          }
-        }
-      }
   }
-
-
+  
+  
   ptbins_iniJpsi.print();
   ptbins_secJpsi.print();
   phibins_deltaPhiJpsiCharm.print();
@@ -3379,37 +3376,37 @@ void analysis::ini_charm_correlations()
 
 
   filename = filename_prefix + "_phibins_deltaPhiIniCharm";
-  binning phibins_deltaPhiIniCharm( filename, 0.0, M_PI, 30 );
+  binning phibins_deltaPhiIniCharm(filename, 0.0, M_PI, 30);
   filename = filename_prefix + "_phibins_deltaThetaIniCharm";
-  binning phibins_deltaThetaIniCharm( filename, 0.0, M_PI, 30 );
+  binning phibins_deltaThetaIniCharm(filename, 0.0, M_PI, 30);
   filename = filename_prefix + "_etabins_detaIniCharm";
-  binning etabins_detaIniCharm( filename, 0.0, 20.0, 70 );
+  binning etabins_detaIniCharm(filename, 0.0, 20.0, 70);
 
-  for( int i = 0; i < addedParticles.size(); i++ )
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
-    if( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
+    if ( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
     {
       pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
       // pseudorapidity
-      eta = 0.5 * log( ( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
-
-      for( int j = i + 1; j < addedParticles.size(); j++ )
+      eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+      
+      for ( int j = i+1; j < addedParticles.size(); j++ )
       {
-        if( addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_pp && ( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 ) )
+        if( addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_pp &&  ( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 ) )
         {
-          cos_delta_phi = ( addedParticles[i].PX * addedParticles[j].PX + addedParticles[i].PY * addedParticles[j].PY )
-                          / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) )
-                          / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) ;
-          phibins_deltaPhiIniCharm.add( acos( cos_delta_phi ) );
-
-          cos_delta_theta = ( addedParticles[i].PX * addedParticles[j].PX + addedParticles[i].PY * addedParticles[j].PY + addedParticles[i].PZ * addedParticles[j].PZ )
-                            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) + pow( addedParticles[i].PZ, 2.0 ) )
-                            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) + pow( addedParticles[j].PZ, 2.0 ) ) ;
-          phibins_deltaThetaIniCharm.add( acos( cos_delta_theta ) );
-
+          cos_delta_phi = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY) 
+          / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) 
+          / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) ;
+          phibins_deltaPhiIniCharm.add( acos(cos_delta_phi) );
+          
+          cos_delta_theta = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY + addedParticles[i].PZ*addedParticles[j].PZ ) 
+          / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) + pow( addedParticles[i].PZ, 2.0 ) ) 
+          / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) + pow( addedParticles[j].PZ, 2.0 ) ) ;
+          phibins_deltaThetaIniCharm.add( acos(cos_delta_theta) );
+          
           // delta eta
           pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-          eta_charm = 0.5 * log( ( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+          eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
           delta_eta = fabs( eta - eta_charm );
           etabins_detaIniCharm.add( delta_eta );
         }
@@ -3423,7 +3420,7 @@ void analysis::ini_charm_correlations()
 }
 
 
-void analysis::writeTempInTube( const int step )
+void analysis::writeTempInTube( const int step  )
 {
   const string sep = "  ";
 
@@ -3433,14 +3430,14 @@ void analysis::writeTempInTube( const int step )
 
 
   double time;
-  if( step == 0 )
+  if ( step == 0 )
     time = 0.0;
   else if ( step == nTimeSteps )
-      return;
-    else
-      time = tstep[step - 1];
+    return;
+  else
+    time = tstep[step-1];
 
-  if( step == 0 )
+  if ( step == 0 )
   {
     // file header
     printTempInTube << "#temperature" << endl;
@@ -3450,7 +3447,7 @@ void analysis::writeTempInTube( const int step )
 
   printTempInTube.width( 10 );
   printTempInTube << time ;
-  printTempInTube << "\t";
+  printTempInTube<< "\t";
 
 
   dr = 2.0; //fm
@@ -3459,20 +3456,20 @@ void analysis::writeTempInTube( const int step )
 
 //   cout << "deta=" << deta << "   dz=" << dz << endl;
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
   printTempInTube << "\t";
   printTempInTube << energyDensity;
   printTempInTube.width( 20 );
-
+  
 
   dr = 5.0; //fm
   deta = 0.5; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
@@ -3484,7 +3481,7 @@ void analysis::writeTempInTube( const int step )
   deta = 1.0; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
@@ -3498,7 +3495,7 @@ void analysis::writeTempInTube( const int step )
   deta = 1.0; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
@@ -3513,28 +3510,28 @@ void analysis::writeTempInTube( const int step )
 }
 
 // writes temperature and velocity of all specified cells in a file, used by Alex Meistrenko as input
-void analysis::calculateTempInTube( const double time, const double radius, const double dz, double& temp, double& tempWithQuarks, double& energyDensity )
+void analysis::calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  )
 {
   int cell_id;
   double pr, XT;
-
+  
   const int minNmbTemp = 30; // minimum number of particles to calculate temperature from
 
 
   // total length in z direction
-  const double zlength = dz * 2.0;
+  const double zlength = dz*2.0;
 
   // volume
   dv = M_PI * pow( radius , 2.0 ) * zlength; // 1/GeV^3
 
-
+  
   // the following routine is written for several cells -> here we do not need this, just set nCells = 1
-
+  
   nCells = 1;
 
   numberInCell = new int[nCells]; // number of all particles in cell
   vx_cell = new double[nCells]; // total x-velocity of all particles in cell
-  vy_cell = new double[nCells];
+  vy_cell = new double[nCells];  
   vz_cell = new double[nCells];
   vr_cell = new double[nCells];
   em_cell = new double[nCells];// total energy of all particles in cell
@@ -3550,11 +3547,11 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
 
 
   // set all properties to 0
-  for( int i = 0; i < nCells; i++ )
+  for ( int i = 0; i < nCells; i++ )
   {
     numberInCell[i] = 0;
-    vx_cell[i] = 0.0;
-    vy_cell[i] = 0.0;
+    vx_cell[i] = 0.0; 
+    vy_cell[i] = 0.0;  
     vz_cell[i] = 0.0;
     vr_cell[i] = 0.0;
     em_cell[i] = 0.0;
@@ -3568,36 +3565,36 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
     temp_cell[i] = 0.0;
     tempWithQuarks_cell[i] = 0.0;
   }
-
+  
 
   // sum over all particles
-  for( int i = 0; i < particles_atTimeNow.size(); i++ )
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    if( FPT_COMP_LE( particles_atTimeNow[i].T, time )  && particles_atTimeNow[i].FLAVOR < 7 )  // only gluons and light quarks
+    if ( FPT_COMP_LE( particles_atTimeNow[i].T, time )  && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
     {
-      if( ( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Z ) < dz ) )
+      if (( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Z ) < dz ) )
       {
         // set cell id to 0
         cell_id = 0;
-
+        
         ++numberInCell[cell_id];
-
+        
         XT = sqrt( particles_atTimeNow[i].X * particles_atTimeNow[i].X + particles_atTimeNow[i].Y * particles_atTimeNow[i].Y );
-        if( XT < 1.0e-5 )
+        if ( XT < 1.0e-5 )
         {
           pr = sqrt( particles_atTimeNow[i].PX * particles_atTimeNow[i].PX
-                     + particles_atTimeNow[i].PY * particles_atTimeNow[i].PY );
+          + particles_atTimeNow[i].PY * particles_atTimeNow[i].PY );
         }
         else
         {
           pr = ( particles_atTimeNow[i].PX * particles_atTimeNow[i].X
-                 + particles_atTimeNow[i].PY * particles_atTimeNow[i].Y ) / XT;
+          + particles_atTimeNow[i].PY * particles_atTimeNow[i].Y ) / XT;
         }
         vr_cell[cell_id] += pr / particles_atTimeNow[i].E;
         vx_cell[cell_id] += particles_atTimeNow[i].PX / particles_atTimeNow[i].E;
         vy_cell[cell_id] += particles_atTimeNow[i].PY / particles_atTimeNow[i].E;
         vz_cell[cell_id] += particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
-
+        
         em_cell[cell_id] += particles_atTimeNow[i].E;
         prm_cell[cell_id] += pr;
         pzm_cell[cell_id] += particles_atTimeNow[i].PZ;
@@ -3609,10 +3606,10 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   }
 
   // calculate temperature for cell
-  for( int i = 0; i < nCells; i++ )
+  for ( int i = 0; i < nCells; i++ )
   {
     // If more than minNmbTemp particles are in the cell the temperature is calculated by them
-    if( numberInCell[i] >= minNmbTemp )
+    if(numberInCell[i] >= minNmbTemp)
     {
       calcTempCell( i );
     }
@@ -3622,15 +3619,15 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
       cout << particles_atTimeNow.size() << "  " << particles_atTimeNow[0].T << "  " << particles_atTimeNow[10].T << endl;
     }
   }
-
-
+  
+  
   temp = temp_cell[0];
   tempWithQuarks = tempWithQuarks_cell[0];
   energyDensity = em_cell[0]; // GeV/fm^3
 
-  delete[] numberInCell;
-  delete[] vx_cell;
-  delete[] vy_cell;
+  delete[] numberInCell; 
+  delete[] vx_cell; 
+  delete[] vy_cell;  
   delete[] vz_cell;
   delete[] vr_cell;
   delete[] em_cell;
@@ -3650,27 +3647,27 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
 
 
 // writes temperature and velocity of all specified cells in a file, used by Alex Meistrenko as input
-void analysis::writeTempAndVel( const int step )
+void analysis::writeTempAndVel( const int step  )
 {
   int nx, ny, nz, cell_id;
   double time, pr, XT;
-
+ 
   const int minNmbTemp = 30; // minimum number of particles to calculate temperature from
 //   const int minNmbTemp = 2; // minimum number of particles to calculate temperature from
   const int minNmbTempCell = 2; // minimum number of particles in one cell to calculate a Temperature. If the number is below this value, the cell is taken as empty (no temperature)
-
-  binning binNumber( "output/number.dat", -0.5, 49.5, 50 );
-  binning binTempCells( "output/tempCells.dat", 0.0, 3., 70 );
-  binning binTempRings( "output/tempRings.dat", 0.0, 2.2, 70 );
-
+  
+  binning binNumber("output/number.dat", -0.5, 49.5, 50);
+  binning binTempCells("output/tempCells.dat", 0.0, 3., 70);
+  binning binTempRings("output/tempRings.dat", 0.0, 2.2, 70);
+  
   int count_tempCell = 0;
   int count_tempNeighborCells = 0;
   int count_noTemp = 0;
-
+  
   int IXY = IX * IY;
 
-  if( step != 0 && step != nTimeSteps )
-    time = tstep[step - 1];
+  if ( step != 0 && step != nTimeSteps )
+    time = tstep[step-1];
   else
     return;
 
@@ -3685,12 +3682,12 @@ void analysis::writeTempAndVel( const int step )
   const int nCellsy = 41;
   const int nCellsz = 41;
   nCells = nCellsx * nCellsy * nCellsz;
-
+  
   dv = xlength * ylength * zlength / nCells; // volume of each cell
 
 //   int numberInCell[nCells]; // number of all particles in cell
 //   double vx_cell[nCells]; // total x-velocity of all particles in cell
-//   double vy_cell[nCells];
+//   double vy_cell[nCells];  
 //   double vz_cell[nCells];
 //   double vr_cell[nCells];
 //   double em_cell[nCells];// total energy of all particles in cell
@@ -3708,7 +3705,7 @@ void analysis::writeTempAndVel( const int step )
   numberInCell = new int[nCells]; // number of all particles in cell
   temp_numberInCell = new int[nCells]; // number of all particles in cell
   vx_cell = new double[nCells]; // total x-velocity of all particles in cell
-  vy_cell = new double[nCells];
+  vy_cell = new double[nCells];  
   vz_cell = new double[nCells];
   vr_cell = new double[nCells];
   em_cell = new double[nCells];// total energy of all particles in cell
@@ -3721,11 +3718,11 @@ void analysis::writeTempAndVel( const int step )
   gama_cell = new double[nCells];
   temp_cell = new double[nCells];
   tempWithQuarks_cell = new double[nCells];
-
+  
   // for copy. If too few particles in one cell, the particles from the surrounding cells are added from _org. Otherwise one would double or triple add particles from cells
   numberInCell_org = new int[nCells]; // number of all particles in cell
   vx_cell_org = new double[nCells]; // total x-velocity of all particles in cell
-  vy_cell_org = new double[nCells];
+  vy_cell_org = new double[nCells];  
   vz_cell_org = new double[nCells];
   vr_cell_org = new double[nCells];
   em_cell_org = new double[nCells];// total energy of all particles in cell
@@ -3734,7 +3731,7 @@ void analysis::writeTempAndVel( const int step )
   pr2em_cell_org = new double[nCells];
   pz2em_cell_org = new double[nCells];
   przem_cell_org = new double[nCells];
-//
+// 
 
 //   for ( int i = 0; i < nCells; i++ )
 //   {
@@ -3742,7 +3739,7 @@ void analysis::writeTempAndVel( const int step )
 //     const int indexZ = i / nxny;
 //     const int indexY = (i -  indexZ  * nxny) / nCellsx;
 //     const int indexX = i -  indexZ  * nxny - indexY * nCellsx;
-//
+//     
 //     energy[i] = 0.0;
 //     numberInCell[i] = indexX + nCellsx * indexY + nCellsx * nCellsy * indexZ;
 //     vx[i] = double(indexX) * xlength / nCellsx;
@@ -3751,12 +3748,12 @@ void analysis::writeTempAndVel( const int step )
 //   }
 
   // set all properties to 0
-  for( int i = 0; i < nCells; i++ )
+  for ( int i = 0; i < nCells; i++ )
   {
     numberInCell[i] = 0;
     temp_numberInCell[i] = 0;
-    vx_cell[i] = 0.0;
-    vy_cell[i] = 0.0;
+    vx_cell[i] = 0.0; 
+    vy_cell[i] = 0.0;  
     vz_cell[i] = 0.0;
     vr_cell[i] = 0.0;
     em_cell[i] = 0.0;
@@ -3769,10 +3766,10 @@ void analysis::writeTempAndVel( const int step )
     gama_cell[i] = 0.0;
     temp_cell[i] = 0.0;
     tempWithQuarks_cell[i] = 0.0;
-
+    
     numberInCell_org[i] = 0;
-    vx_cell_org[i] = 0.0;
-    vy_cell_org[i] = 0.0;
+    vx_cell_org[i] = 0.0; 
+    vy_cell_org[i] = 0.0;  
     vz_cell_org[i] = 0.0;
     vr_cell_org[i] = 0.0;
     em_cell_org[i] = 0.0;
@@ -3782,30 +3779,30 @@ void analysis::writeTempAndVel( const int step )
     pz2em_cell_org[i] = 0.0;
     przem_cell_org[i] = 0.0;
   }
-
+  
   // sum over all particles
-  for( int i = 0; i < particles_atTimeNow.size(); i++ )
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    if( FPT_COMP_E( particles_atTimeNow[i].T, time ) && particles_atTimeNow[i].FLAVOR < 7 )  // only gluons and light quarks
+    if ( FPT_COMP_E( particles_atTimeNow[i].T, time ) && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
     {
       // determine cell id
-      if( fabs( particles_atTimeNow[i].X - xlength / 2.0 ) < 1.0e-6 )
+      if ( fabs( particles_atTimeNow[i].X - xlength / 2.0 ) < 1.0e-6 )
         nx = nCellsx - 1;
       else
-        nx = int( ( particles_atTimeNow[i].X / xlength + 0.5 ) * nCellsx );
+        nx = int(( particles_atTimeNow[i].X / xlength + 0.5 ) * nCellsx );
 
-      if( fabs( particles_atTimeNow[i].Y - ylength / 2.0 ) < 1.0e-6 )
+      if ( fabs( particles_atTimeNow[i].Y - ylength / 2.0 ) < 1.0e-6 )
         ny = nCellsy - 1;
       else
-        ny = int( ( particles_atTimeNow[i].Y / ylength + 0.5 ) * nCellsy );
+        ny = int(( particles_atTimeNow[i].Y / ylength + 0.5 ) * nCellsy );
 
-      if( fabs( particles_atTimeNow[i].Z - zlength / 2.0 ) < 1.0e-6 )
+      if ( fabs( particles_atTimeNow[i].Z - zlength / 2.0 ) < 1.0e-6 )
         nz = nCellsz - 1;
       else
-        nz = int( ( particles_atTimeNow[i].Z / zlength + 0.5 ) * nCellsz );
+        nz = int(( particles_atTimeNow[i].Z / zlength + 0.5 ) * nCellsz );
 
 
-      if( ( nx >= nCellsx ) || ( nx < 0 ) || ( ny >= nCellsy ) || ( ny < 0 ) || ( nz >= nCellsz ) || ( nz < 0 ) )
+      if (( nx >= nCellsx ) || ( nx < 0 ) || ( ny >= nCellsy ) || ( ny < 0 ) || ( nz >= nCellsz ) || ( nz < 0 ) )
       {
         cout << "err cell_ID in temp output" << endl;
         cout << particles_atTimeNow[i].T << "\t" << particles_atTimeNow[i].X << "\t" << particles_atTimeNow[i].Y;
@@ -3815,49 +3812,49 @@ void analysis::writeTempAndVel( const int step )
       else
       {
         cell_id = nx + nCellsx * ny + nCellsx * nCellsy * nz;
-
+        
         ++numberInCell[cell_id];
-
+        
         XT = sqrt( particles_atTimeNow[i].X * particles_atTimeNow[i].X + particles_atTimeNow[i].Y * particles_atTimeNow[i].Y );
-        if( XT < 1.0e-5 )
+        if ( XT < 1.0e-5 )
         {
           pr = sqrt( particles_atTimeNow[i].PX * particles_atTimeNow[i].PX
-                     + particles_atTimeNow[i].PY * particles_atTimeNow[i].PY );
+          + particles_atTimeNow[i].PY * particles_atTimeNow[i].PY );
         }
         else
         {
           pr = ( particles_atTimeNow[i].PX * particles_atTimeNow[i].X
-                 + particles_atTimeNow[i].PY * particles_atTimeNow[i].Y ) / XT;
+          + particles_atTimeNow[i].PY * particles_atTimeNow[i].Y ) / XT;
         }
         vr_cell[cell_id] += pr / particles_atTimeNow[i].E;
         vx_cell[cell_id] += particles_atTimeNow[i].PX / particles_atTimeNow[i].E;
         vy_cell[cell_id] += particles_atTimeNow[i].PY / particles_atTimeNow[i].E;
         vz_cell[cell_id] += particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
-
+        
         em_cell[cell_id] += particles_atTimeNow[i].E;
         prm_cell[cell_id] += pr;
         pzm_cell[cell_id] += particles_atTimeNow[i].PZ;
         pr2em_cell[cell_id] += pr * pr / particles_atTimeNow[i].E;
         pz2em_cell[cell_id] += particles_atTimeNow[i].PZ * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
         przem_cell[cell_id] += pr * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
-
+        
         // temp of particles summed
         tempWithQuarks_cell[cell_id] += particles_atTimeNow[i].temperature;
-        if( particles_atTimeNow[i].temperature >= 0.1 )
+        if( particles_atTimeNow[i].temperature >= 0.1)
           ++temp_numberInCell[cell_id];
       }
     }
   }
-
+  
   // duplicate properties of cell
-  for( int i = 0; i < nCells; i++ )
+  for ( int i = 0; i < nCells; i++ )
   {
     numberInCell_org[i] = numberInCell[i];
     vr_cell_org[i] = vr_cell[i];
     vx_cell_org[i] = vx_cell[i];
     vy_cell_org[i] = vy_cell[i];
     vz_cell_org[i] = vz_cell[i];
-
+    
     em_cell_org[i] = em_cell[i];
     prm_cell_org[i] = prm_cell[i];
     pzm_cell_org[i] = pzm_cell[i];
@@ -3866,59 +3863,59 @@ void analysis::writeTempAndVel( const int step )
     przem_cell_org[i] = przem_cell[i];
   }
 
-
+  
   // determine cells which do not have enough particles
-  for( int i = 0; i < nCells; i++ )
+  for ( int i = 0; i < nCells; i++ )
   {
     // If less than minNmbTempCell particles are in the cell it is taken as empty
-    if( numberInCell[i] >= minNmbTempCell )
+    if(numberInCell[i] >= minNmbTempCell)
     {
       // If less than minNmbTemp particles are in the cell the temperature the 6 neighbor cells are also taken into account
-      if( numberInCell[i] < minNmbTemp )
+      if(numberInCell[i] < minNmbTemp)
       {
         int cell_id_neighbor;
-
+        
         //neighbors in x direction
-        cell_id_neighbor = i - 1;
+        cell_id_neighbor = i-1;
         addNeighborCells( i, cell_id_neighbor );
-        cell_id_neighbor = i + 1;
+        cell_id_neighbor = i+1;
         addNeighborCells( i, cell_id_neighbor );
         //neighbors in y direction
-        cell_id_neighbor = i + IX;
+        cell_id_neighbor = i+IX;
         addNeighborCells( i, cell_id_neighbor );
-        cell_id_neighbor = i - IX;
+        cell_id_neighbor = i-IX;
         addNeighborCells( i, cell_id_neighbor );
         //neighbors in z direction
-        cell_id_neighbor = i - IXY;
+        cell_id_neighbor = i-IXY;
         addNeighborCells( i, cell_id_neighbor );
-        cell_id_neighbor = i + IXY;
+        cell_id_neighbor = i+IXY;
         addNeighborCells( i, cell_id_neighbor );
       }
     }
   }
-
+  
   // calculate temperature for each cell
-  for( int i = 0; i < nCells; i++ )
+  for ( int i = 0; i < nCells; i++ )
   {
     // If less than minNmbTempCell particles are in the cell it is taken as empty
-    if( numberInCell[i] >= minNmbTempCell )
+    if(numberInCell[i] >= minNmbTempCell)
     {
       // If more than minNmbTemp particles are in the cell the temperature is calculated by them
-      if( numberInCell[i] >= minNmbTemp )
+      if(numberInCell[i] >= minNmbTemp)
       {
         calcTempCell( i );
+        
+        tempWithQuarks_cell[i] = tempWithQuarks_cell[i]/temp_numberInCell[i];
 
-        tempWithQuarks_cell[i] = tempWithQuarks_cell[i] / temp_numberInCell[i];
-
-        binTempCells.add( temp_cell[i] );
+        binTempCells.add(temp_cell[i]);
         count_tempCell++;
       }
       else // take also 6 neighbor cells into account
       {
         count_noTemp++;
-
+        
         temp_cell[i] = 0.0; // not enough particles in surrounding to calculate temperature
-
+        
         vx_cell[i] = 0.0;
         vy_cell[i] = 0.0;
         vz_cell[i] = 0.0;
@@ -3926,7 +3923,7 @@ void analysis::writeTempAndVel( const int step )
     }
     else
     {
-      if( numberInCell[i] == 0 )
+      if(numberInCell[i] == 0)
       {
         temp_cell[i] = -2.0; // completely empty
         vx_cell[i] = 0.0;
@@ -3944,14 +3941,14 @@ void analysis::writeTempAndVel( const int step )
   }
 
 
-  string filename, name;
+  string filename,name;
   stringstream ss;
-  ss << time * 10;
+  ss << time*10;
   filename = filename_prefix + "_tempVel_" + ss.str() + ".dat";
 
-  fstream file( filename.c_str(), ios::out | ios::trunc );
+  fstream file( filename.c_str(), ios::out | ios::trunc  );
 
-  if( step == 1 )
+  if ( step == 1 )
   {
     file << "#temperature and velocity" << endl;
     file << "#simulation parameter:" << endl;
@@ -3961,13 +3958,13 @@ void analysis::writeTempAndVel( const int step )
     file << "#sqrtS= " << theConfig->getSqrtS() << " GeV" << endl;
     file << "#b= " << theConfig->getImpactParameter() << " fm" << endl;
     file << "#(" << theConfig->getA()  << ") on ("
-         << theConfig->getA()  << ")" << endl;
+    << theConfig->getA()  << ")" << endl;
     file << "# T in GeV/fm^3" << endl;
     file << "#" << endl;
     file << "#" << "T" << "\t" << "vx" << "\t" << "vy" << "\t" << "vz" << endl;
   }
-
-  for( int i = 0; i < nCells; i++ )
+  
+  for ( int i = 0; i < nCells; i++ )
   {
     file << temp_cell[i] << "\t";
     file << tempWithQuarks_cell[i] << "\t";
@@ -3975,24 +3972,24 @@ void analysis::writeTempAndVel( const int step )
     file << vy_cell[i] << "\t";
     file << vz_cell[i] << endl;
   }
-
+  
   filename = filename + "_spatial";
-
-  fstream file_spatial( filename.c_str(), ios::out | ios::trunc );
-
-  for( int i = 0; i < nCells; i++ )
+  
+  fstream file_spatial( filename.c_str(), ios::out | ios::trunc  );
+  
+  for ( int i = 0; i < nCells; i++ )
   {
     const int nxny = nCellsx * nCellsy;
     const int indexZ = i / nxny;
-    const int indexY = ( i -  indexZ  * nxny ) / nCellsx;
+    const int indexY = (i -  indexZ  * nxny) / nCellsx;
     const int indexX = i -  indexZ  * nxny - indexY * nCellsx;
-
-    if( indexY == int( nCellsy / 2 ) )
+    
+    if(indexY == int(nCellsy/2))
     {
 //       file_spatial << i << "\t";
-      file_spatial << double( indexZ ) * zlength / nCellsz << "\t";
-      file_spatial << double( indexX ) * xlength / nCellsx << "\t";
-
+      file_spatial << double(indexZ) * zlength / nCellsz << "\t";
+      file_spatial << double(indexX) * xlength / nCellsx << "\t";
+      
       file_spatial << temp_cell[i] << "\t";
       file_spatial << tempWithQuarks_cell[i] << "\t";
       file_spatial << vx_cell[i] << "\t";
@@ -4001,9 +3998,9 @@ void analysis::writeTempAndVel( const int step )
     }
   }
 
-  delete[] numberInCell;
-  delete[] vx_cell;
-  delete[] vy_cell;
+  delete[] numberInCell; 
+  delete[] vx_cell; 
+  delete[] vy_cell;  
   delete[] vz_cell;
   delete[] vr_cell;
   delete[] em_cell;
@@ -4018,7 +4015,7 @@ void analysis::writeTempAndVel( const int step )
   delete[] tempWithQuarks_cell;
 }
 
-void analysis::calcTempCell( const int cell_id )
+void analysis::calcTempCell( const int cell_id ) 
 {
   gama_cell[cell_id] = 1.0;
   vx_cell[cell_id] = vx_cell[cell_id] / numberInCell[cell_id];
@@ -4031,28 +4028,28 @@ void analysis::calcTempCell( const int cell_id )
     vr_cell[cell_id] = 0.0;
     gama_cell[cell_id] = 1.0 / sqrt( 1.0 - vz_cell[cell_id] * vz_cell[cell_id] );
   }
-
-  densn_cell[cell_id] = double( numberInCell[cell_id] ) / dv / theConfig->getTestparticles() / gama_cell[cell_id]; //1/fm^3
+  
+  densn_cell[cell_id] = double(numberInCell[cell_id]) / dv / theConfig->getTestparticles() / gama_cell[cell_id];//1/fm^3
   em_cell[cell_id] = ( em_cell[cell_id] - 2.0 * vr_cell[cell_id] * prm_cell[cell_id] - 2.0 * vz_cell[cell_id] * pzm_cell[cell_id] + vr_cell[cell_id] * vr_cell[cell_id] * pr2em_cell[cell_id]
-                       + vz_cell[cell_id] * vz_cell[cell_id] * pz2em_cell[cell_id] + 2.0 * vr_cell[cell_id] * vz_cell[cell_id] * przem_cell[cell_id] )
-                     / theConfig->getTestparticles() / dv * gama_cell[cell_id] * gama_cell[cell_id];//GeV/fm^3
-
+  + vz_cell[cell_id] * vz_cell[cell_id] * pz2em_cell[cell_id] + 2.0 * vr_cell[cell_id] * vz_cell[cell_id] * przem_cell[cell_id] )
+  / theConfig->getTestparticles() / dv * gama_cell[cell_id] * gama_cell[cell_id];//GeV/fm^3
+  
   temp_cell[cell_id] = em_cell[cell_id] / ( 3.0 * densn_cell[cell_id] );
   // assume thermal equilibrium and additional quark flavor
 //   int Nflavor_temp = 3;
 //   tempWithQuarks_cell[cell_id] = pow(pi*pi/3.0 / (16.+12.*Nflavor_temp) * em_cell[cell_id]  * pow(0.197,3.0) , 1.0/4.0);
 }
 
-void analysis::addNeighborCells( const int cell_id, const int neighborCell_id )
+void analysis::addNeighborCells( const int cell_id, const int neighborCell_id ) 
 {
-  if( neighborCell_id >= 0 && neighborCell_id < nCells )
+  if(neighborCell_id >= 0 && neighborCell_id < nCells)
   {
     numberInCell[cell_id] += numberInCell_org[neighborCell_id];
     vr_cell[cell_id] += vr_cell_org[neighborCell_id];
     vx_cell[cell_id] += vx_cell_org[neighborCell_id];
     vy_cell[cell_id] += vy_cell_org[neighborCell_id];
     vz_cell[cell_id] += vz_cell_org[neighborCell_id];
-
+    
     em_cell[cell_id] += em_cell_org[neighborCell_id];
     prm_cell[cell_id] += prm_cell_org[neighborCell_id];
     pzm_cell[cell_id] += pzm_cell_org[neighborCell_id];
@@ -4068,38 +4065,38 @@ void analysis::addNeighborCells( const int cell_id, const int neighborCell_id )
 
 
 // print dndy, detdy and mean pt of gluons
-void analysis::print_dndy( const string subfix )
+void analysis::print_dndy(const string subfix )
 {
   double y, pt;
   double pt_sum = 0.0;
-
+  
   string filename;
 
   filename = filename_prefix + "_dndy_" + subfix;
-  binning dndy( filename, -10.0, 10.0, 200 );
+  binning dndy(filename, -10.0, 10.0, 200);
   filename = filename_prefix + "_dedy_" + subfix;
-  binningValues dedy( filename, -10.0, 10.0, 200 );
-
+  binningValues dedy(filename, -10.0, 10.0, 200);
+  
   filename = filename_prefix + "_dndpt_" + subfix;
-  binning dndpt( filename, 0.0, 20.0, 200 );
-
-  for( int i = 0; i < particles_atTimeNow.size(); i++ )
+  binning dndpt(filename, 0.0, 20.0, 200);
+  
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
     pt = sqrt( pow( particles_atTimeNow[i].PX, 2.0 ) + pow( particles_atTimeNow[i].PY, 2.0 ) );
-    y = 0.5 * log( ( particles_atTimeNow[i].E + particles_atTimeNow[i].PZ ) / ( particles_atTimeNow[i].E - particles_atTimeNow[i].PZ ) );
-
+    y = 0.5 * log(( particles_atTimeNow[i].E + particles_atTimeNow[i].PZ ) / ( particles_atTimeNow[i].E - particles_atTimeNow[i].PZ ) );
+    
 //     if(y < -8.0 || isnan(y))
 // //       cout << y << "\t" << particles_atTimeNow[i].E << "\t" << particles_atTimeNow[i].PZ  << "\t" << pt << "\t" << i << endl;
 //       cout << i << "\t";
-
-    dndy.add( y );
-    dedy.add( y, pt );
-    dndpt.add( pt );
+    
+    dndy.add(y);
+    dedy.add(y,pt);
+    dndpt.add(pt);
     pt_sum += pt;
   }
-
-  cout << "mean pt = " << pt_sum / particles_atTimeNow.size() << endl;
-
+  
+  cout << "mean pt = " << pt_sum/particles_atTimeNow.size() << endl;
+  
   dndy.print();
   dedy.print();
   dndpt.print();
@@ -4122,42 +4119,42 @@ void analysis::analyseAngleDe()
   double cosphi; // transverse angle between D meson and e-
   double ept;
   int k_e;
-
+  
   string filename;
-
-
+  
+  
   filename = filename_prefix + "_dmeson_electron_cosTheta";
-  binningValues binsCosTheta( filename, 0.0, 10.0, 200 );
+  binningValues binsCosTheta(filename, 0.0, 10.0, 200);
   filename = filename_prefix + "_dmeson_electron_cosPhiTrans";
-  binningValues binsCosPhi( filename, 0.0, 10.0, 200 );
-
-  for( int i = 0; i < addedParticles.size(); i++ )
+  binningValues binsCosPhi(filename, 0.0, 10.0, 200);
+  
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
-    if( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
+    if ( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
     {
       // there are several electrons per dmeson/charm quark
-      for( int k = 0; k < theConfig->getNumberElectronStat(); k++ )
-      {
+      for(int k = 0; k < theConfig->getNumberElectronStat(); k++)
+      {      
         k_e = ( i ) * theConfig->getNumberElectronStat() + k ;
-        costheta = ( addedParticlesCopy[i].PX * addedPartcl_electron[k_e].PX + addedParticlesCopy[i].PY * addedPartcl_electron[k_e].PY + addedParticlesCopy[i].PZ * addedPartcl_electron[k_e].PZ )
-                   / sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) + pow( addedPartcl_electron[k_e].PZ, 2.0 ) )
-                   / sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) ) ;
-
-        cosphi = ( addedParticlesCopy[i].PX * addedPartcl_electron[k_e].PX + addedParticlesCopy[i].PY * addedPartcl_electron[k_e].PY )
-                 / sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) )
-                 / sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) ) ;
-
+        costheta = ( addedParticlesCopy[i].PX*addedPartcl_electron[k_e].PX + addedParticlesCopy[i].PY*addedPartcl_electron[k_e].PY + addedParticlesCopy[i].PZ*addedPartcl_electron[k_e].PZ ) 
+        / sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) + pow( addedPartcl_electron[k_e].PZ, 2.0 ) ) 
+        / sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) ) ;
+        
+        cosphi = ( addedParticlesCopy[i].PX*addedPartcl_electron[k_e].PX + addedParticlesCopy[i].PY*addedPartcl_electron[k_e].PY ) 
+        / sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) ) 
+        / sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) ) ;
+        
         ept = sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) ); // e- pt
-
-        binsCosTheta.add( ept, costheta );
-        binsCosPhi.add( ept, cosphi );
+        
+        binsCosTheta.add(ept, costheta);
+        binsCosPhi.add(ept, cosphi);
       }
     }
   }
-
+  
   binsCosTheta.print();
   binsCosPhi.print();
-
+  
 }
 
 
@@ -4173,15 +4170,15 @@ void analysis::analyseAngleDe()
 //       energy_sum += addedParticles[i].E;
 //     }
 //   }
-//
+// 
 //   charmJetEnergy[step] = energy_sum/count;
 //   timestepAnalysed[step] = true;
 // }
-//
+// 
 // void analysis::analyseCharmTestJet()
 // {
 //   string filename;
-//
+//   
 //   filename = filename_prefix + "_Ebins";
 //   binning Ebins(filename, 0.0, 12.0, 24);
 //   filename = filename_prefix + "_xbins";
@@ -4190,7 +4187,7 @@ void analysis::analyseAngleDe()
 //   binning ybins(filename, -3.0, 3.0, 70);
 //   filename = filename_prefix + "_elossbins";
 //   binning elossbins(filename, -2.0, 10.0, 70);
-//
+//   
 //   for ( int i = 0; i < addedParticles.size(); i++ )
 //   {
 //     if ( addedParticles[i].FLAVOR == 7 )
@@ -4201,15 +4198,15 @@ void analysis::analyseAngleDe()
 //       elossbins.add(10.0 - addedParticles[i].E);
 //     }
 //   }
-//
+//   
 //   Ebins.print();
 //   xbins.print();
 //   ybins.print();
 //   elossbins.print();
-//
+//   
 //   filename = filename_prefix + "_jetEvolution";
 //   fstream print( filename.c_str(), ios::out | ios::trunc );
-//
+// 
 //   print << "# time   #mean jet energy" << endl;
 //   for ( int i = 0; i < nTimeSteps + 1; i++ )
 //   {
@@ -4225,7 +4222,7 @@ void analysis::analyseAngleDe()
 //       print << endl;
 //     }
 //   }
-//
+// 
 // }
 
 
@@ -4233,11 +4230,11 @@ void analysis::analyseAngleDe()
 void analysis::jpsiEvolution( int step )
 {
   double pt_min = 0;
-
+  
   if( theConfig->getOutputScheme() == cms_jpsi )
     pt_min = 6.5;
-
-
+  
+  
   int countJpsi_all = 0;
   int countJpsi_ini = 0;
 //   int countJpsi_midNormRap = 0;
@@ -4250,61 +4247,61 @@ void analysis::jpsiEvolution( int step )
   int countJpsi_forwardNormRap_all = 0;
   int countJpsi_forwardNormRap_ini = 0;
 //   int countJpsi_midSpaceTimeRap = 0;
-  for( int i = 0; i < addedParticles.size(); i++ )
+  for ( int i = 0; i < addedParticles.size(); i++ )
   {
-    if( addedParticles[i].FLAVOR == 50 )
+    if ( addedParticles[i].FLAVOR == 50 )
     {
       double pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
-
+      
       countJpsi_all++;
-
-      if( addedParticles[i].initially_produced )
+        
+      if(addedParticles[i].initially_produced)
         countJpsi_ini++;
-
+      
       if( pt >= pt_min )
       {
         double pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
         // pseudorapidity
-        double pseudorap = 0.5 * log( ( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
-
-        if( fabs( pseudorap ) >= rapidityRanges[0].yleft && fabs( pseudorap ) <= rapidityRanges[0].yright )
+        double pseudorap = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+        
+        if ( fabs( pseudorap ) >= rapidityRanges[0].yleft && fabs( pseudorap ) <= rapidityRanges[0].yright )
         {
           countJpsi_midPseudoRap_all++;
-          if( addedParticles[i].initially_produced )
+          if(addedParticles[i].initially_produced)
             countJpsi_midPseudoRap_ini++;
         }
-
-        if( fabs( pseudorap ) >= rapidityRanges[1].yleft && fabs( pseudorap ) <= rapidityRanges[1].yright )
+        
+        if ( fabs( pseudorap ) >= rapidityRanges[1].yleft && fabs( pseudorap ) <= rapidityRanges[1].yright )
         {
           countJpsi_forwardPseudoRap_all++;
-          if( addedParticles[i].initially_produced )
+          if(addedParticles[i].initially_produced)
             countJpsi_forwardPseudoRap_ini++;
         }
-
-
+        
+              
         // normal rapidity
-        double normrap = 0.5 * log( ( addedParticles[i].E + addedParticles[i].PZ ) / ( addedParticles[i].E - addedParticles[i].PZ ) );
-
-        if( fabs( normrap ) >= rapidityRanges[0].yleft && fabs( normrap ) <= rapidityRanges[0].yright )
+        double normrap = 0.5 * log(( addedParticles[i].E + addedParticles[i].PZ ) / ( addedParticles[i].E - addedParticles[i].PZ ) );
+        
+        if ( fabs( normrap ) >= rapidityRanges[0].yleft && fabs( normrap ) <= rapidityRanges[0].yright )
         {
           countJpsi_midNormRap_all++;
-          if( addedParticles[i].initially_produced )
+          if(addedParticles[i].initially_produced)
             countJpsi_midNormRap_ini++;
         }
-
-
-        if( fabs( normrap ) >= rapidityRanges[1].yleft && fabs( normrap ) <= rapidityRanges[1].yright )
+        
+        
+        if ( fabs( normrap ) >= rapidityRanges[1].yleft && fabs( normrap ) <= rapidityRanges[1].yright )
         {
           countJpsi_forwardNormRap_all++;
-          if( addedParticles[i].initially_produced )
+          if(addedParticles[i].initially_produced)
             countJpsi_forwardNormRap_ini++;
         }
-
-
-        //       // space time rapidity
-        //       double strap = 0.5 * log(( addedParticles[i].T + addedParticles[i].Z ) / ( addedParticles[i].T - addedParticles[i].Z ) );
-        //       if( fabs(strap) < midrap )
-        //         countJpsi_midSpaceTimeRap++;
+          
+        
+  //       // space time rapidity
+  //       double strap = 0.5 * log(( addedParticles[i].T + addedParticles[i].Z ) / ( addedParticles[i].T - addedParticles[i].Z ) );
+  //       if( fabs(strap) < midrap )
+  //         countJpsi_midSpaceTimeRap++;
       }
     }
   }
@@ -4332,21 +4329,21 @@ void analysis::printJpsiEvolution()
 {
   string filename = filename_prefix + "_jpsiEvolution";
   fstream print_je( filename.c_str(), ios::out | ios::trunc );
-
+  
   const double delta_y_mid = 2.0 * ( rapidityRanges[0].yright - rapidityRanges[0].yleft );
   const double delta_y_forward = 2.0 * ( rapidityRanges[1].yright - rapidityRanges[1].yleft );
 
   print_je << "# charm Annihaltion and J/psi processes" << endl;
   print_je << "# time   #J/psis    #J/psi production     # ccb->gg processes" << endl;
-  for( int i = 0; i < nTimeSteps + 1; i++ )
+  for ( int i = 0; i < nTimeSteps + 1; i++ )
   {
-    if( timestepAnalysed[i] )
+    if ( timestepAnalysed[i] )
     {
       print_je.width( 15 );
-      if( i == 0 )
+      if ( i == 0 )
         print_je << "0";
       else
-        print_je << tstep[i - 1];
+        print_je << tstep[i-1];
       print_je.width( 15 );
       print_je << double( numberJpsi_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
       print_je.width( 15 );
@@ -4360,7 +4357,7 @@ void analysis::printJpsiEvolution()
       print_je.width( 15 );
       print_je << double( numberCCbGG_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
 
-
+      
       //  / (2.0*1.0) because the rapidity range is 1.0, but for + and . Therefore, times 2.
       print_je.width( 15 );
       print_je << double( numberJpsi_midPseudoRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_mid;
@@ -4370,7 +4367,7 @@ void analysis::printJpsiEvolution()
       print_je << double( numberJpsi_forwardPseudoRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_forward;
       print_je.width( 15 );
       print_je << double( numberJpsi_forwardPseudoRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_forward;
-
+      
       print_je.width( 15 );
       print_je << double( numberJpsi_midNormRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_mid;
       print_je.width( 15 );
@@ -4379,7 +4376,7 @@ void analysis::printJpsiEvolution()
       print_je << double( numberJpsi_forwardNormRap_all_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_forward;
       print_je.width( 15 );
       print_je << double( numberJpsi_forwardNormRap_ini_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() / delta_y_forward;
-
+      
 //       print_je.width( 15 );
 //       print_je << double( numberJpsi_midSpaceTimeRap_time[i] ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
       print_je << endl;
@@ -4494,7 +4491,7 @@ void analysis::mediumParticlesOutput( const int step )
 
 jetTrackerSingleEvent::jetTrackerSingleEvent()
 {
-  for( int i = 0; i < 4; i++ )
+  for ( int i = 0; i < 4; i++ )
   {
     R_proj[i] = 0;
     P_proj_in[i] = P_proj_out[i] = 0;
@@ -4523,8 +4520,8 @@ void analysis::jetTrackerOutput()
   int hours = secs / 3600, minutes = ( secs % 3600 ) / 60, seconds = secs - 3600 * hours - 60 * minutes;
   cout << hours << "h" << minutes << "m" << seconds << "s" <<  endl;
   //---------------------------------------------------------------
-
-
+  
+  
   //---- write output file for pt-spectra -------------------------
   string filename;
   if( studyJets )
@@ -4532,53 +4529,53 @@ void analysis::jetTrackerOutput()
   else
     filename = "/dev/null";
   fstream file( filename.c_str(), ios::out | ios::trunc );
-
+  
   //---- print header if file is empty ----
   file.seekp( 0, ios::end );
   long size = file.tellp();
   file.seekp( 0, ios::beg );
-  if( size == 0 )
+  if ( size == 0 )
     printHeader( file, jets, end );
   //---------------------------------------
-
-  for( int jet = 0; jet < jetTracker.size(); jet++ )
+  
+  for ( int jet = 0; jet < jetTracker.size(); jet++ )
   {
-    for( int event = 0; event < jetTracker[jet].size(); event++ )
+    for ( int event = 0; event < jetTracker[jet].size(); event++ )
     {
       file << jetTracker[jet][event].jet_ID_in << sep << jetTracker[jet][event].jet_ID_out << sep
-           << jetTracker[jet][event].coll_type << sep;
-      for( int i = 0; i < 4; i++ )
+      << jetTracker[jet][event].coll_type << sep;
+      for ( int i = 0; i < 4; i++ )
       {
         file << jetTracker[jet][event].P_proj_in[i] << sep;
       }
-      for( int i = 0; i < 4; i++ )
+      for ( int i = 0; i < 4; i++ )
       {
         file << jetTracker[jet][event].P_proj_out[i] << sep;
       }
-      for( int i = 0; i < 4; i++ )
+      for ( int i = 0; i < 4; i++ )
       {
         file << jetTracker[jet][event].R_proj[i] << sep;
       }
-      file << jetTracker[jet][event].xSection << sep << jetTracker[jet][event].lambda
-           << sep << jetTracker[jet][event].flavor_in << sep << jetTracker[jet][event].flavor_out << endl;
+      file << jetTracker[jet][event].xSection << sep << jetTracker[jet][event].lambda 
+      << sep << jetTracker[jet][event].flavor_in << sep << jetTracker[jet][event].flavor_out << endl;
     }
     file << endl << endl;
   }
-
+  
 }
 
 
 analysisRingStructure::analysisRingStructure( const int _nRings, const double _centralRadius, const double _deltaR ) : numberOfRings( _nRings ),
-  centralRingRadius( _centralRadius ), deltaR( _deltaR )
+    centralRingRadius( _centralRadius ), deltaR( _deltaR )
 {
   rings.resize( _nRings );
 
   rings[0].relocate( 0, _centralRadius );
 
   totalRadius = _centralRadius + ( _nRings - 1 ) * deltaR;
-  for( int i = 1; i < rings.size(); i++ )
+  for ( int i = 1; i < rings.size(); i++ )
   {
-    rings[i].relocate( rings[i - 1].maxRadius, rings[i - 1].maxRadius + deltaR );
+    rings[i].relocate( rings[i-1].maxRadius, rings[i-1].maxRadius + deltaR );
   }
 }
 
@@ -4589,16 +4586,16 @@ void analysisRingStructure::resize( const int _nRings, const double _centralRadi
   numberOfRings = _nRings;
   centralRingRadius = _centralRadius;
   deltaR = _deltaR;
-
+  
   rings.clear();
   rings.resize( _nRings );
 
   rings[0].relocate( 0, _centralRadius );
 
   totalRadius = _centralRadius + ( _nRings - 1 ) * deltaR;
-  for( int i = 1; i < rings.size(); i++ )
+  for ( int i = 1; i < rings.size(); i++ )
   {
-    rings[i].relocate( rings[i - 1].maxRadius, rings[i - 1].maxRadius + deltaR );
+    rings[i].relocate( rings[i-1].maxRadius, rings[i-1].maxRadius + deltaR );
   }
 }
 
@@ -4607,7 +4604,7 @@ void analysisRingStructure::resize( const int _nRings, const double _centralRadi
 int analysisRingStructure::getIndex( const double _xt ) const
 {
   int index = getIndexPure( _xt );
-  if( index >= rings.size() )
+  if ( index >= rings.size() )
   {
     return ( static_cast<int>( rings.size() ) - 1 );
   }
@@ -4621,13 +4618,13 @@ int analysisRingStructure::getIndex( const double _xt ) const
 
 int analysisRingStructure::getIndexPure( const double _xt ) const
 {
-  if( _xt < 0 )
+  if ( _xt < 0 )
   {
     std::string errMsg = "transverse position xt < 0";
     throw eAnalysis_error( errMsg );
   }
-
-  if( _xt < centralRingRadius )
+  
+  if ( _xt < centralRingRadius )
   {
     return 0;
   }
@@ -4638,7 +4635,7 @@ int analysisRingStructure::getIndexPure( const double _xt ) const
 //       std::string errMsg = "transverse position xt > R (R = total radius of ring structure)";
 //       throw eAnalysis_error( errMsg );
 //     }
-
+    
     int index = static_cast<int>( ( _xt - centralRingRadius ) / deltaR ) + 1;  // +1 since index 0 is for the central ring
     return index;
   }
@@ -4651,7 +4648,7 @@ int analysisRingStructure::getIndexPure( const double _xt ) const
 int analysisRingStructure::getIndex( const ParticleOffline& _particle ) const
 {
   double xt = sqrt( pow( _particle.X, 2 ) + pow( _particle.Y, 2 ) );
-
+  
   return getIndex( xt );
 }
 
@@ -4659,12 +4656,12 @@ int analysisRingStructure::getIndex( const ParticleOffline& _particle ) const
 
 analysisRingContainer& analysisRingStructure::operator[]( const int index )
 {
-  if( index < 0 || index >= numberOfRings )
+  if ( index < 0 || index >= numberOfRings )
   {
     std::string errMsg = "index out of range in analysisRingStructure";
     throw eAnalysis_error( errMsg );
   }
-
+  
   return rings[ index ];
 }
 
@@ -4672,13 +4669,13 @@ analysisRingContainer& analysisRingStructure::operator[]( const int index )
 
 analysisRingStructure& analysisRingStructure::operator+=( analysisRingStructure& rhs )
 {
-  if( !( rhs.size() == ( *this ).size() ) )
+  if ( !( rhs.size() == ( *this ).size() ) )
   {
     std::string errMsg = "analysisRingStructure::operator+= only works for equally sized structures";
     throw eAnalysis_error( errMsg );
   }
 
-  for( int i = 0; i < numberOfRings; i++ )
+  for ( int i = 0; i < numberOfRings; i++ )
   {
     rings[i] += rhs[i];
   }
@@ -4688,13 +4685,13 @@ analysisRingStructure& analysisRingStructure::operator+=( analysisRingStructure&
 
 
 
-analysisRingContainer& analysisRingContainer::operator+=( const analysisRingContainer& rhs )
+analysisRingContainer& analysisRingContainer::operator+=( const analysisRingContainer & rhs )
 {
   lambdaGluon += rhs.lambdaGluon;
   lambdaQuark += rhs.lambdaQuark;
   collectedGluon += rhs.collectedGluon;
   collectedQuark += rhs.collectedQuark;
-
+  
   return ( *this );
 }
 

@@ -36,17 +36,17 @@ extern "C" {
 }
 
 additionalParticlesDistribution::additionalParticlesDistribution( const config* const _config, const INITIAL_STATE_TYPE _initialStateType ) :
-  initialStateType( _initialStateType ),
-  configObject( _config ),
-  numberOfParticlesToAdd( _config->getNumberOfParticlesToAdd() ),
-  minimumPT( _config->getMinimumPT() ),
-  minijet_P0( _config->getPtCutoff() ),
-  impactParameter( _config->getImpactParameter() ),
-  numberOfTestparticles( _config->getTestparticles() ),
-  insertionTime( _config->getInsertionTime() ),
-  seed( _config->getSeed() ),
-  filename_prefix( _config->getStandardOutputDirectoryName() + "/" + _config->getJobName() ),
-  initialPartonPt( _config->getInitialPartonPt() )
+    initialStateType( _initialStateType ),
+    configObject( _config ),
+    numberOfParticlesToAdd( _config->getNumberOfParticlesToAdd() ),
+    minimumPT( _config->getMinimumPT() ),
+    minijet_P0( _config->getPtCutoff() ),
+    impactParameter( _config->getImpactParameter() ),
+    numberOfTestparticles( _config->getTestparticles() )
+    insertionTime( _config->getInsertionTime() ),
+    seed( _config->getSeed() ),
+    filename_prefix( _config->getStandardOutputDirectoryName() + "/" + _config->getJobName() ),
+    initialPartonPt( _config->getInitialPartonPt() )
 {
 }
 
@@ -54,86 +54,86 @@ additionalParticlesDistribution::additionalParticlesDistribution( const config* 
 
 void additionalParticlesDistribution::populateParticleVector( std::vector< ParticleOffline >& _particles, WoodSaxon& _wsParameter )
 {
-  initialModel* initialmodel;
-
-  switch( initialStateType )
+  initialModel *initialmodel;
+  
+  switch ( initialStateType )
   {
-  case miniJetsInitialState:
-  {
-    double usedMinimumPT;
-    // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
-    if( minimumPT > minijet_P0 )
-      usedMinimumPT = minimumPT;
-    else
-      usedMinimumPT = minijet_P0;
-    initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
-    break;
-  }
-  case pythiaInitialState:
-    initialmodel = new initialModel_Pythia( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
-    break;
-  case mcatnloInitialState:
-    initialmodel = new initialModel_Mcatnlo( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
-    break;
-  case onlyJpsiInitialState:
-    initialmodel = new initialModel_Jpsi( *configObject, _wsParameter );
-    break;
-  case showerInitialState:
-  {
-    double usedMinimumPT;
-    // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
-    if( minimumPT > minijet_P0 )
-      usedMinimumPT = minimumPT;
-    else
-      usedMinimumPT = minijet_P0;
-    if( numberOfParticlesToAdd % 2 != 0 )
+    case miniJetsInitialState:
     {
-      string errMsg = "For shower initial conditions an even number of initial particles is needed!";
-      throw eInitialState_error( errMsg );
+      double usedMinimumPT;
+      // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
+      if( minimumPT > minijet_P0 )
+        usedMinimumPT = minimumPT;
+      else
+        usedMinimumPT = minijet_P0;
+      initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
+      break;
     }
-
-    initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
-    break;
-  }
-  case fixedPartonState:
-  {
-    double usedMinimumPT;
-    // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
-    if( minimumPT > minijet_P0 )
-      usedMinimumPT = minimumPT;
-    else
-      usedMinimumPT = minijet_P0;
-    if( numberOfParticlesToAdd % 2 != 0 )
+    case pythiaInitialState:
+      initialmodel = new initialModel_Pythia( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
+      break;
+    case mcatnloInitialState:
+      initialmodel = new initialModel_Mcatnlo( *configObject, _wsParameter, minimumPT, numberOfParticlesToAdd );
+      break;
+    case onlyJpsiInitialState:
+      initialmodel = new initialModel_Jpsi( *configObject, _wsParameter );
+      break;
+    case showerInitialState:
     {
-      string errMsg = "For shower initial conditions an even number of initial particles is needed!";
-      throw eInitialState_error( errMsg );
+      double usedMinimumPT;
+      // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
+      if( minimumPT > minijet_P0 )
+        usedMinimumPT = minimumPT;
+      else
+        usedMinimumPT = minijet_P0;
+      if( numberOfParticlesToAdd % 2 != 0 )
+      {
+        string errMsg = "For shower initial conditions an even number of initial particles is needed!";
+        throw eInitialState_error( errMsg );
+      }
+
+      initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
+      break;
     }
+    case fixedPartonState:
+    {
+      double usedMinimumPT;
+      // if minimum PT of added particles is larger than the minijet cut off it is not necessary to sample particles below the value of the former because they are not active in the simulation anyhow.
+      if( minimumPT > minijet_P0 )
+        usedMinimumPT = minimumPT;
+      else
+        usedMinimumPT = minijet_P0;
+      if( numberOfParticlesToAdd % 2 != 0 )
+      {
+        string errMsg = "For shower initial conditions an even number of initial particles is needed!";
+        throw eInitialState_error( errMsg );
+      }
 
-    initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
-    break;
+      initialmodel = new initialModel_minijets( *configObject, _wsParameter, usedMinimumPT, numberOfParticlesToAdd );
+      break;
+    }
+    default:
+      std::string errMsg = "Model for sampling the initial state not implemented yet!";
+      throw eInitialModel_error( errMsg );
+      break;
   }
-  default:
-    std::string errMsg = "Model for sampling the initial state not implemented yet!";
-    throw eInitialModel_error( errMsg );
-    break;
-  }
-
+  
   std::vector<Particle> tempParticleVector;
   initialmodel->populateParticleVector( tempParticleVector );
-
-  if( Particle::N_psi_states > 0 && initialStateType != onlyJpsiInitialState )  // for onlyJpsiInitialState Jpsi has been sampled above
+  
+  if( Particle::N_psi_states > 0 && initialStateType != onlyJpsiInitialState ) // for onlyJpsiInitialState Jpsi has been sampled above
   {
     initialModel_Jpsi theIni_Jpsi( *configObject, _wsParameter );
     theIni_Jpsi.populateParticleVector( tempParticleVector );
   }
-
+  
   _particles.reserve( tempParticleVector.size() );
-  for( int i = 0; i < tempParticleVector.size(); i++ )
+  for ( int i = 0; i < tempParticleVector.size(); i++ )
   {
     ParticleOffline tempParticle( tempParticleVector[i] );
     _particles.push_back( tempParticle );
   }
-
+  
   if( configObject->isStudyNonPromptJpsiInsteadOfElectrons() )
     deleteAllParticlesExceptBottom( _particles );
 
@@ -158,7 +158,7 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
     setEventID( _particles );
     initialShowerInitOutput( _particles );
   }
-  for( int i = 0; i < _particles.size(); i++ )
+  for ( int i = 0; i < _particles.size(); i++ )
   {
     _particles[i].unique_id = ParticleOffline::unique_id_counter_added;
     --ParticleOffline::unique_id_counter_added;
@@ -175,10 +175,10 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
 
   double MT, y, cc;
   double shift;
-  for( int j = 0; j < _particles.size(); j++ )
-  {
-    dtt = fabs( _particles[j].Z ) / tanh( eta_max ) - _particles[j].T;   //tanh(eta)=z/t
-    if( dtt < configObject->getTimeshift() )
+  for ( int j = 0; j < _particles.size(); j++ )
+  {   
+    dtt = fabs( _particles[j].Z ) / tanh( eta_max ) - _particles[j].T;  //tanh(eta)=z/t
+    if ( dtt < configObject->getTimeshift() )
     {
       shift = configObject->getTimeshift();
     }
@@ -191,21 +191,21 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     }
 
     _particles[j].T += shift;
-
+    
     // last interaction spacetime point is point of creation
     _particles[j].X_lastInt = _particles[j].X;
     _particles[j].Y_lastInt = _particles[j].Y;
     _particles[j].Z_lastInt = _particles[j].Z;
     _particles[j].T_lastInt = _particles[j].T;
-
+    
     //formation time 1/sqrt( p_T^2 + m^2) = 1/m_T
-    y = 0.5 * log( ( _particles[j].E+_particles[j].PZ ) / ( _particles[j].E-_particles[j].PZ ) );
-    MT = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) + pow( _particles[j].m, 2 ) );
+    y = 0.5 * log(( _particles[j].E+_particles[j].PZ ) / ( _particles[j].E-_particles[j].PZ ) );
+    MT = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) + pow( _particles[j].m, 2 ) );   
     dtt = 1 / MT * cosh( y ) * 0.197327;  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
-
+    
     // additional formation time for Jpsi
     if( _particles[j].FLAVOR == jpsi )
-      dtt += configObject->getJpsiFormationTime() * cosh( y );  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
+      dtt += configObject->getJpsiFormationTime() * cosh( y ); //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
 
     cc = dtt / _particles[j].E;
     _particles[j].T = _particles[j].T + dtt;
@@ -214,22 +214,22 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
     _particles[j].Z = _particles[j].Z + _particles[j].PZ * cc;
 
     _particles[j].init = true;
-
+    
     // creation time is time at which the particle is allowed to scatter
     _particles[j].T_creation = _particles[j].T;
   }
-
-  for( int i = 0; i < _particles.size(); i++ )
+  
+  for(int i = 0; i < _particles.size(); i++)
   {
     _particles[i].X_init = _particles[i].X;
     _particles[i].Y_init = _particles[i].Y;
     _particles[i].Z_init = _particles[i].Z;
-
+    
     _particles[i].E_init = _particles[i].E;
     _particles[i].PX_init = _particles[i].PX;
     _particles[i].PY_init = _particles[i].PY;
     _particles[i].PZ_init = _particles[i].PZ;
-
+    
     _particles[i].X_traveled = 0.0;
   }
 }
@@ -237,13 +237,13 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
 
 void additionalParticlesDistribution::deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles )
 {
-  for( int j = 0; j < addedParticles.size(); j++ )
+  for(int j = 0; j < addedParticles.size(); j++ )
   {
     if( !( addedParticles[j].FLAVOR == bottom || addedParticles[j].FLAVOR == anti_bottom ) )
     {
       // delete last particle if also not active otherwise switch position with particle to be deleted
-      while( !( addedParticles.back().FLAVOR == bottom || addedParticles.back().FLAVOR == anti_bottom ) &&
-             ( j != addedParticles.size() - 1 ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which is not correct.
+      while( !( addedParticles.back().FLAVOR == bottom || addedParticles.back().FLAVOR == anti_bottom ) && 
+            ( j != addedParticles.size() - 1 ) ) // if particle j is the last particle in the particle list it is deleted here and the then last in the list below as well, which is not correct.
       {
         addedParticles.pop_back();
       }
