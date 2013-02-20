@@ -3267,7 +3267,7 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       }
       else
       {
-        if( ( addedParticles[kscat].FLAVOR != gluon ) && ( F2 == gluon ) )
+        if ( (addedParticles[kscat].FLAVOR != gluon) && (F2 == gluon))
           _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
 
         addedParticles[kscat].FLAVOR = F2;
