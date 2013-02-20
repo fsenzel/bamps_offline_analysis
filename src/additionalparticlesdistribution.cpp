@@ -46,7 +46,7 @@ additionalParticlesDistribution::additionalParticlesDistribution ( const config*
   insertionTime ( _config->getInsertionTime() ),
   seed ( _config->getSeed() ),
   filename_prefix ( _config->getStandardOutputDirectoryName() + "/" + _config->getJobName() ),
-  initialPartonPt( _config->getInitialPartonPt() )
+  initialPartonPt ( _config->getInitialPartonPt() )
 {
 }
 
@@ -144,21 +144,22 @@ void additionalParticlesDistribution::populateParticleVector ( std::vector< Part
     initialShowerInitOutput ( _particles );
     showerParticles ( _particles );
   }
-  else if ( initialStateType == fixedPartonState )
-  {
-    for ( int i = 0; i < _particles.size(); i+=2 )
+  else
+    if ( initialStateType == fixedPartonState )
     {
-      _particles[i].PX = initialPartonPt;
-      _particles[i+1].PX = -initialPartonPt;
-      _particles[i].PY = _particles[i+1].PY = 0.0;
-      _particles[i].PZ = _particles[i+1].PZ = 0.0;
-      _particles[i].E = _particles[i+1].E = initialPartonPt;
-      _particles[i].FLAVOR = _particles[i+1].FLAVOR = gluon;
+      for ( int i = 0; i < _particles.size(); i += 2 )
+      {
+        _particles[i].PX = initialPartonPt;
+        _particles[i + 1].PX = -initialPartonPt;
+        _particles[i].PY = _particles[i + 1].PY = 0.0;
+        _particles[i].PZ = _particles[i + 1].PZ = 0.0;
+        _particles[i].E = _particles[i + 1].E = initialPartonPt;
+        _particles[i].FLAVOR = _particles[i + 1].FLAVOR = gluon;
+      }
+      setEventID ( _particles );
+      initialShowerInitOutput ( _particles );
     }
-    setEventID( _particles );
-    initialShowerInitOutput( _particles );
-  }
-  
+
   for ( int i = 0; i < _particles.size(); i++ )
   {
     _particles[i].unique_id = ParticleOffline::unique_id_counter_added;

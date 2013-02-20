@@ -8,16 +8,16 @@
 class mesonDecay
 {
   public:
-    mesonDecay( const int numberElectronStat_arg, const bool muonsInsteadOfElectrons_arg = false, const bool nonPromptJpsiInsteadOfElectrons_arg = false );
+    mesonDecay ( const int numberElectronStat_arg, const bool muonsInsteadOfElectrons_arg = false, const bool nonPromptJpsiInsteadOfElectrons_arg = false );
     void decayToElectronsToyModel();
     void decayToElectronsPythia();
 
   private:
-    void mesonToElectronToyModel(double P[4], int & F);
-    void setPythiaDecayChannelsElectrons(Pythia8::Pythia& pythia);
-    void setPythiaDecayChannelsMuons(Pythia8::Pythia& pythia);
-    void setPythiaDecayChannelsNonPromptJpsi(Pythia8::Pythia& pythia);
-    
+    void mesonToElectronToyModel ( double P[4], int& F );
+    void setPythiaDecayChannelsElectrons ( Pythia8::Pythia& pythia );
+    void setPythiaDecayChannelsMuons ( Pythia8::Pythia& pythia );
+    void setPythiaDecayChannelsNonPromptJpsi ( Pythia8::Pythia& pythia );
+
     bool muonsInsteadOfElectrons;
     bool nonPromptJpsiInsteadOfElectrons;
     int numberElectronStat;
@@ -27,8 +27,8 @@ class mesonDecay
 class eMesonDecay_error : public std::runtime_error
 {
   public:
-    explicit eMesonDecay_error(const std::string& what) : std::runtime_error(what) {};
-    
+    explicit eMesonDecay_error ( const std::string& what ) : std::runtime_error ( what ) {};
+
     virtual ~eMesonDecay_error() throw() {};
 };
 

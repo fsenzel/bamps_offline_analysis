@@ -9,7 +9,7 @@
 //---------------------------------------------
 
 
-/** @file 
+/** @file
  *  Providing type_index based on C++0x proposition from gcc 4.6
  */
 
@@ -26,43 +26,57 @@ using std::size_t;
 /** @brief The class type_index provides a simple wrapper for type_info which can be used as an index type in associative containers (23.6) and in unordered associative containers (23.7). */
 struct type_index
 {
-  type_index(const type_info& __rhs)
-  : _M_target(&__rhs) { }
-  
-  bool
-  operator==(const type_index& __rhs) const
-  { return *_M_target == *__rhs._M_target; }
-  
-  bool
-  operator!=(const type_index& __rhs) const
-  { return *_M_target != *__rhs._M_target; }
-  
-  bool
-  operator<(const type_index& __rhs) const
-  { return _M_target->before(*__rhs._M_target); }
-  
-  bool
-  operator<=(const type_index& __rhs) const
-  { return !__rhs._M_target->before(*_M_target); }
-  
-  bool
-  operator>(const type_index& __rhs) const
-  { return __rhs._M_target->before(*_M_target); }
-  
-  bool
-  operator>=(const type_index& __rhs) const
-  { return !_M_target->before(*__rhs._M_target); }
-  
-  size_t hash_code() const
-  {
-    boost::hash<std::string> string_hash;
-    return string_hash( _M_target->name() );
-  }
-  
-  const char*
-  name() const
-  { return _M_target->name(); }
-  
+    type_index ( const type_info& __rhs )
+      : _M_target ( &__rhs ) { }
+
+    bool
+    operator== ( const type_index& __rhs ) const
+    {
+      return *_M_target == *__rhs._M_target;
+    }
+
+    bool
+    operator!= ( const type_index& __rhs ) const
+    {
+      return *_M_target != *__rhs._M_target;
+    }
+
+    bool
+    operator< ( const type_index& __rhs ) const
+    {
+      return _M_target->before ( *__rhs._M_target );
+    }
+
+    bool
+    operator<= ( const type_index& __rhs ) const
+    {
+      return !__rhs._M_target->before ( *_M_target );
+    }
+
+    bool
+    operator> ( const type_index& __rhs ) const
+    {
+      return __rhs._M_target->before ( *_M_target );
+    }
+
+    bool
+    operator>= ( const type_index& __rhs ) const
+    {
+      return !_M_target->before ( *__rhs._M_target );
+    }
+
+    size_t hash_code() const
+    {
+      boost::hash<std::string> string_hash;
+      return string_hash ( _M_target->name() );
+    }
+
+    const char*
+    name() const
+    {
+      return _M_target->name();
+    }
+
   private:
     const type_info* _M_target;
 };
@@ -75,13 +89,15 @@ struct hash<type_index>
 {
   typedef size_t        result_type;
   typedef type_index  argument_type;
-  
+
   size_t
-  operator()(const type_index& __ti) const
-  { return __ti.hash_code(); }
+  operator() ( const type_index& __ti ) const
+  {
+    return __ti.hash_code();
+  }
 };
 
-#endif 
+#endif
 
 
 // The coypright note from the original gcc version

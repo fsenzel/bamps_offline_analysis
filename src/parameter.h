@@ -14,8 +14,8 @@
 
 struct initParam
 {
-  double gama,velocity,RA,dA,n0A,RA0;
-  int count_t,count_PT,count_PT_fine;
+  double gama, velocity, RA, dA, n0A, RA0;
+  int count_t, count_PT, count_PT_fine;
 };
 
 

@@ -21,12 +21,12 @@
 class initialModel_CGC : public initialModel
 {
   public:
-    initialModel_CGC( const config& _config);
+    initialModel_CGC ( const config& _config );
     ~initialModel_CGC() {};
-    
-    void populateParticleVector( std::vector<Particle>& _particles );
-  
-        
+
+    void populateParticleVector ( std::vector<Particle>& _particles );
+
+
   private:
     std::string filename_cgcParticleFile;
     int numberOfParticlesToGenerate;

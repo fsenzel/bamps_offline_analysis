@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------
 
-/** @file 
+/** @file
  * @brief Declarations for the class interpolation_iniQNLO.
  */
 
@@ -31,9 +31,9 @@ enum shadowModelJpsi {none, eks98, eps08, eps09};
 class interpolation_iniJpsi_dndptdy : interpolation2d // based on interpolation2d
 {
   public:
-    void configure( const double sqrtS_arg, const double Bimp_arg, const double sigmaAbs_arg = 1.5, const double agN = 0.1, const shadowModelJpsi shadowing_model = eps08 );
+    void configure ( const double sqrtS_arg, const double Bimp_arg, const double sigmaAbs_arg = 1.5, const double agN = 0.1, const shadowModelJpsi shadowing_model = eps08 );
 
-    double getdN(const double y, const double pt) const;
+    double getdN ( const double y, const double pt ) const;
 
   private:
     double impact_parameter, sigmaAbs, sqrtS;

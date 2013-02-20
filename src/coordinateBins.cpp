@@ -25,11 +25,11 @@ using std::endl;
 using namespace ns_casc;
 
 
-coordinateBins::coordinateBins( const int _size, const double _min, const double _max ) :
-    _negative_indices( false ), _min_real( _min ), _max_real( _max ), _min_index_limit( 0 ), _max_index_limit( _size - 1 ),
-    _min_index_active( 0 ), _max_index_active( _size - 1 )
+coordinateBins::coordinateBins ( const int _size, const double _min, const double _max ) :
+  _negative_indices ( false ), _min_real ( _min ), _max_real ( _max ), _min_index_limit ( 0 ), _max_index_limit ( _size - 1 ),
+  _min_index_active ( 0 ), _max_index_active ( _size - 1 )
 {
-  bins.resize( _size );
+  bins.resize ( _size );
 
   if ( _size > 0 )
   {
@@ -51,7 +51,7 @@ coordinateBins::coordinateBins( const int _size, const double _min, const double
 
 
 
-void coordinateBins::reshape( const int _size, const double _min, const double _max )
+void coordinateBins::reshape ( const int _size, const double _min, const double _max )
 {
   _negative_indices = false;
   _min_real = _min;
@@ -62,7 +62,7 @@ void coordinateBins::reshape( const int _size, const double _min, const double _
   _max_index_active = _size - 1;
 
   bins.clear();
-  bins.resize( _size );
+  bins.resize ( _size );
 
   if ( _size > 0 )
   {
@@ -84,10 +84,10 @@ void coordinateBins::reshape( const int _size, const double _min, const double _
 }
 
 
-int coordinateBins::getIndex( const double _x ) const
+int coordinateBins::getIndex ( const double _x ) const
 {
   int index = -1;
-  index = static_cast<int>(( _x - _min_real ) / _delta_x );
+  index = static_cast<int> ( ( _x - _min_real ) / _delta_x );
 
   index -= _min_index_limit;
 
@@ -105,7 +105,7 @@ int coordinateBins::getIndex( const double _x ) const
 
 
 
-const coordinateSubBin& coordinateBins::operator[]( const int _index ) const
+const coordinateSubBin& coordinateBins::operator[] ( const int _index ) const
 {
   int tempIndex = _index - _min_index_limit;
   return bins[ tempIndex ];
@@ -114,28 +114,28 @@ const coordinateSubBin& coordinateBins::operator[]( const int _index ) const
 
 
 
-void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine )
+void coordinateEtaBins::populateEtaBins ( coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine )
 {
   const double delta_eta_fine = _dEta_fine;
   const double eta_max = 8.0;
-  const double n_eta = 2 * static_cast<int>( eta_max / delta_eta_fine );
+  const double n_eta = 2 * static_cast<int> ( eta_max / delta_eta_fine );
 
-  _dNdEta.reshape( n_eta, -eta_max, + eta_max );
+  _dNdEta.reshape ( n_eta, -eta_max, + eta_max );
 
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
-  {    
-    particles_atTimeNow[i].eta = 0.5 * log(( particles_atTimeNow[i].T + particles_atTimeNow[i].Z ) / ( particles_atTimeNow[i].T - particles_atTimeNow[i].Z ) );
+  {
+    particles_atTimeNow[i].eta = 0.5 * log ( ( particles_atTimeNow[i].T + particles_atTimeNow[i].Z ) / ( particles_atTimeNow[i].T - particles_atTimeNow[i].Z ) );
     if ( particles_atTimeNow[i].T < ( _timenow + _dt ) )
     {
-      _dNdEta.increase( particles_atTimeNow[i].eta );
+      _dNdEta.increase ( particles_atTimeNow[i].eta );
     }
   }
 
   int centralIndex = this->getCentralIndex();
-  
+
   for ( int i = 0; i < bins.size(); ++i )
   {
-    bins[i].setLeftRight( -infinity, infinity );
+    bins[i].setLeftRight ( -infinity, infinity );
   }
 
 
@@ -146,11 +146,11 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   int np, npr, npl;
   int nsum1 = 0, nsum2 = 0;
   int nMax = NinEtaBin;
-  const int dNdEta_centralIndex = static_cast<int>( _dNdEta.size() ) / 2;
+  const int dNdEta_centralIndex = static_cast<int> ( _dNdEta.size() ) / 2;
   const double dEta = _dNdEta.get_dx();
 
   //---------- populate central eta bin ----------
-  np = dNdEta_centralIndex + static_cast<int>( _etaShift / dEta );
+  np = dNdEta_centralIndex + static_cast<int> ( _etaShift / dEta );
   npr = np;
   npl = np - 1;
 
@@ -169,7 +169,7 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
     nsum1 += _dNdEta[npr].content;
     nsum2 += _dNdEta[npl].content;
   }
-  
+
   bins[centralIndex].right = _dNdEta[npr].right;
   bins[centralIndex].left = _dNdEta[npl].left;
   bins[centralIndex].content = nsum1 + nsum2;
@@ -179,14 +179,14 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
     bins[centralIndex + 1].left = bins[centralIndex].right;
     bins[centralIndex - 1].right = bins[centralIndex].left;
   }
-  
-  dz = _timenow * ( tanh( bins[centralIndex].right ) - tanh( bins[centralIndex].left ) );
+
+  dz = _timenow * ( tanh ( bins[centralIndex].right ) - tanh ( bins[centralIndex].left ) );
   if ( dz < _dt )
   {
     _dt = dz;
   }
   //---------- populate central eta bin ----------
-  
+
 
   int nRest;
   int index = centralIndex;
@@ -210,15 +210,15 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
       ++npr;
       nsum1 += _dNdEta[npr].content;
     }
-    
+
     bins[index].right = _dNdEta[npr].right;
     bins[index].content = nsum1;
     if ( index + 1 < bins.size() )
     {
       bins[index + 1].left = bins[index].right;
     }
-    
-    dz = _timenow * ( tanh( bins[index].right ) - tanh( bins[index].left ) );
+
+    dz = _timenow * ( tanh ( bins[index].right ) - tanh ( bins[index].left ) );
     if ( dz < _dt )
     {
       _dt = dz;
@@ -232,13 +232,13 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   }
   _max_index_active = index;
   //---------- populate bins with eta > 0 ----------
-  
-  
+
+
 
   //---------- populate bins with eta < 0 ----------
   nRest = 0;
   index = centralIndex;
-  
+
   for ( int i = 0; i < npl; i++ )
   {
     nRest += _dNdEta[i].content;
@@ -265,8 +265,8 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
     {
       bins[index - 1].right = bins[index].left;
     }
-    
-    dz = _timenow * ( tanh( bins[index].right ) - tanh( bins[index].left ) );
+
+    dz = _timenow * ( tanh ( bins[index].right ) - tanh ( bins[index].left ) );
     if ( dz < _dt )
     {
       _dt = dz;
@@ -283,7 +283,7 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   if ( _min_index_active < 0 || _max_index_active >= bins.size() )
   {
     std::string errMsg = "Index out of range in populateEtaBins. EstimatedMaxNumber in constructEtaBins might need adjustment.";
-    throw eCoordBins_error( errMsg );
+    throw eCoordBins_error ( errMsg );
   }
 
   _dt = 0.1 * _dt;
@@ -291,10 +291,10 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
 
 
 
-int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param, const int _nTest )
+int coordinateEtaBins::constructEtaBins ( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param, const int _nTest )
 {
-  double initialArea = 4 * ( _param.RA - _b / 2 ) * sqrt(( _param.RA - _b / 2 ) * ( _param.RA + _b / 2 ) );
-  NinEtaBin = int( initialArea / ( _dx * _dy ) * _NperCell );
+  double initialArea = 4 * ( _param.RA - _b / 2 ) * sqrt ( ( _param.RA - _b / 2 ) * ( _param.RA + _b / 2 ) );
+  NinEtaBin = int ( initialArea / ( _dx * _dy ) * _NperCell );
 
   int estimatedMaxNumber = particles_atTimeNow.size() * 1.3;
   if ( Particle::N_light_flavor == 0 )
@@ -303,18 +303,18 @@ int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, c
   }
   int _IZ = ( estimatedMaxNumber / 2 / NinEtaBin  + 2 ) * 2 + 1;
 
-  bins.resize( _IZ );
+  bins.resize ( _IZ );
   _min_index_limit = 0;
   _max_index_limit = bins.size() - 1;
 
-  cout << "number of cells in one etabin=" << int( pow(( 2 * _param.RA / _dx ), 2 ) )
+  cout << "number of cells in one etabin=" << int ( pow ( ( 2 * _param.RA / _dx ), 2 ) )
        << "\t" << "particle number in one Etabin=" << NinEtaBin << endl;
   if ( particles_atTimeNow.size() <= ( 8 * NinEtaBin ) )
   {
     cout << "N = " << particles_atTimeNow.size() << "  NinEtaBin = " << NinEtaBin << "  IZ = " << _IZ << endl;
     cout << "recommended number of test particles > " << ( ( 8 * NinEtaBin * _nTest ) / particles_atTimeNow.size() ) << endl;
     std::string errMsg = "insufficient number of test particles";
-    throw eCoordBins_error( errMsg );
+    throw eCoordBins_error ( errMsg );
   }
 
   return _IZ;
@@ -327,17 +327,17 @@ int coordinateEtaBins::getCentralIndex() const
   if ( bins.size() % 2 != 1 )
   {
     string errMsg = "number of eta bins must be odd";
-    throw eCoordBins_error( errMsg );
+    throw eCoordBins_error ( errMsg );
   }
   else
   {
-    return ( static_cast<int>( bins.size() ) / 2 );
+    return ( static_cast<int> ( bins.size() ) / 2 );
   }
 }
 
 
 
-int coordinateEtaBins::getIndex( const double _eta ) const
+int coordinateEtaBins::getIndex ( const double _eta ) const
 {
   int index = this->getCentralIndex();
   if ( _eta >= 0 )
@@ -354,10 +354,10 @@ int coordinateEtaBins::getIndex( const double _eta ) const
       --index;
     }
   }
-  
+
   return index;
 }
 
 
 
-// kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;
+// kate: indent-mode cstyle; indent-width 2; replace-tabs on; 
