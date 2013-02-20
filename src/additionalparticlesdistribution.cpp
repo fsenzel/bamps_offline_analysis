@@ -42,7 +42,7 @@ additionalParticlesDistribution::additionalParticlesDistribution( const config* 
     minimumPT( _config->getMinimumPT() ),
     minijet_P0( _config->getPtCutoff() ),
     impactParameter( _config->getImpactParameter() ),
-    numberOfTestparticles( _config->getTestparticles() )
+    numberOfTestparticles( _config->getTestparticles() ),
     insertionTime( _config->getInsertionTime() ),
     seed( _config->getSeed() ),
     filename_prefix( _config->getStandardOutputDirectoryName() + "/" + _config->getJobName() ),

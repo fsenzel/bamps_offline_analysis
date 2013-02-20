@@ -1615,7 +1615,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             
             if( theConfig->isScatt_offlineWithAddedParticles() && theConfig->doScattering_32() )
             {
-              scatt32_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, n32, again, aa, nexttime );
+              scatt32_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, n32, again, nexttime );
               if ( again )
               {
                 return;
@@ -1642,7 +1642,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             if( theConfig->isScatt_offlineWithAddedParticles() )
             {
               analysisRingStructure tempRing( theAnalysis->rings.size(), theAnalysis->rings.getCentralRadius(), theAnalysis->rings.getDeltaR() );
-              scatt2223_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, scaleFactor, again, aa, nexttime, tempRing );
+              scatt2223_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, scaleFactor, again, nexttime, tempRing );
               if ( etaSliceIndex == centralEtaIndex )
               {
                 theAnalysis->rings += tempRing;
