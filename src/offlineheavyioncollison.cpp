@@ -2617,8 +2617,8 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
 
   if ( theConfig->doOutput_scatteredMediumParticles() )
   {
-    mediumParticles.push_back( particles_atTimeNow[iscat] );
-    mediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
+    scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
   }
   
   particles_atTimeNow[iscat].getMomentumArray( P1 );
@@ -2781,8 +2781,8 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
 
   if ( theConfig->doOutput_scatteredMediumParticles() )
   {
-    mediumParticles.push_back( particles_atTimeNow[iscat] );
-    mediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
+    scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
   }
     
   particles_atTimeNow[iscat].getMomentumArray( P1 );
@@ -3152,10 +3152,10 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
 
   if ( theConfig->doOutput_scatteredMediumParticles() )
   {
-    mediumParticles.push_back( particles_atTimeNow[iscat] );
-    mediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
-    mediumParticles.push_back( particles_atTimeNow[jscat] );
-    mediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+    scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
+    scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+    scatteredMediumParticles.push_back( particles_atTimeNow[jscat] );
+    scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
   }
   
   particles_atTimeNow[iscat].getMomentumArray( P1 );

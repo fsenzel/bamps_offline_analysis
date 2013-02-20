@@ -42,7 +42,7 @@ std::vector<ParticleOffline> ns_casc::addedParticles;
 std::vector<ParticleOffline> ns_casc::addedParticlesCopy;
 // std::vector<ParticleHFelectron> ns_casc::addedPartcl_electron;
 std::vector<ParticleOffline> ns_casc::addedPartcl_electron;
-std::vector<ParticleOffline> ns_casc::mediumParticles;
+std::vector<ParticleOffline> ns_casc::scatteredMediumParticles;
 
 
 double dt = 0.1;

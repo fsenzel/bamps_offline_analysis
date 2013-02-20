@@ -4399,11 +4399,11 @@ void analysis::scatteredMediumParticlesOutput( const int step )
     printHeader( file, all, end );
   //---------------------------------------
 
-  for ( int i = 0; i < mediumParticles.size(); i++ )
+  for ( int i = 0; i < scatteredMediumParticles.size(); i++ )
   {
-    file << i << sep << mediumParticles[i].unique_id << sep << mediumParticles[i].cell_id << sep << mediumParticles[i].FLAVOR << sep << mediumParticles[i].T << sep << mediumParticles[i].X << sep
-    << mediumParticles[i].Y << sep  << mediumParticles[i].Z << sep << mediumParticles[i].E << sep << mediumParticles[i].PX << sep << mediumParticles[i].PY << sep
-    << mediumParticles[i].PZ << sep << mediumParticles[i].md2g << sep << mediumParticles[i].md2q << sep << mediumParticles[i].N_EVENT_pp << endl;
+    file << i << sep << scatteredMediumParticles[i].unique_id << sep << scatteredMediumParticles[i].cell_id << sep << scatteredMediumParticles[i].FLAVOR << sep << scatteredMediumParticles[i].T << sep << scatteredMediumParticles[i].X << sep
+    << scatteredMediumParticles[i].Y << sep  << scatteredMediumParticles[i].Z << sep << scatteredMediumParticles[i].E << sep << scatteredMediumParticles[i].PX << sep << scatteredMediumParticles[i].PY << sep
+    << scatteredMediumParticles[i].PZ << sep << scatteredMediumParticles[i].md2g << sep << scatteredMediumParticles[i].md2q << sep << scatteredMediumParticles[i].N_EVENT_pp << endl;
   }
   file.close();
 }
