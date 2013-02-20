@@ -16,11 +16,6 @@
 #ifndef INTERPOLATION_NJPSI_H
 #define INTERPOLATION_NJPSI_H
 
-/**
-@author Jan Uphoff and Oliver Fochler
- */
-
-
 #include "interpolation_n_dimensions.h"
 
 using std::string;

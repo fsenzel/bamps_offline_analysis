@@ -500,7 +500,7 @@ analysis::~analysis()
 
 void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
 {
-  // By default switches are set off:
+  // By default switches are set off (please do not edit here, but define output scheme and change below, for more information see https://th.physik.uni-frankfurt.de/~bamps/cgi-bin/trac/wiki/RestrictedWiki/AnalysisOutputScheme):
   studyHQ = false; // heavy quarks
   studyJpsi = false; // jpsi
   studyTempInTube = false; // temperature in a centred tube in heavy ion collision
@@ -533,6 +533,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   //---- defining rapidity ranges ----
 
   
+  // add a new case for your outpute scheme which you can create in configuration.h
   switch ( _outputScheme )
   {
     case phenix_hq_electrons:
@@ -663,8 +664,22 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
       break;
+
     case background_jets:
       studyScatteredMediumParticles = true;
+
+    case light_parton_lhc:      
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.8 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+
     default:
       break;
   }
@@ -1661,12 +1676,12 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   {
     theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
     theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( anti_up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+//     theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+//     theV2RAA.computeFor( down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+//     theV2RAA.computeFor( strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+//     theV2RAA.computeFor( anti_up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+//     theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+//     theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
   }
   
   if( studyBackground )
@@ -2005,9 +2020,32 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     print_pt_angleDependence << endl;
   }
   
+    //CMS pt cut for non prompt jpsi: 6.5GeV < pt < 30 GeV, y cut: |y|<2.4
+  if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() && _flavTypeToComputeFor == electron_gen )
+  {
+    string filename_yield_cmsNonPromptJpsi = filename_prefix + "_nonPromptJpsiCMScuts_yield_" + name;
+    fstream print_cmsNonPromptJpsi( filename_yield_cmsNonPromptJpsi.c_str(), ios::out | ios::trunc );
+    
+    print_cmsNonPromptJpsi << "# yield of non prompt jpsi from B meson decays" << endl;
+    print_cmsNonPromptJpsi << "# with same acceptance cuts as for CMS:  6.5GeV < pt < 30 GeV,  |y|<2.4" << endl;
+    
+    int count_jpsi = 0;
+    double delta_eta_cms = 2.0 * 2.4;
+    double y, pt;
+    for ( int i = 1; i <= n_particles; i++ )
+    {
+      pt = sqrt( pow( _particles[i].PX, 2.0 ) + pow( _particles[i].PY, 2.0 ) );
+      y = 0.5 * log(( _particles[i].E + _particles[i].PZ ) / ( _particles[i].E - _particles[i].PZ ) );
+      
+      if( fabs( y ) < 2.4 && pt > 6.5 && pt < 30.0 )
+        count_jpsi++;
+    }
+    
+    print_cmsNonPromptJpsi << double( count_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getNumberElectronStat() / delta_eta_cms << endl;
+  }
+  
 
 }
-
 
 
 

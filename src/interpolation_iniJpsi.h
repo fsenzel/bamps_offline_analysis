@@ -16,11 +16,6 @@
 #ifndef INTERPOLATIONINIJPSI_H
 #define INTERPOLATIONINIJPSI_H
 
-/**
-@author Jan Uphoff and Oliver Fochler
- */
-
-
 #include "interpolation_n_dimensions.h"
 
 using std::string;
