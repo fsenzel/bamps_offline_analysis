@@ -185,6 +185,7 @@ public:
   void collectEtDataInitial();
   
   void setSeed( uint32_t _s ) { seed = _s; }
+  uint32_t getSeed( ) { return seed; }
 
 
   int addJetEvent_in( const int ID_1, const int ID_2, const int ID_3, const jetTrackerCollType coll_type,
@@ -199,6 +200,9 @@ public:
   
   double getJetTracking_PT() const {return jetTracking_PT;}
   
+  void registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles,
+      const int _nMediumParticles, const int _nColl, const int _nColl22,
+      const int _nColl23, const int _nColl32 );
   void volumeMidrap(const int ) const;
   
   double tstep[120];
@@ -207,6 +211,11 @@ public:
   analysisRingStructure rings;
   ringStructure centralRingsCopyFromCascade;
 
+  //--------------------//
+  //for jet background analysis
+  void scatteredMediumParticlesOutput( const int step );
+  void mediumParticlesOutput( const int step );
+  //--------------------//
 private:
 
   config * const theConfig ;
@@ -233,6 +242,7 @@ private:
   bool studyJets;
   bool studyCentralDensity;
   bool studyBackground;
+  bool studyScatteredMediumParticles;
   
   
   
@@ -296,6 +306,7 @@ private:
   fstream oscarJets;
   fstream centralDensitiesOutputFile;
   fstream mfpJetsOutputFile;
+  fstream progressLogFile;
   
   
   
@@ -384,6 +395,7 @@ private:
   int* numberJpsiDiss_time;
   int* numberJpsiDissTd_time;
 
+  vector< vector < int > > showerParticlesInEvent;
   
 };
 

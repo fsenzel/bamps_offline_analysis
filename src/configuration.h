@@ -32,7 +32,7 @@
 
 
 /** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState };
+enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, showerInitialState, fixedPartonState };
 
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
@@ -53,7 +53,9 @@ alice_hq_dmesons = 113,
 cms_hq_nonPromptJpsi = 114,
 phenix_jpsi = 131,
 alice_jpsi = 141,
-cms_jpsi = 151
+cms_jpsi = 151,
+// jets:
+background_jets = 161
 };
 
 
@@ -74,6 +76,7 @@ namespace ns_casc
   extern std::vector<ParticleOffline> addedParticlesCopy;
 //   extern std::vector<ParticleHFelectron> addedPartcl_electron;
   extern std::vector<ParticleOffline> addedPartcl_electron;
+  extern std::vector<ParticleOffline> scatteredMediumParticles;
 }
 //--------------------------------------------------------//
 
@@ -129,7 +132,10 @@ class config : public configBase
   
   /** @brief Interface for config::scatt_amongAddedParticles */
   bool isScatt_amongAddedParticles() const {return scatt_amongAddedParticles;}
-  
+
+  /** @brief Interface for config::scatt_furtherOfflineParticles */
+  bool isScatt_furtherOfflineParticles() const {return scatt_furtherOfflineParticles;}
+
   /** @brief Interface for config::N_light_flavors_input */
   int getNlightFlavorsAdded() const {return N_light_flavors_input;}
   
@@ -170,6 +176,13 @@ class config : public configBase
   
   /** @brief Interface for config::P0 */
   double getPtCutoff() const { return P0; }
+  
+  /** @brief Interface for config::insertionTime */
+  double getInsertionTime() const { return insertionTime; };
+  
+  /** @brief Interface for config::initialPartonPt */
+  double getInitialPartonPt() const { return initialPartonPt; };
+  
   /** ------------------------------- */
 
   /** -------- output options ------- */   
@@ -184,7 +197,10 @@ class config : public configBase
   
   /** @brief Interface for config::outputSwitch_movieOutput */
   bool doOutput_movieOutputBackground() const {return outputSwitch_movieOutputBackground;}
-  
+
+  /** @brief Interface for config::outputSwitch_scatteredMediumParticlesOutput */
+  bool doOutput_scatteredMediumParticles() const {return outputSwitch_scatteredMediumParticlesOutput;}
+
   /** @brief Interface for config::v2RAAoutput */
   bool isV2RAAoutput() const {return  v2RAAoutput;}
   
@@ -324,6 +340,8 @@ class config : public configBase
   void readAndPrepareInitialSettings( offlineOutputInterface*const _offlineInterface );
   /** ------------------------------ */
 
+  /** Set seed chosen during runtime */
+  void setSeed ( uint32_t _seed ){ seed = _seed; };
   
  protected:
    /** ----- auxiliary routines ----- */
@@ -397,7 +415,11 @@ class config : public configBase
   /** @brief Whether added particles are allowed to scatter with other added particles */
   bool scatt_amongAddedParticles;
   /** ------------------------------- */
-  
+
+  /** @brief Whether scattered offline particles are allowed to scatter again with other added particles */
+  bool scatt_furtherOfflineParticles;
+  /** ------------------------------- */
+
   /** ---- initial state options ---- */ 
   /** @brief Which type of initial state to use */
   INITIAL_STATE_TYPE initialStateType;
@@ -438,6 +460,13 @@ class config : public configBase
   
   /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
   double P0;  
+  
+  /** @brief If shower initial conditions, this time gives the duration of the shower */
+  double insertionTime;
+  
+  /** @brief Transverse momentum of initial parton pair */
+  double initialPartonPt;
+  
   /** ------------------------------- */
   
   /** -------- output options ------- */ 
@@ -455,6 +484,9 @@ class config : public configBase
   
   /** @brief Specify whether movie output should be written (for the reconstructed background) */
   bool outputSwitch_movieOutputBackground;
+
+  /** @brief Specify whether scattered medium particles output should be written */
+  bool outputSwitch_scatteredMediumParticlesOutput;
   
   /** @brief Whether v2 and RAA output are printed */
   bool v2RAAoutput;
@@ -588,7 +620,7 @@ class config : public configBase
   */
   int numberOfAddedEvents;
   /** @brief Minimum p_T [GeV] of the added particles */
-  double minimumPT; 
+  double minimumPT;
   
   
   // the following parameters are read at runtime from the offline data recorded by the original run, 
