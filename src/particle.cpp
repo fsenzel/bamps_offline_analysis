@@ -12,9 +12,6 @@
  * @brief definitions for the ParticleOffline class
  */
 
-/** @author Oliver Fochler */
-
-
 #include "particle.h"
 
 /**

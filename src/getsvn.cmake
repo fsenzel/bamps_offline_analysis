@@ -2,7 +2,11 @@
 INCLUDE(FindSubversion)
 
 # extract working copy information for SOURCE_DIR into MY_XXX variables
-Subversion_WC_INFO(${SOURCE_DIR} MY)
+IF ( NOT DISABLE_SVN_EXTRAS )
+  Subversion_WC_INFO(${SOURCE_DIR} MY)
+ELSE ( NOT DISABLE_SVN_EXTRAS )
+  SET( MY_WC_REVISION "\"no svn revision info available\"" )
+ENDIF( NOT DISABLE_SVN_EXTRAS )
 
 # write a file with the SVNVERSION define
 FILE(WRITE revision.h.temp "#ifndef REVISION_H

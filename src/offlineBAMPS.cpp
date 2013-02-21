@@ -59,7 +59,7 @@ int main( int argc, char *argv[] )
     theConfig.readAndPrepareInitialSettings( &offlineInterface );
 
     analysis theAnalysis( &theConfig );
-    offlineHeavyIonCollision theHIC( &theConfig, &offlineInterface );
+    offlineHeavyIonCollision theHIC( &theConfig, &offlineInterface, &theAnalysis );
     //--------------------------------------------------------------
 
     //--------------------------------------------------------------
@@ -75,6 +75,7 @@ int main( int argc, char *argv[] )
     else
     {
       seed = ran2.setSeed();
+      theConfig.setSeed( seed );
     }
     theAnalysis.setSeed( seed );
     cout << "seed: " << seed << endl;
@@ -83,7 +84,6 @@ int main( int argc, char *argv[] )
 
     //--------cascade-------------------------------------
     cout << "=============start===============" << endl;
-
     
     
     if( theConfig.isOnlyMediumEvolution() )
@@ -93,7 +93,7 @@ int main( int argc, char *argv[] )
     else
     {
       theHIC.initialize();
-      theHIC.mainFramework( theAnalysis );
+      theHIC.mainFramework();
     }
 
     cout << "==============end================" << endl;

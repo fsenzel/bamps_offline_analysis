@@ -12,7 +12,7 @@
 #include <math.h>
 #include "pdfinterface.h"
 
-#include "config.h"
+#include "configBAMPS.h"
 
 #ifdef LHAPDF_FOUND
 #include "LHAPDF/LHAPDF.h"

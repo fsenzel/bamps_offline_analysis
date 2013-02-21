@@ -4,7 +4,7 @@
 #include "mesonDecay.h"
 #include "particle.h"
 #include "configuration.h"
-#include "config.h"
+#include "configBAMPS.h"
 
 #include "Pythia.h"
 using namespace Pythia8;

@@ -43,7 +43,8 @@ public:
   double getAccumulated_E() const { if ( numberOfParticles > 0 ) return ( E ); else return 0; } 
   double getAveraged_E() const { if ( numberOfParticles > 0 ) return ( E / numberOfParticles ); else return 0; } 
   double getAveraged_p_z() const { if ( numberOfParticles > 0 ) return ( p_z / numberOfParticles ); else return 0; } 
-  double getAveraged_p_r() const { if ( numberOfParticles > 0 ) return ( p_r / numberOfParticles ); else return 0; } 
+  double getAveraged_p_r() const { if ( numberOfParticles > 0 ) return ( p_r / numberOfParticles ); else return 0; }
+  double getAveraged_p_t() const { if ( numberOfParticles > 0 ) return ( p_t / numberOfParticles ); else return 0; }
   double getAveraged_pr2_over_E() const { if ( numberOfParticles > 0 ) return ( pr2_over_E / numberOfParticles ); else return 0; } 
   double getAveraged_pz2_over_E() const { if ( numberOfParticles > 0 ) return ( pz2_over_E / numberOfParticles ); else return 0; } 
   double getAveraged_pr_pz_over_E() const { if ( numberOfParticles > 0 ) return ( pr_pz_over_E / numberOfParticles ); else return 0; } 
@@ -89,6 +90,7 @@ public:
   double inverseE_quarks;
   double p_z;
   double p_r;
+  double p_t;
   double pr2_over_E;
   double pz2_over_E;
   double pr_pz_over_E;
