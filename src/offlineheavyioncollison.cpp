@@ -2456,36 +2456,33 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
           jetEventIndex = theAnalysis->addJetEvent_in( iscat, jscat, kscat, c3to2, I32, _cell.index, lambda_scaled / sqrt( s ) );
         }
 
-        order = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, ran2out / probab32, nexttime );
+        order = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, nexttime );
 
-        if ( scatt32_object.getCollisionStatus() )
+        if ( order == 4 || order == 6 )
         {
-          if ( order == 4 || order == 6 )
+          pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
+          pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
+          if( jetEventIndex != -1 || pt_jscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
           {
-            pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
-            pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
-            if( jetEventIndex != -1 || pt_jscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
-            {
-              theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
-            }
+            theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
           }
-          else if ( order == 2 || order == 5 )
+        }
+        else if ( order == 2 || order == 5 )
+        {
+          pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
+          pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
+          if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
           {
-            pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
-            pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
-            if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
-            {
-              theAnalysis->addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
-            }
+            theAnalysis->addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
           }
-          else if ( order == 1 || order == 3 )
+        }
+        else if ( order == 1 || order == 3 )
+        {
+          pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
+          pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
+          if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_jscat > theAnalysis->getJetTracking_PT() )
           {
-            pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
-            pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
-            if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_jscat > theAnalysis->getJetTracking_PT() )
-            {
-              theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
-            }
+            theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
           }
         }
         else
@@ -2619,42 +2616,39 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
               jetEventIndex = theAnalysis->addJetEvent_in( iscat, jscat, kscat, c3to2, I32, _cell.index, lambda_scaled / sqrt( s ) );
             }
 
-            order = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, ran2out / probab32, nexttime );
+            order = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, nexttime );
 
-            if ( scatt32_object.getCollisionStatus() )
+            if ( order == 4 || order == 6 )
             {
-              if ( order == 4 || order == 6 )
+              pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
+              pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
+              if( jetEventIndex != -1 || pt_jscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
               {
-                pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
-                pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
-                if( jetEventIndex != -1 || pt_jscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
-                {
-                  theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
-                }
+                theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
               }
-              else if ( order == 2 || order == 5 )
+            }
+            else if ( order == 2 || order == 5 )
+            {
+              pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
+              pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
+              if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
               {
-                pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
-                pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
-                if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
-                {
-                  theAnalysis->addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
-                }
+                theAnalysis->addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
               }
-              else if ( order == 1 || order == 3 )
+            }
+            else if ( order == 1 || order == 3 )
+            {
+              pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
+              pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
+              if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_jscat > theAnalysis->getJetTracking_PT() )
               {
-                pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
-                pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
-                if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_jscat > theAnalysis->getJetTracking_PT() )
-                {
-                  theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
-                }
-                
-                //                 hack for exiting both inner loops and continuing with next addedParticle 
-                m1 = static_cast<int>( _allParticlesList.size() ) - 1; 
-                m2 = _allParticlesList.size();        
-                m3--; // m3 is decreased because in the next loop step it is again increased by 1 
+                theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
               }
+              
+              //                 hack for exiting both inner loops and continuing with next addedParticle 
+              m1 = static_cast<int>( _allParticlesList.size() ) - 1; 
+              m2 = _allParticlesList.size();        
+              m3--; // m3 is decreased because in the next loop step it is again increased by 1 
             }
             else
             {
@@ -3225,7 +3219,7 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22
 }
 
 
-int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scattering32& scatt32_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, const int iscat, const int jscat, const int kscat, int& n32, const double picked_ratio, const double nexttime )
+int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scattering32& scatt32_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, const int iscat, const int jscat, const int kscat, int& n32, const double nexttime )
 {
   double P1[4], P2[4], P3[4], R1[4], R2[4], R3[4];
   double Tmax, TT, u, phi, cc;
@@ -3278,18 +3272,16 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
   addedParticles[kscat].Y = R3[2] + P3[2] * cc;
   addedParticles[kscat].Z = R3[3] + P3[3] * cc;
 
-  nGet32Errors += scatt32_obj.getMomenta32( u, phi, picked_ratio, typ, F1, F2 );
+  nGet32Errors += scatt32_obj.getMomenta32( u, phi, typ, F1, F2 );
 
-  if ( scatt32_obj.getCollisionStatus() )
+  scatt32_obj.setNewMomenta32( P1, P2, u, phi );
+  order = scatt32_obj.getOrder();
+
+  double pt_out1 = sqrt( pow( P1[1], 2 ) + pow( P1[2], 2 ) );
+  double pt_out2 = sqrt( pow( P2[1], 2 ) + pow( P2[2], 2 ) );
+
+  if (( order == 1 ) || ( order == 3 ) )   //123  or  213
   {
-    scatt32_obj.setNewMomenta32( P1, P2, u, phi );
-    order = scatt32_obj.getOrder();
-
-    double pt_out1 = sqrt( pow( P1[1], 2 ) + pow( P1[2], 2 ) );
-    double pt_out2 = sqrt( pow( P2[1], 2 ) + pow( P2[2], 2 ) );
-
-    if (( order == 1 ) || ( order == 3 ) )   //123  or  213
-    {
 //       TODO:// add absorbed gluon to annihilated particle list
 //       if ( theConfig->doOutput_scatteredMediumParticles() )
 //       {
@@ -3297,127 +3289,125 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
 //         mediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
 //       }
 
-      //mark absorbed gluon for removal from global particle list
-      deadParticleList.push_back( kscat );
-      addedParticles[kscat].dead = true;
+    //mark absorbed gluon for removal from global particle list
+    deadParticleList.push_back( kscat );
+    addedParticles[kscat].dead = true;
 
-      //erase absorbed gluon from the local list of gluons in this cell
-      removeElementFromVector<int>( _gluonListAdded, kscat );
-      //erase absorbed gluon from the local list of all particles in this cell
-      removeElementFromVector<int>( _allParticlesListAdded, kscat );
+    //erase absorbed gluon from the local list of gluons in this cell
+    removeElementFromVector<int>( _gluonListAdded, kscat );
+    //erase absorbed gluon from the local list of all particles in this cell
+    removeElementFromVector<int>( _allParticlesListAdded, kscat );
 
-      //erase absorbed gluon from the list of all particles in this cell
-      _cellMembersAdded.remove( kscat );
+    //erase absorbed gluon from the list of all particles in this cell
+    _cellMembersAdded.remove( kscat );
+    ParticleOffline tempParticle = particles_atTimeNow[iscat];
+    tempParticle.FLAVOR = F1;
+    tempParticle.PX = P1[1];
+    tempParticle.PY = P1[2];
+    tempParticle.PZ = P1[3];
+    tempParticle.E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
+    tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+    if( theConfig->isScatt_furtherOfflineParticles() )
+      addedParticles.push_back( tempParticle );
+    ParticleOffline tempParticle2 = particles_atTimeNow[jscat];
+    tempParticle2.FLAVOR = F2;
+    tempParticle2.PX = P2[1];
+    tempParticle2.PY = P2[2];
+    tempParticle2.PZ = P2[3];
+    tempParticle2.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+    tempParticle2.unique_id = particles_atTimeNow[jscat].unique_id;
+    tempParticle2.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+    tempParticle2.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+    if( theConfig->isScatt_furtherOfflineParticles() )
+      addedParticles.push_back( tempParticle2 );
+  }
+  else if (( order == 2 ) || ( order == 5 ) )  //132  or  312
+  {
+    if ( pt_out1 > pt_out2 )
+    {
+
+//         if jet particle changes to a gluon, it is added to gluon list in cell
+      if ( (addedParticles[kscat].FLAVOR != gluon) && (F1 == gluon))
+        _gluonListAdded.push_back( kscat );
+
+      addedParticles[kscat].FLAVOR = F1;
+      addedParticles[kscat].PX = P1[1];
+      addedParticles[kscat].PY = P1[2];
+      addedParticles[kscat].PZ = P1[3];
+      addedParticles[kscat].E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
       ParticleOffline tempParticle = particles_atTimeNow[iscat];
-      tempParticle.FLAVOR = F1;
-      tempParticle.PX = P1[1];
-      tempParticle.PY = P1[2];
-      tempParticle.PZ = P1[3];
-      tempParticle.E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+      tempParticle.FLAVOR = F2;
+      tempParticle.PX = P2[1];
+      tempParticle.PY = P2[2];
+      tempParticle.PZ = P2[3];
+      tempParticle.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
       tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
       tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
       tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
       if( theConfig->isScatt_furtherOfflineParticles() )
         addedParticles.push_back( tempParticle );
-      ParticleOffline tempParticle2 = particles_atTimeNow[jscat];
-      tempParticle2.FLAVOR = F2;
-      tempParticle2.PX = P2[1];
-      tempParticle2.PY = P2[2];
-      tempParticle2.PZ = P2[3];
-      tempParticle2.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
-      tempParticle2.unique_id = particles_atTimeNow[jscat].unique_id;
-      tempParticle2.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
-      tempParticle2.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+    }
+    else
+    {
+      if( ( addedParticles[kscat].FLAVOR != gluon ) && ( F2 == gluon ) )
+        _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
+
+      addedParticles[kscat].FLAVOR = F2;
+      addedParticles[kscat].PX = P2[1];
+      addedParticles[kscat].PY = P2[2];
+      addedParticles[kscat].PZ = P2[3];
+      addedParticles[kscat].E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+    }
+  }
+  else //if((order == 4) || (order == 6))  //231 or 321
+  {
+    if ( pt_out1 > pt_out2 )
+    {
+
+      if ( (addedParticles[kscat].FLAVOR != gluon) && (F1 == gluon))
+        _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
+      
+      addedParticles[kscat].FLAVOR = F1;
+      addedParticles[kscat].PX = P1[1];
+      addedParticles[kscat].PY = P1[2];
+      addedParticles[kscat].PZ = P1[3];
+      addedParticles[kscat].E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+      ParticleOffline tempParticle = particles_atTimeNow[jscat];
+      tempParticle.FLAVOR = F2;
+      tempParticle.PX = P2[1];
+      tempParticle.PY = P2[2];
+      tempParticle.PZ = P2[3];
+      tempParticle.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+      tempParticle.unique_id = particles_atTimeNow[jscat].unique_id;
+      tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+      tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
       if( theConfig->isScatt_furtherOfflineParticles() )
-        addedParticles.push_back( tempParticle2 );
+        addedParticles.push_back( tempParticle );
     }
-    else if (( order == 2 ) || ( order == 5 ) )  //132  or  312
+    else
     {
-      if ( pt_out1 > pt_out2 )
-      {
-
-//         if jet particle changes to a gluon, it is added to gluon list in cell
-        if ( (addedParticles[kscat].FLAVOR != gluon) && (F1 == gluon))
-          _gluonListAdded.push_back( kscat );
-
-        addedParticles[kscat].FLAVOR = F1;
-        addedParticles[kscat].PX = P1[1];
-        addedParticles[kscat].PY = P1[2];
-        addedParticles[kscat].PZ = P1[3];
-        addedParticles[kscat].E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
-        ParticleOffline tempParticle = particles_atTimeNow[iscat];
-        tempParticle.FLAVOR = F2;
-        tempParticle.PX = P2[1];
-        tempParticle.PY = P2[2];
-        tempParticle.PZ = P2[3];
-        tempParticle.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
-        tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
-        tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
-        tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-        if( theConfig->isScatt_furtherOfflineParticles() )
-          addedParticles.push_back( tempParticle );
-      }
-      else
-      {
-        if( ( addedParticles[kscat].FLAVOR != gluon ) && ( F2 == gluon ) )
-          _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
-
-        addedParticles[kscat].FLAVOR = F2;
-        addedParticles[kscat].PX = P2[1];
-        addedParticles[kscat].PY = P2[2];
-        addedParticles[kscat].PZ = P2[3];
-        addedParticles[kscat].E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
-      }
+      if ( (addedParticles[kscat].FLAVOR != gluon) && (F2 == gluon))
+        _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
+      
+      addedParticles[kscat].FLAVOR = F2;
+      addedParticles[kscat].PX = P2[1];
+      addedParticles[kscat].PY = P2[2];
+      addedParticles[kscat].PZ = P2[3];
+      addedParticles[kscat].E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+      ParticleOffline tempParticle = particles_atTimeNow[jscat];
+      tempParticle.FLAVOR = F1;
+      tempParticle.PX = P1[1];
+      tempParticle.PY = P1[2];
+      tempParticle.PZ = P1[3];
+      tempParticle.E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+      tempParticle.unique_id = particles_atTimeNow[jscat].unique_id;
+      tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+      tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+      if( theConfig->isScatt_furtherOfflineParticles() )
+        addedParticles.push_back( tempParticle );
     }
-    else //if((order == 4) || (order == 6))  //231 or 321
-    {
-      if ( pt_out1 > pt_out2 )
-      {
-
-        if ( (addedParticles[kscat].FLAVOR != gluon) && (F1 == gluon))
-          _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
-        
-        addedParticles[kscat].FLAVOR = F1;
-        addedParticles[kscat].PX = P1[1];
-        addedParticles[kscat].PY = P1[2];
-        addedParticles[kscat].PZ = P1[3];
-        addedParticles[kscat].E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
-        ParticleOffline tempParticle = particles_atTimeNow[jscat];
-        tempParticle.FLAVOR = F2;
-        tempParticle.PX = P2[1];
-        tempParticle.PY = P2[2];
-        tempParticle.PZ = P2[3];
-        tempParticle.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
-        tempParticle.unique_id = particles_atTimeNow[jscat].unique_id;
-        tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
-        tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-        if( theConfig->isScatt_furtherOfflineParticles() )
-          addedParticles.push_back( tempParticle );
-      }
-      else
-      {
-        if ( (addedParticles[kscat].FLAVOR != gluon) && (F2 == gluon))
-          _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
-        
-        addedParticles[kscat].FLAVOR = F2;
-        addedParticles[kscat].PX = P2[1];
-        addedParticles[kscat].PY = P2[2];
-        addedParticles[kscat].PZ = P2[3];
-        addedParticles[kscat].E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
-        ParticleOffline tempParticle = particles_atTimeNow[jscat];
-        tempParticle.FLAVOR = F1;
-        tempParticle.PX = P1[1];
-        tempParticle.PY = P1[2];
-        tempParticle.PZ = P1[3];
-        tempParticle.E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
-        tempParticle.unique_id = particles_atTimeNow[jscat].unique_id;
-        tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
-        tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-        if( theConfig->isScatt_furtherOfflineParticles() )
-          addedParticles.push_back( tempParticle );
-      }
-    }
-
   }
 
   return order;
