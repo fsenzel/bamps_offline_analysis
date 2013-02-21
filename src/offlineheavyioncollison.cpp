@@ -91,12 +91,12 @@ namespace ns_heavy_quarks
 
 
 
-offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface ) :
+offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface, analysis* const _analysis ) :
     theConfig( _config ), stoptime_last( 0 ), stoptime( 5.0 ), currentNumber( 0 ), numberEvolvingParticles( _config->getN_init() ),
     rings( _config->getRingNumber(), _config->getCentralRingRadius(), _config->getDeltaR() ),
     testpartcl( _config->getTestparticles() ),
     offlineInterface( _offlineInterface ),
-    theI23( _config->doScattering_23() )
+    theI23( _config->doScattering_23() ), theAnalysis( _analysis )
 {
   theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom );
 }
@@ -190,7 +190,7 @@ void offlineHeavyIonCollision::initialize()
 
 
 
-void offlineHeavyIonCollision::mainFramework( analysis& aa )
+void offlineHeavyIonCollision::mainFramework()
 {
   double dt_cascade = 0;
   double dt_backup = 0;
@@ -268,25 +268,25 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 #endif
   }
 
-  aa.initialOutput();
+  theAnalysis->initialOutput();
   if ( theConfig->doOutput_movieOutputJets() )
   {
-    aa.movieOutput( 0, jumpMovieSteps );
+    theAnalysis->movieOutput( 0, jumpMovieSteps );
   }
   if ( theConfig->doOutput_movieOutputBackground() )
   {
-    aa.movieOutputMedium( 0, jumpMovieSteps );
+    theAnalysis->movieOutputMedium( 0, jumpMovieSteps );
   }
-  aa.collectPtDataInitial();
-  aa.collectYDataInitial();
-  aa.collectEtDataInitial();
+  theAnalysis->collectPtDataInitial();
+  theAnalysis->collectYDataInitial();
+  theAnalysis->collectEtDataInitial();
   simulationTime = theConfig->getTimefirst(); //fm/c
 
-  while ( simulationTime >= aa.tstep[nn_ana] )
+  while( simulationTime >= theAnalysis->tstep[nn_ana] )
   {
     nn_ana++;
   }
-  while ( simulationTime >= aa.tstep_movie[nn_ana_movie] )
+  while( simulationTime >= theAnalysis->tstep_movie[nn_ana_movie] )
   {
     nn_ana_movie++;
     jumpMovieSteps++;
@@ -305,7 +305,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       addedParticles[i].Z = addedParticles[i].Z + addedParticles[i].PZ * cc;
 
       addedParticles[i].X_traveled += sqrt( pow( addedParticles[i].PX * cc, 2.0 ) + pow( addedParticles[i].PY * cc, 2.0 ) + pow( addedParticles[i].PZ * cc, 2.0 ) );
-      aa.addJetEvent_initial( i );
+      theAnalysis->addJetEvent_initial( i );
     }
   }
 
@@ -355,7 +355,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       
     if ( doMovieStepMedium && theConfig->doOutput_movieOutputBackground() )
     {
-      aa.movieOutputMedium( nn_ana_movie - 1, jumpMovieSteps );
+      theAnalysis->movieOutputMedium( nn_ana_movie - 1, jumpMovieSteps );
       doMovieStepMedium = false;
     }
 
@@ -381,20 +381,20 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
     nexttime = simulationTime + dt;
 
-    if ( nexttime >= aa.tstep_movie[nn_ana_movie] || nexttime >= aa.tstep[nn_ana] )
+    if( nexttime >= theAnalysis->tstep_movie[nn_ana_movie] || nexttime >= theAnalysis->tstep[nn_ana] )
     {
       dt_backup = dt;
       
-      if ( nexttime >= aa.tstep[nn_ana] ) // ask if it is time for analysis
+      if( nexttime >= theAnalysis->tstep[nn_ana] )  // ask if it is time for analysis
       {
-        nexttime = aa.tstep[nn_ana];
+        nexttime = theAnalysis->tstep[nn_ana];
         dt = nexttime - simulationTime;
         doAnalysisStep = true;
         cout << "profile " << nexttime << endl;
       }
-      if ( nexttime >= aa.tstep_movie[nn_ana_movie] ) // ask if it is time for movie output
+      if( nexttime >= theAnalysis->tstep_movie[nn_ana_movie] )  // ask if it is time for movie output
       {
-        nexttime = aa.tstep_movie[nn_ana_movie];
+        nexttime = theAnalysis->tstep_movie[nn_ana_movie];
         dt = nexttime - simulationTime;
         doMovieStep = true;
         if ( theConfig->doOutput_movieOutputJets() || theConfig->doOutput_movieOutputBackground() )
@@ -405,7 +405,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       
       if ( doAnalysisStep && doMovieStep )
       {
-        if ( !FPT_COMP_E(aa.tstep[nn_ana],aa.tstep_movie[nn_ana_movie]) )
+        if( !FPT_COMP_E( theAnalysis->tstep[nn_ana], theAnalysis->tstep_movie[nn_ana_movie] ) )
         {
           string errMsg( "time steps for movie output and general analysis output do not match" );
           throw eHIC_error( errMsg );
@@ -417,7 +417,7 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 
     // collide added particles with gluonic medium
     deadParticleList.clear();
-    scattering( nexttime, again, aa );
+    scattering( nexttime, again );
 
     // if time step is too large -> collide again with smaller time step
     while ( again )
@@ -457,19 +457,23 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
       cell_ID( nexttime );
 
       deadParticleList.clear();
-      scattering( nexttime, again, aa );
+      scattering( nexttime, again );
     }
 
     scatterEdgeParticles( edgeCell, edgeCellAdded, nexttime );
 
-    removeDeadParticles( aa );
+    removeDeadParticles();
+    if( theConfig->doOutput_progressLog() )
+    {
+      theAnalysis->registerProgressInformationForOutput( simulationTime, dt, addedParticles.size(), particles_atTimeNow.size(), ncoll, ncoll22, ncoll23, ncoll32 );
+    }
     
     if ( doAnalysisStep )
     {
-      aa.intermediateOutput( nn_ana );
-      aa.collectPtData( nn_ana );
-      aa.collectYData( nn_ana );
-      aa.collectEtData( nn_ana );
+      theAnalysis->intermediateOutput( nn_ana );
+      theAnalysis->collectPtData( nn_ana );
+      theAnalysis->collectYData( nn_ana );
+      theAnalysis->collectEtData( nn_ana );
       nn_ana++;
       doAnalysisStep = false;
       dt = dt_backup;
@@ -477,18 +481,18 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
     
     if ( doMovieStep )
     {
-      aa.mfpJetsOutput( nn_ana_movie, jumpMovieSteps );
+      theAnalysis->mfpJetsOutput( nn_ana_movie, jumpMovieSteps );
       
       if ( theConfig->doOutput_movieOutputJets() )
       {
-        aa.movieOutput( nn_ana_movie, jumpMovieSteps );
+        theAnalysis->movieOutput( nn_ana_movie, jumpMovieSteps );
       }
       nn_ana_movie++;
       doMovieStep = false;
       doMovieStepMedium = true;
       dt = dt_backup;
     }
-    aa.printCentralDensities( simulationTime );
+    theAnalysis->printCentralDensities( simulationTime );
     
     
 //     // just error checking if masses and flavors are correct
@@ -533,8 +537,8 @@ void offlineHeavyIonCollision::mainFramework( analysis& aa )
 #endif
   }
 
-  aa.finalOutput( stoptime );
-  aa.addJetEvents_final();
+  theAnalysis->finalOutput( stoptime );
+  theAnalysis->addJetEvents_final();
   
   // List particle numbers for all flavors
   cout << "==========================" << endl;
@@ -749,6 +753,8 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       particlesEvolving[kscat].PX = ptrInteraction23->newpx;
       particlesEvolving[kscat].PY = ptrInteraction23->newpy;
       particlesEvolving[kscat].PZ = ptrInteraction23->newpz;
+      particlesEvolving[kscat].unique_id = Particle::unique_id_counter;
+      Particle::unique_id_counter++;
 
       if ( time <= evolveToTime + 1.0e-6 )
       {
@@ -1223,7 +1229,7 @@ void offlineHeavyIonCollision::cell_ID( double _time )
 
 
 
-void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, analysis& aa )
+void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
 {
   double xt;
   double ee;
@@ -1331,7 +1337,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
     rings.prepareAverages( dz, testpartcl );
     if ( etaSliceIndex == centralEtaIndex )
     {
-      aa.centralRingsCopyFromCascade = rings;
+      theAnalysis->centralRingsCopyFromCascade = rings;
     }
     //---------- populate the ring structure for averages ----------
     
@@ -1609,7 +1615,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
             
             if( theConfig->isScatt_offlineWithAddedParticles() && theConfig->doScattering_32() )
             {
-              scatt32_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, n32, again, aa, nexttime );
+              scatt32_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, n32, again, nexttime );
               if ( again )
               {
                 return;
@@ -1635,11 +1641,11 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
             
             if( theConfig->isScatt_offlineWithAddedParticles() )
             {
-              analysisRingStructure tempRing( aa.rings.size(), aa.rings.getCentralRadius(), aa.rings.getDeltaR() );
-              scatt2223_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, scaleFactor, again, aa, nexttime, tempRing );
+              analysisRingStructure tempRing( theAnalysis->rings.size(), theAnalysis->rings.getCentralRadius(), theAnalysis->rings.getDeltaR() );
+              scatt2223_offlineWithAddedParticles( cells[j], allParticlesList, gluonList, cellsAdded[j], allParticlesListAdded, gluonListAdded, scaleFactor, again, nexttime, tempRing );
               if ( etaSliceIndex == centralEtaIndex )
               {
-                aa.rings += tempRing;
+                theAnalysis->rings += tempRing;
               }
               
               if ( again )
@@ -1754,7 +1760,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again, a
 
 void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
     cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
-    const double scaleFactor, bool& again, analysis& aa, const double nexttime, analysisRingStructure& _analysisRings )
+    const double scaleFactor, bool& again, const double nexttime, analysisRingStructure& _analysisRings )
 {
   const double epsilon = 1.0e-4;
   int iscat, jscat, typ;
@@ -1988,34 +1994,34 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         if ( ran2() * probab2322 < probab23 )
         {
           int jetEventIndex = -1;
-          if ( pt_jscat > aa.getJetTracking_PT() )
+          if( pt_jscat > theAnalysis->getJetTracking_PT() )
           {
-            jetEventIndex = aa.addJetEvent_in( iscat, -1, jscat, c2to3, cs23, _cell.index, lambda_scaled / sqrt( s ) );
+            jetEventIndex = theAnalysis->addJetEvent_in( iscat, -1, jscat, c2to3, cs23, _cell.index, lambda_scaled / sqrt( s ) );
           }
 
           int newIndex = scatt23_offlineWithAddedParticles_utility( scatt23_object, _cell, iscat, jscat, again, nexttime );
 
           pt_jscat = sqrt( pow( addedParticles[jscat].PX, 2.0 ) + pow( addedParticles[jscat].PY, 2.0 ) );
           pt_nmb = sqrt( pow( addedParticles[newIndex].PX, 2.0 ) + pow( addedParticles[newIndex].PY, 2.0 ) );
-          if ( jetEventIndex != -1 || pt_jscat > aa.getJetTracking_PT() || pt_nmb > aa.getJetTracking_PT() )
+          if( jetEventIndex != -1 || pt_jscat > theAnalysis->getJetTracking_PT() || pt_nmb > theAnalysis->getJetTracking_PT() )
           {
-            aa.addJetEvent_out( jetEventIndex, jscat, iscat, newIndex, c2to3 );
+            theAnalysis->addJetEvent_out( jetEventIndex, jscat, iscat, newIndex, c2to3 );
           }
         }
         else
         {
           int jetEventIndex = -1;
-          if ( pt_jscat > aa.getJetTracking_PT() )
+          if( pt_jscat > theAnalysis->getJetTracking_PT() )
           {
-            jetEventIndex = aa.addJetEvent_in( iscat, -1, jscat, c2to2, cs22, _cell.index, lambda_scaled / sqrt( s ) );
+            jetEventIndex = theAnalysis->addJetEvent_in( iscat, -1, jscat, c2to2, cs22, _cell.index, lambda_scaled / sqrt( s ) );
           }
 
           scatt22_offlineWithAddedParticles_utility( scatt22_object, _cellAdded.particleList, _allParticlesListAdded, iscat, jscat, typ, nexttime );
 
           pt_jscat = sqrt( pow( addedParticles[jscat].PX, 2.0 ) + pow( addedParticles[jscat].PY, 2.0 ) );
-          if ( jetEventIndex != -1 || pt_jscat > aa.getJetTracking_PT() )
+          if( jetEventIndex != -1 || pt_jscat > theAnalysis->getJetTracking_PT() )
           {
-            aa.addJetEvent_out( jetEventIndex, jscat, iscat, -1, c2to2 );
+            theAnalysis->addJetEvent_out( jetEventIndex, jscat, iscat, -1, c2to2 );
           }
         }
       }
@@ -2145,7 +2151,7 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
 
 
 
-void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, int& n32, bool& again, analysis& aa, const double nexttime )
+void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, int& n32, bool& again, const double nexttime )
 {
   const double epsilon = 1.0e-4;
   int iscat, jscat, kscat;
@@ -2350,9 +2356,9 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
         double pt_kscat = sqrt( pow( P3[1], 2.0 ) + pow( P3[2], 2.0 ) );
 
         int jetEventIndex = -1;
-        if ( pt_kscat > aa.getJetTracking_PT() )
+        if( pt_kscat > theAnalysis->getJetTracking_PT() )
         {
-          jetEventIndex = aa.addJetEvent_in( iscat, jscat, kscat, c3to2, I32, _cell.index, lambda_scaled / sqrt( s ) );
+          jetEventIndex = theAnalysis->addJetEvent_in( iscat, jscat, kscat, c3to2, I32, _cell.index, lambda_scaled / sqrt( s ) );
         }
 
         order = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, ran2out / probab32, nexttime );
@@ -2363,27 +2369,27 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
           {
             pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
             pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
-            if ( jetEventIndex != -1 || pt_jscat > aa.getJetTracking_PT() || pt_kscat > aa.getJetTracking_PT() )
+            if( jetEventIndex != -1 || pt_jscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
             {
-              aa.addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
+              theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
             }
           }
           else if ( order == 2 || order == 5 )
           {
             pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
             pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
-            if ( jetEventIndex != -1 || pt_iscat > aa.getJetTracking_PT() || pt_kscat > aa.getJetTracking_PT() )
+            if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
             {
-              aa.addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
+              theAnalysis->addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
             }
           }
           else if ( order == 1 || order == 3 )
           {
             pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
             pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
-            if ( jetEventIndex != -1 || pt_iscat > aa.getJetTracking_PT() || pt_jscat > aa.getJetTracking_PT() )
+            if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_jscat > theAnalysis->getJetTracking_PT() )
             {
-              aa.addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
+              theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
             }
           }
         }
@@ -2391,7 +2397,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
         {
           if ( jetEventIndex != -1 )
           {
-            aa.removeJetEvent_in( jetEventIndex );
+            theAnalysis->removeJetEvent_in( jetEventIndex );
           }
         }
       }
@@ -2513,9 +2519,9 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
             double pt_kscat = sqrt( pow( P3[1], 2.0 ) + pow( P3[2], 2.0 ) );
 
             int jetEventIndex = -1;
-            if ( pt_kscat > aa.getJetTracking_PT() )
+            if( pt_kscat > theAnalysis->getJetTracking_PT() )
             {
-              jetEventIndex = aa.addJetEvent_in( iscat, jscat, kscat, c3to2, I32, _cell.index, lambda_scaled / sqrt( s ) );
+              jetEventIndex = theAnalysis->addJetEvent_in( iscat, jscat, kscat, c3to2, I32, _cell.index, lambda_scaled / sqrt( s ) );
             }
 
             order = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, ran2out / probab32, nexttime );
@@ -2526,27 +2532,27 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
               {
                 pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
                 pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
-                if ( jetEventIndex != -1 || pt_jscat > aa.getJetTracking_PT() || pt_kscat > aa.getJetTracking_PT() )
+                if( jetEventIndex != -1 || pt_jscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
                 {
-                  aa.addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
+                  theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
                 }
               }
               else if ( order == 2 || order == 5 )
               {
                 pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
                 pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
-                if ( jetEventIndex != -1 || pt_iscat > aa.getJetTracking_PT() || pt_kscat > aa.getJetTracking_PT() )
+                if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_kscat > theAnalysis->getJetTracking_PT() )
                 {
-                  aa.addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
+                  theAnalysis->addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
                 }
               }
               else if ( order == 1 || order == 3 )
               {
                 pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
                 pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
-                if ( jetEventIndex != -1 || pt_iscat > aa.getJetTracking_PT() || pt_jscat > aa.getJetTracking_PT() )
+                if( jetEventIndex != -1 || pt_iscat > theAnalysis->getJetTracking_PT() || pt_jscat > theAnalysis->getJetTracking_PT() )
                 {
-                  aa.addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
+                  theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
                 }
                 
                 //                 hack for exiting both inner loops and continuing with next addedParticle 
@@ -2559,7 +2565,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
             {
               if ( jetEventIndex != -1 )
               {
-                aa.removeJetEvent_in( jetEventIndex );
+                theAnalysis->removeJetEvent_in( jetEventIndex );
               }
             }
           }
@@ -2603,6 +2609,12 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   double deltaZ = timenow * tanh( etaBins[etaIndex].right ) - leftZ;
   double leftY = _cell.corner.y_min;
   double leftX = _cell.corner.x_min;
+
+  if( theConfig->doOutput_scatteredMediumParticles() )
+  {
+    scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
+    scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+  }
 
   particles_atTimeNow[iscat].getMomentumArray( P1 );
   particles_atTimeNow[iscat].getCoordinateArray( R1 );
@@ -2659,6 +2671,17 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     addedParticles[jscat].PY = P1[2];
     addedParticles[jscat].PZ = P1[3];
     addedParticles[jscat].E = sqrt( pow( P1[1], 2 ) + pow( P1[2], 2 ) + pow( P1[3], 2 ) );
+    ParticleOffline tempParticle = particles_atTimeNow[iscat];
+    tempParticle.FLAVOR = F2;
+    tempParticle.PX = P2[1];
+    tempParticle.PY = P2[2];
+    tempParticle.PZ = P2[3];
+    tempParticle.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    if( theConfig->isScatt_furtherOfflineParticles() )
+      addedParticles.push_back( tempParticle );
   }
   else
   {
@@ -2667,6 +2690,17 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     addedParticles[jscat].PY = P2[2];
     addedParticles[jscat].PZ = P2[3];
     addedParticles[jscat].E = sqrt( pow( P2[1], 2 ) + pow( P2[2], 2 ) + pow( P2[3], 2 ) );
+    ParticleOffline tempParticle = particles_atTimeNow[iscat];
+    tempParticle.FLAVOR = F1;
+    tempParticle.PX = P1[1];
+    tempParticle.PY = P1[2];
+    tempParticle.PZ = P1[3];
+    tempParticle.E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    if( theConfig->isScatt_furtherOfflineParticles() )
+      addedParticles.push_back( tempParticle );
   }
 
   ParticleOffline tempParticle;
@@ -2709,7 +2743,8 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   tempParticle.T_creation = tempParticle.T;
   tempParticle.unique_id = ParticleOffline::unique_id_counter_added;
   --ParticleOffline::unique_id_counter_added;
-
+  tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+  tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
 
 //   if ( sqrt( pow( tempParticle.PX, 2) + pow( tempParticle.PY, 2) ) > 3.0 )
 //   {
@@ -2735,6 +2770,12 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   double as, Tmax, TT, cc, t;
   double M1, M2;
   double t_hat;
+
+  if( theConfig->doOutput_scatteredMediumParticles() )
+  {
+    scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
+    scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+  }
 
   particles_atTimeNow[iscat].getMomentumArray( P1 );
   particles_atTimeNow[iscat].getCoordinateArray( R1 );
@@ -2791,6 +2832,17 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     addedParticles[jscat].PY = P1[2];
     addedParticles[jscat].PZ = P1[3];
     addedParticles[jscat].E = P1[0];
+    ParticleOffline tempParticle = particles_atTimeNow[iscat];
+    tempParticle.FLAVOR = F2;
+    tempParticle.PX = P2[1];
+    tempParticle.PY = P2[2];
+    tempParticle.PZ = P2[3];
+    tempParticle.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    if( theConfig->isScatt_furtherOfflineParticles() )
+      addedParticles.push_back( tempParticle );
   }
   else
   {
@@ -2800,6 +2852,17 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     addedParticles[jscat].PY = P2[2];
     addedParticles[jscat].PZ = P2[3];
     addedParticles[jscat].E = P2[0];
+    ParticleOffline tempParticle = particles_atTimeNow[iscat];
+    tempParticle.FLAVOR = F1;
+    tempParticle.PX = P1[1];
+    tempParticle.PY = P1[2];
+    tempParticle.PZ = P1[3];
+    tempParticle.E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    if( theConfig->isScatt_furtherOfflineParticles() )
+      addedParticles.push_back( tempParticle );
   }
   
   if ( typ == 2240 ) // J/psi + g -> c + cb
@@ -3078,6 +3141,14 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
   FLAVOR_TYPE F1, F2, F3;
   int typ;
 
+  if( theConfig->doOutput_scatteredMediumParticles() )
+  {
+    scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
+    scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+    scatteredMediumParticles.push_back( particles_atTimeNow[jscat] );
+    scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+  }
+
   particles_atTimeNow[iscat].getMomentumArray( P1 );
   particles_atTimeNow[iscat].getCoordinateArray( R1 );
   F1 = particles_atTimeNow[iscat].FLAVOR;
@@ -3127,6 +3198,13 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
 
     if (( order == 1 ) || ( order == 3 ) )   //123  or  213
     {
+//       TODO:// add absorbed gluon to annihilated particle list
+//       if ( theConfig->doOutput_scatteredMediumParticles() )
+//       {
+//         mediumParticles.push_back( addedParticles[kscat] );
+//         mediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+//       }
+
       //mark absorbed gluon for removal from global particle list
       deadParticleList.push_back( kscat );
       addedParticles[kscat].dead = true;
@@ -3138,6 +3216,28 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
 
       //erase absorbed gluon from the list of all particles in this cell
       _cellMembersAdded.remove( kscat );
+      ParticleOffline tempParticle = particles_atTimeNow[iscat];
+      tempParticle.FLAVOR = F1;
+      tempParticle.PX = P1[1];
+      tempParticle.PY = P1[2];
+      tempParticle.PZ = P1[3];
+      tempParticle.E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
+      tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+      tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+      if( theConfig->isScatt_furtherOfflineParticles() )
+        addedParticles.push_back( tempParticle );
+      ParticleOffline tempParticle2 = particles_atTimeNow[jscat];
+      tempParticle2.FLAVOR = F2;
+      tempParticle2.PX = P2[1];
+      tempParticle2.PY = P2[2];
+      tempParticle2.PZ = P2[3];
+      tempParticle2.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+      tempParticle2.unique_id = particles_atTimeNow[jscat].unique_id;
+      tempParticle2.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+      tempParticle2.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+      if( theConfig->isScatt_furtherOfflineParticles() )
+        addedParticles.push_back( tempParticle2 );
     }
     else if (( order == 2 ) || ( order == 5 ) )  //132  or  312
     {
@@ -3153,10 +3253,21 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
         addedParticles[kscat].PY = P1[2];
         addedParticles[kscat].PZ = P1[3];
         addedParticles[kscat].E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+        ParticleOffline tempParticle = particles_atTimeNow[iscat];
+        tempParticle.FLAVOR = F2;
+        tempParticle.PX = P2[1];
+        tempParticle.PY = P2[2];
+        tempParticle.PZ = P2[3];
+        tempParticle.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+        tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
+        tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+        tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+        if( theConfig->isScatt_furtherOfflineParticles() )
+          addedParticles.push_back( tempParticle );
       }
       else
       {
-        if ( (addedParticles[kscat].FLAVOR != gluon) && (F2 == gluon))
+        if( ( addedParticles[kscat].FLAVOR != gluon ) && ( F2 == gluon ) )
           _gluonListAdded.push_back( kscat ); //  if jet particle flavor changes to a gluon, it is added to gluon list in cell
 
         addedParticles[kscat].FLAVOR = F2;
@@ -3179,6 +3290,17 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
         addedParticles[kscat].PY = P1[2];
         addedParticles[kscat].PZ = P1[3];
         addedParticles[kscat].E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+        ParticleOffline tempParticle = particles_atTimeNow[jscat];
+        tempParticle.FLAVOR = F2;
+        tempParticle.PX = P2[1];
+        tempParticle.PY = P2[2];
+        tempParticle.PZ = P2[3];
+        tempParticle.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+        tempParticle.unique_id = particles_atTimeNow[jscat].unique_id;
+        tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+        tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+        if( theConfig->isScatt_furtherOfflineParticles() )
+          addedParticles.push_back( tempParticle );
       }
       else
       {
@@ -3190,6 +3312,17 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
         addedParticles[kscat].PY = P2[2];
         addedParticles[kscat].PZ = P2[3];
         addedParticles[kscat].E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+        ParticleOffline tempParticle = particles_atTimeNow[jscat];
+        tempParticle.FLAVOR = F1;
+        tempParticle.PX = P1[1];
+        tempParticle.PY = P1[2];
+        tempParticle.PZ = P1[3];
+        tempParticle.E = sqrt( P1[1] * P1[1] + P1[2] * P1[2] + P1[3] * P1[3] );
+        tempParticle.unique_id = particles_atTimeNow[jscat].unique_id;
+        tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+        tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+        if( theConfig->isScatt_furtherOfflineParticles() )
+          addedParticles.push_back( tempParticle );
       }
     }
 
@@ -3459,7 +3592,7 @@ void offlineHeavyIonCollision::scatterEdgeParticles( std::list< int >& _offlineP
 /**
 * This routine removes particlre stored in deadParticleList (global to this translation unit via unnamed namespace)
 */
-void offlineHeavyIonCollision::removeDeadParticles( analysis& _aa )
+void offlineHeavyIonCollision::removeDeadParticles( )
 {
   double pt_new;
   int lastIndex = -1;

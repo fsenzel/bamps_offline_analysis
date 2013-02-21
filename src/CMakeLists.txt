@@ -21,6 +21,8 @@ offlineoutput.cpp
 particle.cpp
 pdfinterface.cpp
 psf.cpp
+pythia6425.f
+quark_shower.f
 ringcontainer.cpp
 ringstructure.cpp
 woodsaxon.cpp

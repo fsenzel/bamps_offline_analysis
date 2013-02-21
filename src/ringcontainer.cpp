@@ -19,7 +19,7 @@
 
 ringContainer::ringContainer() : minRadius( 0 ), maxRadius( 0 ), deltaR( 0 ), numberOfParticles( 0 ), numberOfGluons( 0 ), numberOfQuarks( 0 ),
     numberOfActiveParticles( 0 ), md2g( 0 ), md2q( 0 ),
-    v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ), E( 0 ), p_z( 0 ),
+    v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ), E( 0 ), p_z( 0 ), p_t( 0 ),
     gamma( 0 ), particleDensity( 0 ), gluonDensity( 0 ), quarkDensity( 0 ), energyDensity( 0 ), averagesPrepared( false ), volume( 0 ),
     pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ), rates(), numberOfCollectedRateObjects( 0 )
 {
@@ -30,7 +30,7 @@ ringContainer::ringContainer() : minRadius( 0 ), maxRadius( 0 ), deltaR( 0 ), nu
 
 ringContainer::ringContainer( const double _minR, const double _maxR ) : minRadius( _minR ), maxRadius( _maxR ), deltaR( _maxR - _minR ),
     numberOfParticles( 0 ), numberOfActiveParticles( 0 ), numberOfGluons( 0 ), numberOfQuarks( 0 ), md2g( 0 ), md2q( 0 ),
-    v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ), E( 0 ), p_z( 0 ),
+    v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ), E( 0 ), p_z( 0 ), p_t( 0 ),
     gamma( 0 ), particleDensity( 0 ), gluonDensity( 0 ), quarkDensity( 0 ), energyDensity( 0 ), averagesPrepared( false ), volume( 0 ),
     pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ), rates(), numberOfCollectedRateObjects( 0 )
 {
@@ -59,6 +59,7 @@ void ringContainer::clear()
   E = 0;
   p_r = 0;
   p_z = 0;
+  p_t = 0;
   pr2_over_E = 0;
   pz2_over_E = 0;
   pr_pz_over_E = 0;
@@ -118,6 +119,7 @@ void ringContainer::addParticle( const ParticleOffline& _particle )
 
   p_r += pr;
   p_z += _particle.PZ;
+  p_t += sqrt( _particle.PX * _particle.PX + _particle.PY * _particle.PY );
   pr2_over_E += pow( pr, 2 ) / _particle.E;
   pz2_over_E += pow( _particle.PZ, 2 ) / _particle.E;
   pr_pz_over_E += pr * _particle.PZ / _particle.E;
@@ -173,6 +175,7 @@ void ringContainer::addParticleInFormGeom( const ParticleOffline& _particle, con
 
   p_r += pr;
   p_z += _particle.PZold;
+  p_t += sqrt( _particle.PXold * _particle.PXold + _particle.PYold * _particle.PYold );
   pr2_over_E += pow( pr, 2 ) / Eold;
   pz2_over_E += pow( _particle.PZold, 2 ) / Eold;
   pr_pz_over_E += pr * _particle.PZold / Eold;
