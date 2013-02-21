@@ -42,6 +42,7 @@ std::vector<ParticleOffline> ns_casc::addedParticles;
 std::vector<ParticleOffline> ns_casc::addedParticlesCopy;
 // std::vector<ParticleHFelectron> ns_casc::addedPartcl_electron;
 std::vector<ParticleOffline> ns_casc::addedPartcl_electron;
+std::vector<ParticleOffline> ns_casc::scatteredMediumParticles;
 
 
 double dt = 0.1;
@@ -64,6 +65,7 @@ config::config() :
  scatt_offlineWithAddedParticles(true),
  scatt_amongOfflineParticles(false),
  scatt_amongAddedParticles(false),
+ scatt_furtherOfflineParticles( false ),
 // ---- initial state options ----
  initialStateType(miniJetsInitialState),
 #ifdef LHAPDF_FOUND
@@ -80,11 +82,13 @@ config::config() :
  cgcParticleFile("-"),
  mcatnloParticleFile("-"),
  P0(1.4),
+ insertionTime( 0.0 ),
 // ---- output options ----
  outputSwitch_progressLog( true ),
  outputSwitch_detailedParticleOutput(false),
  outputSwitch_movieOutputJets(false),
  outputSwitch_movieOutputBackground(false),
+ outputSwitch_scatteredMediumParticlesOutput( false ),
  v2RAAoutput(true),
  v2RAAoutputIntermediateSteps(false),
  dndyOutput(false),
@@ -219,7 +223,7 @@ void config::processProgramOptions()
   // some special conversions from integer type values to enum values
   if ( vm.count("initial_state.type") )
   {
-    if ( vm["initial_state.type"].as<int>() < 5 && vm["initial_state.type"].as<int>() >= 0 )
+    if ( vm["initial_state.type"].as<int>() < 7 && vm["initial_state.type"].as<int>() >= 0 )
     {
       initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
     }
@@ -293,6 +297,7 @@ void config::initializeProgramOptions()
   ("simulation.scatt_offlineWithAdded", po::value<bool>( &scatt_offlineWithAddedParticles )->default_value( scatt_offlineWithAddedParticles ), "whether offline particles are allowed to scatter with added particles")
   ("simulation.scatt_amongOffline", po::value<bool>( &scatt_amongOfflineParticles )->default_value( scatt_amongOfflineParticles ), "whether offline particles are allowed to scatter with other offline particles")
   ("simulation.scatt_amongAdded", po::value<bool>( &scatt_amongAddedParticles )->default_value( scatt_amongAddedParticles ), "whether added particles are allowed to scatter with other added particles")
+  ("simulation.scatt_furtherOffline", po::value<bool>( &scatt_furtherOfflineParticles )->default_value( scatt_furtherOfflineParticles ), "whether scattered offline particles are allowed to scatter further with other added particles")
   ;
   
   // Group some options related to the initial state
@@ -308,6 +313,8 @@ void config::initializeProgramOptions()
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
   ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
+  ("initial_state.insertionTime", po::value<double>( &insertionTime )->default_value( insertionTime ), "cut-off time for shower evolution [GeV^(-1)], needed when initial_state.type = 5. if value is negative, no PYTHIA showers are not terminated")
+  ("initial_state.initialPartonPt", po::value<double>( &initialPartonPt )->default_value( initialPartonPt ), "parton pt of fixed initial parton pt")
   ;
   
   // Add some options related to the program output  
@@ -320,6 +327,7 @@ void config::initializeProgramOptions()
   ("output.v2RAAoutputIntermediateSteps", po::value<bool>( &v2RAAoutputIntermediateSteps )->default_value( v2RAAoutputIntermediateSteps ), "whether v2 and RAA output are printed at each analyisis time step (otherwise just at beginning and end)")
   ("output.dndyOutput", po::value<bool>( &dndyOutput )->default_value( dndyOutput ), "whether dndy output is written out")
   ("output.outputScheme", po::value<int>()->default_value( static_cast<int>(outputScheme) ), "output scheme id which configures the analysis routines and decides which output is written. The integer for the desired output scheme is given in the OUTPUT_SCHEME enum in configuration.h.")
+  ("output.scatteredMedium", po::value<bool>( &outputSwitch_scatteredMediumParticlesOutput )->default_value( outputSwitch_scatteredMediumParticlesOutput ), "write scattered medium particles output")
   ;
   
   // Add heavy quark options
@@ -559,9 +567,12 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
   }
   
   //   particles_init = *(ptrInitialParticles->particleVector);
+  int maxID = 0;
   for ( int i = 0; i < ptrInitialParticles->particleVector->size(); i++ )
   {
     particles_init[i].unique_id = (*(ptrInitialParticles->particleVector))[i].unique_id;
+    if( particles_init[i].unique_id > maxID )
+      maxID = particles_init[i].unique_id;
     particles_init[i].FLAVOR = (*(ptrInitialParticles->particleVector))[i].FLAVOR;
     particles_init[i].m = (*(ptrInitialParticles->particleVector))[i].m;
     particles_init[i].T = (*(ptrInitialParticles->particleVector))[i].T;
@@ -575,6 +586,7 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
     particles_init[i].md2g = (*(ptrInitialParticles->particleVector))[i].md2g;
     particles_init[i].md2q = (*(ptrInitialParticles->particleVector))[i].md2q;
   }
+  Particle::unique_id_counter = maxID + 1;
   
   for ( int i = 0; i < particles_init.size(); i++ )
   {   

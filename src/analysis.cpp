@@ -23,6 +23,7 @@
 #include "binning2.h"
 #include "configuration.h"
 #include "FPT_compare.h"
+#include "random.h"
 
 #include <stdio.h> // for getenv()
 #include <stdlib.h> // for getenv()
@@ -225,10 +226,12 @@ analysis::analysis( config* const c ):
   //---- times for output of data --------
   int tempCount_tstep = 0;
   tstep_movie[tempCount_tstep] = 0.1;
-  do {
+  do
+  {
     ++tempCount_tstep;
     tstep_movie[tempCount_tstep] = tstep_movie[tempCount_tstep - 1] + 0.1;
-  } while (tstep_movie[tempCount_tstep] <= 10.0 );
+  }
+  while( tstep_movie[tempCount_tstep] <= 10.0 );
   
   ++tempCount_tstep;
   tstep_movie[tempCount_tstep] = infinity;
@@ -471,6 +474,12 @@ analysis::analysis( config* const c ):
     theInterpolation_nJpsi.configure();
   }
   
+  if( theConfig->doOutput_progressLog() )
+  {
+    string filename = theConfig->getStandardOutputDirectoryName() + "/" + theConfig->getJobName() + "_progressLog";
+    progressLogFile.open( filename.c_str(), ios::out | ios::trunc );
+  }
+  showerParticlesInEvent.resize( static_cast<int>( theConfig->getNumberOfParticlesToAdd() / 2 ) );
 }
 
 
@@ -503,7 +512,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyJets = false; // study jets
   studyCentralDensity = false; // density in central part of collision
   studyBackground = false; // print also properties like v2, RAA of background
-  
+  studyScatteredMediumParticles = false; // print scattered medium particles
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -656,7 +665,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
       break;
-      
+    case background_jets:
+      studyScatteredMediumParticles = true;
+      break;
     case light_parton_lhc:      
       rapidityRanges.clear();
       yRange.reset( 0, 0.8 );
@@ -853,6 +864,11 @@ void analysis::finalOutput( const double _stoptime )
   
   if ( dndyOutput )
     print_dndy( "final" );
+  if( studyScatteredMediumParticles )
+  {
+    scatteredMediumParticlesOutput( nTimeSteps );
+    mediumParticlesOutput( nTimeSteps );
+  }
 }
 
 
@@ -2680,7 +2696,7 @@ void analysis::particleOutput( const int step )
   {
     file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep << addedParticles[i].T << sep << addedParticles[i].X << sep
     << addedParticles[i].Y << sep  << addedParticles[i].Z << sep << addedParticles[i].E << sep << addedParticles[i].PX << sep << addedParticles[i].PY << sep
-    << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << endl;
+    << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep << addedParticles[i].N_EVENT_pp << endl;
   }
   file.close();
 }
@@ -2942,7 +2958,7 @@ void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
   case all:
     f << "#ID" << sep << "uniqueID" << sep << "Cell ID" << sep << "Flavor" << sep << "t" << sep << "x" << sep << "y" << sep << "z" << sep
     << "E"  << sep << "Px"  << sep << "Py"  << sep << "Pz" << sep << "md2g/alpha_s [GeV^2]" << sep
-    << "md2q/alpha_s [GeV^2]" << endl;
+    << "md2q/alpha_s [GeV^2]" << sep << "Init. eventID" << endl;
     break;
   default:
     f << endl;
@@ -4378,10 +4394,108 @@ void analysis::printJpsiEvolution()
 }
 
 
+void analysis::registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles, const int _nMediumParticles, const int _nColl, const int _nColl22, const int _nColl23, const int _nColl32 )
+{
+  if( progressLogFile.good() )
+  {
+    string sep = "\t";
+    progressLogFile << _time << sep;
+    progressLogFile << _dt << sep;
+    progressLogFile << _nAddedParticles << sep;
+    progressLogFile << _nMediumParticles << sep;
+    progressLogFile << _nColl << sep;
+    progressLogFile << _nColl22 << sep;
+    progressLogFile << _nColl23 << sep;
+    progressLogFile << _nColl32 << endl;
+  }
+  else
+  {
+    string errMsg = "error when attempting to write progress information log";
+    throw eAnalysis_error( errMsg );
+  }
+}
 
 
+void analysis::scatteredMediumParticlesOutput( const int step )
+{
+  string name;
+  stringstream ss;
+
+  if( step == 0 )
+    name = "initial";
+  else
+    if( step == nTimeSteps )
+      name = "final";
+    else
+    {
+      ss << step;
+      name = "step" + ss.str();
+    }
+
+  //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+  string filename = filename_prefix + "_" + name + "_scatteredMediumParticles.f1";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
+
+  //---- print header if file is empty ----
+  time_t end;
+  time( &end );
+
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if( size == 0 )
+    printHeader( file, all, end );
+  //---------------------------------------
+
+  for( int i = 0; i < scatteredMediumParticles.size(); i++ )
+  {
+    file << i << sep << scatteredMediumParticles[i].unique_id << sep << scatteredMediumParticles[i].cell_id << sep << scatteredMediumParticles[i].FLAVOR << sep << scatteredMediumParticles[i].T << sep << scatteredMediumParticles[i].X << sep
+         << scatteredMediumParticles[i].Y << sep  << scatteredMediumParticles[i].Z << sep << scatteredMediumParticles[i].E << sep << scatteredMediumParticles[i].PX << sep << scatteredMediumParticles[i].PY << sep
+         << scatteredMediumParticles[i].PZ << sep << scatteredMediumParticles[i].md2g << sep << scatteredMediumParticles[i].md2q << sep << scatteredMediumParticles[i].N_EVENT_pp << endl;
+  }
+  file.close();
+}
 
 
+void analysis::mediumParticlesOutput( const int step )
+{
+  string name;
+  stringstream ss;
+
+  if( step == 0 )
+    name = "initial";
+  else
+    if( step == nTimeSteps )
+      name = "final";
+    else
+    {
+      ss << step;
+      name = "step" + ss.str();
+    }
+
+  //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+  string filename = filename_prefix + "_" + name + "_allMediumParticles.f1";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
+
+  //---- print header if file is empty ----
+  time_t end;
+  time( &end );
+
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if( size == 0 )
+    printHeader( file, all, end );
+  //---------------------------------------
+
+  for( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+    file << i << sep << particles_atTimeNow[i].unique_id << sep << particles_atTimeNow[i].cell_id << sep << particles_atTimeNow[i].FLAVOR << sep << particles_atTimeNow[i].T << sep << particles_atTimeNow[i].X << sep
+         << particles_atTimeNow[i].Y << sep  << particles_atTimeNow[i].Z << sep << particles_atTimeNow[i].E << sep << particles_atTimeNow[i].PX << sep << particles_atTimeNow[i].PY << sep
+         << particles_atTimeNow[i].PZ << sep << particles_atTimeNow[i].md2g << sep << particles_atTimeNow[i].md2q << sep << particles_atTimeNow[i].N_EVENT_pp << endl;
+  }
+  file.close();
+}
 
 
 jetTrackerSingleEvent::jetTrackerSingleEvent()
