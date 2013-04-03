@@ -33,8 +33,14 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS( Cuba DEFAULT_MSG Cuba_LIBRARY Cuba_INCLUDE_DI
 # display some status information
 SET ( Cuba_FOUND ${CUBA_FOUND} CACHE INTERNAL "Provide Cuba_FOUND in addition to CUBA_FOUND" FORCE )
 IF( Cuba_FOUND )
- MESSAGE( STATUS "** Cuba library: ${Cuba_LIBRARIES}" )
- MESSAGE( STATUS "** Cuba include: ${Cuba_INCLUDE_DIRS}" )
+  IF (NOT Cuba_FIND_QUIETLY)
+    MESSAGE( STATUS "** Cuba library: ${Cuba_LIBRARIES}" )
+    MESSAGE( STATUS "** Cuba include: ${Cuba_INCLUDE_DIRS}" )
+  ENDIF (NOT Cuba_FIND_QUIETLY)
+ELSE (Cuba_FOUND)
+  IF (Cuba_FIND_REQUIRED)
+    MESSAGE(FATAL_ERROR "Could not find cuba")
+  ENDIF (Cuba_FIND_REQUIRED)
 ENDIF( Cuba_FOUND )
 
 # the variables will only show up in the GUI in the "advanced" view
