@@ -91,9 +91,9 @@ void initialModel_minijets::generateSamplingDataSets( const int _nToGenerate )
   {
     nParticlesToGenerate = _nToGenerate;    
   }
-  cout << "++++ N = " << nParticlesToGenerate / nTestparticles 
-    << " * " << nTestparticles
-    << " = " << nParticlesToGenerate << " testparticles" << endl;
+  cout << "++++ N = " << static_cast<double>( nParticlesToGenerate ) / nTestparticles
+       << " * " << nTestparticles
+       << " = " << nParticlesToGenerate << " added particles" << endl;
   cout << "==================================================================" << endl;
 }
 
@@ -244,23 +244,27 @@ void initialModel_minijets::sample_PXYZE_FLAV( std::vector< Particle >& _particl
     }
 
     // (3c): get some random number and loop over all final states
-    tryXS = maxXS * ran2();
-
-    f1 = f2 = -1;
-    XS = 0.0;
-    for (int i=0;i<13;i++)
+    do //  Loop for ensuring that only light quark flavor are sampled
     {
-      for (int j=0;j<13;j++)
+      tryXS = maxXS * ran2();
+
+      f1 = f2 = -1;
+      XS = 0.0;
+      for( int i = 0; i < 13; i++ )
       {
-        XS += arr[i][j];
-        if (XS >= tryXS) // we have found the solution!
+        for( int j = 0; j < 13; j++ )
         {
-          f1 = i;
-          f2 = j;
-          i = j = 99; // --> quit the loops
+          XS += arr[i][j];
+          if( XS >= tryXS ) // we have found the solution!
+          {
+            f1 = i;
+            f2 = j;
+            i = j = 99; // --> quit the loops
+          }
         }
       }
     }
+    while( ( f1 > 2 * Particle::max_N_light_flavor || f2 > 2 * Particle::max_N_light_flavor ) && ( Particle::N_heavy_flavor == 0 ) );
 
     if (f1 < 0) 
     {

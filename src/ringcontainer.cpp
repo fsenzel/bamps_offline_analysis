@@ -28,7 +28,8 @@ ringContainer::ringContainer() :
   md2g( 0 ), md2q( 0 ),
   v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), 
   E( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ), 
-  p_z( 0 ), pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ),
+  p_z( 0 ), p_r( 0 ), p_t( 0 ), 
+  pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ),
   gamma( 0 ), energyDensity( 0 ), particleDensity( 0 ), 
   gluonDensity( 0 ), quarkDensity( 0 ), volume( 0 ),
   numberOfCollectedRateObjects( 0 )
@@ -47,8 +48,9 @@ ringContainer::ringContainer( const double _minR, const double _maxR ) :
   numberOfActiveParticles( 0 ), 
   md2g( 0 ), md2q( 0 ),
   v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), 
-  E( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ), 
-  p_z( 0 ), pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ), 
+  E( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ),
+  p_z( 0 ), p_r( 0 ), p_t( 0 ), 
+  pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ),
   gamma( 0 ), energyDensity( 0 ), particleDensity( 0 ), 
   gluonDensity( 0 ), quarkDensity( 0 ), volume( 0 ),
   numberOfCollectedRateObjects( 0 )
@@ -77,6 +79,7 @@ void ringContainer::clear()
   E = 0;
   p_r = 0;
   p_z = 0;
+  p_t = 0;
   pr2_over_E = 0;
   pz2_over_E = 0;
   pr_pz_over_E = 0;
@@ -140,6 +143,7 @@ void ringContainer::addParticle( const Particle& _particle )
 
   p_r += pr;
   p_z += _particle.Mom.Pz();
+  p_t += _particle.Mom.Perp();
   pr2_over_E += pow( pr, 2 ) * oneE;
   pz2_over_E += pow( _particle.Mom.Pz(), 2 ) * oneE;
   pr_pz_over_E += pr * _particle.Mom.Pz() * oneE;
@@ -198,6 +202,7 @@ void ringContainer::addParticleInFormGeom( const Particle& _particle, const doub
 
   p_r += pr;
   p_z += _particle.Mom.Pz();
+  p_t += _particle.Mom.Perp();
   pr2_over_E += pow( pr, 2 ) * oneE;
   pz2_over_E += pow( _particle.Old.Pz(), 2 ) * oneE;
   pr_pz_over_E += pr * _particle.Old.Pz() * oneE;

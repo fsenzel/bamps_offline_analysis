@@ -1,7 +1,6 @@
 SET(project_SRCS
 additionalparticlesdistribution.cpp
 analysis.cpp
-binning2.cpp
 cellcontainer.cpp
 configuration.cpp
 coordinateBins.cpp
@@ -20,6 +19,8 @@ offlineheavyioncollison.cpp
 offlineoutput.cpp
 particleOffline.cpp
 pdfinterface.cpp
+pythia6425.f
+quark_shower.f
 ringcontainer.cpp
 ringstructure.cpp
 woodsaxon.cpp

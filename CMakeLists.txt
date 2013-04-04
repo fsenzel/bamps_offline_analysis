@@ -15,6 +15,9 @@ MESSAGE(STATUS "** CPU has RDTSCP opcode: ${HAVE_RDTSCP}")
 ######### Set project name  #########
 PROJECT(offlineBAMPS)
 
+######### Enabling Fortran for PYTHIA shower  #########
+ENABLE_LANGUAGE(Fortran)
+
 ######### Activate packaging, use as "make package_source"  #########
 INCLUDE(CMakeCustomPackageOptions.cmake)
 INCLUDE(CPack)
