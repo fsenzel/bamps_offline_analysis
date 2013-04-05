@@ -1,10 +1,30 @@
-#cmakedefine Cuba_FOUND
+//--------------------------------------------------------- -*- c++ -*- ------
+//provided by subversion
+//----------------------------------------------------------------------------
+//$HeadURL: svn+ssh://gallmei@th.physik.uni-frankfurt.de/home/bamps/svn/lib/branches/vector4D/src/globalsettings.h $
+//$LastChangedDate: 2012-03-21 22:38:52 +0100 (Mi, 21. Mär 2012) $
+//$LastChangedRevision: 521 $
+//$LastChangedBy: gallmei $
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+
+#ifndef CONFIGBAMPS_H
+#define CONFIGBAMPS_H
+
+#cmakedefine CGAL_FOUND
+#cmakedefine CUBA_FOUND
+#cmakedefine FASTJET_FOUND
+#cmakedefine FASTJET_SISCONE_FOUND
+#cmakedefine FASTJET_SISCONE_SPHERICAL_FOUND
+#cmakedefine FASTJET_CMSITERATIVECONE_FOUND
 #cmakedefine LHAPDF_FOUND
+#cmakedefine Pythia_FOUND
+
 #define HAVE_RDTSCP ${HAVE_RDTSCP}
 
 #cmakedefine VECTOR_IMPL_TYPE ${VECTOR_IMPL_TYPE} 
 #define VECTOR_IMPL_${VECTOR_IMPL_TYPE}
 
-#cmakedefine Pythia_FOUND
-
 #define PYTHIA_XML_DIR "${Pythia_xmldoc_PATH}"
+
+#endif
