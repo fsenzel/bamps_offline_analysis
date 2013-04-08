@@ -1,7 +1,6 @@
 SET(project_SRCS
 additionalparticlesdistribution.cpp
 analysis.cpp
-binning2.cpp
 cellcontainer.cpp
 configuration.cpp
 coordinateBins.cpp
