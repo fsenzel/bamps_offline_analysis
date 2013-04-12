@@ -668,6 +668,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     case background_jets:
       studyScatteredMediumParticles = true;
       break;
+      
     case light_parton_lhc:      
       rapidityRanges.clear();
       yRange.reset( 0, 0.8 );
@@ -679,6 +680,11 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
       break;
+    
+    case central_densities:
+      studyCentralDensity = true;
+      break;
+      
     default:
       break;
   }
@@ -3023,7 +3029,9 @@ void analysis::printCentralDensities(const double _time)
   for ( int i = 0; i < centralRingsCopyFromCascade.size(); i++ )
   {
     centralDensitiesOutputFile << sep << centralRingsCopyFromCascade[i].getEnergyDensity() << sep 
-    << centralRingsCopyFromCascade[i].getGluonDensity() << sep << centralRingsCopyFromCascade[i].getQuarkDensity(); 
+    << centralRingsCopyFromCascade[i].getGluonDensity() << sep << centralRingsCopyFromCascade[i].getQuarkDensity() << sep
+    << centralRingsCopyFromCascade[i].getEffectiveTemperature() << sep << centralRingsCopyFromCascade[i].getAveraged_md2g() << sep 
+    << centralRingsCopyFromCascade[i].getAveraged_md2q(); 
   }
   centralDensitiesOutputFile << endl;
 
