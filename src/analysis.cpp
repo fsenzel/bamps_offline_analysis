@@ -1678,6 +1678,13 @@ void analysis::computeV2RAA( string name, const double _outputTime )
       theV2RAA.computeFor( jpsi_sec, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     }
   }
+  else if ( studyJets )
+  {
+    theV2RAA.setPtBinProperties( 0.8*theConfig->getPtCutoff(), 3.0*theConfig->getPtCutoff(), static_cast< int >( 2*2.2*theConfig->getPtCutoff() ) );
+    
+    theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+  }
   else
   {
     theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
