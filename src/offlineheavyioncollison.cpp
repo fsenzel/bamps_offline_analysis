@@ -599,6 +599,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     particlesEvolving[k].init = particles_atTimeNow[k].init;
     particlesEvolving[k].edge = particles_atTimeNow[k].edge;
     particlesEvolving[k].free = particles_atTimeNow[k].free;
+    particlesEvolving[k].isAlreadyInAddedParticles = particles_atTimeNow[k].isAlreadyInAddedParticles;
   }
 
   if ( evolveToTime <= stoptime_last )
@@ -2414,7 +2415,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   double leftY = _cell.corner.y_min;
   double leftX = _cell.corner.x_min;
 
-  if( theConfig->doOutput_scatteredMediumParticles() )
+  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
@@ -2469,8 +2470,11 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
   }
   else
   {
@@ -2482,8 +2486,11 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
   }
 
   ParticleOffline tempParticle;
@@ -2535,7 +2542,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   double M1, M2;
   double t_hat;
 
-  if( theConfig->doOutput_scatteredMediumParticles() )
+  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
@@ -2586,8 +2593,11 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
   }
   else
   {
@@ -2600,8 +2610,11 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
   }
   
   if ( typ == 2240 ) // J/psi + g -> c + cb
@@ -2815,10 +2828,14 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
   FLAVOR_TYPE F1, F2, F3;
   int typ;
 
-  if( theConfig->doOutput_scatteredMediumParticles() )
+  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+  }
+  
+  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+  {
     scatteredMediumParticles.push_back( particles_atTimeNow[jscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
   }
@@ -2882,16 +2899,23 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
     tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+    }
+    
     ParticleOffline tempParticle2 = particles_atTimeNow[jscat];
     tempParticle2.FLAVOR = F2;
     tempParticle2.Mom = P2new;
     tempParticle2.unique_id = particles_atTimeNow[jscat].unique_id; // necessary ???
     tempParticle2.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
     tempParticle2.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
-      addedParticles.push_back( tempParticle2 );
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+    {
+      addedParticles.push_back( tempParticle );
+      particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+    }
   }
   else if (( order == 2 ) || ( order == 5 ) )  //132  or  312
   {
@@ -2910,8 +2934,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
       tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
       tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-      if( theConfig->isScatt_furtherOfflineParticles() )
+      if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+      {
         addedParticles.push_back( tempParticle );
+        particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+      }
     }
     else
     {
@@ -2920,6 +2947,17 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
 
       addedParticles[kscat].FLAVOR = F2;
       addedParticles[kscat].Mom = P2new;
+      ParticleOffline tempParticle = particles_atTimeNow[iscat];
+      tempParticle.FLAVOR = F1;
+      tempParticle.Mom = P1new;
+      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
+      tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+      tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+      if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+      {
+        addedParticles.push_back( tempParticle );
+        particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+      }
     }
   }
   else //if((order == 4) || (order == 6))  //231 or 321
@@ -2938,8 +2976,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       tempParticle.unique_id = particles_atTimeNow[jscat].unique_id; // necessary ???
       tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
       tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-      if( theConfig->isScatt_furtherOfflineParticles() )
+      if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+      {
         addedParticles.push_back( tempParticle );
+        particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+      }
     }
     else
     {
@@ -2954,8 +2995,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       tempParticle.unique_id = particles_atTimeNow[jscat].unique_id; // necessary
       tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
       tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-      if( theConfig->isScatt_furtherOfflineParticles() )
+      if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+      {
         addedParticles.push_back( tempParticle );
+        particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+      }
     }
   }
 

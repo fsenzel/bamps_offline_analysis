@@ -19,6 +19,7 @@
 #define PARTICLE_H
 
 #include "particleprototype.h"
+#include <vector>
 
 
 /**
@@ -107,6 +108,5 @@ class Particle : public ParticlePrototype
     
     int step,tstep,taustep;//fm
 };
-
 
 #endif

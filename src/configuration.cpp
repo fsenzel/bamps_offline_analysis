@@ -569,6 +569,7 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
     particles_init[i].Mom = (*(ptrInitialParticles->particleVector))[i].Mom;
     particles_init[i].md2g = (*(ptrInitialParticles->particleVector))[i].md2g;
     particles_init[i].md2q = (*(ptrInitialParticles->particleVector))[i].md2q;
+    particles_init[i].isAlreadyInAddedParticles.resize( static_cast< int >( numberOfParticlesToAdd / 2 ), false );
   }
   Particle::unique_id_counter = maxID + 1;
   

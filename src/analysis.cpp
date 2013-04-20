@@ -668,6 +668,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     case background_jets:
       studyScatteredMediumParticles = true;
       break;
+      
     case light_parton_lhc:      
       rapidityRanges.clear();
       yRange.reset( 0, 0.8 );
@@ -679,6 +680,11 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
       break;
+    
+    case central_densities:
+      studyCentralDensity = true;
+      break;
+      
     default:
       break;
   }
@@ -1649,6 +1655,13 @@ void analysis::computeV2RAA( string name, const double _outputTime )
       theV2RAA.computeFor( jpsi_ini, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
       theV2RAA.computeFor( jpsi_sec, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     }
+  }
+  else if ( theConfig->getPtCutoff() > 80.0 )
+  {
+    theV2RAA.setPtBinProperties( 0.8*theConfig->getPtCutoff(), 3.0*theConfig->getPtCutoff(), static_cast< int >( 2.2*theConfig->getPtCutoff() ) );
+    
+    theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
   }
   else
   {
@@ -2925,7 +2938,9 @@ void analysis::printCentralDensities(const double _time)
   for ( int i = 0; i < centralRingsCopyFromCascade.size(); i++ )
   {
     centralDensitiesOutputFile << sep << centralRingsCopyFromCascade[i].getEnergyDensity() << sep 
-    << centralRingsCopyFromCascade[i].getGluonDensity() << sep << centralRingsCopyFromCascade[i].getQuarkDensity(); 
+    << centralRingsCopyFromCascade[i].getGluonDensity() << sep << centralRingsCopyFromCascade[i].getQuarkDensity() << sep
+    << centralRingsCopyFromCascade[i].getEffectiveTemperature() << sep << centralRingsCopyFromCascade[i].getAveraged_md2g() << sep 
+    << centralRingsCopyFromCascade[i].getAveraged_md2q(); 
   }
   centralDensitiesOutputFile << endl;
 
@@ -4374,27 +4389,6 @@ void analysis::mediumParticlesOutput( const int step )
          << particles_atTimeNow[i].N_EVENT_pp << endl;
   }
   file.close();
-}
-
-
-jetTrackerSingleEvent::jetTrackerSingleEvent()
-{
-  for ( int i = 0; i < 4; i++ )
-  {
-    R_proj[i] = 0;
-    P_proj_in[i] = P_proj_out[i] = 0;
-    P1_in[i] = P2_in[i] = 0;
-    P1_out[i] = P2_out[i] = 0;
-  }
-  xSection = -1;
-  lambda = -1;
-  cell_ID = -1;
-}
-
-
-jetTrackerSingleEvent::~jetTrackerSingleEvent()
-{
-
 }
 
 

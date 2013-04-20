@@ -249,10 +249,10 @@ void additionalParticlesDistribution::showerParticles( vector< ParticleOffline >
     for( int i = 0; i < _particles.size(); i += 2 )
     {
       vector<ParticleOffline> particleShower;
-      double px = _particles[i].PX;
-      double py = _particles[i].PY;
-      double pz1 = _particles[i].PZ;
-      double pz2 = _particles[i + 1].PZ;
+      double px = _particles[i].Mom.Px();
+      double py = _particles[i].Mom.Py();
+      double pz1 = _particles[i].Mom.Pz();
+      double pz2 = _particles[i + 1].Mom.Pz();
       FLAVOR_TYPE flavor1 = _particles[i].FLAVOR;
       FLAVOR_TYPE flavor2 = _particles[i + 1].FLAVOR;
       particleShower = createShowerEvent( px, py, pz1, pz2, flavor1, flavor2 );
@@ -261,21 +261,11 @@ void additionalParticlesDistribution::showerParticles( vector< ParticleOffline >
       {
         particleShower[j].N_EVENT_pp = _particles[i].N_EVENT_pp;
         particleShower[j].N_EVENT_AA = _particles[i].N_EVENT_AA;
-        particleShower[j].X = _particles[i].X;
-        particleShower[j].Y = _particles[i].Y;
-        particleShower[j].Z = _particles[i].Z;
-        particleShower[j].T = _particles[i].T;
-
-        particleShower[j].X_init = particleShower[j].X;
-        particleShower[j].Y_init = particleShower[j].Y;
-        particleShower[j].Z_init = particleShower[j].Z;
+        particleShower[j].Pos     = _particles[i].Pos;
+        particleShower[j].PosInit = particleShower[j].Pos;
+        particleShower[j].MomInit = particleShower[j].Mom;
 
         particleShower[j].init = true;
-
-        particleShower[j].PX_init = particleShower[j].PX;
-        particleShower[j].PY_init = particleShower[j].PY;
-        particleShower[j].PZ_init = particleShower[j].PZ;
-        particleShower[j].E_init = particleShower[j].E;
 
         tempParticles.push_back( particleShower[j] );
       }
@@ -390,10 +380,10 @@ vector<ParticleOffline> additionalParticlesDistribution::createShowerEvent( cons
         cout << "Unknown flavor type:\t" << bamps_.pa[index][0] << endl;
       }
 
-      tempParticle.PX = bamps_.pa[index][1];
-      tempParticle.PY = bamps_.pa[index][2];
-      tempParticle.PZ = bamps_.pa[index][3];
-      tempParticle.E = sqrt( tempParticle.PX * tempParticle.PX + tempParticle.PY * tempParticle.PY + tempParticle.PZ * tempParticle.PZ );
+      tempParticle.Mom.Px() = bamps_.pa[index][1];
+      tempParticle.Mom.Py() = bamps_.pa[index][2];
+      tempParticle.Mom.Pz() = bamps_.pa[index][3];
+      tempParticle.Mom.E() = sqrt( tempParticle.Mom.vec2() );
       tempParticle.m = 0.0;
       particlesToAdd.push_back( tempParticle );
       index++;
@@ -411,7 +401,7 @@ vector<ParticleOffline> additionalParticlesDistribution::createShowerEvent( cons
   double E2 = sqrt( _px * _px + _py * _py + _pz2 * _pz2 );
   for( int i = 0; i < particlesToAdd.size(); i++ )
   {
-    sumE += particlesToAdd[i].E;
+    sumE += particlesToAdd[i].Mom.E();
   }
   if( FPT_COMP_GE( abs( sumE - ( E1 + E2 ) ) / sumE, 0.05 ) )
   {
@@ -454,9 +444,15 @@ void additionalParticlesDistribution::initialShowerInitOutput( vector< ParticleO
        << sep << "y" << sep << "z" << sep << "t" << endl;
   for( int index = 0; index < _particles.size(); index++ )
   {
-    file << _particles[index].N_EVENT_pp << sep << _particles[index].PX << sep << _particles[index].PY << sep << _particles[index].PZ << sep
-         << _particles[index].E << sep << _particles[index].X << sep << _particles[index].Y << sep << _particles[index].Z << sep
-         << _particles[index].T << endl;
+    file << _particles[index].N_EVENT_pp << sep 
+         << _particles[index].Mom.Px() << sep 
+         << _particles[index].Mom.Py() << sep 
+         << _particles[index].Mom.Pz() << sep
+         << _particles[index].Mom.E() << sep 
+         << _particles[index].Pos.X() << sep 
+         << _particles[index].Pos.Y() << sep 
+         << _particles[index].Pos.Z() << sep
+         << _particles[index].Pos.T() << endl;
   }
   file.close();
 

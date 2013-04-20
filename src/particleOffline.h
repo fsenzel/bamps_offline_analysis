@@ -38,7 +38,8 @@ public:
     PosInit( 0,0,0,0 ),
     MomInit( 0,0,0,0 ),
     lastInt( 0,0,0,0 ),    
-    rate( 0 ), ratev( 0 ) 
+    rate( 0 ), ratev( 0 ),
+    isAlreadyInAddedParticles( 0 )
   {};
     
   ParticleOffline( const Particle& _particle ) : 
@@ -51,7 +52,8 @@ public:
     PosInit( 0,0,0,0 ),
     MomInit( 0,0,0,0 ),
     lastInt( 0,0,0,0 ),    
-    rate( 0 ), ratev( 0 ) 
+    rate( 0 ), ratev( 0 ),
+    isAlreadyInAddedParticles( 0 )
   {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
@@ -77,7 +79,10 @@ public:
   VectorTXYZ lastInt;
     
   double rate, ratev;
-    
+
+  /** @brief vector which holds information in which event this medium particle is already in added particles list */
+  std::vector< bool > isAlreadyInAddedParticles;
+
     
   static int mapToPDGCodes( const FLAVOR_TYPE _flav )
   {
