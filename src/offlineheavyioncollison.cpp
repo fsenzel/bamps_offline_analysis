@@ -1880,7 +1880,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
                                       theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
                                       theConfig->isConstantCrossSecGQ(),
-                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKlight() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
           cs22 = scatt22_object.getXSection22( initialStateIndex );
 
           probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
@@ -1905,7 +1905,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
             }
             else
             {
-              xsection_gg_gg csObj( s, md2g, md2q );
+              xsection_gg_gg csObj( s, md2g, md2q, theConfig->getKlight() );
               csgg = csObj.totalCrossSection();
               lambda_scaled = ( dv * rings[ringIndex].getGamma() * testpartcl * sqrt( s ) ) / ( nTotal * csgg * pow( 0.197, 3.0 ) );
             }
@@ -2113,9 +2113,8 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
 
         scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
                                      theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
-                                     theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(),
-                                     temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi()
-                                     ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+                                     theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKlight(),
+                                     temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
       
         cs22 = scatt22_object.getXSection22( initialStateIndex );
 
@@ -2323,7 +2322,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
           }
           else
           {
-            xsection_gg_gg csObj( s, md2g, md2q );
+            xsection_gg_gg csObj( s, md2g, md2q, theConfig->getKlight() );
             csgg = csObj.totalCrossSection();
             lambda_scaled = ( dv * rings[ringIndex].getGamma() * testpartcl * sqrt( s ) ) / ( nTotal * csgg * pow( 0.197, 3.0 ) );
           }
@@ -2483,7 +2482,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
               }
               else
               {
-                xsection_gg_gg csObj( s, md2g, md2q );
+                xsection_gg_gg csObj( s, md2g, md2q, theConfig->getKlight() );
                 csgg = csObj.totalCrossSection();
                 lambda_scaled = ( dv * rings[ringIndex].getGamma() * testpartcl * sqrt( s ) ) / ( nTotal * csgg * pow( 0.197, 3.0 ) );
               }
@@ -3772,7 +3771,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
     
     s = pow(( P1[0] + P2[0] ), 2 ) - pow(( P1[1] + P2[1] ), 2 ) - pow(( P1[2] + P2[2] ), 2 ) - pow(( P1[3] + P2[3] ), 2 );
     
-    xsection_gg_gg csObj( s, md2g, md2q );
+    xsection_gg_gg csObj( s, md2g, md2q, theConfig->getKlight() );
     csgg = csObj.totalCrossSection();
     lambda = ( dv * rings[nc].getGamma() * testpartcl   ) / ( pow( 0.197, 3.0 ) * _allParticlesList.size() * csgg );  
   }
@@ -3817,7 +3816,8 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
             scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g / as , md2q / as,
                                           theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
                                           theConfig->isConstantCrossSecGQ(),
-                                          theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+                                          theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(),
+                                          theConfig->getKlight() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
             cs22 = scatt22_object.getXSection22();
             probab22 += pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
           }
