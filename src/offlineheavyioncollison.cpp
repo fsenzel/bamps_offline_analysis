@@ -98,7 +98,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     theI23_massless( false ), theI23_charm_m1( false ), theI23_charm_m2( false ), theI23_bottom_m1( false ), theI23_bottom_m2( false ), // do not load data files right at construction, but after configure() has been called below
     offlineInterface( _offlineInterface ),
     theAnalysis( _analysis )
-{
+{  
   // load 2->2 cross section interpolation data
   if( theConfig->doScattering_22() )
     theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom );
@@ -2747,7 +2747,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   //<<---------------------------------------------
   // set new properties for added particle
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
-  if ( pt_out1 > pt_out2 && addedParticles[jscat].FLAVOR <= 2 * Particle::max_N_light_flavor )
+  if ( pt_out1 > pt_out2 && !theConfig->isJetTagged() )
   {
     addedParticles[jscat].FLAVOR = F1;
     addedParticles[jscat].PX = P1[1];
@@ -2793,7 +2793,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   }
 
   int newIndex = -1;
-  if( theConfig->getNlightFlavorsAdded() >= 0 )
+  if( theConfig->isScatt_furtherOfflineParticles() && theConfig->getNlightFlavorsAdded() >= 0 )
   {
     ParticleOffline tempParticle;
     tempParticle.FLAVOR = gluon;
@@ -2835,8 +2835,8 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.T_creation = tempParticle.T;
     tempParticle.unique_id = ParticleOffline::unique_id_counter_added;
     --ParticleOffline::unique_id_counter_added;
-  tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-  tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
 
   //   if ( sqrt( pow( tempParticle.PX, 2) + pow( tempParticle.PY, 2) ) > 3.0 )
   //   {
@@ -2917,7 +2917,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   //<<---------------------------------------------
   // set new properties for added particle
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
-  if ( pt_out1 > pt_out2 && addedParticles[jscat].FLAVOR <= 2 * Particle::max_N_light_flavor )
+  if ( pt_out1 > pt_out2 && !theConfig->isJetTagged() )
   {
     addedParticles[jscat].FLAVOR = F1;
     addedParticles[jscat].m = M1;

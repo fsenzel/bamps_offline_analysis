@@ -142,6 +142,9 @@ class config : public configBase
   
   /** @brief Interface for config::N_heavy_flavors_input */
   int getNheavyFlavorsAdded() const {return N_heavy_flavors_input;}
+  
+  /** @brief Interface for config::jet_tagged */
+  bool isJetTagged() const {return jet_tagged;}
   /** ------------------------------- */
 
   /** ---- initial state options ---- */ 
@@ -427,6 +430,9 @@ class config : public configBase
   
   /** @brief Whether added particles are allowed to scatter with other added particles */
   bool scatt_amongAddedParticles;
+  
+  /** @brief Whether the added particles are treated as tagges jets */
+  bool jet_tagged;
   /** ------------------------------- */
 
   /** @brief Whether scattered offline particles are allowed to scatter again with other added particles */
