@@ -1881,8 +1881,20 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
                                       theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
                                       theConfig->isConstantCrossSecGQ(),
                                       theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKlight() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-          cs22 = scatt22_object.getXSection22( initialStateIndex );
-
+          
+          switch( theConfig->getCrossSectionMethod() )
+          {
+            case csMethod_pQCD:
+              cs22 = scatt22_object.getXSection22( initialStateIndex );
+              break;
+            case csMethod_constCS:
+              cs22 = theConfig->getInputCrossSectionValue() / pow(0.197,2) / 10.0;//1/GeV^2
+              break;
+            default:
+              string errMsg = "Unknown cross-section type in scatt2223_offlineWithAddedParticles... Unrecoverable error!";
+              throw eHIC_error( errMsg );
+          }
+          
           probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
         }
         else
@@ -2813,8 +2825,17 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   addedParticles[jscat].Z_lastInt = addedParticles[jscat].Z;
   addedParticles[jscat].T_lastInt = addedParticles[jscat].T;
 
-  // determine type of scattering, momentum transfer t_hat, new flavor and new masses
-  scatt22_obj.getMomentaAndMasses22( F1, F2, M1, M2, t_hat, typ );
+  if ( theConfig->isIsotropicCrossSection() == false )
+  {
+    // determine type of scattering, momentum transfer t_hat, new flavor and new masses for pQCD cross-sections
+    scatt22_obj.getMomentaAndMasses22( F1, F2, M1, M2, t_hat, typ );
+  }
+  else
+  {
+    // determine type of scattering, momentum transfer t_hat, new flavor and new masses for isotropic processes
+    scatt22_obj.getMomentaAndMasses22_isotropic( F1, F2, M1, M2, t_hat );
+  }
+  
   // translate momemtum transfer t_hat into actual momenta of outgoing particles
   scatt22_obj.setNewMomenta22( P1, P2, R1, R2, t_hat );
 
