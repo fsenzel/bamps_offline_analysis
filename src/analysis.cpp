@@ -1698,12 +1698,12 @@ void analysis::computeV2RAA( string name, const double _outputTime )
     
     theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
     theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( anti_up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( anti_up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
   }
   
   if( studyBackground )
