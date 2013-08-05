@@ -29,6 +29,7 @@
 #include "scattering22.h"
 #include "scattering32.h"
 #include "offlineoutput.h"
+#include "mfpforheavyioncollision.h"
 
 
 class offlineHeavyIonCollision
@@ -134,6 +135,15 @@ private:
 
   double iterateMFP( std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, const int jetID, const double dt, const double dv );
   double iterate_mfp_bisection( std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, const int jetID, const double dt, const double dv, const double lambda_old );
+  
+  /** 
+   * @brief A pointer to a \p mfpForHeavyIonCollision object that
+   * provides interpolated mean free path data for added particles
+   *
+   * This is only needed when \sa config::jetMfpComputationSwitch is set
+   * to \sa JET_MFP_COMPUTATION_TYPE::computeMfpInterpolation or JET_MFP_COMPUTATION_TYPE::thermalMfpGluon. 
+   */
+  mfpForHeavyIonCollision theMFP;
   
   void removeDeadParticles();
   
