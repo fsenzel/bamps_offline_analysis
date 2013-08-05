@@ -50,6 +50,7 @@ light_parton_lhc = 20,
 dndy_time = 201,
 temperature_velocity_cells = 202, // creates output used by Alex Meistrenko for his model
 spatial_density = 203,
+background_v2 = 204,
 
 // heavy quarks:
 phenix_hq_electrons = 101,

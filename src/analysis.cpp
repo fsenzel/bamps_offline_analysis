@@ -676,6 +676,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     case spatial_density:
       study_spatial_density = true;
       break;
+    case background_v2:
+      studyBackground = true;
+      break;
     case cms_jpsi:
       studyJpsi = true;
       studyHQ = true;
@@ -1734,13 +1737,14 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   
   if( studyBackground )
   {
+    theV2RAA.setPtBinProperties( 0, 10, 20, 0, 10, 15 );
     theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( anti_up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( anti_down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( anti_strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+//     theV2RAA.computeFor( up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+//     theV2RAA.computeFor( down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+//     theV2RAA.computeFor( strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+//     theV2RAA.computeFor( anti_up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+//     theV2RAA.computeFor( anti_down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+//     theV2RAA.computeFor( anti_strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
   }
 }
@@ -1783,8 +1787,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   }
   
   // avoid problem with binning pt logaritmitically: cannot deal with pt = 0
-  if( _pt_min < 0.1 )
-    _pt_min = 0.1;
+  if( _pt_min < 0.05 )
+    _pt_min = 0.05;
   
   const double d_ln_pt = ( log( _pt_max ) - log( _pt_min ) ) / n_bins;
 
