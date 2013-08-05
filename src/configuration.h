@@ -51,11 +51,13 @@ alice_hq_electrons = 111,
 alice_hq_muons = 112,
 alice_hq_dmesons = 113,
 cms_hq_nonPromptJpsi = 114,
+alice_hq_nonPromptJpsi = 115,
 phenix_jpsi = 131,
 alice_jpsi = 141,
 cms_jpsi = 151,
 // jets:
-background_jets = 161
+background_jets = 161,
+central_densities = 171
 };
 
 
@@ -141,6 +143,9 @@ class config : public configBase
   
   /** @brief Interface for config::N_heavy_flavors_input */
   int getNheavyFlavorsAdded() const {return N_heavy_flavors_input;}
+  
+  /** @brief Interface for config::jet_tagged */
+  bool isJetTagged() const {return jet_tagged;}
   /** ------------------------------- */
 
   /** ---- initial state options ---- */ 
@@ -420,6 +425,9 @@ class config : public configBase
   
   /** @brief Whether added particles are allowed to scatter with other added particles */
   bool scatt_amongAddedParticles;
+  
+  /** @brief Whether the added particles are treated as tagges jets */
+  bool jet_tagged;
   /** ------------------------------- */
 
   /** @brief Whether scattered offline particles are allowed to scatter again with other added particles */

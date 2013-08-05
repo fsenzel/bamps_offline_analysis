@@ -99,7 +99,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     offlineInterface( _offlineInterface ),
     theMFP( _config ),
     theAnalysis( _analysis )
-{
+{  
   // load 2->2 cross section interpolation data
   if( theConfig->doScattering_22() )
     theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom );
@@ -637,6 +637,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     particlesEvolving[k].init = particles_atTimeNow[k].init;
     particlesEvolving[k].edge = particles_atTimeNow[k].edge;
     particlesEvolving[k].free = particles_atTimeNow[k].free;
+    particlesEvolving[k].isAlreadyInAddedParticles = particles_atTimeNow[k].isAlreadyInAddedParticles;
   }
 
   if ( evolveToTime <= stoptime_last )
@@ -1962,9 +1963,21 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
                                       theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
                                       theConfig->isConstantCrossSecGQ(),
-                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g_wo_as, md2q_wo_as are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-          cs22 = scatt22_object.getXSection22( initialStateIndex );
-
+                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKlight() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+          
+          switch( theConfig->getCrossSectionMethod() )
+          {
+            case csMethod_pQCD:
+              cs22 = scatt22_object.getXSection22( initialStateIndex );
+              break;
+            case csMethod_constCS:
+              cs22 = theConfig->getInputCrossSectionValue() / pow(0.197,2) / 10.0;//1/GeV^2
+              break;
+            default:
+              string errMsg = "Unknown cross-section type in scatt2223_offlineWithAddedParticles... Unrecoverable error!";
+              throw eHIC_error( errMsg );
+          }
+          
           probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
         }
         else
@@ -1987,7 +2000,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
             }
             else
             {
-              xsection_gg_gg csObj( s, md2g_wo_as * coupling::get_constant_coupling(), md2q_wo_as * coupling::get_constant_coupling() );
+              xsection_gg_gg csObj( s, md2g_wo_as * coupling::get_constant_coupling(), md2q_wo_as * coupling::get_constant_coupling(), theConfig->getKlight() );
               csgg = csObj.totalCrossSection();
               lambda_scaled = ( dv * rings[ringIndex].getGamma() * testpartcl * sqrt( s ) ) / ( nTotal * csgg * pow( 0.197, 3.0 ) );
             }
@@ -2210,9 +2223,8 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
 
         scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
                                      theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
-                                     theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(),
-                                     temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi()
-                                     ); // md2g_wo_as, md2q_wo_as are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+                                     theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKlight(),
+                                     temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
       
         cs22 = scatt22_object.getXSection22( initialStateIndex );
 
@@ -2420,7 +2432,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
           }
           else
           {
-            xsection_gg_gg csObj( s, md2g, md2q );
+            xsection_gg_gg csObj( s, md2g, md2q, theConfig->getKlight() );
             csgg = csObj.totalCrossSection();
             lambda_scaled = ( dv * rings[ringIndex].getGamma() * testpartcl * sqrt( s ) ) / ( nTotal * csgg * pow( 0.197, 3.0 ) );
           }
@@ -2580,7 +2592,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
               }
               else
               {
-                xsection_gg_gg csObj( s, md2g, md2q );
+                xsection_gg_gg csObj( s, md2g, md2q, theConfig->getKlight() );
                 csgg = csObj.totalCrossSection();
                 lambda_scaled = ( dv * rings[ringIndex].getGamma() * testpartcl * sqrt( s ) ) / ( nTotal * csgg * pow( 0.197, 3.0 ) );
               }
@@ -2702,7 +2714,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   double leftY = _cell.corner.y_min;
   double leftX = _cell.corner.x_min;
 
-  if( theConfig->doOutput_scatteredMediumParticles() )
+  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
@@ -2749,7 +2761,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   //<<---------------------------------------------
   // set new properties for added particle
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
-  if ( pt_out1 > pt_out2 && addedParticles[jscat].FLAVOR <= 2 * Particle::max_N_light_flavor )
+  if ( pt_out1 > pt_out2 && !theConfig->isJetTagged() )
   {
     addedParticles[jscat].FLAVOR = F1;
     addedParticles[jscat].PX = P1[1];
@@ -2765,8 +2777,11 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
   }
   else
   {
@@ -2784,12 +2799,15 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
   }
 
   int newIndex = -1;
-  if( theConfig->getNlightFlavorsAdded() >= 0 )
+  if( theConfig->isScatt_furtherOfflineParticles() && theConfig->getNlightFlavorsAdded() >= 0 )
   {
     ParticleOffline tempParticle;
     tempParticle.FLAVOR = gluon;
@@ -2831,8 +2849,8 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.T_creation = tempParticle.T;
     tempParticle.unique_id = ParticleOffline::unique_id_counter_added;
     --ParticleOffline::unique_id_counter_added;
-  tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-  tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
 
   //   if ( sqrt( pow( tempParticle.PX, 2) + pow( tempParticle.PY, 2) ) > 3.0 )
   //   {
@@ -2860,7 +2878,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   double M1, M2;
   double t_hat;
 
-  if( theConfig->doOutput_scatteredMediumParticles() )
+  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
@@ -2902,8 +2920,17 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   addedParticles[jscat].Z_lastInt = addedParticles[jscat].Z;
   addedParticles[jscat].T_lastInt = addedParticles[jscat].T;
 
-  // determine type of scattering, momentum transfer t_hat, new flavor and new masses
-  scatt22_obj.getMomentaAndMasses22( F1, F2, M1, M2, t_hat, typ );
+  if ( theConfig->isIsotropicCrossSection() == false )
+  {
+    // determine type of scattering, momentum transfer t_hat, new flavor and new masses for pQCD cross-sections
+    scatt22_obj.getMomentaAndMasses22( F1, F2, M1, M2, t_hat, typ );
+  }
+  else
+  {
+    // determine type of scattering, momentum transfer t_hat, new flavor and new masses for isotropic processes
+    scatt22_obj.getMomentaAndMasses22_isotropic( F1, F2, M1, M2, t_hat );
+  }
+  
   // translate momemtum transfer t_hat into actual momenta of outgoing particles
   scatt22_obj.setNewMomenta22( P1, P2, R1, R2, t_hat );
 
@@ -2913,7 +2940,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   //<<---------------------------------------------
   // set new properties for added particle
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
-  if ( pt_out1 > pt_out2 && addedParticles[jscat].FLAVOR <= 2 * Particle::max_N_light_flavor )
+  if ( pt_out1 > pt_out2 && !theConfig->isJetTagged() )
   {
     addedParticles[jscat].FLAVOR = F1;
     addedParticles[jscat].m = M1;
@@ -2930,8 +2957,11 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
   }
   else
   {
@@ -2950,8 +2980,11 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
   }
   
   if ( typ == 2240 ) // J/psi + g -> c + cb
@@ -3230,10 +3263,14 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
   FLAVOR_TYPE F1, F2, F3;
   int typ;
 
-  if( theConfig->doOutput_scatteredMediumParticles() )
+  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+  }
+  
+  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+  {
     scatteredMediumParticles.push_back( particles_atTimeNow[jscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
   }
@@ -3312,8 +3349,12 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
     tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
     tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+    {
       addedParticles.push_back( tempParticle );
+      particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+    }
+    
     ParticleOffline tempParticle2 = particles_atTimeNow[jscat];
     tempParticle2.FLAVOR = F2;
     tempParticle2.PX = P2[1];
@@ -3323,8 +3364,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
     tempParticle2.unique_id = particles_atTimeNow[jscat].unique_id;
     tempParticle2.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
     tempParticle2.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-    if( theConfig->isScatt_furtherOfflineParticles() )
-      addedParticles.push_back( tempParticle2 );
+    if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+    {
+      addedParticles.push_back( tempParticle );
+      particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+    }
   }
   else if (( order == 2 ) || ( order == 5 ) )  //132  or  312
   {
@@ -3349,8 +3393,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
       tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
       tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-      if( theConfig->isScatt_furtherOfflineParticles() )
+      if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+      {
         addedParticles.push_back( tempParticle );
+        particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+      }
     }
     else
     {
@@ -3362,6 +3409,20 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       addedParticles[kscat].PY = P2[2];
       addedParticles[kscat].PZ = P2[3];
       addedParticles[kscat].E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+      ParticleOffline tempParticle = particles_atTimeNow[iscat];
+      tempParticle.FLAVOR = F2;
+      tempParticle.PX = P2[1];
+      tempParticle.PY = P2[2];
+      tempParticle.PZ = P2[3];
+      tempParticle.E = sqrt( P2[1] * P2[1] + P2[2] * P2[2] + P2[3] * P2[3] );
+      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id;
+      tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
+      tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
+      if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+      {
+        addedParticles.push_back( tempParticle );
+        particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+      }
     }
   }
   else //if((order == 4) || (order == 6))  //231 or 321
@@ -3386,8 +3447,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       tempParticle.unique_id = particles_atTimeNow[jscat].unique_id;
       tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
       tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-      if( theConfig->isScatt_furtherOfflineParticles() )
+      if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+      {
         addedParticles.push_back( tempParticle );
+        particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+      }
     }
     else
     {
@@ -3408,8 +3472,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       tempParticle.unique_id = particles_atTimeNow[jscat].unique_id;
       tempParticle.N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
       tempParticle.N_EVENT_AA = addedParticles[kscat].N_EVENT_AA;
-      if( theConfig->isScatt_furtherOfflineParticles() )
+      if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+      {
         addedParticles.push_back( tempParticle );
+        particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+      }
     }
   }
 
@@ -3816,7 +3883,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
     
     s = pow(( P1[0] + P2[0] ), 2 ) - pow(( P1[1] + P2[1] ), 2 ) - pow(( P1[2] + P2[2] ), 2 ) - pow(( P1[3] + P2[3] ), 2 );
     
-    xsection_gg_gg csObj( s, md2g_wo_as * coupling::get_constant_coupling(), md2q_wo_as * coupling::get_constant_coupling() );
+    xsection_gg_gg csObj( s, md2g_wo_as * coupling::get_constant_coupling(), md2q_wo_as * coupling::get_constant_coupling(), theConfig->getKlight() );
     csgg = csObj.totalCrossSection();
     lambda = ( dv * rings[nc].getGamma() * testpartcl   ) / ( pow( 0.197, 3.0 ) * _allParticlesList.size() * csgg ) * 0.197; // fm  
   }
@@ -3856,7 +3923,8 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
           scatt22_object.setParameter( P1, P2, F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
                                         theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
                                         theConfig->isConstantCrossSecGQ(),
-                                        theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ() ); // md2g_wo_as, md2q_wo_as are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+                                        theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(),
+                                        theConfig->getKlight() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
           cs22 = scatt22_object.getXSection22();
           probab22 += pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
         }
@@ -4540,8 +4608,8 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
   if(!converged)
   {
     double fraction = lambdaResAvr / lambdaAvr * 100.0; // in %
-//     if( ( fraction < 10.0 || fraction > 1000.0 ) && nTotal > 3 ) // %
-    if( ( fraction < 80.0 || fraction > 120.0 ) && nTotal > 0 ) // %
+    if( ( fraction < 10.0 || fraction > 1000.0 ) && nTotal > 3 ) // %
+//     if( ( fraction < 80.0 || fraction > 120.0 ) && nTotal > 0 ) // %
     {
       cout << "not converged: lambda = " << lambda << " fm   lambdaResAvr = " << fraction << " % of lambdaAvr   nmb in cell: " << nTotal << endl;
 //       cout << lambdaAvr << "\t";

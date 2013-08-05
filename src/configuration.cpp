@@ -66,6 +66,7 @@ config::config() :
  scatt_amongOfflineParticles(false),
  scatt_amongAddedParticles(false),
  scatt_furtherOfflineParticles( false ),
+ jet_tagged( false ),
 // ---- initial state options ----
  initialStateType(miniJetsInitialState),
 #ifdef LHAPDF_FOUND
@@ -275,6 +276,15 @@ void config::processProgramOptions()
   {
     outputScheme = static_cast<OUTPUT_SCHEME>( vm["output.outputScheme"].as<int>() );
   }
+  
+  // check if simulation.jet_tagged is set in input file: if not default value or no value given (latter happens if no input file is given at all)
+  // If it is not set and N_heavy_flavors > 0 and no light flavors, set the property jet_tagged = true.
+  if ( ( vm["simulation.jet_tagged"].defaulted() || vm["simulation.jet_tagged"].empty() ) &&  N_light_flavors_input < 0 &&
+  N_heavy_flavors_input > 0 )
+  {
+    cout << "Only heavy quarks are switched on. Therefore, set jet_tagged = true." << endl; 
+    jet_tagged = true;
+  }
 }
 
 
@@ -296,6 +306,7 @@ void config::initializeProgramOptions()
   ("simulation.scatt_amongOffline", po::value<bool>( &scatt_amongOfflineParticles )->default_value( scatt_amongOfflineParticles ), "whether offline particles are allowed to scatter with other offline particles")
   ("simulation.scatt_amongAdded", po::value<bool>( &scatt_amongAddedParticles )->default_value( scatt_amongAddedParticles ), "whether added particles are allowed to scatter with other added particles")
   ("simulation.scatt_furtherOffline", po::value<bool>( &scatt_furtherOfflineParticles )->default_value( scatt_furtherOfflineParticles ), "whether scattered offline particles are allowed to scatter further with other added particles")
+  ("simulation.jet_tagged", po::value<bool>( &jet_tagged )->default_value( jet_tagged ), "whether the added particles are treated as tagges jets")
   ;
   
   // Group some options related to the initial state
@@ -418,7 +429,7 @@ void config::checkOptionsForSanity()
     throw eConfig_error( errMsg );
   }
   
-  if( ( studyNonPromptJpsiInsteadOfElectrons && outputScheme != cms_hq_nonPromptJpsi ) || ( outputScheme == cms_hq_nonPromptJpsi && !studyNonPromptJpsiInsteadOfElectrons ) )
+  if( ( studyNonPromptJpsiInsteadOfElectrons && ( outputScheme != cms_hq_nonPromptJpsi && outputScheme != alice_hq_nonPromptJpsi ) ) || ( ( outputScheme == cms_hq_nonPromptJpsi || outputScheme == alice_hq_nonPromptJpsi ) && !studyNonPromptJpsiInsteadOfElectrons ) )
   {
     string errMsg = "Study Jpsi instead of electrons but no output for this or vice versa.";
     throw eConfig_error( errMsg );
@@ -434,6 +445,12 @@ void config::checkOptionsForSanity()
   if ( !( vm["misc.fixed_mfp_added"].defaulted() || vm["misc.fixed_mfp_added"].empty() ) && jetMfpComputationSwitch != fixedMfp )
   {
     string errMsg = "Option fixed_mfp_added can only be set if jetMfpComputationSwitch is set to fixedMfp.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if ( N_heavy_flavors_input > 0 && !jet_tagged )
+  {
+    string errMsg = "If heavy quarks are involved, jets must be tagged.";
     throw eConfig_error( errMsg );
   }
 }
@@ -588,6 +605,7 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
     particles_init[i].PZ = (*(ptrInitialParticles->particleVector))[i].PZ;
     particles_init[i].md2g = (*(ptrInitialParticles->particleVector))[i].md2g;
     particles_init[i].md2q = (*(ptrInitialParticles->particleVector))[i].md2q;
+    particles_init[i].isAlreadyInAddedParticles.resize( static_cast< int >( numberOfParticlesToAdd / 2 ), false );
   }
   Particle::unique_id_counter = maxID + 1;
   
