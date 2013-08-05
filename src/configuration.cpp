@@ -66,6 +66,7 @@ config::config() :
  scatt_amongOfflineParticles(false),
  scatt_amongAddedParticles(false),
  scatt_furtherOfflineParticles( false ),
+ jet_tagged( false ),
 // ---- initial state options ----
  initialStateType(miniJetsInitialState),
 #ifdef LHAPDF_FOUND
@@ -113,8 +114,10 @@ config::config() :
  hqCorrelationsOutput(false),
 // ---- miscellaneous options ----
  switch_repeatTimesteps(true),
- jetMfpComputationSwitch(computeMfpDefault),
- interpolationBorder(50),
+ jetMfpComputationSwitch(computeMfpLastTimestep),
+ mfpAddedRangeVariation( 100.0 ),
+ fixed_mfp_added( 1.0 ),
+//  interpolationBorder(50),
  // ---- offline reconstruction options ----
  pathdirOfflineData("offline_data"),
  originalName("default"),
@@ -245,7 +248,7 @@ void config::processProgramOptions()
 
   if ( vm.count("misc.jet_mfp_computation") )
   {
-    if ( vm["misc.jet_mfp_computation"].as<int>() < 3 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
+    if ( vm["misc.jet_mfp_computation"].as<int>() < 5 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
     {
       jetMfpComputationSwitch = static_cast<JET_MFP_COMPUTATION_TYPE>( vm["misc.jet_mfp_computation"].as<int>() );
     }
@@ -273,6 +276,15 @@ void config::processProgramOptions()
   {
     outputScheme = static_cast<OUTPUT_SCHEME>( vm["output.outputScheme"].as<int>() );
   }
+  
+  // check if simulation.jet_tagged is set in input file: if not default value or no value given (latter happens if no input file is given at all)
+  // If it is not set and N_heavy_flavors > 0 and no light flavors, set the property jet_tagged = true.
+  if ( ( vm["simulation.jet_tagged"].defaulted() || vm["simulation.jet_tagged"].empty() ) &&  N_light_flavors_input < 0 &&
+  N_heavy_flavors_input > 0 )
+  {
+    cout << "Only heavy quarks are switched on. Therefore, set jet_tagged = true." << endl; 
+    jet_tagged = true;
+  }
 }
 
 
@@ -294,6 +306,7 @@ void config::initializeProgramOptions()
   ("simulation.scatt_amongOffline", po::value<bool>( &scatt_amongOfflineParticles )->default_value( scatt_amongOfflineParticles ), "whether offline particles are allowed to scatter with other offline particles")
   ("simulation.scatt_amongAdded", po::value<bool>( &scatt_amongAddedParticles )->default_value( scatt_amongAddedParticles ), "whether added particles are allowed to scatter with other added particles")
   ("simulation.scatt_furtherOffline", po::value<bool>( &scatt_furtherOfflineParticles )->default_value( scatt_furtherOfflineParticles ), "whether scattered offline particles are allowed to scatter further with other added particles")
+  ("simulation.jet_tagged", po::value<bool>( &jet_tagged )->default_value( jet_tagged ), "whether the added particles are treated as tagges jets")
   ;
   
   // Group some options related to the initial state
@@ -351,9 +364,12 @@ void config::initializeProgramOptions()
   // Add some miscellaneous options
   misc_options.add_options()
   ("misc.repeat_timesteps", po::value<bool>( &switch_repeatTimesteps )->default_value( switch_repeatTimesteps ), "repeat timesteps in cases where the probability has been > 1" ) 
-  ("misc.interpolation_border", po::value<double>( &interpolationBorder )->default_value( interpolationBorder ), "X where interpolation of MFP is done for E > X*T")
-  ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "special treatment for the mean free path of high energy particles")
+//   ("misc.interpolation_border", po::value<double>( &interpolationBorder )->default_value( interpolationBorder ), "X where interpolation of MFP is done for E > X*T")
+  ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "treatment for the mean free path of added particles ( 0 = computeMfpLastTimestep, 1 = computeMfpIteration, 2 = computeMfpInterpolation, 3 = fixedMfp, 4 = thermalMfpGluon)")
+  ("misc.fixed_mfp_added", po::value<double>( &fixed_mfp_added )->default_value( fixed_mfp_added ), "Mean free path of added particles set by hand. Does not depend on energy of particle" )
+  ("misc.mfpAddedRangeVariation", po::value<double>( &mfpAddedRangeVariation )->default_value( mfpAddedRangeVariation ), "Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be" )
   ;
+
   
   // Group offline reconstruction options
   offline_options.add_options()
@@ -424,6 +440,19 @@ void config::checkOptionsForSanity()
     string errMsg = "Only Jpsi in initial state, but N_psi_states = 0.";
     throw eConfig_error( errMsg );
   }
+  
+    // check if misc.fixed_mfp_added is set in input file: if not default value or no value given (latter happens if no input file is given at all)
+  if ( !( vm["misc.fixed_mfp_added"].defaulted() || vm["misc.fixed_mfp_added"].empty() ) && jetMfpComputationSwitch != fixedMfp )
+  {
+    string errMsg = "Option fixed_mfp_added can only be set if jetMfpComputationSwitch is set to fixedMfp.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if ( N_heavy_flavors_input > 0 && !jet_tagged )
+  {
+    string errMsg = "If heavy quarks are involved, jets must be tagged.";
+    throw eConfig_error( errMsg );
+  }
 }
 
 void config::processHeavyQuarkOptions()
@@ -481,6 +510,7 @@ void config::printUsedConfigurationParameters()
   printOptionsDescriptionToIniFormat( simulation_parameters, output );
   printOptionsDescriptionToIniFormat( initial_state_options, output );
   printOptionsDescriptionToIniFormat( output_options, output );
+  printOptionsDescriptionToIniFormat( parameters23, output );
   printOptionsDescriptionToIniFormat( misc_options, output );
   if( Particle::N_heavy_flavor > 0 )
     printOptionsDescriptionToIniFormat( heavy_quark_options, output );

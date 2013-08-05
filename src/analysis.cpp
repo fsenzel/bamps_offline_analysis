@@ -682,7 +682,6 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
       break;
-      
     case background_jets:
       studyScatteredMediumParticles = true;
       break;
@@ -1650,9 +1649,17 @@ void analysis::computeV2RAA( string name, const double _outputTime )
 {
   v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
   
+  const double pt_min_v2RAA = theConfig->getMinimumPT();
+  const double pt_max_v2RAA = 55.0;
+  double nbins_v2RAA = 67; // good for pt_min = 0
+  if( FPT_COMP_GE( pt_min_v2RAA, 6.0 ) )
+    nbins_v2RAA = 25;
+  else if( FPT_COMP_GE( pt_min_v2RAA, 3.0 ) )
+    nbins_v2RAA = 34;
+  
   if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() )
   {
-    theV2RAA.setPtBinProperties( 0.0, 30.0, 60 );
+    theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
     
     theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     if( mesonDecay )
@@ -1660,7 +1667,7 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   }
   if( studyHQ || studyJpsi )
   {
-    theV2RAA.setPtBinProperties( 0.0, 30.0, 60 );
+    theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
     
     theV2RAA.computeFor( charm, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
@@ -1704,6 +1711,8 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   }
   else
   {
+    theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
+    
     theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
     theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
     theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
