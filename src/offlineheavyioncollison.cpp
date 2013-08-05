@@ -109,17 +109,17 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
   {
     if( theConfig->getNlightFlavorsAdded() >= 0 )
     {
-      theI23_massless.configure( theConfig->I23onlineIntegrationIsSet(), 1, 0.0, theConfig->getKappa23LightPartons(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode() );
+      theI23_massless.configure( theConfig->I23onlineIntegrationIsSet(), 1, 0.0, theConfig->getKappa23LightPartons(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
     }
     if( Particle::N_heavy_flavor > 0 )
     {
-      theI23_charm_m1.configure( theConfig->I23onlineIntegrationIsSet(), 1, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode() );
-      theI23_charm_m2.configure( theConfig->I23onlineIntegrationIsSet(), 2, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode() );
+      theI23_charm_m1.configure( theConfig->I23onlineIntegrationIsSet(), 1, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
+      theI23_charm_m2.configure( theConfig->I23onlineIntegrationIsSet(), 2, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
     }
     if( Particle::N_heavy_flavor > 1 )
     {
-      theI23_bottom_m1.configure( theConfig->I23onlineIntegrationIsSet(), 1, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode() );
-      theI23_bottom_m2.configure( theConfig->I23onlineIntegrationIsSet(), 2, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode() );
+      theI23_bottom_m1.configure( theConfig->I23onlineIntegrationIsSet(), 1, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
+      theI23_bottom_m2.configure( theConfig->I23onlineIntegrationIsSet(), 2, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
       
     }
     
@@ -2278,7 +2278,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
   double lambda_scaled;
   double ran2out;
   double betaDistEntry;
-  int order = -1;
+  int absorbedGluon = -1;
 
   //n32=0;
 
@@ -2443,7 +2443,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
         double vy = rings[ringIndex].getAveraged_v_y();
         double vz = rings[ringIndex].getAveraged_v_z();
 
-        betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, as, _gluonList.size() );
+        betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, as, theConfig->isMd2CounterTermInI23(), theConfig->isMatrixElement23_22qt(), _gluonList.size() );  // create scattering32 object for the given 3 particles
         I32 = scatt32_object.getIntegral32_withPrefactors();                        // get the integral I32 for the given 3 particles
 
         probab32 = scaleForSelectedTriplets * I32 * dt / ( pow( dv, 2 ) * pow( static_cast<double>( testpartcl ), 2 ) );
@@ -2471,9 +2471,9 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
           jetEventIndex = theAnalysis->addJetEvent_in( iscat, jscat, kscat, c3to2, I32, _cell.index, lambda_scaled / sqrt( s ) );
         }
 
-        order = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, nexttime );
+        absorbedGluon = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, nexttime );
 
-        if ( order == 4 || order == 6 )
+        if ( absorbedGluon == 1 )
         {
           pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
           pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
@@ -2482,7 +2482,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
             theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
           }
         }
-        else if ( order == 2 || order == 5 )
+        else if ( absorbedGluon == 2 )
         {
           pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
           pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
@@ -2491,7 +2491,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
             theAnalysis->addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
           }
         }
-        else if ( order == 1 || order == 3 )
+        else if ( absorbedGluon == 3 )
         {
           pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
           pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
@@ -2603,7 +2603,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
             double vy = rings[ringIndex].getAveraged_v_y();
             double vz = rings[ringIndex].getAveraged_v_z();
 
-            betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, as, _gluonList.size() );
+            betaDistEntry = scatt32_object.setParameter( vx, vy, vz, P1, P2, P3, F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, as, theConfig->isMd2CounterTermInI23(), theConfig->isMatrixElement23_22qt(), _gluonList.size() );  // create scattering32 object for the given 3 particles
             I32 = scatt32_object.getIntegral32_withPrefactors();                        // get the integral I32 for the given 3 particles
 
             probab32 = I32 * dt / ( pow( dv, 2 ) * pow( static_cast<double>( testpartcl ), 2 ) ); 
@@ -2631,9 +2631,9 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
               jetEventIndex = theAnalysis->addJetEvent_in( iscat, jscat, kscat, c3to2, I32, _cell.index, lambda_scaled / sqrt( s ) );
             }
 
-            order = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, nexttime );
+            absorbedGluon = scatt32_offlineWithAddedParticles_utility( scatt32_object, _cellAdded.particleList, _allParticlesListAdded, _gluonListAdded, iscat, jscat, kscat, n32, nexttime );
 
-            if ( order == 4 || order == 6 )
+            if ( absorbedGluon == 1 )
             {
               pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
               pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
@@ -2642,7 +2642,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
                 theAnalysis->addJetEvent_out( jetEventIndex, kscat, jscat, -1, c3to2 );
               }
             }
-            else if ( order == 2 || order == 5 )
+            else if ( absorbedGluon == 2 )
             {
               pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
               pt_kscat = sqrt( pow( addedParticles[kscat].PX, 2.0 ) + pow( addedParticles[kscat].PY, 2.0 ) );
@@ -2651,7 +2651,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
                 theAnalysis->addJetEvent_out( jetEventIndex, kscat, iscat, -1, c3to2 );
               }
             }
-            else if ( order == 1 || order == 3 )
+            else if ( absorbedGluon == 3 )
             {
               pt_iscat = sqrt( pow( particles_atTimeNow[iscat].PX, 2.0 ) + pow( particles_atTimeNow[iscat].PY, 2.0 ) );
               pt_jscat = sqrt( pow( particles_atTimeNow[jscat].PX, 2.0 ) + pow( particles_atTimeNow[jscat].PY, 2.0 ) );
@@ -3259,7 +3259,6 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
 {
   double P1[4], P2[4], P3[4], R1[4], R2[4], R3[4];
   double Tmax, TT, u, phi, cc;
-  int order;
   FLAVOR_TYPE F1, F2, F3;
   int typ;
 
@@ -3312,15 +3311,14 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
   addedParticles[kscat].Y = R3[2] + P3[2] * cc;
   addedParticles[kscat].Z = R3[3] + P3[3] * cc;
 
-  nGet32Errors += scatt32_obj.getMomenta32( u, phi, typ, F1, F2 );
+  int absorbedGluon = scatt32_obj.getMomenta32( u, phi, typ, F1, F2 );
 
   scatt32_obj.setNewMomenta32( P1, P2, u, phi );
-  order = scatt32_obj.getOrder();
 
   double pt_out1 = sqrt( pow( P1[1], 2 ) + pow( P1[2], 2 ) );
   double pt_out2 = sqrt( pow( P2[1], 2 ) + pow( P2[2], 2 ) );
 
-  if (( order == 1 ) || ( order == 3 ) )   //123  or  213
+  if ( absorbedGluon == 3 )
   {
 //       TODO:// add absorbed gluon to annihilated particle list
 //       if ( theConfig->doOutput_scatteredMediumParticles() )
@@ -3370,7 +3368,7 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
     }
   }
-  else if (( order == 2 ) || ( order == 5 ) )  //132  or  312
+  else if ( absorbedGluon == 2 ) 
   {
     if ( pt_out1 > pt_out2 )
     {
@@ -3425,7 +3423,7 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       }
     }
   }
-  else //if((order == 4) || (order == 6))  //231 or 321
+  else // ( absorbedGluon == 1 ) 
   {
     if ( pt_out1 > pt_out2 )
     {
@@ -3480,7 +3478,7 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
     }
   }
 
-  return order;
+  return absorbedGluon;
 }
 
 
@@ -3969,7 +3967,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
                         theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
                         theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
                         theConfig->I23onlineIntegrationIsSet(),
-                        theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), _gluonList.size() );    
+                        theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), _gluonList.size(), theConfig->isMatrixElement23_22qt() );    
             cs23 = scatt23_object.getXSection23( initialStateIndex ); //1/GeV^2
 
             probab23 += pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
@@ -4342,7 +4340,7 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
                         theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
                         theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
                         theConfig->I23onlineIntegrationIsSet(),
-                        theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), _gluonList.size() );    
+                        theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), _gluonList.size(), theConfig->isMatrixElement23_22qt() );    
             cs23 = scatt23_object.getXSection23( initialStateIndex ); //1/GeV^2
 
             probab23 += pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
