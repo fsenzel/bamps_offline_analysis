@@ -415,7 +415,7 @@ void config::checkOptionsForSanity()
     throw eConfig_error( errMsg );
   }
   
-  if( ( studyNonPromptJpsiInsteadOfElectrons && outputScheme != cms_hq_nonPromptJpsi ) || ( outputScheme == cms_hq_nonPromptJpsi && !studyNonPromptJpsiInsteadOfElectrons ) )
+  if( ( studyNonPromptJpsiInsteadOfElectrons && ( outputScheme != cms_hq_nonPromptJpsi && outputScheme != alice_hq_nonPromptJpsi ) ) || ( ( outputScheme == cms_hq_nonPromptJpsi || outputScheme == alice_hq_nonPromptJpsi ) && !studyNonPromptJpsiInsteadOfElectrons ) )
   {
     string errMsg = "Study Jpsi instead of electrons but no output for this or vice versa.";
     throw eConfig_error( errMsg );
