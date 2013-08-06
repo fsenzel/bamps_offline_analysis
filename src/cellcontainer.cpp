@@ -25,10 +25,10 @@ cellContainer::cellContainer() :
     alpha_s_23( 0 ),
     sigma_22( 0 ),
     sigma_23( 0 ),
-    md2g_scaled_22( 0 ),
-    md2q_scaled_22( 0 ),
-    md2g_scaled_23( 0 ),
-    md2q_scaled_23( 0 ),
+    md2g_wo_as_scaled_22( 0 ),
+    md2q_wo_as_scaled_22( 0 ),
+    md2g_wo_as_scaled_23( 0 ),
+    md2q_wo_as_scaled_23( 0 ),
     lambdaScaled( 0 ),
     averagesPrepared( 0 )
 {
@@ -50,10 +50,10 @@ void cellContainer::clear()
   alpha_s_23 = 0;
   sigma_22 = 0;
   sigma_23 = 0;
-  md2g_scaled_22 = 0;
-  md2q_scaled_22 = 0;
-  md2g_scaled_23 = 0;
-  md2q_scaled_23 = 0;
+  md2g_wo_as_scaled_22 = 0;
+  md2q_wo_as_scaled_22 = 0;
+  md2g_wo_as_scaled_23 = 0;
+  md2q_wo_as_scaled_23 = 0;
   lambdaScaled = 0;
   averagesPrepared = false;
 }
@@ -68,10 +68,10 @@ void cellContainer::resetStoredValues()
   alpha_s_23 = 0;
   sigma_22 = 0;
   sigma_23 = 0;
-  md2g_scaled_22 = 0;
-  md2q_scaled_22 = 0;
-  md2g_scaled_23 = 0;
-  md2q_scaled_23 = 0;
+  md2g_wo_as_scaled_22 = 0;
+  md2q_wo_as_scaled_22 = 0;
+  md2g_wo_as_scaled_23 = 0;
+  md2q_wo_as_scaled_23 = 0;
   lambdaScaled = 0;
   rates.clear();
   averagesPrepared = false;
@@ -113,28 +113,28 @@ void cellContainer::prepareAverages()
 
     if ( nCollected22 > 0 )
     {
-      md2g_scaled_22 /= static_cast<double>( nCollected22 );
-      md2q_scaled_22 /= static_cast<double>( nCollected22 );
+      md2g_wo_as_scaled_22 /= static_cast<double>( nCollected22 );
+      md2q_wo_as_scaled_22 /= static_cast<double>( nCollected22 );
       alpha_s_22 /= static_cast<double>( nCollected22 );
     }
     else
     {
-      md2g_scaled_22 = 0;
-      md2q_scaled_22 = 0;
+      md2g_wo_as_scaled_22 = 0;
+      md2q_wo_as_scaled_22 = 0;
       alpha_s_22 = 0;
     }
 
     if ( nCollected23 > 0 )
     {
-      md2g_scaled_23 /= static_cast<double>( nCollected23 );
-      md2q_scaled_23 /= static_cast<double>( nCollected23 );
+      md2g_wo_as_scaled_23 /= static_cast<double>( nCollected23 );
+      md2q_wo_as_scaled_23 /= static_cast<double>( nCollected23 );
       alpha_s_23 /= static_cast<double>( nCollected23 );
       lambdaScaled /= static_cast<double>( nCollected23 );
     }
     else
     {
-      md2g_scaled_23 = 0;
-      md2q_scaled_23 = 0;
+      md2g_wo_as_scaled_23 = 0;
+      md2q_wo_as_scaled_23 = 0;
       alpha_s_23 = 0;
       lambdaScaled = 0;
     }
@@ -158,10 +158,10 @@ void cellContainer::writeAveragesToParticle( ParticleOffline& _particle ) const
   
 //   _particle.cs22 = sigma_22;               //1/GeV^2
 //   _particle.cs23 = sigma_23;               //1/GeV^2
-//   _particle.md2g_scaled_22 = md2g_scaled_22;
-//   _particle.md2q_scaled_22 = md2q_scaled_22;
-//   _particle.md2g_scaled_23 = md2g_scaled_23;
-  _particle.md2q_scaled_23 = md2q_scaled_23;
+//   _particle.md2g_wo_as_scaled_22 = md2g_wo_as_scaled_22;
+//   _particle.md2q_wo_as_scaled_22 = md2q_wo_as_scaled_22;
+//   _particle.md2g_wo_as_scaled_23 = md2g_wo_as_scaled_23;
+//   _particle.md2q_wo_as_scaled_23 = md2q_wo_as_scaled_23;
 //   _particle.as22 = alpha_s_22;
 //   _particle.as23 = alpha_s_23;
 //   _particle.lambda_scaled = lambdaScaled;

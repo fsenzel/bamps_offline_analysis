@@ -37,8 +37,8 @@ enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialSt
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
 
-/** @brief Enumeration type for different variants of computing the mean free path of high-pt particles */
-enum JET_MFP_COMPUTATION_TYPE { computeMfpDefault, computeMfpIteration, computeMfpInterpolation };
+/** @brief Enumeration type for different variants of computing the mean free path of added particles */
+enum JET_MFP_COMPUTATION_TYPE { computeMfpLastTimestep, computeMfpIteration, computeMfpInterpolation, fixedMfp, thermalMfpGluon };
 
 /** @brief Enumeration type for different output schemes to decide which kind of output is printed 
  * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
@@ -143,6 +143,9 @@ class config : public configBase
   
   /** @brief Interface for config::N_heavy_flavors_input */
   int getNheavyFlavorsAdded() const {return N_heavy_flavors_input;}
+  
+  /** @brief Interface for config::jet_tagged */
+  bool isJetTagged() const {return jet_tagged;}
   /** ------------------------------- */
 
   /** ---- initial state options ---- */ 
@@ -270,12 +273,18 @@ class config : public configBase
 
   /** -------- miscellaneous options ------- */ 
   bool repeatTimesteps() const { return switch_repeatTimesteps; }
-  
-  /** @brief Interface for config::interpolationBorder */
-  double getMFPInterpolationBorder() const {return interpolationBorder;}
-  
+
   /** @brief Interface for config::jetMfpComputationSwitch */
   JET_MFP_COMPUTATION_TYPE getJetMfpComputationType() const {return jetMfpComputationSwitch;}
+  
+  /** @brief Interface for config::mfpAddedRangeVariation */
+  double getMfpAddedRangeVariation() const {return mfpAddedRangeVariation;}
+  
+  /** @brief Interface for config::mfp_added */
+  double getFixedMfpAdded() const {return fixed_mfp_added;}
+  
+//   /** @brief Interface for config::interpolationBorder */
+//   double getMFPInterpolationBorder() const {return interpolationBorder;}
   /** ------------------------------------ */
   
   /** -------- offline reconstruction options ------- */ 
@@ -417,6 +426,9 @@ class config : public configBase
   
   /** @brief Whether added particles are allowed to scatter with other added particles */
   bool scatt_amongAddedParticles;
+  
+  /** @brief Whether the added particles are treated as tagges jets */
+  bool jet_tagged;
   /** ------------------------------- */
 
   /** @brief Whether scattered offline particles are allowed to scatter again with other added particles */
@@ -579,18 +591,27 @@ class config : public configBase
   
   /** -------- miscellaneous options ------- */ 
   // provided by base class:
-  // bool localCluster
-  
-  /** @brief X where interpolation of MFP is done for E > X*T */
-  double interpolationBorder; 
-   
+
   /** @brief How to compute the mean free path high energy particles?
    *
-   * 0 = computeMfpDefault = default, i.e. no special treatment
-   * 1 = computeMfpIteration = iterative computation
-   * 2 = computeMfpInterpolation = use tabulated mfp data and interpolation functions
+   * 0 = computeMfpLastTimestep = use mean free path from last time step if available
+   * 1 = computeMfpIteration = iterative computation every time step for every jet
+   * 2 = computeMfpInterpolation = interpolate mean free path from tables
+   * 3 = fixedMfp = set fixed mean free path by hand
+   * 4 = thermalMfpGluon = set mean free path of emitted gluon which is assumed to be thermal
    */
   JET_MFP_COMPUTATION_TYPE jetMfpComputationSwitch;
+  
+  /** @brief Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be. 
+   * For new value the region [oldvalue * (1 - mfpAddedRangeVariation/100) , oldvalue * (1 + mfpAddedRangeVariation/100) ] is tested. Used in iterate_mfp_bisection(),  
+   */
+  double mfpAddedRangeVariation;
+
+  /** @brief Fixed mean free path which is used if jetMfpComputationSwitch == fixedMfp.  */
+  double fixed_mfp_added; // fm
+  
+//   /** @brief X where interpolation of MFP is done for E > X*T */
+//   double interpolationBorder; 
   
   /** @brief Whether timesteps are repeated in cases where the probability has been > 1 */
   bool switch_repeatTimesteps;
