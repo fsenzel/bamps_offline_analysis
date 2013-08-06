@@ -411,6 +411,7 @@ class config : public configBase
   // int testparticles
   // int N_light_flavors_input
   // int N_heavy_flavors_input
+  // bool couplingRunning
   
   /** @brief Energy density for freeze out (in GeV/fm^3)
    * Particles in regions with energy densities below this threshold will be freely streaming
@@ -521,12 +522,14 @@ class config : public configBase
   //   double KggQQbar
   //   double KgQgQ
   //   double kappa_gQgQ
-  //   bool couplingRunning
   //   bool isotropicCrossSecGQ
   //   bool constantCrossSecGQ
   //   double constantCrossSecValueGQ
   //   double Mcharm_input
   //   double Mbottom_input
+  
+  /** @brief Whether a running coupling is employed for heavy quark processes. Do not use here. Instead set running coupling also for light particles under misc. This option here is only to be compatible with older inputfiles and does nothing else to set the coupling globally. */
+  bool couplingRunningHeavyQuarksInput;
   
   // hadronization of open heavy flavor
   /** @brief Whether hadronization of heavy quarks to D and B mesons is carried out */
