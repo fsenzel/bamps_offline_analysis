@@ -29,6 +29,7 @@
 #include "scattering22.h"
 #include "scattering32.h"
 #include "offlineoutput.h"
+#include "mfpforheavyioncollision.h"
 
 
 class offlineHeavyIonCollision
@@ -53,13 +54,37 @@ private:
   offlineOutputInterface* offlineInterface;
   
   config * const theConfig;
-
+  
   analysis* const theAnalysis;
 
-  interpolation23 theI23;
+  /** @brief  interpolation23 object that provides access to tabulated values for the cross section of all 2->3 processes with running coupling */
+  interpolation23 theI23_massless;
+  interpolation23 theI23_charm_m1;
+  interpolation23 theI23_charm_m2;
+  interpolation23 theI23_bottom_m1;
+  interpolation23 theI23_bottom_m2;
   
   /** @brief  interpolation22 object that provides access to tabulated values for the cross section of all 2->2 processes with running coupling */
   interpolation22 theI22;
+  
+  /** 
+   * @brief Accumulated number of sampling errors in
+   * scattering23::getMomenta23
+   *
+   * Can give hints on the validity of the envelope function. Should
+   * be "small".
+   */
+  int nGet23Errors;
+
+  /** 
+   * @brief Accumulated number of sampling errors in
+   * scattering32::getMomenta32
+   *
+   * Only needed for rejection sampling, 0 for Metropolis sampling per
+   * construction. For rejection sampling: can give hints on the
+   * validity of the envelope function. Should be "small". 
+   */
+  int nGet32Errors;
 
   //--parameters taken from config--------------------------------------------
   double stop;       //total simulated runtime in fm/c
@@ -111,10 +136,22 @@ private:
   void jpsi_dissociation_td( const double time );
 
   double iterateMFP( std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, const int jetID, const double dt, const double dv );
+  double iterate_mfp_bisection( std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, const int jetID, const double dt, const double dv, const double lambda_old );
+  
+  /** 
+   * @brief A pointer to a \p mfpForHeavyIonCollision object that
+   * provides interpolated mean free path data for added particles
+   *
+   * This is only needed when \sa config::jetMfpComputationSwitch is set
+   * to \sa JET_MFP_COMPUTATION_TYPE::computeMfpInterpolation or JET_MFP_COMPUTATION_TYPE::thermalMfpGluon. 
+   */
+  mfpForHeavyIonCollision theMFP;
   
   void removeDeadParticles();
   
   int binomial( const int N, const int k ) const;
+  
+  double addVelocities( const double vx_1, const double vy_1, const double vz_1, const double vx_2, const double vy_2, const double vz_2 );
 };
 
 
