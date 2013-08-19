@@ -2877,6 +2877,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   double Tmax, TT, cc, t;
   double M1, M2;
   double t_hat;
+  bool identical_particle_position_flipped = false; // is only important if jet is tagged and if both particles are identical
 
   if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
   {
@@ -2933,6 +2934,14 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   
   // translate momemtum transfer t_hat into actual momenta of outgoing particles
   scatt22_obj.setNewMomenta22( P1, P2, R1, R2, t_hat );
+  
+  // if tagged jet and identical particles, and large momentum transfer, the u channel is active which flips both particles. Since this is only an effect for identical particles and we cannot distinguish them anyhow, we take the particle which is going in the same direction as the incoming added particle. So for large t_hat we have to choose the other outgoing particle.
+  if( theConfig->isJetTagged() && F1 == F2 )
+  {
+    double s = pow(( P1[0] + P2[0] ), 2 ) - pow(( P1[1] + P2[1] ), 2 ) - pow(( P1[2] + P2[2] ), 2 ) - pow(( P1[3] + P2[3] ), 2 );
+    if( fabs( t_hat ) > s / 2.0 )
+      identical_particle_position_flipped = true;
+  }
 
   double pt_out1 = sqrt( pow( P1[1], 2 ) + pow( P1[2], 2 ) );
   double pt_out2 = sqrt( pow( P2[1], 2 ) + pow( P2[2], 2 ) );
@@ -2940,7 +2949,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   //<<---------------------------------------------
   // set new properties for added particle
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
-  if ( pt_out1 > pt_out2 && !theConfig->isJetTagged() )
+  if ( ( pt_out1 > pt_out2 && !theConfig->isJetTagged() ) || ( theConfig->isJetTagged() && identical_particle_position_flipped ) )
   {
     addedParticles[jscat].FLAVOR = F1;
     addedParticles[jscat].m = M1;
