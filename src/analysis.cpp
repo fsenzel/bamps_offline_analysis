@@ -1876,9 +1876,11 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       mother_flav = addedParticlesCopy[mother_id].FLAVOR;
     }
 
-    if( ( pt <= _pt_max && pt > _pt_min ) &&  
-        ( ( _flavTypeToComputeFor == flavor ) || 
-          ( _flavTypeToComputeFor == ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) ) ) ||
+    FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) );
+    
+    if( ( _flavTypeToComputeFor == flavor ) || 
+          ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) ||
+          ( _flavTypeToComputeFor == genFlavor ) ||
           ( _flavTypeToComputeFor == charm && ( flavor == anti_charm ) ) ||
           ( _flavTypeToComputeFor == bottom && ( flavor == anti_bottom ) ) ||
           ( _flavTypeToComputeFor == heavy_quark && ( flavor == charm || flavor == bottom || flavor == anti_charm || flavor == anti_bottom ) ) ||
@@ -1886,8 +1888,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
           ( _flavTypeToComputeFor == b_electron && ( ( flavor == electron || flavor == positron ) && ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( mother_flav ) ) == bmeson_gen ) ) ||
           ( _flavTypeToComputeFor == jpsi_ini && ( flavor == jpsi && _particles[i].initially_produced ) ) ||
           ( _flavTypeToComputeFor == jpsi_sec && ( flavor == jpsi && !_particles[i].initially_produced ) )
-        ) 
-      )
+      ) 
     {
       // individually check for each rapidity range whether this particle needs to be binned
       for ( int yRangeIndex = 0; yRangeIndex < eta_bins; yRangeIndex++ )
@@ -1897,10 +1898,13 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
           v2sum[yRangeIndex] += v2;
           NmbInRange[yRangeIndex]++;
 
-          dummy = int(( log( pt ) - log( _pt_min ) ) / d_ln_pt );
-          ptBinsV2[yRangeIndex][dummy] += v2;
-          ptBinsNmb[yRangeIndex][dummy]++;
-          ptBinsAngleDep[yRangeIndex][alphaIndex][dummy]++;
+          if ( pt <= _pt_max && pt > _pt_min )
+          {
+            dummy = int(( log( pt ) - log( _pt_min ) ) / d_ln_pt );
+            ptBinsV2[yRangeIndex][dummy] += v2;
+            ptBinsNmb[yRangeIndex][dummy]++;
+            ptBinsAngleDep[yRangeIndex][alphaIndex][dummy]++;
+          }  
         }
       }
     }
@@ -2443,7 +2447,9 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
     Et = sqrt( pow( _particles[j].PX, 2) + pow( _particles[j].PY, 2) );
     y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
     
-    if ( ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR ) == _flavTypeToComputeFor )
+    FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
+    if ( (  genFlavor == _flavTypeToComputeFor ) ||
+      ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
       if ( y <= maxY && y >= minY)
       {

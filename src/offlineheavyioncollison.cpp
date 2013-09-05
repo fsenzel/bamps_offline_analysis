@@ -2047,7 +2047,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
             p23_collected_gluon += probab23;
             lambdaJet_gluon += lambda_scaled;
           }
-          else if ( ParticleOffline::mapToGenericFlavorType( F2 ) == light_quark )
+          else if ( ParticleOffline::mapToGenericFlavorType( F2 ) == light_quark || ParticleOffline::mapToGenericFlavorType( F2 ) == anti_light_quark )
           {
             ++n23_collected_quark;
             p23_collected_quark += probab23;
