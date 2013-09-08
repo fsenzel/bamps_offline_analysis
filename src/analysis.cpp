@@ -2777,6 +2777,33 @@ void analysis::particleOutput( const int step )
     << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep << addedParticles[i].N_EVENT_pp << endl;
   }
   file.close();
+  
+  // if heavy quarks fragment to D mesons write also the D mesons to file
+  if( theConfig->isHadronizationHQ() )
+  {
+    //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+    string filename_meson = filename_prefix + "_" + name + "_meson.f1";
+    fstream file_meson( filename_meson.c_str(), ios::out | ios::trunc );
+
+    //---- print header if file is empty ----
+    time_t end;
+    time( &end );
+
+    file_meson.seekp( 0, ios::end );
+    long size = file_meson.tellp();
+    file_meson.seekp( 0, ios::beg );
+    if ( size == 0 )
+      printHeader( file_meson, all, end );
+    //---------------------------------------
+
+    for ( int i = 0; i < addedParticlesCopy.size(); i++ )
+    {
+      file_meson << i << sep << addedParticlesCopy[i].unique_id << sep << addedParticlesCopy[i].cell_id << sep << addedParticlesCopy[i].FLAVOR << sep << addedParticlesCopy[i].T << sep << addedParticlesCopy[i].X << sep
+      << addedParticlesCopy[i].Y << sep  << addedParticlesCopy[i].Z << sep << addedParticlesCopy[i].E << sep << addedParticlesCopy[i].PX << sep << addedParticlesCopy[i].PY << sep
+      << addedParticlesCopy[i].PZ << sep << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].md2q << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
+    }
+    file_meson.close();
+  }
 }
 
 
