@@ -2878,6 +2878,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   double M1, M2;
   double t_hat;
   bool identical_particle_position_flipped = false; // is only important if jet is tagged and if both particles are identical
+  bool qqbar_position_flipped = false; // is only important if jet is tagged and if outgoing particle is quark and anti-quark. Then use not always the second particle, which is the anti-quark, but randomize.
 
   if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
   {
@@ -2942,6 +2943,13 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     if( fabs( t_hat ) > s / 2.0 )
       identical_particle_position_flipped = true;
   }
+  
+  // if tagged jet and the outgoing particles are newly produced quark and anti-quarks (from gg->qqbar or qqbar->q'qbar' with typ 222 and 225, respectively) do not consider always the second particle, which is the anti-quark, but randomize
+  if( theConfig->isJetTagged() && ( typ == 222 || typ == 225 ) )
+  {
+    if( ran2() < 0.5 )
+      qqbar_position_flipped = true;
+  }
 
   double pt_out1 = sqrt( pow( P1[1], 2 ) + pow( P1[2], 2 ) );
   double pt_out2 = sqrt( pow( P2[1], 2 ) + pow( P2[2], 2 ) );
@@ -2949,7 +2957,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   //<<---------------------------------------------
   // set new properties for added particle
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
-  if ( ( pt_out1 > pt_out2 && !theConfig->isJetTagged() ) || ( theConfig->isJetTagged() && identical_particle_position_flipped ) )
+  if ( ( pt_out1 > pt_out2 && !theConfig->isJetTagged() ) || ( theConfig->isJetTagged() && ( identical_particle_position_flipped || qqbar_position_flipped ) ) )
   {
     addedParticles[jscat].FLAVOR = F1;
     addedParticles[jscat].m = M1;
