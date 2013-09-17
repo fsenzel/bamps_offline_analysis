@@ -2774,7 +2774,8 @@ void analysis::particleOutput( const int step )
   {
     file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep << addedParticles[i].T << sep << addedParticles[i].X << sep
     << addedParticles[i].Y << sep  << addedParticles[i].Z << sep << addedParticles[i].E << sep << addedParticles[i].PX << sep << addedParticles[i].PY << sep
-    << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep << addedParticles[i].N_EVENT_pp << endl;
+//     << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep << addedParticles[i].N_EVENT_pp << endl;
+    << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].X_traveled << sep << addedParticles[i].N_EVENT_pp << endl;
   }
   file.close();
   
@@ -2800,7 +2801,8 @@ void analysis::particleOutput( const int step )
     {
       file_meson << i << sep << addedParticlesCopy[i].unique_id << sep << addedParticlesCopy[i].cell_id << sep << addedParticlesCopy[i].FLAVOR << sep << addedParticlesCopy[i].T << sep << addedParticlesCopy[i].X << sep
       << addedParticlesCopy[i].Y << sep  << addedParticlesCopy[i].Z << sep << addedParticlesCopy[i].E << sep << addedParticlesCopy[i].PX << sep << addedParticlesCopy[i].PY << sep
-      << addedParticlesCopy[i].PZ << sep << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].md2q << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
+//       << addedParticlesCopy[i].PZ << sep << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].md2q << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
+      << addedParticlesCopy[i].PZ << sep << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].X_traveled << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
     }
     file_meson.close();
   }
