@@ -2150,6 +2150,8 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
     addedParticles[iscat].X = addedParticles[iscat].X + addedParticles[iscat].PX * cc;
     addedParticles[iscat].Y = addedParticles[iscat].Y + addedParticles[iscat].PY * cc;
     addedParticles[iscat].Z = addedParticles[iscat].Z + addedParticles[iscat].PZ * cc;
+    
+    addedParticles[iscat].X_traveled += sqrt( pow( addedParticles[iscat].PX * cc, 2.0 ) + pow( addedParticles[iscat].PY * cc, 2.0 ) + pow( addedParticles[iscat].PZ * cc, 2.0 ) );
   }
 }
 
@@ -2862,6 +2864,8 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       addedParticles[newIndex].X = addedParticles[newIndex].X + addedParticles[newIndex].PX * cc;
       addedParticles[newIndex].Y = addedParticles[newIndex].Y + addedParticles[newIndex].PY * cc;
       addedParticles[newIndex].Z = addedParticles[newIndex].Z + addedParticles[newIndex].PZ * cc;
+      
+      addedParticles[newIndex].X_traveled += sqrt( pow( addedParticles[newIndex].PX * cc, 2.0 ) + pow( addedParticles[newIndex].PY * cc, 2.0 ) + pow( addedParticles[newIndex].PZ * cc, 2.0 ) );
   //   }
   }
   
@@ -3070,6 +3074,8 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
       addedParticles[newIndex].Y = addedParticles[newIndex].Y + addedParticles[newIndex].PY * cc;
       addedParticles[newIndex].Z = addedParticles[newIndex].Z + addedParticles[newIndex].PZ * cc;
       
+      addedParticles[newIndex].X_traveled += sqrt( pow( addedParticles[newIndex].PX * cc, 2.0 ) + pow( addedParticles[newIndex].PY * cc, 2.0 ) + pow( addedParticles[newIndex].PZ * cc, 2.0 ) );
+      
       addedParticles[jscat].initially_produced = false;
       addedParticles[jscat].jpsi_dissociation_number = ns_heavy_quarks::jpsi_dissociation;
     }
@@ -3261,6 +3267,8 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22
       addedParticles[newIndex].X = addedParticles[newIndex].X + addedParticles[newIndex].PX * cc;
       addedParticles[newIndex].Y = addedParticles[newIndex].Y + addedParticles[newIndex].PY * cc;
       addedParticles[newIndex].Z = addedParticles[newIndex].Z + addedParticles[newIndex].PZ * cc;
+      
+      addedParticles[newIndex].X_traveled += sqrt( pow( addedParticles[newIndex].PX * cc, 2.0 ) + pow( addedParticles[newIndex].PY * cc, 2.0 ) + pow( addedParticles[newIndex].PZ * cc, 2.0 ) );
     }
     else
       cout << "error in scatt22AmongAddedPartcl_utility()" << endl;
@@ -3327,6 +3335,8 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
   addedParticles[kscat].X = R3[1] + P3[1] * cc;
   addedParticles[kscat].Y = R3[2] + P3[2] * cc;
   addedParticles[kscat].Z = R3[3] + P3[3] * cc;
+  
+  addedParticles[kscat].X_traveled += sqrt( pow( P3[1] * cc, 2.0 ) + pow( P3[2] * cc, 2.0 ) + pow( P3[3] * cc, 2.0 ) );
 
   int absorbedGluon = scatt32_obj.getMomenta32( u, phi, typ, F1, F2 );
 
