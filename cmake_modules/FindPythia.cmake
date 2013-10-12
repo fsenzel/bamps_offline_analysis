@@ -39,7 +39,7 @@ FIND_LIBRARY( Pythia_LHAPDFDummy_LIBRARY
   PATH_SUFFIXES PYTHIA pythia Pythia PYTHIA8 Pythia8 pythia8  # suggest some path suffixes in which the headers could be located
 )
 IF( NOT Pythia_LHAPDFDummy_LIBRARY )
-  FIND_LIBRARY( Pythia_LIBRARY
+  FIND_LIBRARY( Pythia_LHAPDFDummy_LIBRARY
     NAMES lhapdfdummy
     PATHS $ENV{HOME}/usr/lib          # suggest a user based include tree
     PATH_SUFFIXES PYTHIA pythia Pythia PYTHIA8 Pythia8 pythia8  # suggest some path suffixes in which the headers could be located

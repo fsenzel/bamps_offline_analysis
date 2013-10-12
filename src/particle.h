@@ -35,9 +35,9 @@ class Particle : public ParticlePrototype
     Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), N_EVENT_pp( 0 ), HARD( true ), N_EVENT_AA( 0 ), edge( -1 ), coll_id( -1 ),
     free( true ), init( true ),
     collisionTime( 0 ), collisionPartner( -1 ), Old( 0,0,0,0 ), as22( 0 ), as23( 0 ), rate23v( 0 ),
-    rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ), lambda_scaled( 0 ), md2g_scaled_22( 0 ),
-    md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), md2q_scaled_23( 0 ), step( 0 ), tstep( 0 ),
-    taustep( 0 ) {};
+    rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ), lambda_scaled( 0 ), 
+// md2g_scaled_22( 0 ), md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), md2q_scaled_23( 0 ), 
+    step( 0 ), tstep( 0 ), taustep( 0 ) {};
     
     /** @brief space time rapidity \eta */
     double eta;
@@ -97,14 +97,14 @@ class Particle : public ParticlePrototype
     double cs23; 
     /** @brief Mean lambda_scaled associated with this particle, averaged over cell in previous time step */
     double lambda_scaled;
-    /** @brief Mean md2g (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
-    double md2g_scaled_22;
-    /** @brief Mean md2q (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
-    double md2q_scaled_22;
-    /** @brief Mean md2g (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
-    double md2g_scaled_23;
-    /** @brief Mean md2q (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
-    double md2q_scaled_23;
+//     /** @brief Mean md2g (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
+//     double md2g_wo_as_scaled_22;
+//     /** @brief Mean md2q (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
+//     double md2q_wo_as_scaled_22;
+//     /** @brief Mean md2g (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
+//     double md2g_wo_as_scaled_23;
+//     /** @brief Mean md2q (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
+//     double md2q_wo_as_scaled_23;
     
     int step,tstep,taustep;//fm
 };

@@ -14,6 +14,7 @@ initialmodel_particlesFromFile.cpp
 initialmodel_pythia.cpp
 interpolation_iniJpsi.cpp
 interpolation_nJpsi.cpp
+mfpforheavyioncollision.cpp
 offlineBAMPS.cpp
 offlineheavyioncollison.cpp 
 offlineoutput.cpp

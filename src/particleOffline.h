@@ -33,11 +33,12 @@ public:
     temperature(0), 
     initially_produced( true ), 
     jpsi_dissociation_number( -1 ),
+    lambda_added( -1 ), lambda_added_old( -1 ), rate_added( -1 ),
     T_creation( 0 ), 
     X_traveled( 0 ),
-    PosInit( 0,0,0,0 ),
-    MomInit( 0,0,0,0 ),
-    lastInt( 0,0,0,0 ),    
+    PosInit( ),
+    MomInit( ),
+    lastInt( ),    
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 )
   {};
@@ -47,11 +48,12 @@ public:
     temperature(0), 
     initially_produced( true ), 
     jpsi_dissociation_number( -1 ),
+    lambda_added( -1 ), lambda_added_old( -1 ), rate_added( -1 ),
     T_creation( 0 ), 
     X_traveled( 0 ),
-    PosInit( 0,0,0,0 ),
-    MomInit( 0,0,0,0 ),
-    lastInt( 0,0,0,0 ),    
+    PosInit( ),
+    MomInit( ),
+    lastInt( ),    
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 )
   {};
@@ -70,6 +72,15 @@ public:
     
   /** @brief If c+cbar form a Jpsi the variable N_EVENT_pp of the cbar is stored in this variable to be still accessible, In particular if the Jpsi dissociates again. */
   int N_EVENT_Cbar;
+
+  /** @brief Mean free path of the added particle in this time step */
+  double lambda_added; // fm
+    
+  /** @brief Mean free path of the added particle in the previous time step */
+  double lambda_added_old; // fm
+    
+  /** @brief Rate of the added particle in this time step */
+  double rate_added; // 1/fm
     
   /** stuff special to offline reconstruction */
   double T_creation;

@@ -607,6 +607,23 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
       break;
+    case alice_hq_nonPromptJpsi:
+      studyHQ = true;
+      
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.9 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.4 );
+      rapidityRanges.push_back(yRange);
+      break;
     case phenix_jpsi:
       studyJpsi = true;
       studyHQ = true;
@@ -664,7 +681,6 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 2.0 );
       rapidityRanges.push_back(yRange);
       break;
-      
     case background_jets:
       studyScatteredMediumParticles = true;
       break;
@@ -674,6 +690,20 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 0.8 );
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+      break;
+      
+    case light_parton_phenix:      
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.8 );
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 1.0 );
       rapidityRanges.push_back(yRange);
@@ -1611,9 +1641,17 @@ void analysis::computeV2RAA( string name, const double _outputTime )
 {
   v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
   
+  const double pt_min_v2RAA = theConfig->getMinimumPT();
+  const double pt_max_v2RAA = 55.0;
+  double nbins_v2RAA = 67; // good for pt_min = 0
+  if( FPT_COMP_GE( pt_min_v2RAA, 6.0 ) )
+    nbins_v2RAA = 25;
+  else if( FPT_COMP_GE( pt_min_v2RAA, 3.0 ) )
+    nbins_v2RAA = 34;
+  
   if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() )
   {
-    theV2RAA.setPtBinProperties( 0.0, 30.0, 60 );
+    theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
     
     theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     if( mesonDecay )
@@ -1621,7 +1659,7 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   }
   if( studyHQ || studyJpsi )
   {
-    theV2RAA.setPtBinProperties( 0.0, 30.0, 60 );
+    theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
     
     theV2RAA.computeFor( charm, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
     theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
@@ -1665,14 +1703,16 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   }
   else
   {
+    theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
+    
     theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
     theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( anti_up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-//     theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( anti_up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
   }
   
   if( studyBackground )
@@ -1813,9 +1853,11 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       mother_flav = addedParticlesCopy[mother_id].FLAVOR;
     }
 
-    if( ( pt <= _pt_max && pt > _pt_min ) &&  
-        ( ( _flavTypeToComputeFor == flavor ) || 
-          ( _flavTypeToComputeFor == ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) ) ) ||
+    FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) );
+    
+    if( ( _flavTypeToComputeFor == flavor ) || 
+          ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) ||
+          ( _flavTypeToComputeFor == genFlavor ) ||
           ( _flavTypeToComputeFor == charm && ( flavor == anti_charm ) ) ||
           ( _flavTypeToComputeFor == bottom && ( flavor == anti_bottom ) ) ||
           ( _flavTypeToComputeFor == heavy_quark && ( flavor == charm || flavor == bottom || flavor == anti_charm || flavor == anti_bottom ) ) ||
@@ -1823,8 +1865,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
           ( _flavTypeToComputeFor == b_electron && ( ( flavor == electron || flavor == positron ) && ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( mother_flav ) ) == bmeson_gen ) ) ||
           ( _flavTypeToComputeFor == jpsi_ini && ( flavor == jpsi && _particles[i].initially_produced ) ) ||
           ( _flavTypeToComputeFor == jpsi_sec && ( flavor == jpsi && !_particles[i].initially_produced ) )
-        ) 
-      )
+      ) 
     {
       // individually check for each rapidity range whether this particle needs to be binned
       for ( int yRangeIndex = 0; yRangeIndex < eta_bins; yRangeIndex++ )
@@ -1834,10 +1875,13 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
           v2sum[yRangeIndex] += v2;
           NmbInRange[yRangeIndex]++;
 
-          dummy = int(( log( pt ) - log( _pt_min ) ) / d_ln_pt );
-          ptBinsV2[yRangeIndex][dummy] += v2;
-          ptBinsNmb[yRangeIndex][dummy]++;
-          ptBinsAngleDep[yRangeIndex][alphaIndex][dummy]++;
+          if ( pt <= _pt_max && pt > _pt_min )
+          {
+            dummy = int(( log( pt ) - log( _pt_min ) ) / d_ln_pt );
+            ptBinsV2[yRangeIndex][dummy] += v2;
+            ptBinsNmb[yRangeIndex][dummy]++;
+            ptBinsAngleDep[yRangeIndex][alphaIndex][dummy]++;
+          }  
         }
       }
     }
@@ -2011,27 +2055,55 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   }
   
     //CMS pt cut for non prompt jpsi: 6.5GeV < pt < 30 GeV, y cut: |y|<2.4
-  if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() && _flavTypeToComputeFor == electron_gen )
+  if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() && _flavTypeToComputeFor == electron_gen && ( theConfig->getOutputScheme() == cms_hq_nonPromptJpsi || theConfig->getOutputScheme() == alice_hq_nonPromptJpsi ) )
   {
-    string filename_yield_cmsNonPromptJpsi = filename_prefix + "_nonPromptJpsiCMScuts_yield_" + name;
-    fstream print_cmsNonPromptJpsi( filename_yield_cmsNonPromptJpsi.c_str(), ios::out | ios::trunc );
+    string filename_yield_nonPromptJpsi;
+    string text;
     
-    print_cmsNonPromptJpsi << "# yield of non prompt jpsi from B meson decays" << endl;
-    print_cmsNonPromptJpsi << "# with same acceptance cuts as for CMS:  6.5GeV < pt < 30 GeV,  |y|<2.4" << endl;
+    double eta_jpsi, pt_min_jpsi, pt_max_jpsi;
+    
+    if( theConfig->getOutputScheme() == cms_hq_nonPromptJpsi )
+    {
+      filename_yield_nonPromptJpsi = filename_prefix + "_nonPromptJpsiCMScuts_yield_" + name;
+      text = "# with same acceptance cuts as for CMS:  6.5GeV < pt < 30 GeV,  |y|<2.4";
+      eta_jpsi = 2.4;
+      pt_min_jpsi = 6.5;
+      pt_max_jpsi = 30.0;
+    }
+    else if( theConfig->getOutputScheme() == alice_hq_nonPromptJpsi )
+    {
+      filename_yield_nonPromptJpsi = filename_prefix + "_nonPromptJpsiALICEcuts_yield_" + name;
+      text = "# with same acceptance cuts as for ALICE:  2GeV < pt < 30 GeV,  |y|<0.9";
+      eta_jpsi = 0.9;
+      pt_min_jpsi = 2.0;
+      pt_max_jpsi = 30.0;
+    }
+
+    fstream print_nonPromptJpsi( filename_yield_nonPromptJpsi.c_str(), ios::out | ios::trunc );
+    
+    print_nonPromptJpsi << "# yield of non prompt jpsi from B meson decays" << endl;
+    print_nonPromptJpsi << text << endl;
+    print_nonPromptJpsi << "# <pt>     dN/dy" << endl;
     
     int count_jpsi = 0;
-    double delta_eta_cms = 2.0 * 2.4;
+    double pt_sum = 0;
+    double delta_eta_jpsi = 2.0 * eta_jpsi;
     double y, pt;
     for ( int i = 1; i <= n_particles; i++ )
     {
       pt = _particles[i].Mom.Pt();
       y  = _particles[i].Mom.Rapidity();
       
-      if( fabs( y ) < 2.4 && pt > 6.5 && pt < 30.0 )
+      if( fabs( y ) < eta_jpsi && pt > pt_min_jpsi && pt < pt_max_jpsi )
+      {
         count_jpsi++;
+        pt_sum += pt;
+      }
     }
     
-    print_cmsNonPromptJpsi << double( count_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getNumberElectronStat() / delta_eta_cms << endl;
+    print_nonPromptJpsi << pt_sum / double( count_jpsi ) << "\t";
+    
+    print_nonPromptJpsi << double( count_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getNumberElectronStat() / delta_eta_jpsi << endl;
   }
   
 }
@@ -2348,7 +2420,9 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
     Et = _particles[j].Mom.Pt();
     y = _particles[j].Mom.Rapidity();
     
-    if ( ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR ) == _flavTypeToComputeFor )
+    FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
+    if ( (  genFlavor == _flavTypeToComputeFor ) ||
+      ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
       if ( y <= maxY && y >= minY)
       {
@@ -2625,6 +2699,36 @@ void analysis::particleOutput( const int step )
          << addedParticles[i].N_EVENT_pp << endl;
   }
   file.close();
+  
+  // if heavy quarks fragment to D mesons write also the D mesons to file
+  if( theConfig->isHadronizationHQ() )
+  {
+    //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+    string filename_meson = filename_prefix + "_" + name + "_meson.f1";
+    fstream file_meson( filename_meson.c_str(), ios::out | ios::trunc );
+
+    //---- print header if file is empty ----
+    time_t end;
+    time( &end );
+
+    file_meson.seekp( 0, ios::end );
+    long size = file_meson.tellp();
+    file_meson.seekp( 0, ios::beg );
+    if ( size == 0 )
+      printHeader( file_meson, all, end );
+    //---------------------------------------
+
+    for ( int i = 0; i < addedParticlesCopy.size(); i++ )
+    {
+      file_meson << i << sep << addedParticlesCopy[i].unique_id << sep << addedParticlesCopy[i].cell_id << sep << addedParticlesCopy[i].FLAVOR << sep 
+                 << addedParticlesCopy[i].Pos.T() << sep << addedParticlesCopy[i].Pos.X() << sep
+                 << addedParticlesCopy[i].Pos.Y() << sep << addedParticlesCopy[i].Pos.Z() << sep 
+                 << addedParticlesCopy[i].Mom.E()  << sep << addedParticlesCopy[i].Mom.Px() << sep 
+                 << addedParticlesCopy[i].Mom.Py() << sep << addedParticlesCopy[i].Mom.Pz() << sep 
+                 << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].md2q << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
+    }
+    file_meson.close();
+  }
 }
 
 
