@@ -1962,8 +1962,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
   for ( iIt =  _cellAdded.particleList.begin(); iIt != _cellAdded.particleList.end(); iIt++ )
   {
     iscat = *iIt;
-    addedParticles[iscat].Propagate( nexttime );
-
+    addedParticles[iscat].Propagate( nexttime, addedParticles[iscat].X_traveled );
   }
 }
 
@@ -2249,7 +2248,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
                                                      particles_atTimeNow[iscat].Mom,
                                                      particles_atTimeNow[jscat].Mom,
                                                      addedParticles[kscat].Mom,
-                                                     F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, as, theConfig->isMd2CounterTermInI23(), theConfig->isMatrixElement23_22qt(), _gluonList.size() );  // create scattering32 object for the given 3 particles
+                                                     F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, as, theConfig->isMd2CounterTermInI23(), theConfig->isMatrixElement23_22qt(), theConfig->get23FudgeFactorLpm(), _gluonList.size() );  // create scattering32 object for the given 3 particles
         I32 = scatt32_object.getIntegral32_withPrefactors();                        // get the integral I32 for the given 3 particles
 
         probab32 = scaleForSelectedTriplets * I32 * dt / ( pow( dv, 2 ) * pow( static_cast<double>( testpartcl ), 2 ) );
@@ -2406,7 +2405,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
                                                          particles_atTimeNow[iscat].Mom,
                                                          particles_atTimeNow[jscat].Mom,
                                                          addedParticles[kscat].Mom,
-                                                         F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, as, theConfig->isMd2CounterTermInI23(), theConfig->isMatrixElement23_22qt(), _gluonList.size() );  // create scattering32 object for the given 3 particles
+                                                         F1, F2, F3, sqrt( s ), md2g / s, lambda_scaled, as, theConfig->isMd2CounterTermInI23(), theConfig->isMatrixElement23_22qt(), theConfig->get23FudgeFactorLpm(), _gluonList.size() );  // create scattering32 object for the given 3 particles
             I32 = scatt32_object.getIntegral32_withPrefactors();                        // get the integral I32 for the given 3 particles
 
             probab32 = I32 * dt / ( pow( dv, 2 ) * pow( static_cast<double>( testpartcl ), 2 ) ); 
@@ -2789,7 +2788,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
 
       int newIndex = addedParticles.size() - 1;
 
-      addedParticles[newIndex].Propagate( nexttime );
+      addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );
       
       addedParticles[jscat].initially_produced = false;
       addedParticles[jscat].jpsi_dissociation_number = ns_heavy_quarks::jpsi_dissociation;
@@ -2933,7 +2932,7 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22
       
       int newIndex = addedParticles.size() - 1;
 
-      addedParticles[newIndex].Propagate( nexttime );
+      addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );
     }
     else
       cout << "error in scatt22AmongAddedPartcl_utility()" << endl;
@@ -2983,8 +2982,8 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
                    addedParticles[kscat].Pos.T() );
   TT = ( nexttime - Tmax ) * ran2() + Tmax;
 
-  addedParticles[kscat].Propagate( TT );
-
+  addedParticles[kscat].Propagate( TT, addedParticles[kscat].X_traveled );
+  
   int absorbedGluon = scatt32_obj.getMomenta32( u, phi, typ, F1, F2 );
 
   VectorEPxPyPz P1new, P2new;
@@ -3610,7 +3609,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
                                                          addedParticles[jetID].Mom,
                                                          particles_atTimeNow[iscat].Mom,
                                                          particles_atTimeNow[jscat].Mom,
-                                                         F1, F2, F3, sqrt( s ), md2g_wo_as * coupling::get_constant_coupling() / s, lambda_scaled, coupling::get_constant_coupling(), _gluonList.size() );
+                                                         F1, F2, F3, sqrt( s ), md2g_wo_as * coupling::get_constant_coupling() / s, lambda_scaled, coupling::get_constant_coupling(), false, false, theConfig->get23FudgeFactorLpm(), _gluonList.size() );
             I32 = scatt32_object.getIntegral32_withPrefactors();                        // get the integral I32 for the given 3 particles
             
             probab32 += I32 * dt / ( pow( dv, 2.0 ) * pow( static_cast<double>( testpartcl ) , 2.0 ) );
@@ -3651,7 +3650,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
                                                                addedParticles[jetID].Mom,
                                                                particles_atTimeNow[iscat].Mom,
                                                                particles_atTimeNow[jscat].Mom,
-                                                               F1, F2, F3, sqrt( s ), md2g_wo_as * coupling::get_constant_coupling() / s, lambda_scaled, coupling::get_constant_coupling(), _gluonList.size() );
+                                                               F1, F2, F3, sqrt( s ), md2g_wo_as * coupling::get_constant_coupling() / s, lambda_scaled, coupling::get_constant_coupling(), false, false, theConfig->get23FudgeFactorLpm(), _gluonList.size() );
                   I32 = scatt32_object.getIntegral32_withPrefactors();                        // get the integral I32 for the given 3 particles
                   
                   probab32 += I32 * dt / ( pow( dv, 2.0 ) * pow( static_cast<double>( testpartcl ), 2.0 ) ); 
@@ -3956,7 +3955,7 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
                                                          addedParticles[jetID].Mom,
                                                          particles_atTimeNow[iscat].Mom,
                                                          particles_atTimeNow[jscat].Mom,
-                                                         F1, F2, F3, sqrt( s ), md2g_wo_as * coupling::get_constant_coupling() / s, lambda_scaled, coupling::get_constant_coupling(), _gluonList.size() );
+                                                         F1, F2, F3, sqrt( s ), md2g_wo_as * coupling::get_constant_coupling() / s, lambda_scaled, coupling::get_constant_coupling(), false, false, theConfig->get23FudgeFactorLpm(), _gluonList.size() );
             I32 = scatt32_object.getIntegral32_withPrefactors();                        // get the integral I32 for the given 3 particles
             
             probab32 += I32 * dt / ( pow( dv, 2.0 ) * pow( static_cast<double>( testpartcl ) , 2.0 ) );
@@ -3997,7 +3996,7 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
                                                                addedParticles[jetID].Mom,
                                                                particles_atTimeNow[iscat].Mom,
                                                                particles_atTimeNow[jscat].Mom,
-                                                               F1, F2, F3, sqrt( s ), md2g_wo_as * coupling::get_constant_coupling() / s, lambda_scaled, coupling::get_constant_coupling(), _gluonList.size() );
+                                                               F1, F2, F3, sqrt( s ), md2g_wo_as * coupling::get_constant_coupling() / s, lambda_scaled, coupling::get_constant_coupling(), false, false, theConfig->get23FudgeFactorLpm(), _gluonList.size() );
                   I32 = scatt32_object.getIntegral32_withPrefactors();                        // get the integral I32 for the given 3 particles
                   
                   probab32 += I32 * dt / ( pow( dv, 2.0 ) * pow( static_cast<double>( testpartcl ) , 2.0 ) );

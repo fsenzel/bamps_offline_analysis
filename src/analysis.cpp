@@ -2695,7 +2695,10 @@ void analysis::particleOutput( const int step )
          << addedParticles[i].Pos.Y() << sep << addedParticles[i].Pos.Z() << sep 
          << addedParticles[i].Mom.E() << sep << addedParticles[i].Mom.Px() << sep 
          << addedParticles[i].Mom.Py() << sep << addedParticles[i].Mom.Pz() << sep 
-         << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep 
+      //         << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep 
+      //         << addedParticles[i].N_EVENT_pp << endl;
+         << addedParticles[i].md2g << sep 
+         << addedParticles[i].X_traveled << sep 
          << addedParticles[i].N_EVENT_pp << endl;
   }
   file.close();
@@ -2725,7 +2728,8 @@ void analysis::particleOutput( const int step )
                  << addedParticlesCopy[i].Pos.Y() << sep << addedParticlesCopy[i].Pos.Z() << sep 
                  << addedParticlesCopy[i].Mom.E()  << sep << addedParticlesCopy[i].Mom.Px() << sep 
                  << addedParticlesCopy[i].Mom.Py() << sep << addedParticlesCopy[i].Mom.Pz() << sep 
-                 << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].md2q << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
+        //                 << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].md2q << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
+                 << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].X_traveled << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
     }
     file_meson.close();
   }
