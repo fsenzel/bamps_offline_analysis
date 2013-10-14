@@ -4098,6 +4098,13 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
                 P3[2] = particles_atTimeNow[jscat].PY;
                 P3[3] = particles_atTimeNow[jscat].PZ;
                 
+                // at least one of the particles must be a gluon
+                // otherwise go to next step in the loop
+                if ( !( F1 == gluon || F2 == gluon || F3 == gluon ) )
+                {
+                  continue;
+                }
+
                 s = pow(( P1[0] + P2[0] + P3[0] ), 2 ) - pow(( P1[1] + P2[1] + P3[1] ), 2 ) - pow(( P1[2] + P2[2] + P3[2] ), 2 ) - pow(( P1[3] + P2[3] + P3[3] ), 2 );
                 
                 if ( s > 1.1*lambda2 )
@@ -4471,6 +4478,13 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
                 P3[2] = particles_atTimeNow[jscat].PY;
                 P3[3] = particles_atTimeNow[jscat].PZ;
                 
+                // at least one of the particles must be a gluon
+                // otherwise go to next step in the loop
+                if ( !( F1 == gluon || F2 == gluon || F3 == gluon ) )
+                {
+                  continue;
+                }
+
                 s = pow(( P1[0] + P2[0] + P3[0] ), 2 ) - pow(( P1[1] + P2[1] + P3[1] ), 2 ) - pow(( P1[2] + P2[2] + P3[2] ), 2 ) - pow(( P1[3] + P2[3] + P3[3] ), 2 );
                 
                 if ( s > 1.1*lambda2 )
