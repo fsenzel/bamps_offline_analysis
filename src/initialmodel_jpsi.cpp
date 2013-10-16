@@ -1,10 +1,10 @@
 //---------------------------------------------
 //provided by subversion
 //---------------------------------------------
-//$HeadURL: file:///home/bamps/svn/full/offlineAnalysis/branches/heavy_quark_offline/src/configuration.cpp $
-//$LastChangedDate: 2012-02-29 11:20:46 +0100 (Wed, 29 Feb 2012) $
-//$LastChangedRevision: 423 $
-//$LastChangedBy: uphoff $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------
 //---------------------------------------------
 

@@ -1,10 +1,10 @@
 //--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
 //----------------------------------------------------------------------------
-//$HeadURL: svn+ssh://gallmei@th.physik.uni-frankfurt.de/home/bamps/svn/full/branches/vector4D/src/particle.h $
-//$LastChangedDate: 2012-07-09 14:50:33 +0200 (Mo, 09. Jul 2012) $
-//$LastChangedRevision: 714 $
-//$LastChangedBy: gallmei $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 

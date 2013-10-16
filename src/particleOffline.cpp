@@ -1,10 +1,10 @@
 //---------------------------------------------------------------------------------------
 //provided by subversion
 //---------------------------------------------------------------------------------------
-//$HeadURL: svn+ssh://gallmei@th.physik.uni-frankfurt.de/home/bamps/svn/full/offlineAnalysis/branches/vector4D/src/particleOffline.cpp $
-//$LastChangedDate: $
-//$LastChangedRevision: -1 $
-//$LastChangedBy: $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //---------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------
 
