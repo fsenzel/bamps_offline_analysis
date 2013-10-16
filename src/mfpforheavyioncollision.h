@@ -1,10 +1,10 @@
 //--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
 //----------------------------------------------------------------------------
-//$HeadURL: file:///home/bamps/svn/full/trunk/src/mfpforheavyioncollision.h $
-//$LastChangedDate: 2012-03-21 22:26:37 +0100 (Wed, 21 Mar 2012) $
-//$LastChangedRevision: 520 $
-//$LastChangedBy: gallmei $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
