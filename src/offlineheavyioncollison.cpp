@@ -1876,14 +1876,14 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         if ( cs22 > 0.0 )
         {
           ++_cellAdded.nCollected22;
-          _cellAdded.md2g_wo_as_scaled_22 += md2g_wo_as / s;
-          _cellAdded.md2q_wo_as_scaled_22 += md2q_wo_as / s;
+          _cellAdded.md2g_scaled_22 += md2g_wo_as / s; // check!!!
+          _cellAdded.md2q_scaled_22 += md2q_wo_as / s; // check!!!
         }
         if ( cs23 > 0.0 )
         {
           ++_cellAdded.nCollected23;
-          _cellAdded.md2g_wo_as_scaled_23 += md2g_wo_as / s;
-          _cellAdded.md2q_wo_as_scaled_23 += md2q_wo_as / s;
+          _cellAdded.md2g_scaled_23 += md2g_wo_as / s; // check!!!
+          _cellAdded.md2q_scaled_23 += md2q_wo_as / s; // check!!!
           _cellAdded.lambdaScaled += lambda_scaled;
         }
 

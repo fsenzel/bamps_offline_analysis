@@ -15,6 +15,8 @@
 #ifndef PARTICLEOFFLINE_H
 #define PARTICLEOFFLINE_H
 
+#include <vector>
+
 #include "particle.h"
 
 

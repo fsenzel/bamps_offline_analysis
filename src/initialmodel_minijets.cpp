@@ -44,7 +44,6 @@ initialModel_minijets::initialModel_minijets( const config& _config, WoodSaxon& 
     std::string errMsg = "Impact parameter b too large. b > 2 R_A0";
     throw eMiniJet_error( errMsg );
   }
-  _WoodSaxonParameter = WoodSaxonParameter;
 
   switch ( _config.getPDFsource() )
   {

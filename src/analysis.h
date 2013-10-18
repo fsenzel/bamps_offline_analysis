@@ -12,11 +12,11 @@
 #ifndef ANALYSIS_H
 #define ANALYSIS_H
 
+#include <fstream>
+#include <math.h>
 #include <stdint.h>
 #include <time.h>
-#include <fstream>
 #include <vector>
-#include <math.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -195,14 +195,18 @@ public:
   void collectEtDataInitial();
   
   void setSeed( uint32_t _s ) { seed = _s; }
-  uint32_t getSeed( ) { return seed; }
+  uint32_t getSeed( ) const { return seed; }
 
 
-  int addJetEvent_in( const int ID_1, const int ID_2, const int ID_3, const jetTrackerCollType coll_type,
-  const double cross_section, const int cell_ID, const double lambda );
+  int addJetEvent_in( const int ID_1, const int ID_2, const int ID_3, 
+                      const jetTrackerCollType coll_type,
+                      const double cross_section, const int cell_ID, 
+                      const double lambda );
   void addJetEvent_initial( const int jetID );
   void addJetEvents_final();
-  void addJetEvent_out( const int entity_ID, const int added_ID, const int ID_2, const int ID_3, const jetTrackerCollType coll_type );
+  void addJetEvent_out( const int entity_ID, 
+                        const int added_ID, const int ID_2, const int ID_3, 
+                        const jetTrackerCollType coll_type );
   void removeJetEvent_in( const int entity_ID );
   void exchangeJetID( const int oldID, const int newID );
   void makeJetTrackerCopy();
@@ -210,9 +214,15 @@ public:
   
   double getJetTracking_PT() const {return jetTracking_PT;}
   
-  void registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles,
-      const int _nMediumParticles, const int _nColl, const int _nColl22,
-      const int _nColl23, const int _nColl32 );
+  void registerProgressInformationForOutput( 
+           const double _time, 
+           const double _dt, 
+           const int _nAddedParticles,
+           const int _nMediumParticles, 
+           const int _nColl, 
+           const int _nColl22,
+           const int _nColl23, 
+           const int _nColl32 );
   void volumeMidrap(const int ) const;
   
 private:

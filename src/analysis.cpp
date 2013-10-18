@@ -9,26 +9,20 @@
 //---------------------------------------------
 
 
+#include <fstream>
 #include <iostream>
 #include <iomanip>
-#include <fstream>
 #include <math.h>
-#include <string>
 #include <sstream>
-#include <time.h>
+#include <string>
+#include <stdio.h> // for getenv()
+#include <stdlib.h> // for getenv()
 
-#include "particle.h"
 #include "analysis.h"
 #include "binning.h"
 #include "binning2.h"
-#include "configuration.h"
 #include "FPT_compare.h"
 #include "random.h"
-
-#include <stdio.h> // for getenv()
-#include <stdlib.h> // for getenv()
-#include <time.h>
-
 
 using namespace std;
 using namespace ns_casc;

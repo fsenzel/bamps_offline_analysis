@@ -166,7 +166,7 @@ void ringContainer::addParticleInFormGeom( const Particle& _particle, const doub
   double Eold = _particle.Old.E();
   double oneE = 1 / Eold;
 
-  double cc = ( _time - _particle.Pos.T() ) / Eold;
+  double cc = ( _time - _particle.Pos.T() ) * oneE;
 
   double xx = _particle.Pos.X() + _particle.Old.Px() * cc;
   double yy = _particle.Pos.Y() + _particle.Old.Py() * cc;

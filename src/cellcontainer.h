@@ -8,7 +8,6 @@
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
-// at revision 1004, this is identical to full/branches/vector4D/src/cellcontainer.h
 
 #ifndef CELLCONTAINER_H
 #define CELLCONTAINER_H
@@ -84,10 +83,10 @@ public:
   double alpha_s_22;
   double alpha_s_23;
 
-  double md2g_wo_as_scaled_22;
-  double md2q_wo_as_scaled_22;
-  double md2g_wo_as_scaled_23;
-  double md2q_wo_as_scaled_23;
+  double md2g_scaled_22;
+  double md2q_scaled_22;
+  double md2g_scaled_23;
+  double md2q_scaled_23;
 
   double sigma_22;
   double sigma_23;

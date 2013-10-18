@@ -80,6 +80,7 @@ namespace ns_casc
 //   extern std::vector<ParticleHFelectron> addedPartcl_electron;
   extern std::vector<ParticleOffline> addedPartcl_electron;
   extern std::vector<ParticleOffline> scatteredMediumParticles;
+
 }
 //--------------------------------------------------------//
 

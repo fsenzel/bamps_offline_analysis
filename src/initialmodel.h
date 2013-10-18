@@ -8,7 +8,7 @@
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
-// at revision 902, this file is identical to full/branches/vector4D/src/initialmodel.h
+
 
 #ifndef INITIALMODEL_H
 #define INITIALMODEL_H
@@ -55,6 +55,11 @@ public:
    */
   void setUniqueID( std::vector<Particle>& _particles );
 
+  /**
+   * @brief Return a 'typical' radius of the model
+   */
+  virtual double Radius();
+
 };
 
 
@@ -78,6 +83,15 @@ public:
    */
   ~initialModelWS();
 
+  /**
+   * @brief Return a 'typical' radius of the model
+   */
+  virtual double Radius();
+
+  /** 
+   * @brief Reserve memory for the Particle vector and sample momenta
+   * and positions. 
+   */
   virtual void populateParticleVector( std::vector<Particle>& _particles ) = 0;
 
   /** 

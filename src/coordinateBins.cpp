@@ -8,9 +8,7 @@
 //---------------------------------------------
 //---------------------------------------------
 
-// at revision 902, this file is identical to full/trunk/src/coordinateBins.cpp
-//
-// every usage of 'particles' is replaced by 'particles_atTimeNow'
+
 
 #include <stdexcept>
 #include <vector>
@@ -24,6 +22,7 @@
 using std::vector;
 using std::cout;
 using std::endl;
+
 using namespace ns_casc;
 
 
@@ -117,7 +116,7 @@ const coordinateSubBin& coordinateBins::operator[]( const int _index ) const
 
 
 
-void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine )
+void coordinateEtaBins::populateEtaBins( std::vector<Particle> & parts, coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine )
 {
   const double delta_eta_fine = _dEta_fine;
   const double eta_max = 8.0;
@@ -125,13 +124,13 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
 
   _dNdEta.reshape( n_eta, -eta_max, + eta_max );
 
-  for ( unsigned int i = 0; i < particles_atTimeNow.size(); i++ )
+  for ( unsigned int i = 0; i < parts.size(); i++ )
   {    
-    particles_atTimeNow[i].eta = particles_atTimeNow[i].Pos.Rapidity();
+    parts[i].eta = parts[i].Pos.Rapidity();
 
-    if ( particles_atTimeNow[i].Pos.T() < ( _timenow + _dt ) )
+    if ( parts[i].Pos.T() < ( _timenow + _dt ) )
     {
-      _dNdEta.increase( particles_atTimeNow[i].eta );
+      _dNdEta.increase( parts[i].eta );
     }
   }
 
@@ -293,14 +292,19 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   _dt = timestepScaling * _dt;
 }
 
-
-
-int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param, const int _nTest )
+/**
+ * The new parameter RA corresponds to the former variable WoodSaxon&
+ * _param.RA, i.e. to the radius parameter
+ *
+ * The new parameter particlesSize corresponds to the former particles.size()
+ */
+int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, const double _RA, const int _nTest, const int particlesSize )
 {
-  double initialArea = 4 * ( _param.RA - _b / 2 ) * sqrt(( _param.RA - _b / 2 ) * ( _param.RA + _b / 2 ) );
+  // The following line relies on Woods-Saxon density distribution:
+  double initialArea = 4 * ( _RA - _b / 2 ) * sqrt(( _RA - _b / 2 ) * ( _RA + _b / 2 ) ); 
   NinEtaBin = int( initialArea / ( _dx * _dy ) * _NperCell );
 
-  int estimatedMaxNumber = particles_atTimeNow.size() * 1.3;
+  int estimatedMaxNumber = particlesSize * 1.3;
   if ( Particle::N_light_flavor == 0 )
   {
     estimatedMaxNumber *= 1.4;  // ugly fix, empirical value
@@ -311,12 +315,12 @@ int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, c
   _min_index_limit = 0;
   _max_index_limit = bins.size() - 1;
 
-  cout << "number of cells in one etabin=" << int( pow(( 2 * _param.RA / _dx ), 2 ) )
+  cout << "number of cells in one etabin=" << int( pow(( 2 * _RA / _dx ), 2 ) )
        << "\t" << "particle number in one Etabin=" << NinEtaBin << endl;
-  if ( particles_atTimeNow.size() <= ( 8 * NinEtaBin ) )
+  if ( particlesSize <= ( 8 * NinEtaBin ) )
   {
-    cout << "N = " << particles_atTimeNow.size() << "  NinEtaBin = " << NinEtaBin << "  IZ = " << _IZ << endl;
-    cout << "recommended number of test particles > " << ( ( 8 * NinEtaBin * _nTest ) / particles_atTimeNow.size() ) << endl;
+    cout << "N = " << particlesSize << "  NinEtaBin = " << NinEtaBin << "  IZ = " << _IZ << endl;
+    cout << "recommended number of test particles > " << ( ( 8 * NinEtaBin * _nTest ) / particlesSize ) << endl;
     std::string errMsg = "insufficient number of test particles";
     throw eCoordBins_error( errMsg );
   }

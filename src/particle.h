@@ -8,19 +8,18 @@
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
-// At revision 902, this file is more or less identical to
-// full/branches/vector4D/src/particle.h, except N_EVENT_AA and N_EVENT_pp
-
 /** @file
-* @brief Declarations for the Particle class
-*/
+ * @brief Declarations for the Particle class
+ */
+
+
 
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
 #include "particleprototype.h"
-#include <vector>
 
+#include "bampsvector.h"
 
 /**
 * @brief Provides properties of a particle needed in the simulations.
@@ -32,12 +31,26 @@ class Particle : public ParticlePrototype
 {
   public:
     /** @brief Provide standard constructor (for completeness) */
-    Particle() : ParticlePrototype(), eta( 0 ), md2g( 0 ), md2q( 0 ), N_EVENT_pp( 0 ), HARD( true ), N_EVENT_AA( 0 ), edge( -1 ), coll_id( -1 ),
-    free( true ), init( true ),
-    collisionTime( 0 ), collisionPartner( -1 ), Old( 0,0,0,0 ), as22( 0 ), as23( 0 ), rate23v( 0 ),
-    rate32v( 0 ), rate22v( 0), cs22( 0 ), cs23( 0 ), lambda_scaled( 0 ), 
-// md2g_scaled_22( 0 ), md2q_scaled_22( 0 ), md2g_scaled_23( 0 ), md2q_scaled_23( 0 ), 
-    step( 0 ), tstep( 0 ), taustep( 0 ) {};
+    Particle() : 
+      ParticlePrototype(), 
+      eta( 0 ), 
+      md2g( 0 ), md2q( 0 ), 
+      N_EVENT_pp( 0 ), HARD( true ), N_EVENT_AA( 0 ),
+      edge( -1 ), coll_id( -1 ),
+      free( true ), init( true ),
+      collisionTime( 0 ), collisionPartner( -1 ), 
+      Old( 0,0,0,0 ), 
+      as22( 0 ), as23( 0 ), 
+      rate23v( 0 ), rate32v( 0 ), rate22v( 0), 
+      cs22( 0 ), cs23( 0 ), 
+      lambda_scaled( 0 ), 
+      md2g_scaled_22( 0 ),
+      md2q_scaled_22( 0 ), 
+      md2g_scaled_23( 0 ), 
+      md2q_scaled_23( 0 ), 
+      step( 0 ), tstep( 0 ), taustep( 0 ) 
+{
+};
     
     /** @brief space time rapidity \eta */
     double eta;
@@ -49,17 +62,19 @@ class Particle : public ParticlePrototype
     
     /** @brief Pythia event number */
     int N_EVENT_pp;
+
     /** @brief Pythia hard or soft scattering */
     bool HARD; // true/1 if parton comes from hard scattering
 
-    /*
+    /**
      * @brief Event number of heavy ion collision to which particle belongs. 
      *
      * Necessary if the number of added particles is much larger than the 
      * number of particles which would be present in a event according
      * to the test particles number of offline particles. 
      * This is only important if one considers scatterings among the 
-     * added particles.  */
+     * added particles.  
+     **/
     int N_EVENT_AA;
     
     /** @brief index of edge cell the particle belongs to, edge = -1 corresponds to no edge cell */
@@ -78,7 +93,7 @@ class Particle : public ParticlePrototype
     /** @brief collision partner (geometric collisions) */
     int collisionPartner;
 
-    /** @brief Momentum and mass prior to geometric collision, needed for particles in "edge cell"*/
+    /** @brief Momentum and Energy prior to geometric collision, needed for particles in "edge cell"*/
     VectorEPxPyPz Old;
 
     /** @brief Mean alpha_s for 2->2 interactions associated with this particle, averaged over cell in previous time step */ 
@@ -97,14 +112,14 @@ class Particle : public ParticlePrototype
     double cs23; 
     /** @brief Mean lambda_scaled associated with this particle, averaged over cell in previous time step */
     double lambda_scaled;
-//     /** @brief Mean md2g (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
-//     double md2g_wo_as_scaled_22;
-//     /** @brief Mean md2q (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
-//     double md2q_wo_as_scaled_22;
-//     /** @brief Mean md2g (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
-//     double md2g_wo_as_scaled_23;
-//     /** @brief Mean md2q (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
-//     double md2q_wo_as_scaled_23;
+    /** @brief Mean md2g (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
+    double md2g_scaled_22;
+    /** @brief Mean md2q (scaled with s) from 2->2 interactions, averaged over cell in previous time step */
+    double md2q_scaled_22;
+    /** @brief Mean md2g (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
+    double md2g_scaled_23;
+    /** @brief Mean md2q (scaled with s) from 2->3 interactions, averaged over cell in previous time step */
+    double md2q_scaled_23;
     
     int step,tstep,taustep;//fm
 };

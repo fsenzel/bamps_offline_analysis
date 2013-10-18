@@ -8,12 +8,6 @@
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
-// at revision 902, this file is identical to full/trunk/src/coordinateBins.h
-//
-// in order to be consistent with the old version, we had to set the
-// default of 'timestepScaling = 0.1'(instead of 0.2)
-//
-
 
 #ifndef COORDINATE_BINS_H
 #define COORDINATE_BINS_H
@@ -24,7 +18,7 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 
-#include "woodsaxon.h"
+#include "particle.h"
 
 using std::vector;
 
@@ -130,13 +124,13 @@ private:
 class coordinateEtaBins : public coordinateBins
 {
 public:
-  coordinateEtaBins() : coordinateBins(), NinEtaBin( 0 ), timestepScaling(0.1) {};
-  coordinateEtaBins( const int _size, const double _min, const double _max, const double _scaleTimestep = 0.1 ) : coordinateBins( _size, _min, _max ), NinEtaBin(0), timestepScaling(_scaleTimestep) {};
+  coordinateEtaBins() : coordinateBins(), NinEtaBin( 0 ), timestepScaling(0.2) {};
+  coordinateEtaBins( const int _size, const double _min, const double _max, const double _scaleTimestep = 0.2 ) : coordinateBins( _size, _min, _max ), NinEtaBin(0), timestepScaling(_scaleTimestep) {};
   ~coordinateEtaBins() {};
   
-  void populateEtaBins( coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine
+  void populateEtaBins( std::vector<Particle> & parts, coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine
  );
-  int constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param, const int _nTest );
+  int constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, const double _RA, const int _nTest, const int particlesSize );
   int getCentralIndex() const;
   int getIndex( const double _eta ) const;
   

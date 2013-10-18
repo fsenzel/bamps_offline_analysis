@@ -50,6 +50,10 @@ FIND_PATH( LHAPDF_INCLUDE_DIR
     PATHS $ENV{HOME}/usr/include/LHAPDF ${LHAPDF_PREFIX} /usr/include/LHAPDF /usr/local/include/LHAPDF
 )
 
+# remove a trailing 'LHAPDF', since the header files are always adressed as 'LHAPDF/xxx.h'
+STRING(REGEX REPLACE "/LHAPDF" "" LHAPDF_INCLUDE_DIR ${LHAPDF_INCLUDE_DIR})
+
+
 SET( LHAPDF_LIBRARIES ${LHAPDF_LIB} )
 SET( LHAPDF_INCLUDE_DIRS ${LHAPDF_INCLUDE_DIR} )
 
