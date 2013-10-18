@@ -8,12 +8,14 @@
 //---------------------------------------------
 //---------------------------------------------
 
+// at revision 902, this file is identical to full/branches/vector4D/src/offlineoutput.cpp
 
 #include <typeinfo>
 #include <iostream>
 
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -47,7 +49,7 @@ offlineOutputInterface::~offlineOutputInterface()
 
 void offlineOutputInterface::collectAndOutputEventList()
 {
-  for ( int i = 0; i < eventList.size(); i++ )
+  for ( unsigned int i = 0; i < eventList.size(); i++ )
   {
     offlineDataEventType collectEventType( eventList[i] );
     this->submitOfflineDataForOutput( &collectEventType );
@@ -84,7 +86,7 @@ void offlineOutputInterface::submitOfflineDataForOutput( const offlineDataGeneri
   }
   
   // the actual output
-  (*archive) & _data;
+  (*archive) & BOOST_SERIALIZATION_NVP( _data );
 }
 
 

@@ -37,7 +37,7 @@ void initialModel_Pythia::sampleMomenta( std::vector< Particle >& _particles )
     int n_event_pp_input;
     // structure of file
     // number of pythia event  is hard?   flavour  energy  px  py  pz  m
-    readParticles >> n_event_pp_input >> tempParticle.HARD >> flavTemp >> tempParticle.E >> tempParticle.PX >> tempParticle.PY >> tempParticle.PZ >> tempParticle.m;
+    readParticles >> n_event_pp_input >> tempParticle.HARD >> flavTemp >> tempParticle.Mom.E() >> tempParticle.Mom.Px() >> tempParticle.Mom.Py() >> tempParticle.Mom.Pz() >> tempParticle.m;
     tempParticle.FLAVOR = static_cast<FLAVOR_TYPE>( flavTemp );
     
     if( n_event_pp_input != event_tmp )
@@ -57,9 +57,9 @@ void initialModel_Pythia::sampleMomenta( std::vector< Particle >& _particles )
     }
     
     // to avoid rounding errors compute energy from momenta and mass E^2=p^2+m^2, for light partons this can be different from Pythia's value if in Pythia this parton had a mass
-    tempParticle.E = sqrt( pow( tempParticle.PX, 2.0 ) + pow( tempParticle.PY, 2.0 ) + pow( tempParticle.PZ, 2.0 ) + pow( tempParticle.m, 2.0 ) );
+    tempParticle.Mom.E() = sqrt( tempParticle.Mom.vec2() + pow( tempParticle.m, 2.0 ) );
     
-    double pt = sqrt( pow( tempParticle.PX, 2.0 ) + pow( tempParticle.PY, 2.0 ) );
+    double pt = tempParticle.Mom.Pt();
     
     if( pt >= minimumPT )
     {

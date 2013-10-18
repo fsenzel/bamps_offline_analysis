@@ -9,26 +9,20 @@
 //---------------------------------------------
 
 
+#include <fstream>
 #include <iostream>
 #include <iomanip>
-#include <fstream>
 #include <math.h>
-#include <string>
 #include <sstream>
-#include <time.h>
+#include <string>
+#include <stdio.h> // for getenv()
+#include <stdlib.h> // for getenv()
 
-#include "particle.h"
 #include "analysis.h"
 #include "binning.h"
 #include "binning2.h"
-#include "configuration.h"
 #include "FPT_compare.h"
 #include "random.h"
-
-#include <stdio.h> // for getenv()
-#include <stdlib.h> // for getenv()
-#include <time.h>
-
 
 using namespace std;
 using namespace ns_casc;
@@ -295,7 +289,7 @@ analysis::analysis( config* const c ):
     numberBinsPT = int(( maxPT - minPT + 0.001 ) / binWidthPT );
     
     tArrayOfDoubleVec tmpArray;
-    for ( int i = 0; i < rapidityRanges.size(); i++ )
+    for ( unsigned int i = 0; i < rapidityRanges.size(); i++ )
     {
       tmpArray.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
       ptBins_gluons.push_back( tmpArray );
@@ -317,7 +311,7 @@ analysis::analysis( config* const c ):
       ptBins_all.push_back( tmpArray );
     }
 
-    for ( int ny = 0; ny < rapidityRanges.size(); ny++ )
+    for ( unsigned int ny = 0; ny < rapidityRanges.size(); ny++ )
     {
       for ( int nt = 0; nt < nTimeSteps + 2; nt++ )
       {
@@ -343,7 +337,6 @@ analysis::analysis( config* const c ):
     
     
     //---- initialisation of softPT-binning ----
-    maxPTSoft;
     binWidthSoftPT = 0.1;
     numberBinsSoftPT = int(( maxPTSoft + 0.001 ) / binWidthSoftPT );
     ptBinsSoftAll_gluons = new vector<double>[nTimeSteps+1];
@@ -1023,7 +1016,7 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
 
   // populate temporary _ptBins with temporary "references" to the actual data structures according to the requested flavor
   tVecOfArrayOfDoubleVec _ptBins;
-  for ( int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
+  for ( unsigned int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
   {
     switch ( _flavTypeToComputeFor )
     {
@@ -1111,7 +1104,7 @@ void analysis::printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor )
   //---------------------------------------
 
   //------------- the actual output ---------------
-  for ( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
+  for ( unsigned int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
   {
     file << "#y in +- [" << rapidityRanges[yRangeIndex].yleft << ", " << rapidityRanges[yRangeIndex].yright << "]" << endl;
     for ( int i = 0; i < numberBinsPT; i++ )
@@ -1264,7 +1257,7 @@ void analysis::onePartclCorrelations()
 //  const double eta_max = 10000.0;//
 
   string filename;
-  double pp, pt_fin, pt_init, eta, dpt_vec, dpt_scal, rt_init, dE;
+  double pt_fin, pt_init, eta, dpt_vec, dpt_scal, rt_init, dE;
 
 
   filename = filename_prefix + "_ptIni_ptFin_1correl";
@@ -1310,23 +1303,23 @@ void analysis::onePartclCorrelations()
   double q_hat_scal_sum = 0.0, q_hat_vec_sum = 0.0;
   int count_q_hat_sum = 0;
 
-  for ( int i = 0;i < addedParticles.size();i++ )
+  for ( unsigned int i = 0;i < addedParticles.size();i++ )
   {
 //     if(addedParticles[i].T <= time)
 //     {
-    pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
-
-    // pseudorapidity
-    eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+    eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
 
     if ( fabs( eta ) <= eta_max )
     {
-      pt_init = sqrt( pow( addedParticles[i].PX_init, 2.0 ) + pow( addedParticles[i].PY_init, 2.0 ) );
-      pt_fin = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
-      dpt_vec = sqrt( pow( addedParticles[i].PX_init - addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY_init - addedParticles[i].PY, 2.0 ) );
-      dpt_scal = sqrt( pow( addedParticles[i].PX_init, 2.0 ) + pow( addedParticles[i].PY_init, 2.0 ) ) - sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
-      rt_init = sqrt( pow( addedParticles[i].X_init, 2.0 ) + pow( addedParticles[i].Y_init, 2.0 ) );
-      dE = addedParticles[i].E_init - addedParticles[i].E;
+      pt_init = addedParticles[i].MomInit.Pt();
+      pt_fin  = addedParticles[i].Mom.Pt();
+
+      dpt_vec = (addedParticles[i].MomInit - addedParticles[i].Mom).Pt();
+
+      dpt_scal = pt_init - pt_fin;
+      rt_init  = addedParticles[i].PosInit.Pt();
+
+      dE = addedParticles[i].MomInit.E() - addedParticles[i].Mom.E();
 
       ptIniptFin.add( pt_init, pt_fin );
       ptInidpt.add( pt_init, dpt_vec );
@@ -1385,7 +1378,7 @@ void analysis::twoPartclCorrelations()
   const double pt_min_dNdr = 5.0;//GeV, cut on particle for dN/dr_t
 
   string filename;
-  double pp, eta, rt_init;
+  double eta, rt_init;
   double dpt_ini, dpt_fin, dp_ini, dp_fin, dphi_fin, dphi_ini, scal_prod, length1, length2, pt_fin_i, pt_fin_j;
 
   filename = filename_prefix + "_dpt_partons";
@@ -1444,18 +1437,15 @@ void analysis::twoPartclCorrelations()
   binning dNdrI_ptbar5_dpt02( filename, 0.0, 15.0, 60 );
 
   // 2 particle correlations, charm and anti-charm which are produced in same reaction
-  for ( int i = 0;i < addedParticles.size();i++ )
+  for ( unsigned int i = 0;i < addedParticles.size();i++ )
   {
 //     if(addedParticles[i].T <= time)
 //     {
-    pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
-
-    // pseudorapidity
-    eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+    eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
 
     if ( fabs( eta ) <= eta_max )
     {
-      for ( int j = i + 1;j < addedParticles.size();j++ )
+      for ( unsigned int j = i + 1;j < addedParticles.size();j++ )
       {
 //         if ( addedParticles[i].N_EVENT_pp == addedParticles[j].N_EVENT_pp )
         if ( true )
@@ -1463,21 +1453,19 @@ void analysis::twoPartclCorrelations()
 
           //           if(addedParticles[i].T <= time)
           //           {
-          pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-
-          // pseudorapidity
-          eta = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+          eta = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
 
           if ( fabs( eta ) <= eta_max )
           {
-//                 dpt_ini = sqrt( pow(addedParticles[i].PX_init-addedParticles[j].PX_init,2.0) + pow(addedParticles[i].PY_init-addedParticles[j].PY_init,2.0) );
-//                 dpt_fin = sqrt( pow(addedParticles[i].PX-addedParticles[j].PX,2.0) + pow(addedParticles[i].PY-addedParticles[j].PY,2.0) );
-            dpt_ini = fabs( sqrt( pow( addedParticles[i].PX_init, 2.0 ) + pow( addedParticles[i].PY_init, 2.0 ) ) - sqrt( pow( addedParticles[j].PX_init, 2.0 ) + pow( addedParticles[j].PY_init, 2.0 ) ) );
-            dpt_fin = fabs( sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) - sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) );
+//                 dpt_ini = sqrt( pow(addedParticles[i].MomInit.Px()-addedParticles[j].MomInit.Px(),2.0) + pow(addedParticles[i].MomInit.Py()-addedParticles[j].MomInit.Py(),2.0) );
+//                 dpt_fin = sqrt( pow(addedParticles[i].Mom.Px()-addedParticles[j].Mom.Px(),2.0) + pow(addedParticles[i].Mom.Py()-addedParticles[j].Mom.Py(),2.0) );
+            dpt_ini = fabs( addedParticles[i].MomInit.Pt() - addedParticles[j].MomInit.Pt() );
+            dpt_fin = fabs( addedParticles[i].Mom.Pt() - addedParticles[j].Mom.Pt() );
 
-            dp_ini = sqrt( pow( addedParticles[i].PX_init - addedParticles[j].PX_init, 2.0 ) + pow( addedParticles[i].PY_init - addedParticles[j].PY_init, 2.0 ) + pow( addedParticles[i].PZ_init - addedParticles[j].PZ_init, 2.0 ) );
-            dp_fin = sqrt( pow( addedParticles[i].PX - addedParticles[j].PX, 2.0 ) + pow( addedParticles[i].PY - addedParticles[j].PY, 2.0 ) + pow( addedParticles[i].PZ - addedParticles[j].PZ, 2.0 ) );
-            rt_init = sqrt( pow( addedParticles[i].X_init, 2.0 ) + pow( addedParticles[i].Y_init, 2.0 ) ); // same for both particles
+            dp_ini = sqrt( (addedParticles[i].MomInit - addedParticles[j].MomInit).vec2() );
+            dp_fin = sqrt( (addedParticles[i].Mom - addedParticles[j].Mom).vec2() );
+
+            rt_init =  addedParticles[i].PosInit.Pt(); // same for both particles
 
             dptIdptF2.add( dpt_ini, dpt_fin );
             dptIdptFposI2.add( dpt_ini, dpt_fin, rt_init );
@@ -1492,42 +1480,42 @@ void analysis::twoPartclCorrelations()
 //                   partdpt.width(15);
 //                   partdpt << dpt_fin;
 //                   partdpt.width(15);
-//                   partdpt << fabs( sqrt( pow(addedParticles[i].PX,2.0) + pow(addedParticles[i].PY,2.0) ) - sqrt( pow(addedParticles[j].PX,2.0) + pow(addedParticles[j].PY,2.0) ) );
+//                   partdpt << fabs( sqrt( pow(addedParticles[i].Mom.Px(),2.0) + pow(addedParticles[i].Mom.Py(),2.0) ) - sqrt( pow(addedParticles[j].Mom.Px(),2.0) + pow(addedParticles[j].Mom.Py(),2.0) ) );
 //
 //                   partdpt.width(25);
-//                   partdpt << addedParticles[i].PX;
+//                   partdpt << addedParticles[i].Mom.Px();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[i].PY;
+//                   partdpt << addedParticles[i].Mom.Py();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[i].PZ;
+//                   partdpt << addedParticles[i].Mom.Pz();
 //
 //                   partdpt.width(25);
-//                   partdpt << addedParticles[j].PX;
+//                   partdpt << addedParticles[j].Mom.Px();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[j].PY;
+//                   partdpt << addedParticles[j].Mom.Py();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[j].PZ;
+//                   partdpt << addedParticles[j].Mom.Pz();
 //
 //                   partdpt.width(25);
-//                   partdpt << addedParticles[i].PX_init;
+//                   partdpt << addedParticles[i].MomInit.Px();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[i].PY_init;
+//                   partdpt << addedParticles[i].MomInit.Py();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[i].PZ_init;
+//                   partdpt << addedParticles[i].MomInit.Pz();
 //
 //                   partdpt.width(25);
-//                   partdpt << addedParticles[j].PX_init;
+//                   partdpt << addedParticles[j].MomInit.Px();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[j].PY_init;
+//                   partdpt << addedParticles[j].MomInit.Py();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[j].PZ_init;
+//                   partdpt << addedParticles[j].MomInit.Pz();
 //
 //                   partdpt.width(25);
-//                   partdpt << addedParticles[j].X_init;
+//                   partdpt << addedParticles[j].PosInit.X();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[j].Y_init;
+//                   partdpt << addedParticles[j].PosInit.Y();
 //                   partdpt.width(15);
-//                   partdpt << addedParticles[j].Z_init;
+//                   partdpt << addedParticles[j].PosInit.Z();
 //
 //                   partdpt.width(25);
 //                   partdpt << rt_init << endl;
@@ -1536,15 +1524,8 @@ void analysis::twoPartclCorrelations()
 
 
             // azimuthal angle between two charm quarks
-            scal_prod = addedParticles[i].PX_init * addedParticles[j].PX_init + addedParticles[i].PY_init * addedParticles[j].PY_init;
-            length1 = sqrt( pow( addedParticles[i].PX_init, 2.0 ) + pow( addedParticles[i].PY_init, 2.0 ) );
-            length2 = sqrt( pow( addedParticles[j].PX_init, 2.0 ) + pow( addedParticles[j].PY_init, 2.0 ) );
-            dphi_ini = acos( scal_prod / length1 / length2 );
-
-            scal_prod = addedParticles[i].PX * addedParticles[j].PX + addedParticles[i].PY * addedParticles[j].PY;
-            length1 = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
-            length2 = sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) );
-            dphi_fin = acos( scal_prod / length1 / length2 );
+            dphi_ini = acos( CosPhi( addedParticles[i].MomInit, addedParticles[j].MomInit ) );
+            dphi_fin = acos( CosPhi( addedParticles[i].Mom, addedParticles[j].Mom ) );
 
             // total angle between two charm quarks
 //                 scal_prod = addedParticles[i].PX_init*addedParticles[j].PX_init + addedParticles[i].PY_init*addedParticles[j].PY_init + addedParticles[i].PZ_init*addedParticles[j].PZ_init;
@@ -1563,13 +1544,13 @@ void analysis::twoPartclCorrelations()
             dphiFall.add( dphi_fin );
             dphiIall.add( dphi_ini );
 
-            if ( sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) >= pt_min_assoc && sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) )  >= pt_min_assoc )
+            if ( addedParticles[i].Mom.Pt2() >= pow( pt_min_assoc, 2.0 ) && addedParticles[j].Mom.Pt2() >= pow( pt_min_assoc, 2.0 ) )
             {
               dphiF22.add( dphi_fin );
               dphiI22.add( dphi_ini );
 
-              if (( sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) >= pt_min_trig && sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) )  >= pt_min_assoc ) ||
-                  ( sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) >= pt_min_assoc && sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) )  >= pt_min_trig ) )
+              if (( addedParticles[i].Mom.Pt2() >= pow( pt_min_trig, 2.0 ) && addedParticles[j].Mom.Pt2() >= pow( pt_min_assoc, 2.0 )) ||
+                  ( addedParticles[i].Mom.Pt2() >= pow( pt_min_assoc, 2.0 ) && addedParticles[j].Mom.Pt2() >= pow( pt_min_trig, 2.0 )))
               {
                 dphiF42.add( dphi_fin );
                 dphiI42.add( dphi_ini );
@@ -1587,8 +1568,8 @@ void analysis::twoPartclCorrelations()
 
 
 
-            pt_fin_i = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
-            pt_fin_j = sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) );
+            pt_fin_i = addedParticles[i].Mom.Pt();
+            pt_fin_j = addedParticles[j].Mom.Pt();
 
             dNdrI_all.add( rt_init );
             if ( pt_fin_i > pt_min_dNdr )
@@ -1612,21 +1593,12 @@ void analysis::twoPartclCorrelations()
 
   for ( int j = 0;j < addedParticles.size();j++ )
   {
+    eta = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
 
-    pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-
-    // pseudorapidity
-    eta = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
-
-    double x1 = 0.0;
-    double y1 = 1.0;
-
+    VectorXYZ V = VectorXYZ( 0.0, 1.0, 0.0 );
     if ( fabs( eta ) <= eta_max )
     {
-      scal_prod = x1 * addedParticles[j].PX + y1 * addedParticles[j].PY;
-      length1 = sqrt( pow( x1, 2.0 ) + pow( y1, 2.0 ) );
-      length2 = sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) );
-      dphi_fin = acos( scal_prod / length1 / length2 );
+      dphi_fin = acos( CosPhi(addedParticles[j].Mom, V) );
       dphiiso.add( dphi_fin );
     }
   }
@@ -1833,11 +1805,10 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   // compute v2 and bin it into pt bins
   for ( int i = 0; i < n_particles; i++ )
   {
-    pp = sqrt( pow( _particles[i].E, 2.0 ) - pow( _particles[i].m, 2.0 ) );
-    pt = sqrt( pow( _particles[i].PX, 2.0 ) + pow( _particles[i].PY, 2.0 ) );
-    xt = sqrt( pow( _particles[i].X, 2.0 ) + pow( _particles[i].Y, 2.0 ) );
+    pt = _particles[i].Mom.Pt();
+    xt = _particles[i].Pos.Pt();
 
-    sinAlpha = _particles[i].PY / pt;
+    sinAlpha = _particles[i].Mom.Py() / pt;
     alpha = asin( fabs( sinAlpha ) );
     alpha = alpha * 180 / M_PI;
     
@@ -1848,7 +1819,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     }
         
     // for most particle species we are interested in the pseudorapidity (for massless particle it does not matter anyhow)
-    eta = 0.5 * log(( pp + _particles[i].PZ ) / ( pp - _particles[i].PZ ) );
+    eta = _particles[i].Mom.Pseudorapidity(_particles[i].m);
     
     // for some scenarios however explicitly the rapidity is measured. So substitute eta by the rapidity:
     if( ( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() &&
@@ -1863,9 +1834,9 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
         ParticleOffline::mapToGenericFlavorType( _flavTypeToComputeFor ) == bmeson_gen ||
         ParticleOffline::mapToGenericFlavorType( _flavTypeToComputeFor ) == jpsi
     )
-      eta = 0.5 * log(( _particles[i].E + _particles[i].PZ ) / ( _particles[i].E - _particles[i].PZ ) );
+      eta = _particles[i].Mom.Rapidity();
 
-    v2 = ( pow( _particles[i].PX, 2.0 ) - pow( _particles[i].PY, 2.0 ) ) / pow( pt, 2.0 );
+    v2 = ( pow( _particles[i].Mom.Px(), 2.0 ) - pow( _particles[i].Mom.Py(), 2.0 ) ) / pow( pt, 2.0 );
 
     flavor = _particles[i].FLAVOR;
     
@@ -2114,8 +2085,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     double y, pt;
     for ( int i = 1; i <= n_particles; i++ )
     {
-      pt = sqrt( pow( _particles[i].PX, 2.0 ) + pow( _particles[i].PY, 2.0 ) );
-      y = 0.5 * log(( _particles[i].E + _particles[i].PZ ) / ( _particles[i].E - _particles[i].PZ ) );
+      pt = _particles[i].Mom.Pt();
+      y  = _particles[i].Mom.Rapidity();
       
       if( fabs( y ) < eta_jpsi && pt > pt_min_jpsi && pt < pt_max_jpsi )
       {
@@ -2129,7 +2100,6 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     print_nonPromptJpsi << double( count_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getNumberElectronStat() / delta_eta_jpsi << endl;
   }
   
-
 }
 
 
@@ -2165,22 +2135,19 @@ void analysis::volumeMidrap( const int step ) const
 //       tBins.add(xt);
 //     }
 
-    if ( particles_atTimeNow[i].T <= tstep[step] )
+    if ( particles_atTimeNow[i].Pos.T() <= tstep[step] )
     {
-
-      y = 0.5 * log(( particles_atTimeNow[i].E + particles_atTimeNow[i].PZ ) / ( particles_atTimeNow[i].E - particles_atTimeNow[i].PZ ) );
+      y = particles_atTimeNow[i].Mom.Rapidity();
       if ( fabs( y ) <= y_max )
       {
-        zBins.add( fabs( particles_atTimeNow[i].Z ) );
-        xt = sqrt( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) );
-        tBins.add( xt );
+        zBins.add( fabs( particles_atTimeNow[i].Pos.Z() ) );
+        tBins.add( particles_atTimeNow[i].Pos.Perp() );
       }
 
 
 
-//       zBins.add( fabs(particles_atTimeNow[i].Z) );
-//       xt = sqrt(pow(particles_atTimeNow[i].X,2.0) + pow(particles_atTimeNow[i].Y,2.0));
-//       tBins.add(xt);
+//       zBins.add( fabs(particles_atTimeNow[i].Pos.Z()) );
+//       tBins.add( particles_atTimeNow[i].Pos.Perp() );
     }
 
   }
@@ -2238,8 +2205,8 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
   // loop over all particles and bin them according to their pt
   for ( int j = 0; j < n_particles; j++ )
   {
-    pt = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
-    y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
+    pt = _particles[j].Mom.Pt();
+    y = _particles[j].Mom.Rapidity();
     
     // check whether particle has the correct flavor
     genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
@@ -2323,7 +2290,7 @@ void analysis::ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vect
   FLAVOR_TYPE genFlavor;
   for ( int j = 0; j < n_particles; j++ )
   {
-    pt = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) );
+    pt = _particles[j].Mom.Pt();
 
     genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
     if ( _flavTypeToComputeFor == allFlavors || _particles[j].FLAVOR == _flavTypeToComputeFor || 
@@ -2393,7 +2360,7 @@ void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Pa
 
   for ( int j = 0; j < n_particles; j++ )
   {
-    y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
+    y = _particles[j].Mom.Rapidity();
 
     if ( _particles[j].FLAVOR == _flavTypeToComputeFor )
     {
@@ -2444,8 +2411,8 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
   
   for ( int j = 0; j < n_particles; j++ )
   {
-    Et = sqrt( pow( _particles[j].PX, 2) + pow( _particles[j].PY, 2) );
-    y = 0.5 * log(( _particles[j].E + _particles[j].PZ ) / ( _particles[j].E - _particles[j].PZ ) );
+    Et = _particles[j].Mom.Pt();
+    y = _particles[j].Mom.Rapidity();
     
     FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
     if ( (  genFlavor == _flavTypeToComputeFor ) ||
@@ -2522,15 +2489,8 @@ void analysis::addJetEvent_initial( const int jetID )
   tempEvent.flavor_in = -1;
   tempEvent.flavor_out = static_cast<int>( addedParticles[jetID].FLAVOR );
 
-  tempEvent.R_proj[0] = addedParticles[jetID].T;
-  tempEvent.R_proj[1] = addedParticles[jetID].X;
-  tempEvent.R_proj[2] = addedParticles[jetID].Y;
-  tempEvent.R_proj[3] = addedParticles[jetID].Z;
-
-  tempEvent.P_proj_out[0] = addedParticles[jetID].E;
-  tempEvent.P_proj_out[1] = addedParticles[jetID].PX;
-  tempEvent.P_proj_out[2] = addedParticles[jetID].PY;
-  tempEvent.P_proj_out[3] = addedParticles[jetID].PZ;
+  tempEvent.R_proj = addedParticles[jetID].Pos;
+  tempEvent.P_proj_out = addedParticles[jetID].Mom;
 
   vector<jetTrackerSingleEvent> tempVec;
   tempVec.push_back( tempEvent );
@@ -2543,27 +2503,19 @@ void analysis::addJetEvents_final()
   double pt;
   for ( int i = 0; i < addedParticles.size(); i++ )
   {
-    pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
+    pt = addedParticles[i].Mom.Pt();
     if ( pt > jetTracking_PT )
     {
       jetTrackerSingleEvent tempEvent;
       tempEvent.jet_ID_in = -addedParticles[i].unique_id;
       tempEvent.jet_ID_out = -1;
-      tempEvent.R_proj[0] = addedParticles[i].T;
-      tempEvent.R_proj[1] = addedParticles[i].X;
-      tempEvent.R_proj[2] = addedParticles[i].Y;
-      tempEvent.R_proj[3] = addedParticles[i].Z;
-
-      tempEvent.P_proj_in[0] = addedParticles[i].E;
-      tempEvent.P_proj_in[1] = addedParticles[i].PX;
-      tempEvent.P_proj_in[2] = addedParticles[i].PY;
-      tempEvent.P_proj_in[3] = addedParticles[i].PZ;
+      tempEvent.R_proj = addedParticles[i].Pos;
+      tempEvent.P_proj_in = addedParticles[i].Mom;
       
       tempEvent.flavor_out = -1;
       tempEvent.flavor_in = static_cast<int>( addedParticles[i].FLAVOR );
       
       tempEvent.coll_type = final_jet;
-
 
       int entity_index = 0;
       while ( entity_index < jetTracker.size() && jetTracker[entity_index].back().jet_ID_out != -addedParticles[i].unique_id )
@@ -2600,36 +2552,21 @@ int analysis::addJetEvent_in( const int ID_1, const int ID_2, const int added_ID
 
   jetTrackerSingleEvent tempEvent;
   tempEvent.jet_ID_in = -addedParticles[jetID].unique_id;
-  tempEvent.R_proj[0] = addedParticles[jetID].T;
-  tempEvent.R_proj[1] = addedParticles[jetID].X;
-  tempEvent.R_proj[2] = addedParticles[jetID].Y;
-  tempEvent.R_proj[3] = addedParticles[jetID].Z;
+  tempEvent.R_proj = addedParticles[jetID].Pos;
   tempEvent.flavor_in = static_cast<int>( addedParticles[jetID].FLAVOR );
 
-  tempEvent.P_proj_in[0] = addedParticles[jetID].E;
-  tempEvent.P_proj_in[1] = addedParticles[jetID].PX;
-  tempEvent.P_proj_in[2] = addedParticles[jetID].PY;
-  tempEvent.P_proj_in[3] = addedParticles[jetID].PZ;
-
-  tempEvent.P1_in[0] = particles_atTimeNow[partner1].E;
-  tempEvent.P1_in[1] = particles_atTimeNow[partner1].PX;
-  tempEvent.P1_in[2] = particles_atTimeNow[partner1].PY;
-  tempEvent.P1_in[3] = particles_atTimeNow[partner1].PZ;
+  tempEvent.P_proj_in = addedParticles[jetID].Mom;
+  tempEvent.P1_in = particles_atTimeNow[partner1].Mom;
 
   if ( coll_type == c3to2 )
   {
-    tempEvent.P2_in[0] = particles_atTimeNow[partner2].E;
-    tempEvent.P2_in[1] = particles_atTimeNow[partner2].PX;
-    tempEvent.P2_in[2] = particles_atTimeNow[partner2].PY;
-    tempEvent.P2_in[3] = particles_atTimeNow[partner2].PZ;
+    tempEvent.P2_in = particles_atTimeNow[partner2].Mom;
   }
 
   tempEvent.lambda = lambda;
   tempEvent.xSection = cross_section;
   tempEvent.cell_ID = cell_ID;
   tempEvent.coll_type = coll_type;
-  
-
 
   int entity_index = 0;
   while ( entity_index < jetTracker.size() && jetTracker[entity_index].back().jet_ID_out != -addedParticles[jetID].unique_id )
@@ -2654,13 +2591,13 @@ int analysis::addJetEvent_in( const int ID_1, const int ID_2, const int added_ID
 
 void analysis::addJetEvent_out( const int entity_ID, const int added_ID, const int ID_2, const int ID_3, const jetTrackerCollType coll_type )
 {
-  double pt1 = sqrt( pow( addedParticles[added_ID].PX, 2.0 ) + pow( addedParticles[added_ID].PY, 2.0 ) );
-  double pt2 = sqrt( pow( particles_atTimeNow[ID_2].PX, 2.0 ) + pow( particles_atTimeNow[ID_2].PY, 2.0 ) );
+  double pt1 = addedParticles[added_ID].Mom.Pt();
+  double pt2 = particles_atTimeNow[ID_2].Mom.Pt();
 
   double pt3 = -1;
   if ( coll_type == c2to3 )
   {
-    pt3 = sqrt( pow( addedParticles[ID_3].PX, 2.0 ) + pow( addedParticles[ID_3].PY, 2.0 ) );
+    pt3 = addedParticles[ID_3].Mom.Pt();
   }
 
   int jetID;
@@ -2679,57 +2616,32 @@ void analysis::addJetEvent_out( const int entity_ID, const int added_ID, const i
   if ( entity_ID != -1 )
   {
     jetTracker[entity_ID].back().jet_ID_out = -addedParticles[jetID].unique_id;
-
-    jetTracker[entity_ID].back().P_proj_out[0] = addedParticles[jetID].E;
-    jetTracker[entity_ID].back().P_proj_out[1] = addedParticles[jetID].PX;
-    jetTracker[entity_ID].back().P_proj_out[2] = addedParticles[jetID].PY;
-    jetTracker[entity_ID].back().P_proj_out[3] = addedParticles[jetID].PZ;
+    jetTracker[entity_ID].back().P_proj_out = addedParticles[jetID].Mom;
     
     jetTracker[entity_ID].back().flavor_out = static_cast<int>( addedParticles[jetID].FLAVOR );
-    
-
-    jetTracker[entity_ID].back().P1_out[0] = particles_atTimeNow[partner1].E;
-    jetTracker[entity_ID].back().P1_out[1] = particles_atTimeNow[partner1].PX;
-    jetTracker[entity_ID].back().P1_out[2] = particles_atTimeNow[partner1].PY;
-    jetTracker[entity_ID].back().P1_out[3] = particles_atTimeNow[partner1].PZ;
+    jetTracker[entity_ID].back().P1_out = particles_atTimeNow[partner1].Mom;
 
     if ( coll_type == c2to3 )
     {
-      jetTracker[entity_ID].back().P2_out[0] = addedParticles[partner2].E;
-      jetTracker[entity_ID].back().P2_out[1] = addedParticles[partner2].PX;
-      jetTracker[entity_ID].back().P2_out[2] = addedParticles[partner2].PY;
-      jetTracker[entity_ID].back().P2_out[3] = addedParticles[partner2].PZ;
+      jetTracker[entity_ID].back().P2_out = addedParticles[partner2].Mom;
     }
   }
-  else if ( sqrt( pow( addedParticles[jetID].PX, 2.0 ) + pow( addedParticles[jetID].PY, 2.0 ) ) > jetTracking_PT )
+  else if ( addedParticles[jetID].Mom.Pt2() > pow( jetTracking_PT, 2 ) )
   {
     jetTrackerSingleEvent tempEvent;
     tempEvent.jet_ID_in = -1;
     tempEvent.jet_ID_out = -addedParticles[jetID].unique_id;
     tempEvent.coll_type = production;
-    tempEvent.R_proj[0] = addedParticles[jetID].T;
-    tempEvent.R_proj[1] = addedParticles[jetID].X;
-    tempEvent.R_proj[2] = addedParticles[jetID].Y;
-    tempEvent.R_proj[3] = addedParticles[jetID].Z;
+    tempEvent.R_proj = addedParticles[jetID].Pos;
     tempEvent.flavor_in = -1;
     tempEvent.flavor_out = static_cast<int>( addedParticles[jetID].FLAVOR );
 
-    tempEvent.P_proj_out[0] = addedParticles[jetID].E;
-    tempEvent.P_proj_out[1] = addedParticles[jetID].PX;
-    tempEvent.P_proj_out[2] = addedParticles[jetID].PY;
-    tempEvent.P_proj_out[3] = addedParticles[jetID].PZ;
-
-    tempEvent.P1_out[0] = particles_atTimeNow[partner1].E;
-    tempEvent.P1_out[1] = particles_atTimeNow[partner1].PX;
-    tempEvent.P1_out[2] = particles_atTimeNow[partner1].PY;
-    tempEvent.P1_out[3] = particles_atTimeNow[partner1].PZ;
+    tempEvent.P_proj_out = addedParticles[jetID].Mom;
+    tempEvent.P1_out = particles_atTimeNow[partner1].Mom;
 
     if ( coll_type == c2to3 )
     {
-      tempEvent.P2_out[0] = addedParticles[partner2].E;
-      tempEvent.P2_out[1] = addedParticles[partner2].PX;
-      tempEvent.P2_out[2] = addedParticles[partner2].PY;
-      tempEvent.P2_out[3] = addedParticles[partner2].PZ;
+      tempEvent.P2_out = addedParticles[partner2].Mom;
     }
 
     vector< jetTrackerSingleEvent > tempEntity;
@@ -2772,10 +2684,16 @@ void analysis::particleOutput( const int step )
 
   for ( int i = 0; i < addedParticles.size(); i++ )
   {
-    file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep << addedParticles[i].T << sep << addedParticles[i].X << sep
-    << addedParticles[i].Y << sep  << addedParticles[i].Z << sep << addedParticles[i].E << sep << addedParticles[i].PX << sep << addedParticles[i].PY << sep
-//     << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep << addedParticles[i].N_EVENT_pp << endl;
-    << addedParticles[i].PZ << sep << addedParticles[i].md2g << sep << addedParticles[i].X_traveled << sep << addedParticles[i].N_EVENT_pp << endl;
+    file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep 
+         << addedParticles[i].Pos.T() << sep << addedParticles[i].Pos.X() << sep
+         << addedParticles[i].Pos.Y() << sep << addedParticles[i].Pos.Z() << sep 
+         << addedParticles[i].Mom.E() << sep << addedParticles[i].Mom.Px() << sep 
+         << addedParticles[i].Mom.Py() << sep << addedParticles[i].Mom.Pz() << sep 
+      //         << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep 
+      //         << addedParticles[i].N_EVENT_pp << endl;
+         << addedParticles[i].md2g << sep 
+         << addedParticles[i].X_traveled << sep 
+         << addedParticles[i].N_EVENT_pp << endl;
   }
   file.close();
   
@@ -2799,10 +2717,13 @@ void analysis::particleOutput( const int step )
 
     for ( int i = 0; i < addedParticlesCopy.size(); i++ )
     {
-      file_meson << i << sep << addedParticlesCopy[i].unique_id << sep << addedParticlesCopy[i].cell_id << sep << addedParticlesCopy[i].FLAVOR << sep << addedParticlesCopy[i].T << sep << addedParticlesCopy[i].X << sep
-      << addedParticlesCopy[i].Y << sep  << addedParticlesCopy[i].Z << sep << addedParticlesCopy[i].E << sep << addedParticlesCopy[i].PX << sep << addedParticlesCopy[i].PY << sep
-//       << addedParticlesCopy[i].PZ << sep << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].md2q << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
-      << addedParticlesCopy[i].PZ << sep << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].X_traveled << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
+      file_meson << i << sep << addedParticlesCopy[i].unique_id << sep << addedParticlesCopy[i].cell_id << sep << addedParticlesCopy[i].FLAVOR << sep 
+                 << addedParticlesCopy[i].Pos.T() << sep << addedParticlesCopy[i].Pos.X() << sep
+                 << addedParticlesCopy[i].Pos.Y() << sep << addedParticlesCopy[i].Pos.Z() << sep 
+                 << addedParticlesCopy[i].Mom.E()  << sep << addedParticlesCopy[i].Mom.Px() << sep 
+                 << addedParticlesCopy[i].Mom.Py() << sep << addedParticlesCopy[i].Mom.Pz() << sep 
+        //                 << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].md2q << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
+                 << addedParticlesCopy[i].md2g << sep << addedParticlesCopy[i].X_traveled << sep << addedParticlesCopy[i].N_EVENT_pp << endl;
     }
     file_meson.close();
   }
@@ -2815,7 +2736,7 @@ void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const in
   const string sep = "  ";
   const int width = 14;
   double cc, dt;
-  double t, x, y, z;
+  VectorTXYZ Pos;
   const double zero = 0.0;
 
   double time;
@@ -2909,43 +2830,32 @@ void analysis::writePartclMovie( vector< ParticleOffline >& _particles, const in
           nCount_selected = 1;
 
           _oscar << ::std::scientific << ::std::uppercase << ::std::setprecision( 6 )
-          << setw( width ) << _particles[i].PX << setw( width ) << _particles[i].PY << setw( width ) << _particles[i].PZ << setw( width )
-          << _particles[i].E << setw( width ) << _particles[i].m;
+                 << setw( width ) << _particles[i].Mom.Px() 
+                 << setw( width ) << _particles[i].Mom.Py() 
+                 << setw( width ) << _particles[i].Mom.Pz() 
+                 << setw( width ) << _particles[i].Mom.E() 
+                 << setw( width ) << _particles[i].m;
 
-          if ( _particles[i].T == time )
-          {
-            t = _particles[i].T;
-            x = _particles[i].X;
-            y = _particles[i].Y;
-            z = _particles[i].Z;
-          }
-          else if ( _particles[i].T > time )
-          {
-            dt = time - _particles[i].T;
-            cc = dt / _particles[i].E;
-            t = _particles[i].T + dt;
-            x = _particles[i].X + _particles[i].PX * cc;
-            y = _particles[i].Y + _particles[i].PY * cc;
-            z = _particles[i].Z + _particles[i].PZ * cc;
-          }
-          else
+          if ( _particles[i].Pos.T() < time )
           {
             cout << "error in write movie particle data, particles from the past" << endl;
-            cout << "timestep=" << time << "   time _particles=" << _particles[i].T << endl;
-            dt = time - _particles[i].T;
-            cc = dt / _particles[i].E;
-            t = _particles[i].T + dt;
-            x = _particles[i].X + _particles[i].PX * cc;
-            y = _particles[i].Y + _particles[i].PY * cc;
-            z = _particles[i].Z + _particles[i].PZ * cc;
+            cout << "timestep=" << time << "   time _particles=" << _particles[i].Pos.T() << endl;
           }
+          
+          Pos = _particles[i].Pos + _particles[i].Mom * (( time - _particles[i].Pos.T() )/_particles[i].Mom.E() );
 
-          _oscar << setw( width ) << x << setw( width ) << y << setw( width ) << z << setw( width ) << t;
+
+          _oscar << setw( width ) << Pos.X() << setw( width ) << Pos.Y() << setw( width ) << Pos.Z() << setw( width ) << Pos.T();
 
           //       _oscar << "0.0" << sep << "0.0" << sep << "0.0" << sep << "0.0" << sep << "0.0" << sep << "0" << endl;
           //         _oscar << zero << sep << zero << sep << zero << sep << zero << sep << zero << ::std::setw( 10 ) << int(zero) << endl;
           //         _oscar << zero << sep << _particles[i].X_lastInt << sep << _particles[i].Y_lastInt << sep << _particles[i].Z_lastInt << sep << _particles[i].T_lastInt << ::std::setw( 10 ) << int(zero) << endl;
-          _oscar << setw( width ) << zero << setw( width ) << _particles[i].X_lastInt << setw( width ) << _particles[i].Y_lastInt << setw( width ) << _particles[i].Z_lastInt << setw( width ) << _particles[i].T_lastInt << ::std::setw( 10 ) << -(_particles[i].unique_id) << endl;
+          _oscar << setw( width ) << zero 
+                 << setw( width ) << _particles[i].lastInt.X()
+                 << setw( width ) << _particles[i].lastInt.Y() 
+                 << setw( width ) << _particles[i].lastInt.Z() 
+                 << setw( width ) << _particles[i].lastInt.T() 
+                 << ::std::setw( 10 ) << -(_particles[i].unique_id) << endl;
           // --------------------------------------------------->>
         }
       }
@@ -3274,7 +3184,7 @@ void analysis::getJpsiFugacity( const double time, const double dr, const double
   {
     if ( addedParticles[i].T_creation <= time )
     {
-      if (( pow( addedParticles[i].X, 2.0 ) + pow( addedParticles[i].Y, 2.0 ) < pow( dr, 2.0 ) )  && ( fabs( addedParticles[i].Z ) < dz ) )
+      if (( addedParticles[i].Pos.Perp2() < pow( dr, 2.0 ) )  && ( fabs( addedParticles[i].Pos.Z() ) < dz ) )
       {
         // number of jpsi
         if ( addedParticles[i].FLAVOR == 50 )
@@ -3287,29 +3197,29 @@ void analysis::getJpsiFugacity( const double time, const double dr, const double
   
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    if ( particles_atTimeNow[i].T <= time )
+    if ( particles_atTimeNow[i].Pos.T() <= time )
     {
-      if (( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( dr, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Z ) < dz ) )
+      if (( particles_atTimeNow[i].Pos.Perp2() < pow( dr, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Pos.Z() ) < dz ) )
       {
         // compute temp
         if ( particles_atTimeNow[i].FLAVOR == 0 ) // gluon
         {
-          e_g += particles_atTimeNow[i].E;
+          e_g += particles_atTimeNow[i].Mom.E();
           n_g++;
         }
       }
     }
   }
 
-  temp = e_g / 3.0 / n_g; // GeV
-  enDen = e_g / V / pow( 0.197, 3.0 ); // GeV/fm^3
+  temp = e_g /( 3.0 * n_g ); // GeV
+  enDen = e_g /( V * pow( 0.197, 3.0 ) ); // GeV/fm^3
 
 
   
   n_jpsi_equ = theInterpolation_nJpsi.getN( temp ) * V;  // GeV^3/GeV^3 = 1
 
 
-  fugacity = double(n_jpsi)/ n_jpsi_equ / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles();
+  fugacity = double(n_jpsi)/( n_jpsi_equ * theConfig->getTestparticles() * theConfig->getNaddedEvents() * theConfig->getJpsiTestparticles() );
 
 //   cout << "t=" << time << "  temp=" << temp << "  deltaTemp=" << deltaTemp <<  "  n_jpsi_equ=" << n_jpsi_equ << "  fugacity=" << fugacity << "  n_jpsi=" << n_jpsi << "  V=" << V << endl;
 
@@ -3319,7 +3229,7 @@ void analysis::getJpsiFugacity( const double time, const double dr, const double
 
 void analysis::jpsi_correlations()
 {
-  double cos_delta_phi, cos_delta_theta, pt, pp, delta_eta, eta, eta_charm;
+  double cos_delta_phi, cos_delta_theta, pt, delta_eta, eta, eta_charm;
   string filename;
 
   filename = filename_prefix + "_jpsi_corr_ptbins_iniJpsi";
@@ -3359,14 +3269,11 @@ void analysis::jpsi_correlations()
   {
     if ( addedParticles[i].FLAVOR == 50 ) // jpsi
     {
-      pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
-      pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
-      // pseudorapidity
-      eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
-      double y = 0.5 * log(( addedParticles[i].E + addedParticles[i].PZ ) / ( addedParticles[i].E - addedParticles[i].PZ ) );
+      pt = addedParticles[i].Mom.Pt();
+      eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
       
       eta_test.add(eta);
-      y_test.add(y);
+      y_test.add( addedParticles[i].Mom.Rapidity() );
       
       if( addedParticles[i].initially_produced ) // initial Jpsi
       {
@@ -3378,8 +3285,7 @@ void analysis::jpsi_correlations()
           if( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 )
           {
             // delta eta
-            pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-            eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+            eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaIniJpsiAllCharm.add( delta_eta );
           }
@@ -3388,7 +3294,7 @@ void analysis::jpsi_correlations()
       else
       {
         ptbins_secJpsi.add(pt);
-
+        
         for ( int j = 0; j < addedParticles.size(); j++ )
         {
           // find partners of charm quarks in Jpsi
@@ -3397,19 +3303,14 @@ void analysis::jpsi_correlations()
 //             if ( addedParticles[j].FLAVOR != 7 && addedParticles[j].FLAVOR != 8 )
 //               cout << "error in analysis::jpsi_correlations() " << addedParticles[j].FLAVOR << "  " << addedParticles[i].FLAVOR << "  " << addedParticles[j].m << "  " << addedParticles[i].m << "  " << addedParticles[j].N_EVENT_pp << "  " << addedParticles[i].N_EVENT_pp << "  " << addedParticles[j].N_EVENT_Cbar << "  " << addedParticles[i].N_EVENT_Cbar << endl;
             
-            cos_delta_phi = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY ) 
-            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) 
-            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) ;
+            cos_delta_phi = CosPhi( addedParticles[i].Mom, addedParticles[j].Mom );
             phibins_deltaPhiJpsiCharm.add( acos(cos_delta_phi) );
-      
-            cos_delta_theta = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY + addedParticles[i].PZ*addedParticles[j].PZ ) 
-            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) + pow( addedParticles[i].PZ, 2.0 ) ) 
-            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) + pow( addedParticles[j].PZ, 2.0 ) ) ;
+            
+            cos_delta_theta = CosTheta( addedParticles[i].Mom, addedParticles[j].Mom );
             phibins_deltaThetaJpsiCharm.add( acos(cos_delta_theta) );
             
             // delta eta
-            pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-            eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+            eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaJpsiCharm.add( delta_eta );
             etabins_detaJpsiCharm2d.add( eta, eta_charm );
@@ -3419,8 +3320,7 @@ void analysis::jpsi_correlations()
           if( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 )
           {
             // delta eta
-            pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-            eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+            eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaSecJpsiAllCharm.add( delta_eta );
           }
@@ -3431,9 +3331,7 @@ void analysis::jpsi_correlations()
     {
       if( addedParticles[i].jpsi_dissociation_number != -1 ) // produced in Jpsi dissociation
       {
-        pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
-        // pseudorapidity
-        eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+        eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
         
         for ( int j = 0; j < addedParticles.size(); j++ )
         {
@@ -3442,26 +3340,19 @@ void analysis::jpsi_correlations()
             if ( addedParticles[j].FLAVOR != 7 && addedParticles[j].FLAVOR != 8 )
               cout << "error2 in analysis::jpsi_correlations() " << addedParticles[j].FLAVOR << "  " << addedParticles[j].m << "  " << addedParticles[i].FLAVOR << "  " << addedParticles[i].m << "  " << addedParticles[j].jpsi_dissociation_number << endl;
             
-            cos_delta_phi = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY) 
-            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) 
-            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) ;
+            cos_delta_phi = CosPhi( addedParticles[i].Mom, addedParticles[j].Mom );
             phibins_deltaPhiCharmCharm.add( acos(cos_delta_phi) );
       
-            cos_delta_theta = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY + addedParticles[i].PZ*addedParticles[j].PZ ) 
-            / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) + pow( addedParticles[i].PZ, 2.0 ) ) 
-            / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) + pow( addedParticles[j].PZ, 2.0 ) ) ;
+            cos_delta_theta = CosTheta( addedParticles[i].Mom, addedParticles[j].Mom );
             phibins_deltaThetaCharmCharm.add( acos(cos_delta_theta) );
             
             // delta eta
-            pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-            eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+            eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
             delta_eta = fabs( eta - eta_charm );
             etabins_detaCharmCharm.add( delta_eta );
             
-            pt = sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) );
-            ptbins_charmFromJpsi.add(pt);
-            pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
-            ptbins_charmFromJpsi.add(pt);
+            ptbins_charmFromJpsi.add( addedParticles[j].Mom.Pt() );
+            ptbins_charmFromJpsi.add( addedParticles[i].Mom.Pt() );
           }
         }
       }
@@ -3489,7 +3380,7 @@ void analysis::jpsi_correlations()
 
 void analysis::ini_charm_correlations()
 {
-  double cos_delta_phi, cos_delta_theta, pp, eta, eta_charm, delta_eta;
+  double cos_delta_phi, cos_delta_theta, eta, eta_charm, delta_eta;
   string filename;
 
 
@@ -3500,31 +3391,24 @@ void analysis::ini_charm_correlations()
   filename = filename_prefix + "_etabins_detaIniCharm";
   binning etabins_detaIniCharm(filename, 0.0, 20.0, 70);
 
-  for ( int i = 0; i < addedParticles.size(); i++ )
+  for ( unsigned int i = 0; i < addedParticles.size(); i++ )
   {
     if ( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
     {
-      pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
-      // pseudorapidity
-      eta = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+      eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
       
-      for ( int j = i+1; j < addedParticles.size(); j++ )
+      for ( unsigned int j = i+1; j < addedParticles.size(); j++ )
       {
         if( addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_pp &&  ( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 ) )
         {
-          cos_delta_phi = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY) 
-          / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) ) 
-          / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) ) ;
+          cos_delta_phi = CosPhi( addedParticles[i].Mom, addedParticles[j].Mom );
           phibins_deltaPhiIniCharm.add( acos(cos_delta_phi) );
           
-          cos_delta_theta = ( addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY + addedParticles[i].PZ*addedParticles[j].PZ ) 
-          / sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) + pow( addedParticles[i].PZ, 2.0 ) ) 
-          / sqrt( pow( addedParticles[j].PX, 2.0 ) + pow( addedParticles[j].PY, 2.0 ) + pow( addedParticles[j].PZ, 2.0 ) ) ;
+          cos_delta_theta = CosTheta( addedParticles[i].Mom, addedParticles[j].Mom );
           phibins_deltaThetaIniCharm.add( acos(cos_delta_theta) );
           
           // delta eta
-          pp = sqrt( pow( addedParticles[j].E, 2.0 ) - pow( addedParticles[j].m, 2.0 ) );
-          eta_charm = 0.5 * log(( pp + addedParticles[j].PZ ) / ( pp - addedParticles[j].PZ ) );
+          eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
           delta_eta = fabs( eta - eta_charm );
           etabins_detaIniCharm.add( delta_eta );
         }
@@ -3688,37 +3572,36 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   // sum over all particles
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    if ( FPT_COMP_LE( particles_atTimeNow[i].T, time )  && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
+    if ( FPT_COMP_LE( particles_atTimeNow[i].Pos.T(), time )  && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
     {
-      if (( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Z ) < dz ) )
+      if (( particles_atTimeNow[i].Pos.Perp2() < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Pos.Z() ) < dz ) )
       {
         // set cell id to 0
         cell_id = 0;
         
         ++numberInCell[cell_id];
         
-        XT = sqrt( particles_atTimeNow[i].X * particles_atTimeNow[i].X + particles_atTimeNow[i].Y * particles_atTimeNow[i].Y );
+        XT = particles_atTimeNow[i].Pos.Perp();
         if ( XT < 1.0e-5 )
         {
-          pr = sqrt( particles_atTimeNow[i].PX * particles_atTimeNow[i].PX
-          + particles_atTimeNow[i].PY * particles_atTimeNow[i].PY );
+          pr = particles_atTimeNow[i].Mom.Pt();
         }
         else
         {
-          pr = ( particles_atTimeNow[i].PX * particles_atTimeNow[i].X
-          + particles_atTimeNow[i].PY * particles_atTimeNow[i].Y ) / XT;
+          pr = ( particles_atTimeNow[i].Mom.Px() * particles_atTimeNow[i].Pos.X()
+                 + particles_atTimeNow[i].Mom.Py() * particles_atTimeNow[i].Pos.Y() ) / XT;
         }
-        vr_cell[cell_id] += pr / particles_atTimeNow[i].E;
-        vx_cell[cell_id] += particles_atTimeNow[i].PX / particles_atTimeNow[i].E;
-        vy_cell[cell_id] += particles_atTimeNow[i].PY / particles_atTimeNow[i].E;
-        vz_cell[cell_id] += particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
+        vr_cell[cell_id] += pr / particles_atTimeNow[i].Mom.E();
+        vx_cell[cell_id] += particles_atTimeNow[i].Mom.Px() / particles_atTimeNow[i].Mom.E();
+        vy_cell[cell_id] += particles_atTimeNow[i].Mom.Py() / particles_atTimeNow[i].Mom.E();
+        vz_cell[cell_id] += particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
         
-        em_cell[cell_id] += particles_atTimeNow[i].E;
+        em_cell[cell_id] += particles_atTimeNow[i].Mom.E();
         prm_cell[cell_id] += pr;
-        pzm_cell[cell_id] += particles_atTimeNow[i].PZ;
-        pr2em_cell[cell_id] += pr * pr / particles_atTimeNow[i].E;
-        pz2em_cell[cell_id] += particles_atTimeNow[i].PZ * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
-        przem_cell[cell_id] += pr * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
+        pzm_cell[cell_id] += particles_atTimeNow[i].Mom.Pz();
+        pr2em_cell[cell_id] += pr * pr / particles_atTimeNow[i].Mom.E();
+        pz2em_cell[cell_id] += particles_atTimeNow[i].Mom.Pz() * particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
+        przem_cell[cell_id] += pr * particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
       }
     }
   }
@@ -3734,7 +3617,7 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
     else // take also 6 neighbor cells into account
     {
       cout << "error in calculateTempInTube(): to few particles in cell. Number=" << numberInCell[i] << "  time=" << time << endl;
-      cout << particles_atTimeNow.size() << "  " << particles_atTimeNow[0].T << "  " << particles_atTimeNow[10].T << endl;
+      cout << particles_atTimeNow.size() << "  " << particles_atTimeNow[0].Pos.T() << "  " << particles_atTimeNow[10].Pos.T() << endl;
     }
   }
   
@@ -3901,30 +3784,30 @@ void analysis::writeTempAndVel( const int step  )
   // sum over all particles
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    if ( FPT_COMP_E( particles_atTimeNow[i].T, time ) && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
+    if ( FPT_COMP_E( particles_atTimeNow[i].Pos.T(), time ) && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
     {
       // determine cell id
-      if ( fabs( particles_atTimeNow[i].X - xlength / 2.0 ) < 1.0e-6 )
+      if ( fabs( particles_atTimeNow[i].Pos.X() - xlength / 2.0 ) < 1.0e-6 )
         nx = nCellsx - 1;
       else
-        nx = int(( particles_atTimeNow[i].X / xlength + 0.5 ) * nCellsx );
+        nx = int(( particles_atTimeNow[i].Pos.X() / xlength + 0.5 ) * nCellsx );
 
-      if ( fabs( particles_atTimeNow[i].Y - ylength / 2.0 ) < 1.0e-6 )
+      if ( fabs( particles_atTimeNow[i].Pos.Y() - ylength / 2.0 ) < 1.0e-6 )
         ny = nCellsy - 1;
       else
-        ny = int(( particles_atTimeNow[i].Y / ylength + 0.5 ) * nCellsy );
+        ny = int(( particles_atTimeNow[i].Pos.Y() / ylength + 0.5 ) * nCellsy );
 
-      if ( fabs( particles_atTimeNow[i].Z - zlength / 2.0 ) < 1.0e-6 )
+      if ( fabs( particles_atTimeNow[i].Pos.Z() - zlength / 2.0 ) < 1.0e-6 )
         nz = nCellsz - 1;
       else
-        nz = int(( particles_atTimeNow[i].Z / zlength + 0.5 ) * nCellsz );
+        nz = int(( particles_atTimeNow[i].Pos.Z() / zlength + 0.5 ) * nCellsz );
 
 
       if (( nx >= nCellsx ) || ( nx < 0 ) || ( ny >= nCellsy ) || ( ny < 0 ) || ( nz >= nCellsz ) || ( nz < 0 ) )
       {
         cout << "err cell_ID in temp output" << endl;
-        cout << particles_atTimeNow[i].T << "\t" << particles_atTimeNow[i].X << "\t" << particles_atTimeNow[i].Y;
-        cout << "\t" << particles_atTimeNow[i].Z << endl;
+        cout << particles_atTimeNow[i].Pos.T() << "\t" << particles_atTimeNow[i].Pos.X() << "\t" << particles_atTimeNow[i].Pos.Y();
+        cout << "\t" << particles_atTimeNow[i].Pos.Z() << endl;
         cout << nx << "\t" << ny << "\t" << nz << endl;
       }
       else
@@ -3933,28 +3816,27 @@ void analysis::writeTempAndVel( const int step  )
         
         ++numberInCell[cell_id];
         
-        XT = sqrt( particles_atTimeNow[i].X * particles_atTimeNow[i].X + particles_atTimeNow[i].Y * particles_atTimeNow[i].Y );
+        XT = particles_atTimeNow[i].Pos.Perp();
         if ( XT < 1.0e-5 )
         {
-          pr = sqrt( particles_atTimeNow[i].PX * particles_atTimeNow[i].PX
-          + particles_atTimeNow[i].PY * particles_atTimeNow[i].PY );
+          pr = particles_atTimeNow[i].Mom.Pt();
         }
         else
         {
-          pr = ( particles_atTimeNow[i].PX * particles_atTimeNow[i].X
-          + particles_atTimeNow[i].PY * particles_atTimeNow[i].Y ) / XT;
+          pr = ( particles_atTimeNow[i].Mom.Px() * particles_atTimeNow[i].Pos.X()
+                 + particles_atTimeNow[i].Mom.Py() * particles_atTimeNow[i].Pos.Y() ) / XT;
         }
-        vr_cell[cell_id] += pr / particles_atTimeNow[i].E;
-        vx_cell[cell_id] += particles_atTimeNow[i].PX / particles_atTimeNow[i].E;
-        vy_cell[cell_id] += particles_atTimeNow[i].PY / particles_atTimeNow[i].E;
-        vz_cell[cell_id] += particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
+        vr_cell[cell_id] += pr / particles_atTimeNow[i].Mom.E();
+        vx_cell[cell_id] += particles_atTimeNow[i].Mom.Px() / particles_atTimeNow[i].Mom.E();
+        vy_cell[cell_id] += particles_atTimeNow[i].Mom.Py() / particles_atTimeNow[i].Mom.E();
+        vz_cell[cell_id] += particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
         
-        em_cell[cell_id] += particles_atTimeNow[i].E;
+        em_cell[cell_id] += particles_atTimeNow[i].Mom.E();
         prm_cell[cell_id] += pr;
-        pzm_cell[cell_id] += particles_atTimeNow[i].PZ;
-        pr2em_cell[cell_id] += pr * pr / particles_atTimeNow[i].E;
-        pz2em_cell[cell_id] += particles_atTimeNow[i].PZ * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
-        przem_cell[cell_id] += pr * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
+        pzm_cell[cell_id] += particles_atTimeNow[i].Mom.Pz();
+        pr2em_cell[cell_id] += pr * pr / particles_atTimeNow[i].Mom.E();
+        pz2em_cell[cell_id] += particles_atTimeNow[i].Mom.Pz() * particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
+        przem_cell[cell_id] += pr * particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
         
         // temp of particles summed
         tempWithQuarks_cell[cell_id] += particles_atTimeNow[i].temperature;
@@ -4198,13 +4080,13 @@ void analysis::print_dndy(const string subfix )
   filename = filename_prefix + "_dndpt_" + subfix;
   binning dndpt(filename, 0.0, 20.0, 200);
   
-  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  for ( unsigned int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    pt = sqrt( pow( particles_atTimeNow[i].PX, 2.0 ) + pow( particles_atTimeNow[i].PY, 2.0 ) );
-    y = 0.5 * log(( particles_atTimeNow[i].E + particles_atTimeNow[i].PZ ) / ( particles_atTimeNow[i].E - particles_atTimeNow[i].PZ ) );
+    pt = particles_atTimeNow[i].Mom.Pt();
+    y  = particles_atTimeNow[i].Mom.Rapidity();
     
 //     if(y < -8.0 || isnan(y))
-// //       cout << y << "\t" << particles_atTimeNow[i].E << "\t" << particles_atTimeNow[i].PZ  << "\t" << pt << "\t" << i << endl;
+// //       cout << y << "\t" << particles_atTimeNow[i].Mom.E() << "\t" << particles_atTimeNow[i].Mom.Pz()  << "\t" << pt << "\t" << i << endl;
 //       cout << i << "\t";
     
     dndy.add(y);
@@ -4246,7 +4128,7 @@ void analysis::analyseAngleDe()
   filename = filename_prefix + "_dmeson_electron_cosPhiTrans";
   binningValues binsCosPhi(filename, 0.0, 10.0, 200);
   
-  for ( int i = 0; i < addedParticles.size(); i++ )
+  for ( unsigned int i = 0; i < addedParticles.size(); i++ )
   {
     if ( addedParticles[i].FLAVOR == 7 || addedParticles[i].FLAVOR == 8 )
     {
@@ -4254,15 +4136,11 @@ void analysis::analyseAngleDe()
       for(int k = 0; k < theConfig->getNumberElectronStat(); k++)
       {      
         k_e = ( i ) * theConfig->getNumberElectronStat() + k ;
-        costheta = ( addedParticlesCopy[i].PX*addedPartcl_electron[k_e].PX + addedParticlesCopy[i].PY*addedPartcl_electron[k_e].PY + addedParticlesCopy[i].PZ*addedPartcl_electron[k_e].PZ ) 
-        / sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) + pow( addedPartcl_electron[k_e].PZ, 2.0 ) ) 
-        / sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) ) ;
+        costheta = CosTheta( addedParticlesCopy[i].Mom, addedPartcl_electron[k_e].Mom );
         
-        cosphi = ( addedParticlesCopy[i].PX*addedPartcl_electron[k_e].PX + addedParticlesCopy[i].PY*addedPartcl_electron[k_e].PY ) 
-        / sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) ) 
-        / sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) ) ;
-        
-        ept = sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) ); // e- pt
+        cosphi = CosPhi( addedParticlesCopy[i].Mom, addedPartcl_electron[k_e].Mom );
+
+        ept = addedPartcl_electron[k_e].Mom.Pt(); // e- pt
         
         binsCosTheta.add(ept, costheta);
         binsCosPhi.add(ept, cosphi);
@@ -4365,11 +4243,12 @@ void analysis::jpsiEvolution( int step )
   int countJpsi_forwardNormRap_all = 0;
   int countJpsi_forwardNormRap_ini = 0;
 //   int countJpsi_midSpaceTimeRap = 0;
-  for ( int i = 0; i < addedParticles.size(); i++ )
+
+  for ( unsigned int i = 0; i < addedParticles.size(); i++ )
   {
     if ( addedParticles[i].FLAVOR == 50 )
     {
-      double pt = sqrt( pow( addedParticles[i].PX, 2.0 ) + pow( addedParticles[i].PY, 2.0 ) );
+      double pt = addedParticles[i].Mom.Pt();
       
       countJpsi_all++;
         
@@ -4378,9 +4257,7 @@ void analysis::jpsiEvolution( int step )
       
       if( pt >= pt_min )
       {
-        double pp = sqrt( pow( addedParticles[i].E, 2.0 ) - pow( addedParticles[i].m, 2.0 ) );
-        // pseudorapidity
-        double pseudorap = 0.5 * log(( pp + addedParticles[i].PZ ) / ( pp - addedParticles[i].PZ ) );
+        double pseudorap = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
         
         if ( fabs( pseudorap ) >= rapidityRanges[0].yleft && fabs( pseudorap ) <= rapidityRanges[0].yright )
         {
@@ -4398,7 +4275,7 @@ void analysis::jpsiEvolution( int step )
         
               
         // normal rapidity
-        double normrap = 0.5 * log(( addedParticles[i].E + addedParticles[i].PZ ) / ( addedParticles[i].E - addedParticles[i].PZ ) );
+        double normrap = addedParticles[i].Mom.Rapidity();
         
         if ( fabs( normrap ) >= rapidityRanges[0].yleft && fabs( normrap ) <= rapidityRanges[0].yright )
         {
@@ -4417,7 +4294,7 @@ void analysis::jpsiEvolution( int step )
           
         
   //       // space time rapidity
-  //       double strap = 0.5 * log(( addedParticles[i].T + addedParticles[i].Z ) / ( addedParticles[i].T - addedParticles[i].Z ) );
+  //       double strap = addedParticles[i].Pos.Rapidity();
   //       if( fabs(strap) < midrap )
   //         countJpsi_midSpaceTimeRap++;
       }
@@ -4558,9 +4435,14 @@ void analysis::scatteredMediumParticlesOutput( const int step )
 
   for( int i = 0; i < scatteredMediumParticles.size(); i++ )
   {
-    file << i << sep << scatteredMediumParticles[i].unique_id << sep << scatteredMediumParticles[i].cell_id << sep << scatteredMediumParticles[i].FLAVOR << sep << scatteredMediumParticles[i].T << sep << scatteredMediumParticles[i].X << sep
-         << scatteredMediumParticles[i].Y << sep  << scatteredMediumParticles[i].Z << sep << scatteredMediumParticles[i].E << sep << scatteredMediumParticles[i].PX << sep << scatteredMediumParticles[i].PY << sep
-         << scatteredMediumParticles[i].PZ << sep << scatteredMediumParticles[i].md2g << sep << scatteredMediumParticles[i].md2q << sep << scatteredMediumParticles[i].N_EVENT_pp << endl;
+    file << i << sep << scatteredMediumParticles[i].unique_id << sep << scatteredMediumParticles[i].cell_id 
+         << sep << scatteredMediumParticles[i].FLAVOR << sep 
+         << scatteredMediumParticles[i].Pos.T() << sep << scatteredMediumParticles[i].Pos.X() << sep
+         << scatteredMediumParticles[i].Pos.Y() << sep << scatteredMediumParticles[i].Pos.Z() << sep 
+         << scatteredMediumParticles[i].Mom.E() << sep << scatteredMediumParticles[i].Mom.Px() << sep 
+         << scatteredMediumParticles[i].Mom.Py() << sep << scatteredMediumParticles[i].Mom.Pz() << sep 
+         << scatteredMediumParticles[i].md2g << sep << scatteredMediumParticles[i].md2q << sep 
+         << scatteredMediumParticles[i].N_EVENT_pp << endl;
   }
   file.close();
 }
@@ -4599,34 +4481,17 @@ void analysis::mediumParticlesOutput( const int step )
 
   for( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    file << i << sep << particles_atTimeNow[i].unique_id << sep << particles_atTimeNow[i].cell_id << sep << particles_atTimeNow[i].FLAVOR << sep << particles_atTimeNow[i].T << sep << particles_atTimeNow[i].X << sep
-         << particles_atTimeNow[i].Y << sep  << particles_atTimeNow[i].Z << sep << particles_atTimeNow[i].E << sep << particles_atTimeNow[i].PX << sep << particles_atTimeNow[i].PY << sep
-         << particles_atTimeNow[i].PZ << sep << particles_atTimeNow[i].md2g << sep << particles_atTimeNow[i].md2q << sep << particles_atTimeNow[i].N_EVENT_pp << endl;
+    file << i << sep << particles_atTimeNow[i].unique_id << sep << particles_atTimeNow[i].cell_id << sep 
+         << particles_atTimeNow[i].FLAVOR << sep 
+         << particles_atTimeNow[i].Pos.T() << sep << particles_atTimeNow[i].Pos.X() << sep
+         << particles_atTimeNow[i].Pos.Y() << sep << particles_atTimeNow[i].Pos.Z() << sep 
+         << particles_atTimeNow[i].Mom.E() << sep << particles_atTimeNow[i].Mom.Px() << sep 
+         << particles_atTimeNow[i].Mom.Py() << sep << particles_atTimeNow[i].Mom.Pz() << sep 
+         << particles_atTimeNow[i].md2g << sep << particles_atTimeNow[i].md2q << sep 
+         << particles_atTimeNow[i].N_EVENT_pp << endl;
   }
   file.close();
 }
-
-
-jetTrackerSingleEvent::jetTrackerSingleEvent()
-{
-  for ( int i = 0; i < 4; i++ )
-  {
-    R_proj[i] = 0;
-    P_proj_in[i] = P_proj_out[i] = 0;
-    P1_in[i] = P2_in[i] = 0;
-    P1_out[i] = P2_out[i] = 0;
-  }
-  xSection = -1;
-  lambda = -1;
-  cell_ID = -1;
-}
-
-
-jetTrackerSingleEvent::~jetTrackerSingleEvent()
-{
-
-}
-
 
 
 void analysis::jetTrackerOutput()
@@ -4656,23 +4521,23 @@ void analysis::jetTrackerOutput()
     printHeader( file, jets, end );
   //---------------------------------------
   
-  for ( int jet = 0; jet < jetTracker.size(); jet++ )
+  for ( unsigned int jet = 0; jet < jetTracker.size(); jet++ )
   {
-    for ( int event = 0; event < jetTracker[jet].size(); event++ )
+    for ( unsigned int event = 0; event < jetTracker[jet].size(); event++ )
     {
       file << jetTracker[jet][event].jet_ID_in << sep << jetTracker[jet][event].jet_ID_out << sep
       << jetTracker[jet][event].coll_type << sep;
       for ( int i = 0; i < 4; i++ )
       {
-        file << jetTracker[jet][event].P_proj_in[i] << sep;
+        file << jetTracker[jet][event].P_proj_in(i) << sep;
       }
       for ( int i = 0; i < 4; i++ )
       {
-        file << jetTracker[jet][event].P_proj_out[i] << sep;
+        file << jetTracker[jet][event].P_proj_out(i) << sep;
       }
       for ( int i = 0; i < 4; i++ )
       {
-        file << jetTracker[jet][event].R_proj[i] << sep;
+        file << jetTracker[jet][event].R_proj(i) << sep;
       }
       file << jetTracker[jet][event].xSection << sep << jetTracker[jet][event].lambda 
       << sep << jetTracker[jet][event].flavor_in << sep << jetTracker[jet][event].flavor_out << endl;
@@ -4691,7 +4556,7 @@ analysisRingStructure::analysisRingStructure( const int _nRings, const double _c
   rings[0].relocate( 0, _centralRadius );
 
   totalRadius = _centralRadius + ( _nRings - 1 ) * deltaR;
-  for ( int i = 1; i < rings.size(); i++ )
+  for ( unsigned int i = 1; i < rings.size(); i++ )
   {
     rings[i].relocate( rings[i-1].maxRadius, rings[i-1].maxRadius + deltaR );
   }
@@ -4711,7 +4576,7 @@ void analysisRingStructure::resize( const int _nRings, const double _centralRadi
   rings[0].relocate( 0, _centralRadius );
 
   totalRadius = _centralRadius + ( _nRings - 1 ) * deltaR;
-  for ( int i = 1; i < rings.size(); i++ )
+  for ( unsigned int i = 1; i < rings.size(); i++ )
   {
     rings[i].relocate( rings[i-1].maxRadius, rings[i-1].maxRadius + deltaR );
   }
@@ -4721,7 +4586,7 @@ void analysisRingStructure::resize( const int _nRings, const double _centralRadi
 
 int analysisRingStructure::getIndex( const double _xt ) const
 {
-  int index = getIndexPure( _xt );
+  unsigned int index = getIndexPure( _xt );
   if ( index >= rings.size() )
   {
     return ( static_cast<int>( rings.size() ) - 1 );
@@ -4765,9 +4630,7 @@ int analysisRingStructure::getIndexPure( const double _xt ) const
 
 int analysisRingStructure::getIndex( const ParticleOffline& _particle ) const
 {
-  double xt = sqrt( pow( _particle.X, 2 ) + pow( _particle.Y, 2 ) );
-  
-  return getIndex( xt );
+  return getIndex( _particle.Pos.Perp() );
 }
 
 

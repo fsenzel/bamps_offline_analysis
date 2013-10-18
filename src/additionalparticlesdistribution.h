@@ -36,15 +36,24 @@ private:
   
   void deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles );
   
+  INITIAL_STATE_TYPE initialStateType;
+
+  const config * const configObject;
+
   int numberOfParticlesToAdd;
+
   /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT;
+
   /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
   double minijet_P0;
-  const config * const configObject;
-  double impactParameter;       //impact parameter in fm
-  int numberOfTestparticles;    //number of testparticles per real particle
-  INITIAL_STATE_TYPE initialStateType;
+
+  /** @brief impact parameter in fm */
+  double impactParameter;
+  
+  /** @brief number of testparticles per real particle */
+  int numberOfTestparticles;
+
   double initialPartonPt;
   
   /** @brief Cut-off time for shower evolution [GeV^-1] */

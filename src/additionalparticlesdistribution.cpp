@@ -128,7 +128,7 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   }
   
   _particles.reserve( tempParticleVector.size() );
-  for ( int i = 0; i < tempParticleVector.size(); i++ )
+  for ( unsigned int i = 0; i < tempParticleVector.size(); i++ )
   {
     ParticleOffline tempParticle( tempParticleVector[i] );
     _particles.push_back( tempParticle );
@@ -146,19 +146,19 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
   }
   else if( initialStateType == fixedPartonState )
   {
-    for( int i = 0; i < _particles.size(); i += 2 )
+    for( unsigned int i = 0; i < _particles.size(); i += 2 )
     {
-      _particles[i].PX = initialPartonPt;
-      _particles[i + 1].PX = -initialPartonPt;
-      _particles[i].PY = _particles[i + 1].PY = 0.0;
-      _particles[i].PZ = _particles[i + 1].PZ = 0.0;
-      _particles[i].E = _particles[i + 1].E = initialPartonPt;
-      _particles[i].FLAVOR = _particles[i + 1].FLAVOR = gluon;
+      _particles[i].Mom.Px() = initialPartonPt;
+      _particles[i + 1].Mom.Px() = -initialPartonPt;
+      _particles[i].Mom.Py() = _particles[i + 1].Mom.Py() = 0.0;
+      _particles[i].Mom.Pz() = _particles[i + 1].Mom.Pz() = 0.0;
+      _particles[i].Mom.E()  = _particles[i + 1].Mom.E()  = initialPartonPt;
+      _particles[i].FLAVOR   = _particles[i + 1].FLAVOR   = gluon;
     }
     setEventID( _particles );
     initialShowerInitOutput( _particles );
   }
-  for ( int i = 0; i < _particles.size(); i++ )
+  for ( unsigned int i = 0; i < _particles.size(); i++ )
   {
     _particles[i].unique_id = ParticleOffline::unique_id_counter_added;
     --ParticleOffline::unique_id_counter_added;
@@ -169,15 +169,15 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
 
 void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOffline >& _particles )
 {
-  double max = 0;
   double dtt = 0;
   double eta_max = 5.0;
 
-  double MT, y, cc;
+  double MT, y;
   double shift;
-  for ( int j = 0; j < _particles.size(); j++ )
+
+  for ( unsigned int j = 0; j < _particles.size(); j++ )
   {   
-    dtt = fabs( _particles[j].Z ) / tanh( eta_max ) - _particles[j].T;  //tanh(eta)=z/t
+    dtt = fabs( _particles[j].Pos.Z() ) / tanh( eta_max ) - _particles[j].Pos.T();  //tanh(eta)=z/t
     if ( dtt < configObject->getTimeshift() )
     {
       shift = configObject->getTimeshift();
@@ -190,46 +190,32 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
       cout << "shift only that particle by that timeshift." << endl;
     }
 
-    _particles[j].T += shift;
+    _particles[j].Pos.T() += shift;
     
     // last interaction spacetime point is point of creation
-    _particles[j].X_lastInt = _particles[j].X;
-    _particles[j].Y_lastInt = _particles[j].Y;
-    _particles[j].Z_lastInt = _particles[j].Z;
-    _particles[j].T_lastInt = _particles[j].T;
+    _particles[j].lastInt = _particles[j].Pos;
     
     //formation time 1/sqrt( p_T^2 + m^2) = 1/m_T
-    y = 0.5 * log(( _particles[j].E+_particles[j].PZ ) / ( _particles[j].E-_particles[j].PZ ) );
-    MT = sqrt( pow( _particles[j].PX, 2 ) + pow( _particles[j].PY, 2 ) + pow( _particles[j].m, 2 ) );   
+    y = _particles[j].Mom.Rapidity();
+    MT = _particles[j].Mom.Mt( _particles[j].m );
     dtt = 1 / MT * cosh( y ) * 0.197327;  //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
     
     // additional formation time for Jpsi
     if( _particles[j].FLAVOR == jpsi )
       dtt += configObject->getJpsiFormationTime() * cosh( y ); //fm/c   //cosh(y) = gamma  (of that particle wrt motion in z-direction)
 
-    cc = dtt / _particles[j].E;
-    _particles[j].T = _particles[j].T + dtt;
-    _particles[j].X = _particles[j].X + _particles[j].PX * cc;
-    _particles[j].Y = _particles[j].Y + _particles[j].PY * cc;
-    _particles[j].Z = _particles[j].Z + _particles[j].PZ * cc;
+    _particles[j].Propagate( _particles[j].Pos.T() + dtt );
 
     _particles[j].init = true;
     
     // creation time is time at which the particle is allowed to scatter
-    _particles[j].T_creation = _particles[j].T;
+    _particles[j].T_creation = _particles[j].Pos.T();
   }
   
-  for(int i = 0; i < _particles.size(); i++)
+  for(unsigned int i = 0; i < _particles.size(); i++)
   {
-    _particles[i].X_init = _particles[i].X;
-    _particles[i].Y_init = _particles[i].Y;
-    _particles[i].Z_init = _particles[i].Z;
-    
-    _particles[i].E_init = _particles[i].E;
-    _particles[i].PX_init = _particles[i].PX;
-    _particles[i].PY_init = _particles[i].PY;
-    _particles[i].PZ_init = _particles[i].PZ;
-    
+    _particles[i].PosInit = _particles[i].Pos;
+    _particles[i].MomInit = _particles[i].Mom;
     _particles[i].X_traveled = 0.0;
   }
 }
@@ -237,7 +223,7 @@ void additionalParticlesDistribution::prepareParticles( std::vector< ParticleOff
 
 void additionalParticlesDistribution::deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles )
 {
-  for(int j = 0; j < addedParticles.size(); j++ )
+  for(unsigned int j = 0; j < addedParticles.size(); j++ )
   {
     if( !( addedParticles[j].FLAVOR == bottom || addedParticles[j].FLAVOR == anti_bottom ) )
     {
@@ -263,10 +249,10 @@ void additionalParticlesDistribution::showerParticles( vector< ParticleOffline >
     for( int i = 0; i < _particles.size(); i += 2 )
     {
       vector<ParticleOffline> particleShower;
-      double px = _particles[i].PX;
-      double py = _particles[i].PY;
-      double pz1 = _particles[i].PZ;
-      double pz2 = _particles[i + 1].PZ;
+      double px = _particles[i].Mom.Px();
+      double py = _particles[i].Mom.Py();
+      double pz1 = _particles[i].Mom.Pz();
+      double pz2 = _particles[i + 1].Mom.Pz();
       FLAVOR_TYPE flavor1 = _particles[i].FLAVOR;
       FLAVOR_TYPE flavor2 = _particles[i + 1].FLAVOR;
       particleShower = createShowerEvent( px, py, pz1, pz2, flavor1, flavor2 );
@@ -275,21 +261,11 @@ void additionalParticlesDistribution::showerParticles( vector< ParticleOffline >
       {
         particleShower[j].N_EVENT_pp = _particles[i].N_EVENT_pp;
         particleShower[j].N_EVENT_AA = _particles[i].N_EVENT_AA;
-        particleShower[j].X = _particles[i].X;
-        particleShower[j].Y = _particles[i].Y;
-        particleShower[j].Z = _particles[i].Z;
-        particleShower[j].T = _particles[i].T;
-
-        particleShower[j].X_init = particleShower[j].X;
-        particleShower[j].Y_init = particleShower[j].Y;
-        particleShower[j].Z_init = particleShower[j].Z;
+        particleShower[j].Pos     = _particles[i].Pos;
+        particleShower[j].PosInit = particleShower[j].Pos;
+        particleShower[j].MomInit = particleShower[j].Mom;
 
         particleShower[j].init = true;
-
-        particleShower[j].PX_init = particleShower[j].PX;
-        particleShower[j].PY_init = particleShower[j].PY;
-        particleShower[j].PZ_init = particleShower[j].PZ;
-        particleShower[j].E_init = particleShower[j].E;
 
         tempParticles.push_back( particleShower[j] );
       }
@@ -404,10 +380,10 @@ vector<ParticleOffline> additionalParticlesDistribution::createShowerEvent( cons
         cout << "Unknown flavor type:\t" << bamps_.pa[index][0] << endl;
       }
 
-      tempParticle.PX = bamps_.pa[index][1];
-      tempParticle.PY = bamps_.pa[index][2];
-      tempParticle.PZ = bamps_.pa[index][3];
-      tempParticle.E = sqrt( tempParticle.PX * tempParticle.PX + tempParticle.PY * tempParticle.PY + tempParticle.PZ * tempParticle.PZ );
+      tempParticle.Mom.Px() = bamps_.pa[index][1];
+      tempParticle.Mom.Py() = bamps_.pa[index][2];
+      tempParticle.Mom.Pz() = bamps_.pa[index][3];
+      tempParticle.Mom.E() = sqrt( tempParticle.Mom.vec2() );
       tempParticle.m = 0.0;
       particlesToAdd.push_back( tempParticle );
       index++;
@@ -425,7 +401,7 @@ vector<ParticleOffline> additionalParticlesDistribution::createShowerEvent( cons
   double E2 = sqrt( _px * _px + _py * _py + _pz2 * _pz2 );
   for( int i = 0; i < particlesToAdd.size(); i++ )
   {
-    sumE += particlesToAdd[i].E;
+    sumE += particlesToAdd[i].Mom.E();
   }
   if( FPT_COMP_GE( abs( sumE - ( E1 + E2 ) ) / sumE, 0.05 ) )
   {
@@ -468,9 +444,15 @@ void additionalParticlesDistribution::initialShowerInitOutput( vector< ParticleO
        << sep << "y" << sep << "z" << sep << "t" << endl;
   for( int index = 0; index < _particles.size(); index++ )
   {
-    file << _particles[index].N_EVENT_pp << sep << _particles[index].PX << sep << _particles[index].PY << sep << _particles[index].PZ << sep
-         << _particles[index].E << sep << _particles[index].X << sep << _particles[index].Y << sep << _particles[index].Z << sep
-         << _particles[index].T << endl;
+    file << _particles[index].N_EVENT_pp << sep 
+         << _particles[index].Mom.Px() << sep 
+         << _particles[index].Mom.Py() << sep 
+         << _particles[index].Mom.Pz() << sep
+         << _particles[index].Mom.E() << sep 
+         << _particles[index].Pos.X() << sep 
+         << _particles[index].Pos.Y() << sep 
+         << _particles[index].Pos.Z() << sep
+         << _particles[index].Pos.T() << endl;
   }
   file.close();
 

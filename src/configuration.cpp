@@ -623,14 +623,8 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
       maxID = particles_init[i].unique_id;
     particles_init[i].FLAVOR = (*(ptrInitialParticles->particleVector))[i].FLAVOR;
     particles_init[i].m = (*(ptrInitialParticles->particleVector))[i].m;
-    particles_init[i].T = (*(ptrInitialParticles->particleVector))[i].T;
-    particles_init[i].X = (*(ptrInitialParticles->particleVector))[i].X;
-    particles_init[i].Y = (*(ptrInitialParticles->particleVector))[i].Y;
-    particles_init[i].Z = (*(ptrInitialParticles->particleVector))[i].Z;
-    particles_init[i].E = (*(ptrInitialParticles->particleVector))[i].E;
-    particles_init[i].PX = (*(ptrInitialParticles->particleVector))[i].PX;
-    particles_init[i].PY = (*(ptrInitialParticles->particleVector))[i].PY;
-    particles_init[i].PZ = (*(ptrInitialParticles->particleVector))[i].PZ;
+    particles_init[i].Pos = (*(ptrInitialParticles->particleVector))[i].Pos;
+    particles_init[i].Mom = (*(ptrInitialParticles->particleVector))[i].Mom;
     particles_init[i].md2g = (*(ptrInitialParticles->particleVector))[i].md2g;
     particles_init[i].md2q = (*(ptrInitialParticles->particleVector))[i].md2q;
     particles_init[i].isAlreadyInAddedParticles.resize( static_cast< int >( numberOfParticlesToAdd / 2 ), false );
@@ -644,16 +638,13 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
     particlesEvolving[i].init = true;
     particlesEvolving[i].free = false;
     
-    if ( particlesEvolving[i].T < timefirst )
+    if ( particlesEvolving[i].Pos.T() < timefirst )
     {
       particlesEvolving[i].edge = true;
       particlesEvolving[i].init = false;
     }
     
-    particlesEvolving[i].PXold = particles_init[i].PX;
-    particlesEvolving[i].PYold = particles_init[i].PY;
-    particlesEvolving[i].PZold = particles_init[i].PZ;
-    particlesEvolving[i].Eold  = particles_init[i].E;
+    particlesEvolving[i].Old  = particles_init[i].Mom;
   }
   
   particles_atTimeNow = particles_init;

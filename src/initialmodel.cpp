@@ -8,11 +8,15 @@
 using std::cout;
 using std::endl;
 
+double initialModel::Radius() 
+{
+  return 0.0;
+}
 
 void initialModel::setUniqueID( std::vector<Particle>& _particles )
 {
   Particle::unique_id_counter = 0;
-  for ( int i = 0; i < _particles.size(); i++ )
+  for ( unsigned int i = 0; i < _particles.size(); i++ )
   {
     _particles[i].unique_id = Particle::unique_id_counter;
     ++Particle::unique_id_counter;
@@ -32,33 +36,29 @@ initialModelWS::~initialModelWS( )
 {
 }
 
+double initialModelWS::Radius() 
+{
+  return WoodSaxonParameter.RA;
+}
+
 void initialModelWS::sample_XYZ_WoodSaxon(double T, double &X, double &Y, double &Z) const
 {
-  double vt, gv, gvt, tc1, tc2, tc3, xx, bA, bB, zA, zB, fds, fd;
-  double zmax, zmin, xmax, xmin, ymax, ymin, max;
-  double c1, c2;
-
-  double densityA_max;
-  
-  double m = 2.0;
-  //   double m = 2.718;
-  double L_z;// L_z is z component of radius where densityA is only 1/m-th of maximum value
-
   const double RA0 = WoodSaxonParameter.RA0; // just a shortcut
-  double RR;
 
-  vt = WoodSaxonParameter.velocity * fabs( T );
-  gv = WoodSaxonParameter.gamma * WoodSaxonParameter.velocity;
-  gvt = gv * fabs( T );
+  const double vt = WoodSaxonParameter.velocity * fabs( T );
+  const double gv = WoodSaxonParameter.gamma * WoodSaxonParameter.velocity;
+  const double gvt = gv * fabs( T );
 
-  c1 = sqrt(( RA0 + impactParameter ) * fabs( RA0 - impactParameter ) );
-  tc1 = ( RA0 - c1 ) / 2.0 / gv;
-  tc2 = sqrt( impactParameter * ( 2.0 * RA0 - impactParameter ) ) / 2.0 / gv;
-  tc3 = ( RA0 + c1 ) / 2.0 / gv;
+  const double tc0 = sqrt(( RA0 + impactParameter ) * fabs( RA0 - impactParameter ) );
+  const double tc1 = ( RA0 - tc0 ) / (2.0 * gv);
+  const double tc2 = sqrt( impactParameter * ( 2.0 * RA0 - impactParameter ) ) / (2.0 * gv);
+  const double tc3 = ( RA0 + tc0 ) / (2.0 * gv);
 
-  xx = impactParameter / 2.0 + gvt * sqrt( RA0*RA0 / ( impactParameter*impactParameter / 4.0 + gvt*gvt ) - 1.0 );
+  double xx = impactParameter / 2.0 + gvt * sqrt( RA0*RA0 / ( impactParameter*impactParameter / 4.0 + gvt*gvt ) - 1.0 );
+
 
   // z-axis in overlap region
+  double RR;
   if (( RA0 > impactParameter ) && ( fabs( T ) >= tc1 ) && ( fabs( T ) <= tc3 ) ) 
   { 
     RR = RA0;
@@ -67,29 +67,31 @@ void initialModelWS::sample_XYZ_WoodSaxon(double T, double &X, double &Y, double
   {
     RR = sqrt(( RA0 + impactParameter - xx ) * ( RA0 - impactParameter + xx ) );
   }
-  zmin = vt - RR / WoodSaxonParameter.gamma;
-  zmax = -zmin;
+  double zmin = vt - RR / WoodSaxonParameter.gamma;
+  double zmax = -zmin;
 
   // x-axis in overlap region
-  xmax = ( fabs( T ) <= tc2 ) ? RA0 : xx;
-  xmin = impactParameter - xmax;
+  double xmax = ( fabs( T ) <= tc2 ) ? RA0 : xx;
+  double xmin = impactParameter - xmax;
 
   // y-axis in overlap region
-  ymax = sqrt( RA0*RA0 - impactParameter*impactParameter / 4.0 - gvt*gvt );
-  ymin = -ymax;
+  double ymax = sqrt( RA0*RA0 - impactParameter*impactParameter / 4.0 - gvt*gvt );
+  double ymin = -ymax;
 
   // the maximum of nA(s,z-vt)*nB(s-b,z+vt) in the overlap region
-  max = densityA( impactParameter / 2.0, -WoodSaxonParameter.velocity * T ) * densityA( impactParameter / 2.0, WoodSaxonParameter.velocity * T );
+  double max = densityA( impactParameter / 2.0, -WoodSaxonParameter.velocity * T ) * densityA( impactParameter / 2.0, WoodSaxonParameter.velocity * T );
 
   // sampling of position
+  double fds, fd;
+
   do
   {
     X = ( xmax - xmin ) * ran2() + xmin;
     Y = ( ymax - ymin ) * ran2() + ymin;
     Z = ( zmax - zmin ) * ran2() + zmin;
 
-    bA = sqrt( X*X + Y*Y );
-    bB = sqrt(( X - impactParameter )*( X - impactParameter ) + Y*Y );
+    double bA = sqrt( X*X + Y*Y );
+    double bB = sqrt(( X - impactParameter )*( X - impactParameter ) + Y*Y );
 
     if (( bA > RA0 ) || ( bB > RA0 ) ) 
     {
@@ -97,10 +99,10 @@ void initialModelWS::sample_XYZ_WoodSaxon(double T, double &X, double &Y, double
     }
     else
     {
-      zA = sqrt(( RA0 + bA ) * ( RA0 - bA ) ) / WoodSaxonParameter.gamma;
-      zB = sqrt(( RA0 + bB ) * ( RA0 - bB ) ) / WoodSaxonParameter.gamma;
-      c1 = fabs( Z - WoodSaxonParameter.velocity * T );
-      c2 = fabs( Z + WoodSaxonParameter.velocity * T );
+      double zA = sqrt(( RA0 + bA ) * ( RA0 - bA ) ) / WoodSaxonParameter.gamma;
+      double zB = sqrt(( RA0 + bB ) * ( RA0 - bB ) ) / WoodSaxonParameter.gamma;
+      double c1 = fabs( Z - WoodSaxonParameter.velocity * T );
+      double c2 = fabs( Z + WoodSaxonParameter.velocity * T );
       fds = (( c1 > zA ) || ( c2 > zB ) ) ? -1.0 : densityA( bA, c1 ) * densityA( bB, c2 );
     }
 
@@ -128,12 +130,9 @@ void initialModelWS::sample_TXYZ_singleParticle( Particle& _particle )
   double T, X, Y, Z;
   
   sample_T_WoodSaxon(T);
-  _particle.T = T;
-  
   sample_XYZ_WoodSaxon(T, X,Y,Z);
-  _particle.X = X - impactParameter / 2.0;    // shift into the correct coordinate system 
-  _particle.Y = Y;
-  _particle.Z = Z;
+
+  _particle.Pos = VectorTXYZ(T, X - impactParameter / 2.0, Y, Z); // shift into the correct coordinate system 
 }
 
 
@@ -151,7 +150,7 @@ void initialModelWS::generateTimeDistributionWS(double &T_AB)
   if ( !distrTime ) // only do this stuff if the distribution has not been computed before (i.e. the shared_ptr is empty)
   {
     int nn, ncut;
-    double dt, tmp;
+    double dt;
     double tgral, sd, chi2a; // for VEGAS
     double *dist, *tt, *distin;
     
@@ -213,6 +212,10 @@ void initialModelWS::generateTimeDistributionWS(double &T_AB)
     distrTime.reset( new ranGen_Distr(&tt[ncut], &distin[ncut], nn-ncut+1, interp_cspline) );
     
     cout << "---- generateTimeDistributionWS: finished" << endl;
+    
+    delete[] tt;
+    delete[] dist;
+    delete[] distin;
   }
 }
 
@@ -220,7 +223,7 @@ void initialModelWS::generateTimeDistributionWS(double &T_AB)
 
 void integrand_time::operator()( const int *ndim, const double xx[], const int *ncomp, double ff[] ) const
 {
-  double wgt;
+  double wgt = 0;
   ff[0] = this->operator()( xx, wgt );
 }
 
@@ -241,13 +244,10 @@ double integrand_time::operator()( const double x[], double wgt ) const  //wgt i
   vt = velocity * time;
   gvt = gama * vt;
 
-  c1 = 4.0 * pow( RA0, 2.0 ) / ( pow( bImp, 2.0 ) + 4.0 * pow( gvt, 2.0 ) );
+  c1 = 4.0 * RA0*RA0 / ( bImp*bImp + 4.0 * gvt*gvt );
 
   // choose a x[fm] value
-  if ( 2.0*gvt > sqrt( bImp*( 2.0*RA0 - bImp ) ) )
-    xmax = bImp / 2.0 + gvt * sqrt( c1 - 1.0 );
-  else
-    xmax = RA0;
+  xmax = ( 4.0*gvt*gvt > bImp*( 2.0*RA0 - bImp ) ) ? bImp / 2.0 + gvt * sqrt( c1 - 1.0 ) : RA0;
   xmin = bImp - xmax;
 
   if ( fabs( xmax - xmin ) < 1.0e-8 )
@@ -263,14 +263,9 @@ double integrand_time::operator()( const double x[], double wgt ) const  //wgt i
   zAr = vt + c1;
   zBl = -vt - c2;
   zBr = -vt + c2;
-  if ( zAl > zBl )
-    zmin = zAl;
-  else
-    zmin = zBl;
-  if ( zAr < zBr )
-    zmax = zAr;
-  else
-    zmax = zBr;
+
+  zmin = ( zAl > zBl ) ? zAl : zBl;
+  zmax = ( zAr < zBr ) ? zAr : zBr;
 
   if ( fabs( zmax - zmin ) < 1.0e-8 )
     return 0.0;
@@ -285,10 +280,7 @@ double integrand_time::operator()( const double x[], double wgt ) const  //wgt i
   if (( fabs( yA2 ) < 1.0e-8 ) || ( fabs( yB2 ) < 1.0e-8 ) )
     return 0.0;
 
-  if ( yA2 <= yB2 )
-    ymax = sqrt( yA2 );
-  else
-    ymax = sqrt( yB2 );
+  ymax = ( yA2 <= yB2 ) ? sqrt( yA2 ) : sqrt( yB2 );
 
   V = V * 2.0 * ymax;
   yy = 2.0 * ymax * double( x[3] ) - ymax;

@@ -35,7 +35,7 @@ private:
   double getGluonDensity( const double T, const double fugacity = 1 ) const ;
   double getQuarkDensity( const double T, const double fugacity = 1 ) const;
 
-  int getStartIndexForTemperatureValues( const double _T, const int _nValues ) const;
+  int getStartIndexForTemperatureValues( const double _T, const unsigned int _nValues ) const;
   
   /** @brief interpolation routine */
   void polint( const double xa[], const double ya[], const int n, const double x, double *y, double *dy ) const;

@@ -1,12 +1,12 @@
-//---------------------------------------------
+//--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
-//---------------------------------------------
+//----------------------------------------------------------------------------
 //$HeadURL$
 //$LastChangedDate$
 //$LastChangedRevision$
 //$LastChangedBy$
-//---------------------------------------------
-//---------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 
 /** @file
@@ -26,7 +26,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "configurationbase.h"
-#include "particle.h"
+#include "particleOffline.h"
 #include "offlineoutput.h"
 #include "interpolation_iniJpsi.h"
 
@@ -80,6 +80,7 @@ namespace ns_casc
 //   extern std::vector<ParticleHFelectron> addedPartcl_electron;
   extern std::vector<ParticleOffline> addedPartcl_electron;
   extern std::vector<ParticleOffline> scatteredMediumParticles;
+
 }
 //--------------------------------------------------------//
 

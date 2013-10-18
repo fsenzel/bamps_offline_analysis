@@ -85,9 +85,9 @@ private:
   
 
   double P0; /**< lower PT-cutoff (in GeV) */
-  
+
   int nTestparticles;
-  
+
   /** @brief Number of (high-pt) particles that is added on top of the reconstructed medium, using it as a background. */
   int nParticlesToGenerate;
   /** @brief Number of heavy ion collision events, set on top of the offline reconstruction. 
@@ -102,7 +102,7 @@ private:
   ranGen_Distr *distrPT; /**< the random generator for the PT distribution */
   interpolationGSL *maxIntegrandPT; /**< the maximum value of the integrand per pT */
 
-    interfacePDF_generic *PDF; /**< the parton distribution generator */
+  interfacePDF_generic *PDF; /**< the parton distribution generator */
 
 };
 
@@ -120,7 +120,7 @@ class integrand_distPT : public integrand
 {
 public:
   integrand_distPT() :
-    pT(0.0), sqrtS(0.0), PDF(0), xT(0.0) {};
+    pT(0.0), sqrtS(0.0), xT(0.0), PDF(0) {};
 
   integrand_distPT(const double _pT, const double _sqrtS, interfacePDF_generic *_PDF) : 
     pT(_pT), sqrtS(_sqrtS), PDF(_PDF) 
@@ -177,7 +177,7 @@ private:
   double pT; /**< The stored value of pT */
   double sqrtS; /**< The stored value of sqrt(s) */
   double xT; /**< = 2.0 * pT / sqrtS */
-    interfacePDF_generic *PDF; /**< pointer to the PDF generator */
+  interfacePDF_generic *PDF; /**< pointer to the PDF generator */
 
   
   /**
