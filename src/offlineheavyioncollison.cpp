@@ -3446,26 +3446,30 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
   }
   else
   {
-    int selected = 0;
-    do  // pick random particle (that is neihter dead nor the jet) from the _particleList
+    do  // ensure found cross section is nonzero
     {
-      selected = static_cast<int>( ran2() * _allParticlesList.size() );
-      if ( selected >= _allParticlesList.size() )
+      do  // pick random particle (that is neihter dead nor the jet) from the _particleList
       {
-        continue;
-      }      
-      iscat = _allParticlesList[selected];
-    }
-    while ( particles_atTimeNow[iscat].dead );
-    
-    md2g_wo_as = ( addedParticles[jetID].md2g + particles_atTimeNow[iscat].md2g ) / 2.0;
-    md2q_wo_as = ( addedParticles[jetID].md2q + particles_atTimeNow[iscat].md2q ) / 2.0;
-    
-    s = (addedParticles[jetID].Mom + particles_atTimeNow[iscat].Mom).M2();
-    
-    xsection_gg_gg csObj( s, md2g_wo_as, md2q_wo_as, &theI22, theConfig->getKfactor_light() );
-    csgg = csObj.totalCrossSection();
+	int selected = static_cast<int>( ran2() * _allParticlesList.size() );
+	if ( selected >= _allParticlesList.size() )
+	{
+	  continue;
+	}      
+	iscat = _allParticlesList[selected];
+      }
+      while ( particles_atTimeNow[iscat].dead );
+      
+      md2g_wo_as = ( addedParticles[jetID].md2g + particles_atTimeNow[iscat].md2g ) / 2.0;
+      md2q_wo_as = ( addedParticles[jetID].md2q + particles_atTimeNow[iscat].md2q ) / 2.0;
+      
+      s = (addedParticles[jetID].Mom + particles_atTimeNow[iscat].Mom).M2();
+      
+      xsection_gg_gg csObj( s, md2g_wo_as, md2q_wo_as, &theI22, theConfig->getKfactor_light() );
+      csgg = csObj.totalCrossSection();
+    } while (csgg < 1.0e-7);
+
     lambda = ( dv * rings[nc].getGamma() * testpartcl   ) / ( pow( 0.197, 3.0 ) * _allParticlesList.size() * csgg ) * 0.197; // fm  
+
   }
   //--------------------------------------------------------------------------------------------
   
