@@ -36,20 +36,6 @@ int Ntest;
 
 int main( int argc, char *argv[] )
 {
-  {
-    double _x = -0.1;
-    double _min_real = 0.3;
-    double _delta_x = 0.2;
-
-    int index;
-    for (_x=-0.1;_x<=0.8;_x+=0.01)
-    {
-      index = static_cast<int>(( _x - _min_real ) / _delta_x );
-      cout << index << " " << _x <<endl;
-    }
-    return 7;
-  }
-
   cout << "# Version: SVN " << SVN_REVISION << endl;
   
   try
