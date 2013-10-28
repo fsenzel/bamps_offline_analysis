@@ -3911,8 +3911,6 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
     xsection_gg_gg csObj( s, md2g_wo_as, md2q_wo_as, &theI22, theConfig->getKfactor_light() );
     csgg = csObj.totalCrossSection();
     lambda = ( dv * rings[nc].getGamma() * testpartcl   ) / ( pow( 0.197, 3.0 ) * _allParticlesList.size() * csgg ) * 0.197; // fm  
-
-    cout << "lambda = " << lambda << "     jetRate = " << jetRate << "  sqrt(s) = " << sqrt(s) << endl;
   }
   //--------------------------------------------------------------------------------------------
   
