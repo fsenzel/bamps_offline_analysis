@@ -91,6 +91,7 @@ int main( int argc, char *argv[] )
   */
   catch (int e) // provided to handle program termination after displaying usage and help messages
   {
+    cout << "Signal caught: " << e << endl;
     if ( e == HELP_MESSAGE_REQUESTED )
     {
       return EXIT_SUCCESS;
