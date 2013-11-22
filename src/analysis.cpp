@@ -1636,12 +1636,26 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
   
   const double pt_min_v2RAA = theConfig->getMinimumPT();
-  const double pt_max_v2RAA = 55.0;
-  double nbins_v2RAA = 67; // good for pt_min = 0
-  if( FPT_COMP_GE( pt_min_v2RAA, 6.0 ) )
-    nbins_v2RAA = 25;
-  else if( FPT_COMP_GE( pt_min_v2RAA, 3.0 ) )
-    nbins_v2RAA = 34;
+  double pt_max_v2RAA, nbins_v2RAA;
+  if( pt_min_v2RAA < 35 )
+  {
+    pt_max_v2RAA = 55.0;
+    nbins_v2RAA = 67; // good for pt_min = 0
+    if( FPT_COMP_GE( pt_min_v2RAA, 6.0 ) )
+      nbins_v2RAA = 25;
+    else if( FPT_COMP_GE( pt_min_v2RAA, 3.0 ) )
+      nbins_v2RAA = 34;
+  }
+  else
+  {
+    pt_max_v2RAA = 150.0;
+    nbins_v2RAA = 60;
+    
+    if( FPT_COMP_GE( pt_min_v2RAA, 70.0 ) )
+      nbins_v2RAA = 52;
+    else if( FPT_COMP_GE( pt_min_v2RAA, 90.0 ) )
+      nbins_v2RAA = 45;
+  }
   
   if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() )
   {
