@@ -3545,7 +3545,7 @@ void analysis::writeTempInTube( const int step  )
 {
   const string sep = "  ";
 
-  double temp, tempWithQuarks, energyDensity;
+  double temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks;
   int n_jpsi;
   double dr, dz, deta;
 
@@ -3577,12 +3577,20 @@ void analysis::writeTempInTube( const int step  )
 
 //   cout << "deta=" << deta << "   dz=" << dz << endl;
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
   printTempInTube << "\t";
   printTempInTube << energyDensity;
+  printTempInTube << "\t";
+  printTempInTube << fugacityGluons;
+  printTempInTube << "\t";
+  printTempInTube << fugacityQuarks;
+  printTempInTube << "\t";
+  printTempInTube << densityGluons;
+  printTempInTube << "\t";
+  printTempInTube << densityQuarks;
   printTempInTube.width( 20 );
   
 
@@ -3590,25 +3598,40 @@ void analysis::writeTempInTube( const int step  )
   deta = 0.5; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
   printTempInTube << "\t";
   printTempInTube << energyDensity;
+  printTempInTube << "\t";
+  printTempInTube << fugacityGluons;
+  printTempInTube << "\t";
+  printTempInTube << fugacityQuarks;
+  printTempInTube << "\t";
+  printTempInTube << densityGluons;
+  printTempInTube << "\t";
+  printTempInTube << densityQuarks;
   printTempInTube.width( 20 );
 
   dr = 2.0; //fm
   deta = 1.0; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
   printTempInTube << "\t";
   printTempInTube << energyDensity;
-  printTempInTube.width( 20 );
+  printTempInTube << "\t";
+  printTempInTube << fugacityGluons;
+  printTempInTube << "\t";
+  printTempInTube << fugacityQuarks;
+  printTempInTube << "\t";
+  printTempInTube << densityGluons;
+  printTempInTube << "\t";
+  printTempInTube << densityQuarks;
   printTempInTube.width( 20 );
 
 
@@ -3616,12 +3639,20 @@ void analysis::writeTempInTube( const int step  )
   deta = 1.0; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
   printTempInTube << "\t";
   printTempInTube << energyDensity;
+  printTempInTube << "\t";
+  printTempInTube << fugacityGluons;
+  printTempInTube << "\t";
+  printTempInTube << fugacityQuarks;
+  printTempInTube << "\t";
+  printTempInTube << densityGluons;
+  printTempInTube << "\t";
+  printTempInTube << densityQuarks;
   printTempInTube.width( 20 );
 
 
@@ -3631,7 +3662,7 @@ void analysis::writeTempInTube( const int step  )
 }
 
 // writes temperature and velocity of all specified cells in a file, used by Alex Meistrenko as input
-void analysis::calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  )
+void analysis::calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity, double & fugacityGluons, double & fugacityQuarks, double & densityGluons, double & densityQuarks  )
 {
   int cell_id;
   double pr, XT;
@@ -3643,7 +3674,7 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   const double zlength = dz*2.0;
 
   // volume
-  dv = M_PI * pow( radius , 2.0 ) * zlength; // 1/GeV^3
+  dv = M_PI * pow( radius , 2.0 ) * zlength; // fm^3
 
   
   // the following routine is written for several cells -> here we do not need this, just set nCells = 1
@@ -3665,6 +3696,12 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   gama_cell = new double[nCells];
   temp_cell = new double[nCells];
   tempWithQuarks_cell = new double[nCells];
+  
+  int numberGluons = 0;
+  int numberQuarks = 0;
+  
+  double numberGluonsEquil, numberQuarksEquil;
+  
 
 
   // set all properties to 0
@@ -3699,6 +3736,10 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
         cell_id = 0;
         
         ++numberInCell[cell_id];
+        if( particles_atTimeNow[i].FLAVOR == gluon )
+          numberGluons++;
+        else
+          numberQuarks++;
         
         XT = sqrt( particles_atTimeNow[i].X * particles_atTimeNow[i].X + particles_atTimeNow[i].Y * particles_atTimeNow[i].Y );
         if ( XT < 1.0e-5 )
@@ -3745,6 +3786,15 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   temp = temp_cell[0];
   tempWithQuarks = tempWithQuarks_cell[0];
   energyDensity = em_cell[0]; // GeV/fm^3
+  
+  numberGluonsEquil = 16.0 * pow( temp , 3.0 ) / pow( M_PI , 2.0) * dv / pow( 0.197 , 3.0 ) * theConfig->getTestparticles();
+  numberQuarksEquil = 12.0 * Particle::N_light_flavor * pow( temp , 3.0 ) / pow( M_PI , 2.0) * dv / pow( 0.197 , 3.0 ) * theConfig->getTestparticles();
+  
+  fugacityGluons = double(numberGluons) / numberGluonsEquil;
+  fugacityQuarks = double(numberQuarks) / numberQuarksEquil;
+  
+  densityGluons = double(numberGluons) / dv / theConfig->getTestparticles(); // 1/fm^3
+  densityQuarks = double(numberQuarks) / dv / theConfig->getTestparticles(); // 1/fm^3
 
   delete[] numberInCell; 
   delete[] vx_cell; 

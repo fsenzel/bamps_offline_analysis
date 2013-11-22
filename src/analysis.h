@@ -317,7 +317,7 @@ private:
   void writeTempAndVel( const int step  );
   void addNeighborCells( const int cell_id, const int neighborCell_id );
   void writeTempInTube( const int step  );
-  void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  );
+  void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity, double & fugacityGluons, double & fugacityQuarks, double & densityGluons, double & densityQuarks  );
   void print_dndy(const string subfix );
   void print_spatial_density(const string subfix );
   
