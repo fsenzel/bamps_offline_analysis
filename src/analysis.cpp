@@ -1777,14 +1777,14 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   if( studyBackground )
   {
     theV2RAA.setPtBinProperties( 0, 10, 20, 0, 10, 15 );
-    theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+    theV2RAA.computeFor( gluon, particlesEvolving, particlesEvolving.size(), "background", _outputTime, v2background );
 //     theV2RAA.computeFor( up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
 //     theV2RAA.computeFor( down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
 //     theV2RAA.computeFor( strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
 //     theV2RAA.computeFor( anti_up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
 //     theV2RAA.computeFor( anti_down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
 //     theV2RAA.computeFor( anti_strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+    theV2RAA.computeFor( light_quark, particlesEvolving, particlesEvolving.size(), "background", _outputTime, v2background );
   }
 }
 
