@@ -58,18 +58,10 @@ int main( int argc, char *argv[] )
     //--------------------------------------------------------------
     // initialize the random number generator
     // defined globally in random.h and random.cpp
-    uint32_t seed;
 
-    if ( theConfig.getSeed() != 0 )
-    {
-      seed = theConfig.getSeed();
-      ran2.setSeed( seed );
-    }
-    else
-    {
-      seed = ran2.setSeed();
-      theConfig.setSeed( seed );
-    }
+    uint32_t seed = theConfig.getSeed();
+    if (seed == 0) seed = ran2.findSeed();
+    ran2.setSeed( seed );
     theAnalysis.setSeed( seed );
     cout << "seed: " << seed << endl;
     //--------------------------------------------------------------
