@@ -15,8 +15,10 @@ INCLUDE(CMakeCustomPackageOptions.cmake)
 INCLUDE(CPack)
 
 ######### Find Boost libraries #########
-SET(BOOST_ROOT "$ENV{HOME}/usr")
-MESSAGE(STATUS "** Search Boost root: ${BOOST_ROOT}")
+IF(NOT BOOST_ROOT AND NOT DEFINED ENV{BOOST_ROOT})
+  SET(BOOST_ROOT "$ENV{HOME}/usr")
+ENDIF()
+MESSAGE(STATUS "** Boost Hint: ${BOOST_ROOT}")
 FIND_PACKAGE(Boost 1.40 COMPONENTS serialization system filesystem program_options regex REQUIRED)
  MESSAGE(STATUS "** Boost Include: ${Boost_INCLUDE_DIR}")
  MESSAGE(STATUS "** Boost Libraries: ${Boost_LIBRARY_DIRS}")
