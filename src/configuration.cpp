@@ -83,7 +83,6 @@ config::config() :
  cgcParticleFile("-"),
  mcatnloParticleFile("-"),
  P0(1.4),
- insertionTime( 0.0 ),
 // ---- output options ----
  outputSwitch_progressLog( true ),
  outputSwitch_detailedParticleOutput(false),
@@ -223,7 +222,7 @@ void config::processProgramOptions()
   // some special conversions from integer type values to enum values
   if ( vm.count("initial_state.type") )
   {
-    if ( vm["initial_state.type"].as<int>() < 7 && vm["initial_state.type"].as<int>() >= 0 )
+    if ( vm["initial_state.type"].as<int>() < 8 && vm["initial_state.type"].as<int>() >= 0 )
     {
       initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
     }
@@ -323,8 +322,8 @@ void config::initializeProgramOptions()
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
   ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
-  ("initial_state.insertionTime", po::value<double>( &insertionTime )->default_value( insertionTime ), "cut-off time for shower evolution [GeV^(-1)], needed when initial_state.type = 5. if value is negative, no PYTHIA showers are not terminated")
   ("initial_state.initialPartonPt", po::value<double>( &initialPartonPt )->default_value( initialPartonPt ), "parton pt of fixed initial parton pt")
+  ("initial_state.initialPartonFlavor", po::value<int>( &initialPartonFlavor )->default_value( initialPartonFlavor ), "flavor of fixed initial parton pt ( 0 = gg, 1 = u u-bar, 2 = g u )")
   ;
   
   // Add some options related to the program output  

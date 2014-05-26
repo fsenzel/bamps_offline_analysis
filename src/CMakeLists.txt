@@ -6,19 +6,21 @@ SET( SOURCES_lib
   additionalparticlesdistribution.cpp
   analysis.cpp
   configuration.cpp
+  fixedshower_event.f
   hadronization_hq.cpp
   initialmodel_jpsi.cpp
   initialmodel_mcatnlo.cpp
   initialmodel_minijets.cpp
   initialmodel_particlesFromFile.cpp
   initialmodel_pythia.cpp
+  initialmodel_pythiashower.cpp
   interpolation_iniJpsi.cpp
   interpolation_nJpsi.cpp
   offlineheavyioncollison.cpp 
   offlineoutput.cpp
   particleOffline.cpp
   pythia6425.f
-  quark_shower.f
+  pythiashower_event.f90
 )
 
 IF( Pythia_FOUND )

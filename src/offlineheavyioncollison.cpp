@@ -2586,7 +2586,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   }
 
   int newIndex = -1;
-  if( theConfig->isScatt_furtherOfflineParticles() && theConfig->getNlightFlavorsAdded() >= 0 )
+  if( theConfig->getNlightFlavorsAdded() >= 0 )
   {
     ParticleOffline tempParticle;
     tempParticle.FLAVOR = gluon;
