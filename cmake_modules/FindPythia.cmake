@@ -10,7 +10,7 @@
 
 # find the path of the include files, based on two headers
 FIND_PATH( Pythia_INCLUDE_DIR 
-    NAMES Pythia.h
+    NAMES Pythia8
     PATHS $ENV{HOME}/usr/include      # suggest a user based include tree
     PATH_SUFFIXES PYTHIA Pythia pythia PYTHIA8 Pythia8 pythia8  # suggest some path suffixes in which the headers could be located
 )

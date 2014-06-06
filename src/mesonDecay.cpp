@@ -6,7 +6,7 @@
 #include "configuration.h"
 #include "configBAMPS.h"
 
-#include "Pythia.h"
+#include "Pythia8/Pythia.h"
 using namespace Pythia8;
 
 using namespace ns_casc;
@@ -120,7 +120,7 @@ void mesonDecay::decayToElectronsPythia()
         id = addedParticlesCopy[i].FLAVOR;
 
         // mass from Pythia
-        mm = pdt.mass(id);
+        mm = pdt.mSel(id);
         //calculate energy with new mass
         ee = sqrt( addedParticlesCopy[i].Mom.Perp2() + mm*mm );
         // Store the particle in the event record.
