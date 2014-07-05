@@ -30,7 +30,7 @@ extern "C" {
   void pythiashowerevent_( const double* ptMin, uint32_t* seed );
   struct
   {
-    double pa[100][6];
+    double pa[100][7];
   } bamps_;
 }
 

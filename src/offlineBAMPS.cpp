@@ -63,6 +63,7 @@ int main( int argc, char *argv[] )
     if (seed == 0) seed = ran2.findSeed();
     ran2.setSeed( seed );
     theAnalysis.setSeed( seed );
+    theConfig.setSeed( seed );
     cout << "seed: " << seed << endl;
     //--------------------------------------------------------------
 
