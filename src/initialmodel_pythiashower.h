@@ -82,7 +82,7 @@ class initialModel_PYTHIAShower : public initialModelWS
         case -3:
           return anti_strange;
         default:
-          std::cout << "Unknown pythia flavor:\t" << _pythiaFlavor << std::endl;
+//           std::cout << "Unknown pythia flavor:\t" << _pythiaFlavor << std::endl;
           return allFlavors;
       }
   };

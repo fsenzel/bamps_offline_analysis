@@ -454,6 +454,12 @@ void config::checkOptionsForSanity()
     string errMsg = "If heavy quarks are involved, jets must be tagged.";
     throw eConfig_error( errMsg );
   }
+  
+  if ( scatt_furtherOfflineParticles && !jet_tagged )
+  {
+    string errMsg = "If recoiled particles are further evolved, jets must be tagged.";
+    throw eConfig_error( errMsg );
+  }
 }
 
 void config::processHeavyQuarkOptions()

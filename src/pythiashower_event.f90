@@ -82,7 +82,9 @@
         PA(7,Iqq) = P(Iqq,5) 
 !         WRITE(*,*) K(Iqq,2), K(Iqq,3), P(Iqq,1), P(Iqq,2), P(Iqq,3), P(Iqq,4), P(Iqq,5)
 2     CONTINUE
-      CALL PYLIST(2)
+
+!       Only for debugging:
+!       CALL PYLIST(2)
       
       END IF
       

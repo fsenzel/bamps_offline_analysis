@@ -42,7 +42,8 @@ public:
     MomInit( ),
     lastInt( ),    
     rate( 0 ), ratev( 0 ),
-    isAlreadyInAddedParticles( 0 )
+    isAlreadyInAddedParticles( 0 ),
+    rate_added_32( 0.0 )
   {};
     
   ParticleOffline( const Particle& _particle ) : 
@@ -57,7 +58,8 @@ public:
     MomInit( ),
     lastInt( ),    
     rate( 0 ), ratev( 0 ),
-    isAlreadyInAddedParticles( 0 )
+    isAlreadyInAddedParticles( 0 ),
+    rate_added_32( 0.0 )
   {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
@@ -83,7 +85,10 @@ public:
     
   /** @brief Rate of the added particle in this time step */
   double rate_added; // 1/fm
-    
+
+  /** @brief 3->2 rate of the added particle in this time step */
+  double rate_added_32; // 1/fm
+
   /** stuff special to offline reconstruction */
   double T_creation;
   double X_traveled;//fm
