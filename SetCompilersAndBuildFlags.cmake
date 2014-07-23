@@ -125,3 +125,7 @@ ENDIF()
 
 #########
 
+# enable C++11 features:
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x" CACHE STRING "..." FORCE)
+
+#########
