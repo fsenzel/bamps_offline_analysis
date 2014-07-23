@@ -14,6 +14,25 @@ ENABLE_LANGUAGE(Fortran)
 INCLUDE(CMakeCustomPackageOptions.cmake)
 INCLUDE(CPack)
 
+######### check that C++11 code compiles #########
+include(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("
+#include <initializer_list>
+struct A {};
+struct B : public A { using A::A; };
+template<typename T = void> int f() { return 1; }
+int main() {
+  auto l = []() { return f(); };
+  return l() - 1;
+}
+" CXX11_COMPILES)
+
+if(NOT CXX11_COMPILES)
+#   message(FATAL_ERROR "Your compiler did not manage to compile a simple C++11 program. Please get a newer C++ compiler.")
+   message(WARNING "Your compiler did not manage to compile a simple C++11 program. Please get a newer C++ compiler."
+   "It may be okay for this code. Keep fingers crossed that it manages the C++11 features used.")
+endif()
+
 ######### Find Boost libraries #########
 IF(NOT BOOST_ROOT AND NOT DEFINED ENV{BOOST_ROOT})
   SET(BOOST_ROOT "$ENV{HOME}/usr")
