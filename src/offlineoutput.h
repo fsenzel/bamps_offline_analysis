@@ -27,9 +27,10 @@
 #define BAMPS_RECONSTRUCT_ACTIVATE_READOUT
 
 #include <iostream>
+#include <map>
 #include <stdexcept>
 #include <string>
-#include <map>
+#include <typeindex>
 #include <vector>
 
 #include <boost/archive/text_oarchive.hpp>
@@ -52,7 +53,6 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "coordinateBins.h"
-#include "typeindex.h"
 #include "particle.h"
 #include "bampsvector.h"
 
