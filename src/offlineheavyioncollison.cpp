@@ -14,7 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <deque>
-#include <math.h>
+#include <cmath>
 #include <limits.h>
 
 #include "offlineheavyioncollison.h"
@@ -4617,12 +4617,12 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
       lambdaRes = velocity_jet_restframe / (R22 + R23 + R32); //fm
 
     // error checking  
-    if( isnan(lambdaRes) || isinf(lambdaRes) || FPT_COMP_E( lambdaRes, 0.0 ) )
+    if( std::isnan(lambdaRes) || std::isinf(lambdaRes) || FPT_COMP_E( lambdaRes, 0.0 ) )
     {
-      if( isinf(lambdaRes) && (R22 + R23 + R32) != 0.0 )
+      if( std::isinf(lambdaRes) && (R22 + R23 + R32) != 0.0 )
         cout << "lambda = " << lambdaRes  << "  " <<  sqrt( s )  << "  " <<  (R22 + R23 + R32) << endl;
       
-      if( isnan(lambdaRes) )
+      if( std::isnan(lambdaRes) )
         cout << "lambda = " << lambdaRes  << "  " <<  sqrt( s ) << endl;
       
       if( lambdaRes == 0.0 )
