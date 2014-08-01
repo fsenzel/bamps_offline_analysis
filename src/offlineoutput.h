@@ -21,9 +21,10 @@
 #define BAMPS_RECONSTRUCT_ACTIVATE_READOUT
 
 #include <iostream>
+#include <map>
 #include <stdexcept>
 #include <string>
-#include <map>
+#include <typeindex>
 #include <vector>
 
 #include <boost/archive/text_oarchive.hpp>
@@ -45,8 +46,9 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "coordinateBins.h"
-#include "typeindex.h"
 #include "particle.h"
+
+using namespace std;
 
 class eOfflineOutput_error;
 enum offlineEventType { event_interaction22, event_interaction23, event_interaction32, event_interactionElastic, 
