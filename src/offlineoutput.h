@@ -48,6 +48,8 @@
 #include "coordinateBins.h"
 #include "particle.h"
 
+using namespace std;
+
 class eOfflineOutput_error;
 enum offlineEventType { event_interaction22, event_interaction23, event_interaction32, event_interactionElastic, 
                         event_particleIdSwap, event_newTimestep, event_endOfCascade, event_dummy = 99 };
