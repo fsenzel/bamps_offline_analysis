@@ -1,5 +1,5 @@
 #include "mesonDecay.h"
-#include "Pythia.h"
+#include "Pythia8/Pythia.h"
 using namespace Pythia8; 
 
 
