@@ -22,6 +22,7 @@
 
 #include "offlineoutput.h"
 
+using std::type_index;
 
 std::string  offlineDataGeneric::filenameIdentifier = "oflineDataGeneric";
 std::string  offlineDataEventType::filenameIdentifier = "eventList";

@@ -98,6 +98,10 @@ ELSEIF(BAMPS_BUILD_TYPE STREQUAL "AMD")
   SET(CMAKE_CXX_FLAGS_RELEASE "-Ofast -DNDEBUG" CACHE STRING 
     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
   ##
+ELSEIF(BAMPS_BUILD_TYPE STREQUAL "GCC49")
+  MESSAGE(STATUS "** Compiling with GCC (g++) settings**")
+  SET(ENV{CXX} "g++-4.9")
+  ##
 ELSEIF(BAMPS_BUILD_TYPE STREQUAL "GCC")
   MESSAGE(STATUS "** Compiling with GCC (g++) settings**")
   SET(ENV{CXX} "g++")

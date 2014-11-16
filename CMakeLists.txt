@@ -36,6 +36,16 @@ if(NOT CXX11_COMPILES)
    "It may be okay for this code. Keep fingers crossed that it manages the C++11 features used.")
 endif()
 
+######### check for -fdiagnostics-color compiler option #########
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-fdiagnostics-color=always" HAS_DIAGNOSTICSCOLOR)
+if(HAS_DIAGNOSTICSCOLOR)
+  message(STATUS "Current compiler supports -fdiagnostics-color=always option.")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
+elseif()
+   message(STATUS "Current compiler does not support -fdiagnostics-color=always option.")
+endif()
+
 ######### Find Boost libraries #########
 IF(NOT BOOST_ROOT AND NOT DEFINED ENV{BOOST_ROOT})
   SET(BOOST_ROOT "$ENV{HOME}/usr")

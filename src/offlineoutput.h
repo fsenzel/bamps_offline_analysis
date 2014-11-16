@@ -157,7 +157,7 @@ private:
   void checkAndCreateOutputDirectory( boost::filesystem::path& _dir );
     
   typedef boost::shared_ptr<boost::filesystem::ofstream> tPointerToFilestream;
-  typedef std::map< type_index, tPointerToFilestream > tFileStreamMap;
+  typedef std::map< std::type_index, tPointerToFilestream > tFileStreamMap;
   tFileStreamMap outputMap;
 
 #if BINARY_OFFLINE_OUTPUT > 0 
@@ -170,14 +170,14 @@ private:
 #endif
 #endif
   typedef boost::shared_ptr<tArchive> tPointerToArchive;
-  typedef std::map< type_index, tPointerToArchive > tArchiveMap;
+  typedef std::map< std::type_index, tPointerToArchive > tArchiveMap;
   tArchiveMap archiveMap;
     
     
 #ifdef BAMPS_RECONSTRUCT_ACTIVATE_READOUT
   /** read the stuff */
   typedef boost::shared_ptr<boost::filesystem::ifstream> tPointerToInputFilestream;
-  typedef std::map< type_index, tPointerToInputFilestream > tInputFileStreamMap;
+  typedef std::map< std::type_index, tPointerToInputFilestream > tInputFileStreamMap;
   tInputFileStreamMap inputMap;
 
 #if BINARY_OFFLINE_OUTPUT > 0 
@@ -186,15 +186,15 @@ private:
   typedef boost::archive::text_iarchive tInputArchive;
 #endif
   typedef boost::shared_ptr<tInputArchive> tPointerToInputArchive;
-  typedef std::map< type_index, tPointerToInputArchive > tInputArchiveMap;
+  typedef std::map< std::type_index, tPointerToInputArchive > tInputArchiveMap;
   tInputArchiveMap inputArchiveMap;
   /** read the stuff */
     
   /** save the last read position */
-  typedef std::map< type_index, std::streampos > tStreamPositionMap;
+  typedef std::map< std::type_index, std::streampos > tStreamPositionMap;
   tStreamPositionMap lastStreamPositionMap;
     
-  typedef std::map< type_index, tPointerToOfflineData > tOfflineDataMap;
+  typedef std::map< std::type_index, tPointerToOfflineData > tOfflineDataMap;
   tOfflineDataMap backupLastReadData;     
   /** save the last read position */
 #endif
@@ -244,10 +244,10 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
   tPointerToInputArchive archive;
   
   //   check whether an output archive for the given type of data has already been created, re-use if yes, create if no
-  tInputArchiveMap::iterator it = inputArchiveMap.find( type_index(typeid(T)) );
+  tInputArchiveMap::iterator it = inputArchiveMap.find( std::type_index(typeid(T)) );
   if( it != inputArchiveMap.end() )
   {
-    tInputFileStreamMap::iterator itFile = inputMap.find( type_index(typeid(T)) );
+    tInputFileStreamMap::iterator itFile = inputMap.find( std::type_index(typeid(T)) );
     if( itFile != inputMap.end() )
     {
       stream = itFile->second;    
@@ -271,14 +271,14 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
     stream->open( filename.c_str() );
 #endif
     
-    inputMap.insert(std::make_pair( type_index(typeid(T)), stream));
+    inputMap.insert(std::make_pair( std::type_index(typeid(T)), stream));
     archive.reset( new tInputArchive( *stream ) );
-    inputArchiveMap.insert(std::make_pair( type_index(typeid(T)), archive));
+    inputArchiveMap.insert(std::make_pair( std::type_index(typeid(T)), archive));
     
-    lastStreamPositionMap.insert( std::make_pair( type_index(typeid(T)), 0 ));
+    lastStreamPositionMap.insert( std::make_pair( std::type_index(typeid(T)), 0 ));
   }
   
-  tOfflineDataMap::iterator itBackupData = backupLastReadData.find( type_index(typeid(T)) );
+  tOfflineDataMap::iterator itBackupData = backupLastReadData.find( std::type_index(typeid(T)) );
   if( itBackupData != backupLastReadData.end() )
   {
     boost::shared_ptr< T > shrptr = boost::static_pointer_cast< T >( itBackupData->second );
@@ -288,7 +288,7 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
   else
   {
     // the actual reading
-    tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( type_index(typeid(T)) );
+    tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( std::type_index(typeid(T)) );
     if( itLastPos != lastStreamPositionMap.end() )
     {
       itLastPos->second = stream->tellg();    
@@ -300,9 +300,9 @@ boost::shared_ptr<T> offlineOutputInterface::readOfflineDataFromArchive()
     if ( ptrToDerived == 0 )
     {
       std::string errMsg = "Bad cast. Attempted dynamic_cast from ";
-      errMsg += type_index(typeid(offlineDataGeneric)).name();
+      errMsg += std::type_index(typeid(offlineDataGeneric)).name();
       errMsg += " to ";
-      errMsg += type_index(typeid(T)).name();
+      errMsg += std::type_index(typeid(T)).name();
       throw eOfflineOutput_error( errMsg );
     }
     
@@ -318,7 +318,7 @@ void offlineOutputInterface::undoLastReadOperation()
   tPointerToInputFilestream stream;
   
   std::streampos lastStreamPosition;
-  tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( type_index(typeid(T)) );
+  tStreamPositionMap::iterator itLastPos = lastStreamPositionMap.find( std::type_index(typeid(T)) );
   if( itLastPos != lastStreamPositionMap.end() )
   {
     lastStreamPosition = itLastPos->second;    
@@ -330,7 +330,7 @@ void offlineOutputInterface::undoLastReadOperation()
   }
   
   //   check whether an output archive for the given type of data has already been created, re-use if yes, create if no
-  tInputFileStreamMap::iterator it = inputMap.find( type_index(typeid(T)) );
+  tInputFileStreamMap::iterator it = inputMap.find( std::type_index(typeid(T)) );
   if( it != inputMap.end() )
   {
     stream = it->second;
@@ -342,7 +342,7 @@ void offlineOutputInterface::undoLastReadOperation()
 template<class T>
 void offlineOutputInterface::temporaryStoreData(tPointerToOfflineData _data)
 {
-  tOfflineDataMap::iterator itBackupData = backupLastReadData.find( type_index(typeid(T)) );
+  tOfflineDataMap::iterator itBackupData = backupLastReadData.find( std::type_index(typeid(T)) );
   if( itBackupData != backupLastReadData.end() )
   {
     std::string errMsg = "Attempting to store temporary data into a storage that is already in use";
@@ -350,7 +350,7 @@ void offlineOutputInterface::temporaryStoreData(tPointerToOfflineData _data)
   }
   else
   {    
-    backupLastReadData.insert(std::make_pair( type_index(typeid(T)), _data));
+    backupLastReadData.insert(std::make_pair( std::type_index(typeid(T)), _data));
   }
 }
 #endif
