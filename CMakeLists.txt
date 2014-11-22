@@ -1,5 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules/")
+get_filename_component(LIBSRC_DIR "${CMAKE_SOURCE_DIR}/lib" REALPATH)
+SET(CMAKE_MODULE_PATH "${LIBSRC_DIR}/../cmake_modules/")
 
 ######### This sets custom build flags and includes options for various compilers #########
 INCLUDE(SetCompilersAndBuildFlags)
