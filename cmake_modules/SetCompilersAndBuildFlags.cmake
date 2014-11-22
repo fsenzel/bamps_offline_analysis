@@ -23,12 +23,20 @@ ENDIF( NOT CMAKE_BUILD_TYPE )
 #########
 ## We may define own CMAKE_BUILD_TYPE:
 
-## CMAKE_BUILD_TYPE == DebugProf :
+## -DCMAKE_BUILD_TYPE=DebugProf :
 
 SET(CMAKE_CXX_FLAGS_DEBUGPROF "-O3 -g -pg -Wall -Wunused-variable" CACHE STRING 
   "Flags used by the compiler during profiling builds.")
 SET(CMAKE_C_FLAGS_DEBUGPROF "-O3 -g -pg -Wall -Wunused-variable" CACHE STRING 
   "Flags used by the compiler during profiling builds.")
+
+## -DCMAKE_BUILD_TYPE=Backtrace :
+
+SET(CMAKE_CXX_FLAGS_BACKTRACE "-O0 -g -rdynamic" CACHE STRING 
+  "Flags used by the compiler during builds allowing backtrace.")
+SET(CMAKE_C_FLAGS_BACKTRACE "-O0 -g -rdynamic" CACHE STRING 
+  "Flags used by the compiler during builds allowing backtrace.")
+MARK_AS_ADVANCED( CMAKE_CXX_FLAGS_BACKTRACE CMAKE_C_FLAGS_BACKTRACE)
 
 #########
 
@@ -99,13 +107,33 @@ ELSEIF(BAMPS_BUILD_TYPE STREQUAL "AMD")
     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
   ##
 ELSEIF(BAMPS_BUILD_TYPE STREQUAL "GCC49")
-  MESSAGE(STATUS "** Compiling with GCC (g++) settings**")
+  MESSAGE(STATUS "** Compiling with GCC 4.9 (g++) settings**")
   SET(ENV{CXX} "g++-4.9")
-  ##
+  ##    
 ELSEIF(BAMPS_BUILD_TYPE STREQUAL "GCC")
   MESSAGE(STATUS "** Compiling with GCC (g++) settings**")
   SET(ENV{CXX} "g++")
   ##
+ELSEIF(BAMPS_BUILD_TYPE STREQUAL "CLANG")
+  MESSAGE(STATUS "** Compiling with CLANG settings**")
+  SET(ENV{CC} "clang")
+  SET(ENV{CXX} "clang++")
+  SET(CMAKE_C_FLAGS                "-Wall -std=c99")
+  SET(CMAKE_C_FLAGS_DEBUG          "-g")
+  SET(CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
+  SET(CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG")
+  SET(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+  SET(CMAKE_CXX_FLAGS                "-Wall")
+  SET(CMAKE_CXX_FLAGS_DEBUG          "-g")
+  SET(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
+  SET(CMAKE_CXX_FLAGS_RELEASE        "-v -O4 -DNDEBUG" CACHE STRING 
+    "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
+  SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+SET (CMAKE_AR      "/usr/bin/llvm-ar" CACHE STRING "")
+SET (CMAKE_LINKER  "/usr/bin/llvm-ld" CACHE STRING "")
+SET (CMAKE_NM      "/usr/bin/llvm-nm" CACHE STRING "")
+SET (CMAKE_OBJDUMP "/usr/bin/llvm-objdump" CACHE STRING "")
+SET (CMAKE_RANLIB  "/usr/bin/llvm-ranlib" CACHE STRING "")
 ELSE()
   MESSAGE(STATUS "** Compiling with default settings**")
   MESSAGE(STATUS "** Use -DBAMPS_BUILD_TYPE to specify predefined sets of build options. Possible Values are: GCC, Intel, IntelCSC, IntelLoeweCSC, AMD, AMDCSC, AMDLoeweCSC **")
@@ -116,7 +144,11 @@ ENDIF()
 SET(VECTOR_IMPL_TYPE "SSE" CACHE STRING "Possible vector implementation types are: Scalar, SSE" )
 MARK_AS_ADVANCED( VECTOR_IMPL_TYPE )
 
-IF (VECTOR_IMPL_TYPE STREQUAL "SSE")
+IF (VECTOR_IMPL_TYPE STREQUAL "AVX")
+  MESSAGE(STATUS "** Vector implementation: AVX")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -msse2avx -mno-sse4a" CACHE STRING 
+    "Flags used by the compiler during all build types.") 
+ELSEIF (VECTOR_IMPL_TYPE STREQUAL "SSE")
   MESSAGE(STATUS "** Vector implementation: SSE")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse2 -msse3" CACHE STRING 
     "Flags used by the compiler during all build types.") 
