@@ -13,6 +13,7 @@
 #    "OptimizeForArchitecture"
 #=============================================================================
 
+include(CheckCXXCompilerFlag)
 
 # Taken from "Vc":
 #=============================================================================
@@ -83,8 +84,12 @@ macro(AutodetectHostArchitecture)
    if(_vendor_id STREQUAL "GenuineIntel")
       if(_cpu_family EQUAL 6)
          # Any recent Intel CPU except NetBurst
-         if(_cpu_model EQUAL 58)
+         if(_cpu_model EQUAL 62)
             set(TARGET_ARCHITECTURE "ivy-bridge")
+         elseif(_cpu_model EQUAL 58)
+            set(TARGET_ARCHITECTURE "ivy-bridge")
+         elseif(_cpu_model EQUAL 47) # Xeon E7 4860
+            set(TARGET_ARCHITECTURE "westmere")
          elseif(_cpu_model EQUAL 46) # Xeon 7500 series
             set(TARGET_ARCHITECTURE "westmere")
          elseif(_cpu_model EQUAL 45) # Xeon TNG
@@ -127,9 +132,16 @@ macro(AutodetectHostArchitecture)
          endif(_cpu_model GREATER 2)
       endif(_cpu_family EQUAL 6)
    elseif(_vendor_id STREQUAL "AuthenticAMD")
-      if(_cpu_family EQUAL 21) # 15h
-         set(TARGET_ARCHITECTURE "bulldozer")
+      if(_cpu_family EQUAL 22) # 16h
+         set(TARGET_ARCHITECTURE "AMD 16h")
+      elseif(_cpu_family EQUAL 21) # 15h
+         if(_cpu_model LESS 2)
+            set(TARGET_ARCHITECTURE "bulldozer")
+         else()
+            set(TARGET_ARCHITECTURE "piledriver")
+         endif()
       elseif(_cpu_family EQUAL 20) # 14h
+         set(TARGET_ARCHITECTURE "AMD 14h")
       elseif(_cpu_family EQUAL 18) # 12h
          if(_cpu_model EQUAL 1) # Llano
 	    set(TARGET_ARCHITECTURE "llano")
@@ -145,8 +157,9 @@ macro(AutodetectHostArchitecture)
    endif(_vendor_id STREQUAL "GenuineIntel")
 endmacro()
 
+
 macro(SetHostVectorSupport)
-   set(TARGET_ARCHITECTURE "auto" CACHE STRING "CPU architecture to optimize for. Using an incorrect setting here can result in crashes of the resulting binary because of invalid instructions used.\nSetting the value to \"auto\" will try to optimize for the architecture where cmake is called.\nOther supported values are: \"none\", \"generic\", \"core\", \"merom\" (65nm Core2), \"penryn\" (45nm Core2), \"nehalem\", \"westmere\", \"sandy-bridge\", \"ivy-bridge\", \"atom\", \"k8\", \"k8-sse3\", \"barcelona\", \"istanbul\", \"magny-cours\", \"bulldozer\", \"llano\", \"interlagos\".")
+   set(TARGET_ARCHITECTURE "auto" CACHE STRING "CPU architecture to optimize for. Using an incorrect setting here can result in crashes of the resulting binary because of invalid instructions used.\nSetting the value to \"auto\" will try to optimize for the architecture where cmake is called.\nOther supported values are: \"none\", \"generic\", \"core\", \"merom\" (65nm Core2), \"penryn\" (45nm Core2), \"nehalem\", \"westmere\", \"sandy-bridge\", \"ivy-bridge\", \"atom\", \"k8\", \"k8-sse3\", \"barcelona\", \"istanbul\", \"llano\", \"magny-cours\", \"bulldozer\", \"interlagos\", \"piledriver\", \"AMD 14h\", \"AMD 16h\".")
    set(_force)
    if(NOT _last_target_arch STREQUAL "${TARGET_ARCHITECTURE}")
 #      message(STATUS "target changed from \"${_last_target_arch}\" to \"${TARGET_ARCHITECTURE}\"")
@@ -156,18 +169,29 @@ macro(SetHostVectorSupport)
    mark_as_advanced(_last_target_arch)
    string(TOLOWER "${TARGET_ARCHITECTURE}" TARGET_ARCHITECTURE)
 
+   set(_march_flag_list)
    set(_available_vector_units_list)
+   set(_set_march 1)
 
    if(TARGET_ARCHITECTURE STREQUAL "auto")
       AutodetectHostArchitecture()
       message(STATUS "Detected CPU: ${TARGET_ARCHITECTURE}")
+      set(_set_march 0)
+   else()
+      message(STATUS "Defined CPU: ${TARGET_ARCHITECTURE}")
    endif(TARGET_ARCHITECTURE STREQUAL "auto")
 
+
    if(TARGET_ARCHITECTURE STREQUAL "core")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3")
    elseif(TARGET_ARCHITECTURE STREQUAL "merom")
+      list(APPEND _march_flag_list "merom")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3")
    elseif(TARGET_ARCHITECTURE STREQUAL "penryn")
+      list(APPEND _march_flag_list "penryn")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3")
       message(STATUS "Sadly the Penryn architecture exists in variants with SSE4.1 and without SSE4.1.")
       if(_cpu_flags MATCHES "sse4_1")
@@ -177,30 +201,78 @@ macro(SetHostVectorSupport)
          message(STATUS "SSE4.1: disabled (auto-detected from this computer's CPU flags)")
       endif()
    elseif(TARGET_ARCHITECTURE STREQUAL "nehalem")
+      list(APPEND _march_flag_list "nehalem")
+      list(APPEND _march_flag_list "corei7")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4.1" "sse4.2")
    elseif(TARGET_ARCHITECTURE STREQUAL "westmere")
+      list(APPEND _march_flag_list "westmere")
+      list(APPEND _march_flag_list "corei7")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4.1" "sse4.2")
    elseif(TARGET_ARCHITECTURE STREQUAL "ivy-bridge")
+      list(APPEND _march_flag_list "core-avx-i")
+      list(APPEND _march_flag_list "corei7-avx")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4.1" "sse4.2" "avx" "rdrnd" "f16c")
    elseif(TARGET_ARCHITECTURE STREQUAL "sandy-bridge")
+      list(APPEND _march_flag_list "sandybridge")
+      list(APPEND _march_flag_list "corei7-avx")
+      list(APPEND _march_flag_list "corei7")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4.1" "sse4.2" "avx")
    elseif(TARGET_ARCHITECTURE STREQUAL "atom")
+      list(APPEND _march_flag_list "atom")
+      list(APPEND _march_flag_list "bonnell")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3")
    elseif(TARGET_ARCHITECTURE STREQUAL "k8")
+      list(APPEND _march_flag_list "k8")
       list(APPEND _available_vector_units_list "sse" "sse2")
    elseif(TARGET_ARCHITECTURE STREQUAL "k8-sse3")
+      list(APPEND _march_flag_list "k8-sse3")
+      list(APPEND _march_flag_list "k8")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3")
+   elseif(TARGET_ARCHITECTURE STREQUAL "AMD 16h")
+      list(APPEND _march_flag_list "btver2")
+      list(APPEND _march_flag_list "btver1")
+      list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4a" "sse4.1" "sse4.2" "avx" "f16c")
+   elseif(TARGET_ARCHITECTURE STREQUAL "AMD 14h")
+      list(APPEND _march_flag_list "btver1")
+      list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4a")
+   elseif(TARGET_ARCHITECTURE STREQUAL "piledriver")
+      list(APPEND _march_flag_list "bdver2")
+      list(APPEND _march_flag_list "bdver1")
+      list(APPEND _march_flag_list "bulldozer")
+      list(APPEND _march_flag_list "barcelona")
+      list(APPEND _march_flag_list "core2")
+      list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4a" "sse4.1" "sse4.2" "avx" "xop" "fma4" "fma" "f16c")
    elseif(TARGET_ARCHITECTURE STREQUAL "interlagos")
+      list(APPEND _march_flag_list "bdver1")
+      list(APPEND _march_flag_list "bulldozer")
+      list(APPEND _march_flag_list "barcelona")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4a" "sse4.1" "sse4.2" "avx" "xop" "fma4")
    elseif(TARGET_ARCHITECTURE STREQUAL "bulldozer")
+      list(APPEND _march_flag_list "bdver1")
+      list(APPEND _march_flag_list "bulldozer")
+      list(APPEND _march_flag_list "barcelona")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "ssse3" "sse4a" "sse4.1" "sse4.2" "avx" "xop" "fma4")
    elseif(TARGET_ARCHITECTURE STREQUAL "barcelona")
+      list(APPEND _march_flag_list "barcelona")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "sse4a")
    elseif(TARGET_ARCHITECTURE STREQUAL "istanbul")
-      list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "sse4a")
-   elseif(TARGET_ARCHITECTURE STREQUAL "magny-cours")
+      list(APPEND _march_flag_list "barcelona")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "sse4a")
    elseif(TARGET_ARCHITECTURE STREQUAL "llano")
+      list(APPEND _march_flag_list "amdfam10")
+      list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "sse4a")
+   elseif(TARGET_ARCHITECTURE STREQUAL "magny-cours")
+      list(APPEND _march_flag_list "barcelona")
+      list(APPEND _march_flag_list "core2")
       list(APPEND _available_vector_units_list "sse" "sse2" "sse3" "sse4a")
    elseif(TARGET_ARCHITECTURE STREQUAL "generic")
       list(APPEND _march_flag_list "generic")
@@ -209,6 +281,8 @@ macro(SetHostVectorSupport)
    else(TARGET_ARCHITECTURE STREQUAL "core")
       message(FATAL_ERROR "Unknown target architecture: \"${TARGET_ARCHITECTURE}\". Please set TARGET_ARCHITECTURE to a supported value.")
    endif(TARGET_ARCHITECTURE STREQUAL "core")
+
+
 
    if(NOT TARGET_ARCHITECTURE STREQUAL "none")
       _my_find(_available_vector_units_list "sse2" SSE2_FOUND)
@@ -248,7 +322,44 @@ macro(SetHostVectorSupport)
       set(HAVE_VECTOR_XOP    ${XOP_FOUND}    CACHE BOOL "We have support of XOP." ${_force})
       set(HAVE_VECTOR_FMA4   ${FMA4_FOUND}   CACHE BOOL "We have support of FMA4." ${_force})
 
+
+      set(_cxx_flags)
+
+      if(_set_march)
+
+        if(CMAKE_CXX_COMPILER MATCHES "/(icpc|icc)$") # ICC (on Linux)
+          
+          # to be inserted...
+          
+        else() # not MSVC and not ICC => GCC, Clang, Open64
+          foreach(_flag ${_march_flag_list})
+            string(REGEX REPLACE "[-.+/:= ]" "_" _flag_esc "${_flag}")
+            CHECK_CXX_COMPILER_FLAG("-march=${_flag}" HAS_FLAG_${_flag_esc})
+            if(HAS_FLAG_${_flag_esc})
+#              message(STATUS "Compiler supports ${_flag}")
+              set(_cxx_flags "${_cxx_flags} -march=${_flag}")
+            else()
+#              message(STATUS "Compiler does not supports ${_flag}")
+            endif()
+            
+          endforeach(_flag)
+        endif()
+
+      else()
+
+#        message(STATUS "setting flag -march=native")
+#        set(_cxx_flags "${_cxx_flags} -march=native")
+
+      endif(_set_march)
+
+
+      set(CXX_FLAGS_MARCH ${_cxx_flags} CACHE STRING "additional CXX flags -march=..." FORCE)
+
+
   endif ()
+
+  # the variables will only show up in the GUI in the "advanced" view
+  MARK_AS_ADVANCED(CXX_FLAGS_MARCH)
 
 endmacro()
 

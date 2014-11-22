@@ -16,6 +16,7 @@ INCLUDE(CPack)
 
 ######### Setup host properties (Vector, RDTSCP, ...) #########
 INCLUDE(HostProperties)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS_MARCH}")
 
 ######### check that C++11 code compiles #########
 include(CheckCXXSourceCompiles)
@@ -40,10 +41,10 @@ endif()
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-fdiagnostics-color=always" HAS_DIAGNOSTICSCOLOR)
 if(HAS_DIAGNOSTICSCOLOR)
-  message(STATUS "Current compiler supports -fdiagnostics-color=always option.")
+#  message(STATUS "Current compiler supports -fdiagnostics-color=always option.")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
 elseif()
-   message(STATUS "Current compiler does not support -fdiagnostics-color=always option.")
+#   message(STATUS "Current compiler does not support -fdiagnostics-color=always option.")
 endif()
 
 ######### Find Boost libraries #########
@@ -96,6 +97,25 @@ IF ( LINK_TO_BAMPS_LIB )
   ENDIF( NOT BAMPS_FOUND )
 ENDIF( LINK_TO_BAMPS_LIB )
 
+######### This option controls whether OpenMP should be used #########
+## Default: FALSE
+## Change on the command line via -DWITH_OPENMP=TRUE
+SET ( WITH_OPENMP FALSE CACHE BOOL "Whether to use OpenMP or not" )
+
+######### Find OpenMP and enable/disable it according flag #########
+
+IF( WITH_OPENMP )
+  FIND_PACKAGE( OpenMP )
+  IF( OPENMP_FOUND )
+#    MESSAGE(STATUS "** OpenMP found and will be used.")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -D_GLIBCXX_PARALLEL")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+  ENDIF()
+ELSE()
+#    MESSAGE(STATUS "** OpenMP found, but will *not* be used.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
+ENDIF()
 
 ######### Handle doxygen files via CMake, adds custom target, use as "make doxygen" #########
 IF( NOT DISABLE_BUILD_EXTRAS )
