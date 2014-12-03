@@ -64,8 +64,6 @@ namespace
   list<int> deadParticleList;
   coordinateEtaBins etaBins;
 
-  int gG, gQ;
-
   long ncoll, ncoll32, ncoll23, ncoll22, ncolle;
 
   double randomShiftEta, randomShiftX, randomShiftY;
@@ -236,9 +234,6 @@ void offlineHeavyIonCollision::mainFramework()
   int jpsi_dissociation_backup = 0;
   
   list<int> edgeCellCopy, edgeCellAddedCopy;
-
-  gG = 2 * ( pow( static_cast<double>( Ncolor ) , 2 ) - 1 );
-  gQ = 2 * Ncolor;
 
   dx = theConfig->get_dx();
   dy = theConfig->get_dy();
@@ -1134,8 +1129,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   
   formGeomCopy = formGeom;
 
-  gG = 2 * ( pow( static_cast<double>( Ncolor ) , 2 ) - 1 );
-  
   if ( !formGeomCopy.empty() )
   {
     list<int>::iterator iIt;
@@ -3860,7 +3853,6 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
   double lambdaAvr, lambdaResAvr; // fm
   deque<double> lambdaArray, lambdaResArray;
   
-//   const double gG=2*(Ncolor*Ncolor-1);
   const double epsilon = 0.01;
   const int nIterationsMax = 30;
   
