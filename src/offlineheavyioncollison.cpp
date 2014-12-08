@@ -100,7 +100,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
 {  
   // load 2->2 cross section interpolation data
   if( theConfig->doScattering_22() )
-    theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom );
+    theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom, theConfig->getMaxRunningCoupling(), theConfig->getfixedCouplingValue() );
   
   // load 2->3 cross section interpolation data
   if( theConfig->doScattering_23() )
