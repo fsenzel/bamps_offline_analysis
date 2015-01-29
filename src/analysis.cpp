@@ -709,6 +709,24 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       studyCentralDensity = true;
       break;
       
+    case photons:
+      
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.15 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.25 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.35 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.45 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.55 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      studyBackground = true;
+      break;
+      
     default:
       break;
   }

@@ -3,16 +3,17 @@ jobname = test
 seed = 0
 
 [simulation]
-time = 1.1
+time = 0.5
 
 [offline]
 name = lhc276_b36_pythia_08shadowing_20fm_nf3_1
 offline_data_dir = recorded_events/LHC_2_76TeV/b3_6
 minPT_added = 8
-nAdded = 5
+nAdded = 0
 
 [output]
 directory = output
+outputScheme = 40
 
 [misc]
 switch_32 = 0

@@ -58,7 +58,8 @@ alice_jpsi = 141,
 cms_jpsi = 151,
 // jets:
 background_jets = 161,
-central_densities = 171
+central_densities = 171,
+photons = 40
 };
 
 
