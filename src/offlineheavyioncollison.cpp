@@ -127,6 +127,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
   
   nGet23Errors = 0;
   nGet32Errors = 0;
+  totalPhotonNumber = 0;
 }
 
 
@@ -220,6 +221,7 @@ void offlineHeavyIonCollision::initialize()
 
 void offlineHeavyIonCollision::mainFramework()
 {
+  totalPhotonNumber = 0;
   double dt_cascade = 0;
   double dt_backup = 0;
   double nexttime;
@@ -435,6 +437,14 @@ void offlineHeavyIonCollision::mainFramework()
 
     // collide added particles with gluonic medium
     deadParticleList.clear();
+    
+    //WARNING: Moritz
+    //for ( unsigned int i = 0; i < particles_atTimeNow.size(); i++ )
+    //{
+    //  cout << "particles " << particles_atTimeNow[i].Pos.X() << endl;
+    //}
+    
+    //std::cout << "Scattering! " << endl;
     scattering( nexttime, again );
 
     // if time step is too large -> collide again with smaller time step
@@ -562,6 +572,8 @@ void offlineHeavyIonCollision::mainFramework()
   cout << "number of errors in get32(...) = " << nGet32Errors << endl;
   cout << "number of errors in get23(...) = " << nGet23Errors << endl;
   
+  cout << "==========================" << endl;
+  cout << "Total Number of Photons = " << totalPhotonNumber << endl;
   // List particle numbers for all flavors
   cout << "==========================" << endl;
   cout << "Added particles:" << endl;
@@ -1215,8 +1227,9 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
     dv = dx * dy * dz;
     for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
     {
-      if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
-      {
+      //WARNING!   if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
+      if ( !( cells[j].empty()) )
+      {      
         cells[j].resetStoredValues();
         cellsAdded[j].resetStoredValues();
         gluonList.clear();
@@ -1230,10 +1243,12 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         
         //------------------------- check whether all particles in this cell are free --------------------
         free = true;
+        int numberInThisCell=0;
         for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
         {
           int id = *iIt;
           xt = particles_atTimeNow[id].Pos.Perp();
+          numberInThisCell++;
           
           nc = rings.getIndexPure( xt );
           
@@ -1258,6 +1273,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             free = false;
           }
         }
+        //cout << "Number of Particles in This Cell = " << numberInThisCell << endl;
         
         for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
         {
@@ -1397,6 +1413,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                 particles_atTimeNow[id].rate = rateAntiQuarks[etaSliceIndex][nc];
                 particles_atTimeNow[id].ratev = rateAntiQuarks_prev[etaSliceIndex][nc];
               }
+              
+              
             }
             for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
             {
@@ -1526,6 +1544,16 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             {
               scaleFactor = static_cast<double>( nGluons ) / static_cast<double>( nGluons - n32 );
             }
+            
+            if( theConfig->isScatt_amongBackgroundParticles() )
+            {
+              scatt22_amongBackgroundParticles( cells[j], allParticlesList, scaleFactor, again, nexttime );
+              
+              if ( again )
+              {
+                return;
+              }
+            }            
             
             if( theConfig->isScatt_amongAddedParticles() && theConfig->doScattering_22() )
             {
@@ -1986,6 +2014,108 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
   }
 }
 
+//WARNING!
+void offlineHeavyIonCollision::scatt22_amongBackgroundParticles( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime )
+{
+  int iscat, jscat, typ;
+  double s, cs22, Vrel;
+  double M1, M2;
+  double probab22;
+  double md2g_wo_as, md2q_wo_as,s_cutoff_for_pqcd;
+  int initialStateIndex = -1;
+  FLAVOR_TYPE F1, F2;
+  double temperature;
+
+
+  list<int>::const_iterator iIt;
+  list<int>::const_iterator jIt;
+
+  scattering22 scatt22_object( &theI22 );
+  
+  for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
+  {
+    iscat = _allParticlesList[i];
+
+    for ( unsigned int j = i + 1; j < _allParticlesList.size(); j++ )
+    {
+      jscat = _allParticlesList[j];
+      
+      F1 = particles_atTimeNow[iscat].FLAVOR;
+      M1 = particles_atTimeNow[iscat].m;
+      F2 = particles_atTimeNow[jscat].FLAVOR;
+      M2 = particles_atTimeNow[jscat].m;
+
+      //cout << "flavors " << F1 << "     " << F2 << endl;
+      
+      
+      s = (particles_atTimeNow[iscat].Mom + particles_atTimeNow[jscat].Mom).M2();
+
+     if (theConfig->getCrossSectionMethod() == 0)
+     {
+       s_cutoff_for_pqcd=2.0*theConfig->getInfraredCutOffEMProcesses();/* WARNING! For PQCD (with Debye-Mass) 0.1, Check for the Photonproduction! */
+     }else
+     {
+       s_cutoff_for_pqcd=0.0;
+     }
+      
+      if ( s < 1.1*lambda2 && FPT_COMP_G(s, s_cutoff_for_pqcd) )
+      {
+        probab22 = -1.0;
+        cs22 = 0.0; //1/GeV^2
+      }
+      else
+      {
+        Vrel = VelRel( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom, M1, M2 );
+
+        //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, it will be multiplied in the scattering routines
+        md2g_wo_as = ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
+        md2q_wo_as = ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q ) / 2.0;
+        
+        scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
+                                     F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
+                                     theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
+                                     theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses(),
+                                     theConfig->getInfraredCutOffEMProcesses(),
+                                     temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+      
+        cs22 = scatt22_object.getXSection22( initialStateIndex );
+
+        // in scatt22_amongAddedParticles was this:
+        //probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl * theConfig->getNaddedEvents() ) * theConfig->getJpsiTestparticles();
+        
+        //New:
+        //WARNING: is dv the cell volume?
+        //WARNING: What is theConfig->getNaddedEvents()
+        probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt  / ( dv * testpartcl );
+        //cout << "Probab = " << probab22 << " dv = " << dv << " testpartcl = " << testpartcl << " dt = " << dt << " Vrel= " << Vrel << "NaddedEvents" << theConfig->getNaddedEvents() << endl;
+        
+        if ( F1 == gluon )
+        {
+          probab22 *= scaleFactor;
+        }
+        if ( F2 == gluon )
+        {
+          probab22 *= scaleFactor;
+        }
+      }
+
+      if ( probab22 > 1.0 )
+      {
+//         cout << "P2322=" << probab2322 << ">1" << endl;
+        again = true;
+//         cout << "dt (old) = " << dt << endl;
+        dt = 0.5 / ( probab22 / dt );
+//         cout << "dt (new) = " << dt << endl;
+        return;
+      }
+
+      if ( ran2() < probab22 )
+      {
+        scatt22_amongBackgroundParticles_utility( scatt22_object, _cells.particleList, _allParticlesList, iscat, jscat, typ, nexttime );
+      }
+    }
+  }
+}
 
 
 
@@ -3038,6 +3168,57 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22
   }
 }
 
+void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_utility( scattering22& scatt22_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesList, const int iscat, const int jscat, int& typ, const double nexttime )
+{
+  FLAVOR_TYPE F1, F2;
+  double Tmax, TT;
+  double M1, M2;
+  double t_hat;
+  
+  
+  
+  ParticleOffline temp_particle_iscat = particles_atTimeNow[iscat];
+  ParticleOffline temp_particle_jscat = particles_atTimeNow[jscat];
+
+  F1 = particles_atTimeNow[iscat].FLAVOR;
+  M1 = particles_atTimeNow[iscat].m;
+
+  F2 = particles_atTimeNow[jscat].FLAVOR;
+  M2 = particles_atTimeNow[jscat].m;
+
+  Tmax = std::max( particles_atTimeNow[iscat].Pos.T(), particles_atTimeNow[jscat].Pos.T() );
+  TT = ( nexttime - Tmax ) * ran2() + Tmax;
+  temp_particle_iscat.Propagate( TT, particles_atTimeNow[iscat].X_traveled );
+  temp_particle_jscat.Propagate( TT, particles_atTimeNow[jscat].X_traveled );
+
+  // at this point scattering take place, therefore set properties of last scattering point
+  temp_particle_iscat.lastInt = particles_atTimeNow[iscat].Pos;
+  temp_particle_jscat.lastInt = particles_atTimeNow[jscat].Pos;
+
+  // determine type of scattering, momentum transfer t_hat, new flavor and new masses
+  scatt22_obj.getMomentaAndMasses22( F1, F2, M1, M2, t_hat, typ );
+  
+  //cout << F1 << "       " << F2 << endl;
+  
+  // translate momemtum transfer t_hat into actual momenta of outgoing particles
+  VectorEPxPyPz P1new, P2new;
+  VectorTXYZ Pos1new, Pos2new;
+   
+  scatt22_obj.setNewMomenta22( P1new, P2new, 
+                               Pos1new, Pos2new,
+                               t_hat );
+  if(F1==33)
+  {
+    //cout << "Photon with Energy E=" << P1new.E() << " GeV produced!" << endl;
+    totalPhotonNumber++;
+  }
+  if(F2==33)
+  {
+    //cout << "Photon with Energy E=" << P2new.E() << " GeV produced!" << endl;
+    totalPhotonNumber++;
+  }
+  cout << totalPhotonNumber << " Photons @ time " << nexttime << endl;
+}
 
 int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scattering32& scatt32_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, const int iscat, const int jscat, const int kscat, int& n32, const double nexttime )
 {

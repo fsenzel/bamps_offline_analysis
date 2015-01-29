@@ -137,6 +137,9 @@ class config : public configBase
   
   /** @brief Interface for config::scatt_amongAddedParticles */
   bool isScatt_amongAddedParticles() const {return scatt_amongAddedParticles;}
+  
+  /** @brief Interface for config::scatt_amongBackgroundParticles */
+  bool isScatt_amongBackgroundParticles() const {return scatt_amongBackgroundParticles;}  
 
   /** @brief Interface for config::scatt_furtherOfflineParticles */
   bool isScatt_furtherOfflineParticles() const {return scatt_furtherOfflineParticles;}
@@ -429,6 +432,9 @@ class config : public configBase
   
   /** @brief Whether added particles are allowed to scatter with other added particles */
   bool scatt_amongAddedParticles;
+  
+  /** @brief Whether background particles are allowed to scatter virtually with each other to produce photons. No influence back onto the recorded medium.*/
+  bool scatt_amongBackgroundParticles;
   
   /** @brief Whether the added particles are treated as tagges jets */
   bool jet_tagged;
