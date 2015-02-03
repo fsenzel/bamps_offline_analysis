@@ -48,7 +48,7 @@ class Particle : public ParticlePrototype
       md2q_scaled_22( 0 ), 
       md2g_scaled_23( 0 ), 
       md2q_scaled_23( 0 ), 
-      step( 0 ), tstep( 0 ), taustep( 0 ) 
+      step( 0 ), tstep( 0 ), taustep( 0 )
 {
 };
     
@@ -87,6 +87,8 @@ class Particle : public ParticlePrototype
     bool free;
     /** @brief Flag for discerning particles that are still within their initial formation time */
     bool init;
+
+    
     
     /** @brief collision ordering time [fm] (geometric collisions) */
     double collisionTime;

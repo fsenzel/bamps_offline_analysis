@@ -93,6 +93,7 @@ config::config() :
  v2RAAoutput(true),
  v2RAAoutputIntermediateSteps(false),
  dndyOutput(false),
+ outputSwitch_photons( false ),
  outputScheme(no_output),
 // ---- heavy quark options ----
  couplingRunningHeavyQuarksInput(false),
@@ -337,6 +338,7 @@ void config::initializeProgramOptions()
   ("output.v2RAA", po::value<bool>( &v2RAAoutput )->default_value( v2RAAoutput ), "write v2 and RAA output for added particles")
   ("output.v2RAAoutputIntermediateSteps", po::value<bool>( &v2RAAoutputIntermediateSteps )->default_value( v2RAAoutputIntermediateSteps ), "whether v2 and RAA output are printed at each analyisis time step (otherwise just at beginning and end)")
   ("output.dndyOutput", po::value<bool>( &dndyOutput )->default_value( dndyOutput ), "whether dndy output is written out")
+  ("output.photons", po::value<bool>( &outputSwitch_photons )->default_value( outputSwitch_photons ), "whether output concerning photons is written out")
   ("output.outputScheme", po::value<int>()->default_value( static_cast<int>(outputScheme) ), "output scheme id which configures the analysis routines and decides which output is written. The integer for the desired output scheme is given in the OUTPUT_SCHEME enum in configuration.h.")
   ("output.scatteredMedium", po::value<bool>( &outputSwitch_scatteredMediumParticlesOutput )->default_value( outputSwitch_scatteredMediumParticlesOutput ), "write scattered medium particles output")
   ;

@@ -58,7 +58,7 @@ analysis::analysis( config* const c ):
   //-----------------------
   
   handle_output_studies( outputScheme );
-  
+   
   // to create the tsteps use such a bash script:
   // for (( I=50; $I <= 80; I++ )); do   J=$(echo "scale=1; ($I+1)/10" | bc); echo "tstep[$I]=$J;" ; done
   if( studyJpsi ) // jpsi evolution: more timesteps
@@ -369,11 +369,6 @@ analysis::analysis( config* const c ):
     //--------------------------------------
   }
   
-  
-  
-  
-  
-  
   if( studyYDistribution || studyEtSpectra )
   {
     //------ initialisation of rapidity binning ------
@@ -433,7 +428,6 @@ analysis::analysis( config* const c ):
     //--------------------------------------------------
   }
 
-
   if( studyJpsi )
   {
     numberJpsi_all_time = new int[nTimeSteps+1];
@@ -473,6 +467,42 @@ analysis::analysis( config* const c ):
     progressLogFile.open( filename.c_str(), ios::out | ios::trunc );
   }
   showerParticlesInEvent.resize( static_cast<int>( theConfig->getNumberOfParticlesToAdd() / 2 ) );
+  
+
+  if( studyPhotons )
+  { 
+    if( theConfig->doOutput_photons())
+    {
+      //PhotonEnergyBins configuration   
+      PhotondNOverTwoPiptdydptBin.setMinMaxN( 0.0, 3.0, 100 );
+    }    
+    
+    //---- initialisation of PT-binning ----
+    minPTPhotons = 0.0;
+    maxPTPhotons = 3.0;
+    binWidthPTPhotons = 0.03;
+    numberBinsPTPhotons = int(( maxPTPhotons - minPTPhotons + 0.001 ) / binWidthPTPhotons );
+    
+    tArrayOfDoubleVec tmpArray2;
+    for ( unsigned int i = 0; i < rapidityRanges.size(); i++ )
+    { 
+      tmpArray2.reset( new vector<double>[nTimeSteps+2] );     //+2 because of initial and final timesteps
+      ptBins_photons.push_back( tmpArray2 ); 
+    } 
+    for ( unsigned int ny = 0; ny < rapidityRanges.size(); ny++ )
+    {
+      ptBins_photons[ny][0].resize( numberBinsPTPhotons + 1, 0 );
+    }    
+    //write the bin labels
+    for ( int i = 0; i < numberBinsPTPhotons; i++ )
+    {
+      ptBinLabelsPhotons.push_back( minPT + ( i * binWidthPTPhotons ) + ( binWidthPTPhotons / 2 ) );
+    }
+    cout << "Photon-binning: Number of bins: " << numberBinsPTPhotons << "  binWidth: " << binWidthPTPhotons << endl;
+    //---- initialisation of PT-binning ----
+    
+  }
+
 }
 
 
@@ -506,6 +536,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyCentralDensity = false; // density in central part of collision
   studyBackground = false; // print also properties like v2, RAA of background
   studyScatteredMediumParticles = false; // print scattered medium particles
+  studyPhotons = false; // transverse momentum spectra of photons
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -709,14 +740,13 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       studyCentralDensity = true;
       break;
       
-    case photons:
-      
+    case photons:     
       rapidityRanges.clear();
-      yRange.reset( 0, 0.15 );
+      yRange.reset( 0, 0.15 );//rapidityRange[0]
       rapidityRanges.push_back(yRange);
-      yRange.reset( 0, 0.25 );
+      yRange.reset( 0, 0.25 );//1
       rapidityRanges.push_back(yRange);
-      yRange.reset( 0, 0.35 );
+      yRange.reset( 0, 0.35 );//2
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 0.45 );
       rapidityRanges.push_back(yRange);
@@ -725,6 +755,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       yRange.reset( 0, 1.0 );
       rapidityRanges.push_back(yRange);
       studyBackground = true;
+      studyPhotons=true;
       break;
       
     default:
@@ -746,6 +777,7 @@ void analysis::collectPtDataInitial()
     ptSoftDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), 0 );
     ptSoftDistribution( allFlavors, particles_atTimeNow, particles_atTimeNow.size(), 0 );
   }
+  
 }
 
 
@@ -762,6 +794,11 @@ void analysis::collectPtData( const int step )
     ptSoftDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
     ptSoftDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
     ptSoftDistribution( allFlavors, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  }
+  
+  if( studyPhotons)
+  {  
+    
   }
 }
 
@@ -809,8 +846,114 @@ void analysis::collectEtData( const int step )
   }
 }
 
+void analysis::PtDistributionPhotons( const double PTofThisSinglePhoton, const double etaOfThisSinglePhoton, const double EofSinglePhoton )
+{
+  //Binning-Class:
+  if ( fabs( etaOfThisSinglePhoton ) >= rapidityRanges[2].yleft && fabs( etaOfThisSinglePhoton ) <= rapidityRanges[2].yright )
+  {  
+    PhotondNOverTwoPiptdydptBin.add(PTofThisSinglePhoton); //PTofThisSinglePhoton/(2*M_PI*DeltaRapidity*PTofThisSinglePhoton ) 
+  }
 
+  //New Method:
+  double pt, y;
+ 
+  pt = PTofThisSinglePhoton;
+  y = etaOfThisSinglePhoton;
+    
+  // is it in the possible pt range at all?
+  if ( pt < maxPTPhotons && pt >= minPTPhotons )
+  {
+    // individually check for each rapidity range whether this particle needs to be binned
+    for ( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
+    {
+      if ( fabs( y ) >= rapidityRanges[yRangeIndex].yleft && fabs( y ) <= rapidityRanges[yRangeIndex].yright )
+      {
+        if ( pt == minPTPhotons )  // a special case
+        {
+          ++ptBins_photons[yRangeIndex][0][0];  // actually bin the pt of the particle
+        }
+        else
+        {
+          ++ptBins_photons[yRangeIndex][0][int(( pt - minPTPhotons )/binWidthPTPhotons )];  // actually bin the pt of the particle
+        }
+      }
+    }
+  }  
+}
 
+/** Photonspectra output
+ * 
+ * @param[in] 
+ * @param[out] 
+ * 
+ */
+void analysis::photonSpectrumOutput()
+{
+  time_t end;
+  time( &end );
+  
+  cout << "testp: " << theConfig->getTestparticles() << endl;
+  
+  //****** Old Method:
+  string filename1 = filename_prefix + "_PhotondNOverTwoPiptdydpt_Old";
+  fstream file1( filename1.c_str(), ios::out | ios::trunc );
+
+  //print header if file is empty
+  file1.seekp( 0, ios::end );
+  long size = file1.tellp();
+  file1.seekp( 0, ios::beg );
+  if ( size == 0 )
+    printHeader( file1, photonPtDist,end );
+
+  
+  double DeltaRapidity = fabs(rapidityRanges[2].yright - rapidityRanges[2].yleft)*2.0;
+  
+  PhotondNOverTwoPiptdydptBin.print(file1,1.0/(2.0*M_PI*DeltaRapidity*theConfig->getTestparticles()));
+  file1.close();
+
+  //***** New Method:
+  
+  
+  string filename2 = filename_prefix + "_PhotondNOverTwoPiptdydpt_New";
+  fstream file2( filename2.c_str(), ios::out | ios::trunc );
+
+  //---- print header if file is empty ----
+  //file2.seekp( 0, ios::end );
+  //long size2 = file2.tellp();
+  //file2.seekp( 0, ios::beg );
+  //if ( size2 == 0 )
+  //  printHeader( file2, ptSpectrum, end );
+  //---------------------------------------
+
+  cout << "Rapidity ranges" << endl;
+  cout << rapidityRanges[0].yright << " " << rapidityRanges[0].yleft << endl;
+  cout << rapidityRanges[1].yright << " " << rapidityRanges[1].yleft << endl;  
+  cout << rapidityRanges[2].yright << " " << rapidityRanges[2].yleft << endl;
+  cout << rapidityRanges[3].yright << " " << rapidityRanges[3].yleft << endl;  
+  
+  //------------- the actual output ---------------
+  for ( unsigned int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
+  {
+    file2 << "#y in +- [" << rapidityRanges[yRangeIndex].yleft << ", " << rapidityRanges[yRangeIndex].yright << "]" << sep; 
+  } 
+  file2 << endl;
+ 
+  for ( int i = 0; i < numberBinsPTPhotons; i++ )
+  {
+    file2 << ptBinLabelsPhotons[i] << sep;
+    for ( unsigned int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
+    {
+      DeltaRapidity = fabs(rapidityRanges[yRangeIndex].yright - rapidityRanges[yRangeIndex].yleft)*2.0;
+      file2 <<  ptBins_photons[yRangeIndex][0][i]/(2.0*M_PI*DeltaRapidity*binWidthPTPhotons*ptBinLabelsPhotons[i]*theConfig->getTestparticles())  << sep;
+    } 
+    file2 << endl;
+  }
+  file2 << endl << endl;
+  //-------------------------------------------------
+
+  file2.close();
+   
+}
 
 
 void analysis::initialOutput()
@@ -2927,6 +3070,9 @@ void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
   case quarkNumbers:  
     f << "#quark numbers summed over all rapidities" << endl;
     break;
+  case photonPtDist:
+    f << "#spectrum of produced photons - ";
+    break;
   default:
     f << "#undefined ";
   }
@@ -3008,6 +3154,10 @@ void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
     f << "#ID" << sep << "uniqueID" << sep << "Cell ID" << sep << "Flavor" << sep << "t" << sep << "x" << sep << "y" << sep << "z" << sep
     << "E"  << sep << "Px"  << sep << "Py"  << sep << "Pz" << sep << "md2g/alpha_s [GeV^2]" << sep
     << "md2q/alpha_s [GeV^2]" << sep << "Init. eventID" << endl;
+    break;
+  case photonPtDist:
+    f << "#photons per energy bin (divided by bin width)" << endl;
+    f << "# bin width = " << PhotondNOverTwoPiptdydptBin.getWidth() << endl;    
     break;
   default:
     f << endl;

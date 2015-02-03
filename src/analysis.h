@@ -26,6 +26,7 @@
 #include "particle.h"
 #include "ringstructure.h"
 #include "interpolation_nJpsi.h"
+#include "binning.h"
 
 using std::vector;
 using std::fstream;
@@ -36,7 +37,7 @@ using std::fstream;
 class config;
 
 enum jetTrackerCollType {initial_jet, final_jet, c2to2, c2to3, c3to2, production};
-enum anaType {ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets};
+enum anaType {ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets, photonPtDist};
 enum v2Type {v2jets, v2background};
 
 const string sep = "\t";
@@ -194,6 +195,9 @@ public:
   void collectEtData( const int step );
   void collectEtDataInitial();
   
+  /** @brief Generate the Energy-distribution for Photons. */
+  void PtDistributionPhotons( const double PTofThisSinglePhoton , const double etaOfThisSinglePhoton, const double EofSinglePhoton  ); 
+  
   void setSeed( uint32_t _s ) { seed = _s; }
   uint32_t getSeed( ) const { return seed; }
 
@@ -241,6 +245,11 @@ public:
   void scatteredMediumParticlesOutput( const int step );
   void mediumParticlesOutput( const int step );
   //--------------------//
+  
+  /** @brief Writes the photonspectra out. */
+  void photonSpectrumOutput();
+  string file14;//Photonspectra
+  
 private:
 
   uint32_t seed;
@@ -266,6 +275,7 @@ private:
   bool studyCentralDensity;
   bool studyBackground;
   bool studyScatteredMediumParticles;
+  bool studyPhotons;
   
   
   
@@ -286,8 +296,7 @@ private:
   void printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor);
   void printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor );
   void printYDistribution();
-  
-  
+    
   int nTimeSteps;
   int nTimeSteps_movie;
   
@@ -303,9 +312,10 @@ private:
 
   std::vector<analysisRapidityRange> rapidityRanges;
   
-  double minPT, maxPT, binWidthPT;
-  int numberBinsPT;
+  double minPT, maxPT, binWidthPT, minPTPhotons, maxPTPhotons, binWidthPTPhotons;
+  int numberBinsPT, numberBinsPTPhotons;
   std::vector<double> ptBinLabels;
+  std::vector<double> ptBinLabelsPhotons;
   tVecOfArrayOfDoubleVec ptBins_gluons;
   tVecOfArrayOfDoubleVec ptBins_quarks;
   tVecOfArrayOfDoubleVec ptBins_ups;
@@ -315,6 +325,7 @@ private:
   tVecOfArrayOfDoubleVec ptBins_anti_downs;
   tVecOfArrayOfDoubleVec ptBins_anti_stranges;
   tVecOfArrayOfDoubleVec ptBins_all;
+  tVecOfArrayOfDoubleVec ptBins_photons;
 
   double maxPTSoft;
   double binWidthSoftPT;
@@ -322,6 +333,8 @@ private:
   std::vector<double> *ptBinsSoftAll_gluons, *ptBinsSoftAll_quarks, *ptBinsSoftAll_all;
   std::vector<double> *ptBinsSoftAll_ups, *ptBinsSoftAll_downs, *ptBinsSoftAll_stranges, *ptBinsSoftAll_anti_ups, *ptBinsSoftAll_anti_downs, *ptBinsSoftAll_anti_stranges;
   std::vector<double> ptSoftBinLabels;
+  
+  binning PhotondNOverTwoPiptdydptBin;
   
   double jetTracking_PT;  
   

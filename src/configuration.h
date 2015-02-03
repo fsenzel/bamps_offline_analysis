@@ -220,6 +220,9 @@ class config : public configBase
   
   /** @brief Interface for config::dndyOutput */
   bool isDndyOutput() const {return  dndyOutput;}
+
+  /** @brief Interface for config::outputSwitch_photons */
+  bool doOutput_photons() const { return outputSwitch_photons; } 
   
   /** @brief Interface for config::outputScheme */
   OUTPUT_SCHEME getOutputScheme() const {return  outputScheme;}
@@ -520,6 +523,9 @@ class config : public configBase
   
   /** @brief Whether dndy output is written out */
   bool dndyOutput;
+  
+  /** @brief Specify whether photon-studys output should be written to a file */
+  bool outputSwitch_photons;
   
   /** @brief Output schemes to decide which kind of output is printed */
   OUTPUT_SCHEME outputScheme;
