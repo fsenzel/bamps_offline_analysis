@@ -22,12 +22,15 @@
 using std::vector;
 using std::cout;
 using std::endl;
+
 using namespace ns_casc;
 
 
 coordinateBins::coordinateBins( const int _size, const double _min, const double _max ) :
-    _negative_indices( false ), _min_real( _min ), _max_real( _max ), _min_index_limit( 0 ), _max_index_limit( _size - 1 ),
-    _min_index_active( 0 ), _max_index_active( _size - 1 )
+  _min_real( _min ), _max_real( _max ), 
+  _min_index_limit( 0 ), _max_index_limit( _size - 1 ),
+  _min_index_active( 0 ), _max_index_active( _size - 1 ), 
+  _negative_indices( false )
 {
   bins.resize( _size );
 
@@ -41,7 +44,7 @@ coordinateBins::coordinateBins( const int _size, const double _min, const double
   }
 
   double tmp = _min_real;
-  for ( int i = _min_index_limit; i <= _max_index_limit; i++ )
+  for ( unsigned int i = _min_index_limit; i <= _max_index_limit; i++ )
   {
     bins[i].left = tmp;
     tmp += _delta_x;
@@ -74,7 +77,7 @@ void coordinateBins::reshape( const int _size, const double _min, const double _
   }
 
   double tmp = _min_real;
-  for ( int i = _min_index_limit; i <= _max_index_limit; i++ )
+  for ( unsigned int i = _min_index_limit; i <= _max_index_limit; i++ )
   {
     bins[i].left = tmp;
     tmp += _delta_x;
@@ -86,8 +89,7 @@ void coordinateBins::reshape( const int _size, const double _min, const double _
 
 int coordinateBins::getIndex( const double _x ) const
 {
-  int index = -1;
-  index = static_cast<int>(( _x - _min_real ) / _delta_x );
+  int index = static_cast<int>(( _x - _min_real ) / _delta_x );
 
   index -= _min_index_limit;
 
@@ -114,7 +116,7 @@ const coordinateSubBin& coordinateBins::operator[]( const int _index ) const
 
 
 
-void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine )
+void coordinateEtaBins::populateEtaBins( std::vector<Particle> & parts, coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine )
 {
   const double delta_eta_fine = _dEta_fine;
   const double eta_max = 8.0;
@@ -122,18 +124,19 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
 
   _dNdEta.reshape( n_eta, -eta_max, + eta_max );
 
-  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  for ( unsigned int i = 0; i < parts.size(); i++ )
   {    
-    particles_atTimeNow[i].eta = 0.5 * log(( particles_atTimeNow[i].T + particles_atTimeNow[i].Z ) / ( particles_atTimeNow[i].T - particles_atTimeNow[i].Z ) );
-    if ( particles_atTimeNow[i].T < ( _timenow + _dt ) )
+    parts[i].eta = parts[i].Pos.Rapidity();
+
+    if ( parts[i].Pos.T() < ( _timenow + _dt ) )
     {
-      _dNdEta.increase( particles_atTimeNow[i].eta );
+      _dNdEta.increase( parts[i].eta );
     }
   }
 
   int centralIndex = this->getCentralIndex();
   
-  for ( int i = 0; i < bins.size(); ++i )
+  for ( unsigned int i = 0; i < bins.size(); ++i )
   {
     bins[i].setLeftRight( -infinity, infinity );
   }
@@ -144,8 +147,8 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   _dt = _dx;
 
   int np, npr, npl;
-  int nsum1 = 0, nsum2 = 0;
-  int nMax = NinEtaBin;
+  unsigned int nsum1 = 0, nsum2 = 0;
+  unsigned int nMax = NinEtaBin;
   const int dNdEta_centralIndex = static_cast<int>( _dNdEta.size() ) / 2;
   const double dEta = _dNdEta.get_dx();
 
@@ -188,8 +191,8 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
   //---------- populate central eta bin ----------
   
 
-  int nRest;
-  int index = centralIndex;
+  unsigned int nRest;
+  unsigned int index = centralIndex;
   //---------- populate bins with eta > 0 ----------
   nRest = 0;
   for ( int i = npr + 1; i < _dNdEta.size(); i++ )
@@ -286,17 +289,22 @@ void coordinateEtaBins::populateEtaBins( coordinateBins& _dNdEta, const double _
     throw eCoordBins_error( errMsg );
   }
 
-  _dt = 0.1 * _dt;
+  _dt = timestepScaling * _dt;
 }
 
-
-
-int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param, const int _nTest )
+/**
+ * The new parameter RA corresponds to the former variable WoodSaxon&
+ * _param.RA, i.e. to the radius parameter
+ *
+ * The new parameter particlesSize corresponds to the former particles.size()
+ */
+int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, const double _RA, const int _nTest, const int particlesSize )
 {
-  double initialArea = 4 * ( _param.RA - _b / 2 ) * sqrt(( _param.RA - _b / 2 ) * ( _param.RA + _b / 2 ) );
+  // The following line relies on Woods-Saxon density distribution:
+  double initialArea = 4 * ( _RA - _b / 2 ) * sqrt(( _RA - _b / 2 ) * ( _RA + _b / 2 ) ); 
   NinEtaBin = int( initialArea / ( _dx * _dy ) * _NperCell );
 
-  int estimatedMaxNumber = particles_atTimeNow.size() * 1.3;
+  int estimatedMaxNumber = particlesSize * 1.3;
   if ( Particle::N_light_flavor == 0 )
   {
     estimatedMaxNumber *= 1.4;  // ugly fix, empirical value
@@ -307,12 +315,12 @@ int coordinateEtaBins::constructEtaBins( const int _NperCell, const double _b, c
   _min_index_limit = 0;
   _max_index_limit = bins.size() - 1;
 
-  cout << "number of cells in one etabin=" << int( pow(( 2 * _param.RA / _dx ), 2 ) )
+  cout << "number of cells in one etabin=" << int( pow(( 2 * _RA / _dx ), 2 ) )
        << "\t" << "particle number in one Etabin=" << NinEtaBin << endl;
-  if ( particles_atTimeNow.size() <= ( 8 * NinEtaBin ) )
+  if ( particlesSize <= ( 8 * NinEtaBin ) )
   {
-    cout << "N = " << particles_atTimeNow.size() << "  NinEtaBin = " << NinEtaBin << "  IZ = " << _IZ << endl;
-    cout << "recommended number of test particles > " << ( ( 8 * NinEtaBin * _nTest ) / particles_atTimeNow.size() ) << endl;
+    cout << "N = " << particlesSize << "  NinEtaBin = " << NinEtaBin << "  IZ = " << _IZ << endl;
+    cout << "recommended number of test particles > " << ( ( 8 * NinEtaBin * _nTest ) / particlesSize ) << endl;
     std::string errMsg = "insufficient number of test particles";
     throw eCoordBins_error( errMsg );
   }
@@ -339,7 +347,7 @@ int coordinateEtaBins::getCentralIndex() const
 
 int coordinateEtaBins::getIndex( const double _eta ) const
 {
-  int index = this->getCentralIndex();
+  unsigned int index = this->getCentralIndex();
   if ( _eta >= 0 )
   {
     while ( _eta >= bins[index].right && index < _max_index_limit )

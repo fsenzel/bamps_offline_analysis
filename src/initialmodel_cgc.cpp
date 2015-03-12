@@ -8,6 +8,7 @@
 //---------------------------------------------
 //---------------------------------------------
 
+// at revision 902, this file is identical to full/branches/vector4D/src/initialmodel_cgc.cpp
 
 #include <math.h>
 #include <string>
@@ -67,7 +68,7 @@ void initialModel_CGC::populateParticleVector( std::vector< Particle >& _particl
 
   std::ifstream cgcParticles( filename_cgcParticleFile.c_str() );
   char buf[250];
-  double rx, ry, y, pt, phi, eta;
+  double rx, ry, y, pt, phi;
   int n = 0;
 
   do
@@ -78,16 +79,13 @@ void initialModel_CGC::populateParticleVector( std::vector< Particle >& _particl
     {
       n++;
 
-      _particles[n].T = tau0 * cosh( y );
-      _particles[n].X = rx;
-      _particles[n].Y = ry;
-      _particles[n].Z = tau0 * sinh( y );
+      _particles[n].Pos = VectorTXYZ(tau0 * cosh( y ),rx,ry,tau0 * sinh( y ));
 
-      _particles[n].PZ = pt * sinh( y );
       phi = 2.0 * M_PI * ran2();
-      _particles[n].PX = pt * cos( phi );
-      _particles[n].PY = pt * sin( phi );
-      _particles[n].E = sqrt( _particles[n].PX * _particles[n].PX + _particles[n].PY * _particles[n].PY + _particles[n].PZ * _particles[n].PZ );
+      _particles[n].Mom.Pz() = pt * sinh( y );
+      _particles[n].Mom.Px() = pt * cos( phi );
+      _particles[n].Mom.Py() = pt * sin( phi );
+      _particles[n].Mom.E() = sqrt( _particles[n].Mom.vec2() );
 
       _particles[n].m = 0.0;
       _particles[n].FLAVOR = gluon;

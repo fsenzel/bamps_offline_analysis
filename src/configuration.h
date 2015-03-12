@@ -1,12 +1,12 @@
-//---------------------------------------------
+//--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
-//---------------------------------------------
+//----------------------------------------------------------------------------
 //$HeadURL$
 //$LastChangedDate$
 //$LastChangedRevision$
 //$LastChangedBy$
-//---------------------------------------------
-//---------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 
 /** @file
@@ -26,13 +26,13 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "configurationbase.h"
-#include "particle.h"
+#include "particleOffline.h"
 #include "offlineoutput.h"
 #include "interpolation_iniJpsi.h"
 
 
 /** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, showerInitialState, fixedPartonState };
+enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, fixedShowerInitialState, fixedPartonInitialState, pythiaShowerInitialState };
 
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
@@ -44,6 +44,7 @@ enum JET_MFP_COMPUTATION_TYPE { computeMfpLastTimestep, computeMfpIteration, com
  * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
 */
 enum OUTPUT_SCHEME { no_output = 0,  
+light_parton_phenix = 10,
 light_parton_lhc = 20,
 
 // medium output
@@ -86,6 +87,7 @@ namespace ns_casc
 //   extern std::vector<ParticleHFelectron> addedPartcl_electron;
   extern std::vector<ParticleOffline> addedPartcl_electron;
   extern std::vector<ParticleOffline> scatteredMediumParticles;
+
 }
 //--------------------------------------------------------//
 
@@ -189,12 +191,12 @@ class config : public configBase
   /** @brief Interface for config::P0 */
   double getPtCutoff() const { return P0; }
   
-  /** @brief Interface for config::insertionTime */
-  double getInsertionTime() const { return insertionTime; };
-  
   /** @brief Interface for config::initialPartonPt */
   double getInitialPartonPt() const { return initialPartonPt; };
   
+  /** @brief Interface for config::initialPartonFlavor */
+  int getInitialPartonFlavor() const { return initialPartonFlavor; };
+
   /** ------------------------------- */
 
   /** -------- output options ------- */   
@@ -486,11 +488,11 @@ class config : public configBase
   /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
   double P0;  
   
-  /** @brief If shower initial conditions, this time gives the duration of the shower */
-  double insertionTime;
-  
   /** @brief Transverse momentum of initial parton pair */
   double initialPartonPt;
+
+  /** @brief Flavor of initial parton pair */
+  int initialPartonFlavor;
   
   /** ------------------------------- */
   

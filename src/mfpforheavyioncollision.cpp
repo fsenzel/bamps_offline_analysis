@@ -135,7 +135,7 @@ double mfpForHeavyIonCollision::getQuarkDensity( const double T, const double fu
 
 
 
-int mfpForHeavyIonCollision::getStartIndexForTemperatureValues(const double _T, const int _nValues) const
+int mfpForHeavyIonCollision::getStartIndexForTemperatureValues(const double _T, const unsigned int _nValues) const
 {
   if ( _nValues > temperaturesForMfpData.size() )
   {
@@ -143,7 +143,7 @@ int mfpForHeavyIonCollision::getStartIndexForTemperatureValues(const double _T, 
     throw eMFP_heavy_ion_error( errMsg );
   }
   
-  int nn = 0;
+  unsigned int nn = 0;
   while ( temperaturesForMfpData[nn] < _T && nn < temperaturesForMfpData.size() )
   {
     ++nn;

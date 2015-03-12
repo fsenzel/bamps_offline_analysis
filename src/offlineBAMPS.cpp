@@ -40,13 +40,6 @@ int main( int argc, char *argv[] )
   
   try
   {
-    int ng;
-    double stoptime, time, nexttime;
-    bool readCellStructure = false;
-    bool again;
-    bool dodo = false;
-    int nn_ana = 0;
-    
     //--------------------------------------------------------------
     // create and initialize the main objects needed for
     // configuration,execution and analysis of the simulation
@@ -65,19 +58,12 @@ int main( int argc, char *argv[] )
     //--------------------------------------------------------------
     // initialize the random number generator
     // defined globally in random.h and random.cpp
-    uint32_t seed;
 
-    if ( theConfig.getSeed() != 0 )
-    {
-      seed = theConfig.getSeed();
-      ran2.setSeed( seed );
-    }
-    else
-    {
-      seed = ran2.setSeed();
-      theConfig.setSeed( seed );
-    }
+    uint32_t seed = theConfig.getSeed();
+    if (seed == 0) seed = ran2.findSeed();
+    ran2.setSeed( seed );
     theAnalysis.setSeed( seed );
+    theConfig.setSeed( seed );
     cout << "seed: " << seed << endl;
     //--------------------------------------------------------------
 
@@ -106,6 +92,7 @@ int main( int argc, char *argv[] )
   */
   catch (int e) // provided to handle program termination after displaying usage and help messages
   {
+    cout << "Signal caught: " << e << endl;
     if ( e == HELP_MESSAGE_REQUESTED )
     {
       return EXIT_SUCCESS;

@@ -1,59 +1,72 @@
-//---------------------------------------------
+//--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
-//---------------------------------------------
+//----------------------------------------------------------------------------
 //$HeadURL$
 //$LastChangedDate$
 //$LastChangedRevision$
 //$LastChangedBy$
-//---------------------------------------------
-//---------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 
 #ifndef OFFLINEHEAVYIONCOLLISON_H
 #define OFFLINEHEAVYIONCOLLISON_H
 
-
+#include <algorithm>
 #include <fstream>
 #include <stdexcept>
 #include <vector>
-#include <algorithm>
 
-#include "configuration.h"
+
 #include "analysis.h"
-#include "interpolation23.h"
-#include "interpolation22.h" 
-#include "woodsaxon.h"
-#include "ringstructure.h"
 #include "cellcontainer.h"
-#include "scattering23.h"
-#include "scattering22.h"
-#include "scattering32.h"
-#include "offlineoutput.h"
+#include "configuration.h"
+#include "interpolation22.h"
+#include "interpolation23.h"
 #include "mfpforheavyioncollision.h"
+#include "offlineoutput.h"
+#include "ringstructure.h"
+#include "scattering22.h"
+#include "scattering23.h"
+#include "scattering32.h"
+#include "woodsaxon.h"
 
 
 class offlineHeavyIonCollision
 {
 public:
+  /** 
+   * @brief Constructor
+   */
   offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface, analysis* const _analysis );
+
+  /** 
+   * @brief Destructor
+   */
   ~offlineHeavyIonCollision();
 
+  /** 
+   * @brief Initialize particle momenta, positions, etc. 
+   */
   void initialize();
+
+  /** 
+   * @brief The main framework of the simulation 
+   */
   void mainFramework();
   
   void onlyMediumEvolution( analysis& aa );
 
   double evolveMedium( const double evolveToTime, bool& _endOfDataFiles );
-  void scattering( const double nexttime, bool& again );
-  void cell_ID( double time );
 
-  void scatterEdgeParticles( std::list< int >& _offlineParticleList, std::list< int >& _addedParticleList, const double nexttime );
 
 private:
-  /** @brief Pointer to the interface for the output of data needed for later offline reconstruction */
-  offlineOutputInterface* offlineInterface;
-  
-  config * const theConfig;
+  /** 
+   * @brief A pointer to the global config object that encapsulates
+   * user defined settings etc. 
+   */ 
+  config* const theConfig;
+
   
   analysis* const theAnalysis;
 
@@ -66,6 +79,28 @@ private:
   
   /** @brief  interpolation22 object that provides access to tabulated values for the cross section of all 2->2 processes with running coupling */
   interpolation22 theI22;
+
+  //---- parameters that are copied from the config object for convenience ----
+  /** @brief Runtime to simulate [in fm/c] */
+  double stop;
+  /** @brief Mass number of nucleus A */
+  double A;
+  /** @brief Atomic number, i.e. number of protons, of nucleus A */
+  double Aatomic;
+  /** @brief Mass number of nucleus A */
+  double B;
+  /** @brief Atomic number, i.e. number of protons, of nucleus B */
+  double Batomic;
+  /** @brief Center of momentum energy per NN pair [GeV] */
+  double sqrtS;
+  /** @brief Lower pT cutoff [GeV] for mini-jet initial conditions, see config::initialStateType */
+  double P0;
+  /** @brief Impact parameter [in fm] */
+  double Bimp;
+  /** @brief Number of test particles per real particle */
+  int testpartcl;
+  //--------------------------------------------------------------------------
+
   
   /** 
    * @brief Accumulated number of sampling errors in
@@ -86,19 +121,14 @@ private:
    */
   int nGet32Errors;
 
-  //--parameters taken from config--------------------------------------------
-  double stop;       //total simulated runtime in fm/c
-  double A;          //mass number of nucleus A
-  double Aatomic;    //atomic number, i.e. number of protons, of nucleus A
-  double B;          //mass number of nucleus B
-  double Batomic;    //atomic number of nucleus B
-  double sqrtS;      //c.m. energy per NN pair, GeV
-  double P0;         //lower PT-cutoff, GeV
-  double Bimp;       //impact parameter in fm
-  int testpartcl;    //number of testparticles per real particle
-  //--------------------------------------------------------------------------
-
+  /** 
+   * @brief The rings that are used for averaging several variables
+   * (Debye masses, rates, etc.) 
+   */ 
   ringStructure rings;
+
+  /** @brief Pointer to the interface for the output of data needed for later offline reconstruction */
+  offlineOutputInterface* offlineInterface;
   
   std::vector< std::vector<double> > rateGluons;
   std::vector< std::vector<double> > rateQuarks;
@@ -115,6 +145,13 @@ private:
   int numberEvolvingParticles;
 
   WoodSaxon WoodSaxonParameter;
+
+
+  void cell_ID( double time );
+
+  void scattering( const double nexttime, bool& again );
+
+  void scatterEdgeParticles( std::list< int >& _offlineParticleList, std::list< int >& _addedParticleList, const double nexttime );
 
 
   void scatt2223_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,

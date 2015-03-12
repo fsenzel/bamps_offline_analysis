@@ -36,39 +36,25 @@ private:
   
   void deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles );
   
+  INITIAL_STATE_TYPE initialStateType;
+
+  const config * const configObject;
+
   int numberOfParticlesToAdd;
+
   /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT;
+
   /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
   double minijet_P0;
-  const config * const configObject;
-  double impactParameter;       //impact parameter in fm
-  int numberOfTestparticles;    //number of testparticles per real particle
-  INITIAL_STATE_TYPE initialStateType;
-  double initialPartonPt;
+
+  /** @brief impact parameter in fm */
+  double impactParameter;
   
-  /** @brief Cut-off time for shower evolution [GeV^-1] */
-  double insertionTime;
+  /** @brief number of testparticles per real particle */
+  int numberOfTestparticles;
+
   
-  /** @brief Random number generator seed for fixing PYTHIA seed */
-  uint32_t seed;
-  
-  /** @brief Filename prefix, needed for initial unshowered particle output */
-  string filename_prefix; 
-  
-  /** @brief Routine for converting a particle vector consisting of back-to-back
-   *         parton pairs into dijet showers */
-  void showerParticles( std::vector< ParticleOffline >& _particles ); 
-  
-  /** @brief Routine for setting event flag for additional particles */
-  void setEventID( std::vector< ParticleOffline >& _particles );
-  
-  /** @brief Output routine of shower initiating partons before showering */
-  void initialShowerInitOutput( std::vector< ParticleOffline > _particles );
-  
-  /** @brief Routine for creating one dijet shower out of PYTHIA */
-  vector<ParticleOffline> createShowerEvent( const double _px, const double _py, const double _pz1, const double _pz2, const FLAVOR_TYPE _flavor1, const FLAVOR_TYPE _flavor2 );
-    
 };
 
 

@@ -83,7 +83,6 @@ config::config() :
  cgcParticleFile("-"),
  mcatnloParticleFile("-"),
  P0(1.4),
- insertionTime( 0.0 ),
 // ---- output options ----
  outputSwitch_progressLog( true ),
  outputSwitch_detailedParticleOutput(false),
@@ -224,7 +223,7 @@ void config::processProgramOptions()
   // some special conversions from integer type values to enum values
   if ( vm.count("initial_state.type") )
   {
-    if ( vm["initial_state.type"].as<int>() < 7 && vm["initial_state.type"].as<int>() >= 0 )
+    if ( vm["initial_state.type"].as<int>() < 8 && vm["initial_state.type"].as<int>() >= 0 )
     {
       initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
     }
@@ -324,8 +323,8 @@ void config::initializeProgramOptions()
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
   ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
-  ("initial_state.insertionTime", po::value<double>( &insertionTime )->default_value( insertionTime ), "cut-off time for shower evolution [GeV^(-1)], needed when initial_state.type = 5. if value is negative, no PYTHIA showers are not terminated")
   ("initial_state.initialPartonPt", po::value<double>( &initialPartonPt )->default_value( initialPartonPt ), "parton pt of fixed initial parton pt")
+  ("initial_state.initialPartonFlavor", po::value<int>( &initialPartonFlavor )->default_value( initialPartonFlavor ), "flavor of fixed initial parton pt ( 0 = gg, 1 = u u-bar, 2 = g u )")
   ;
   
   // Add some options related to the program output  
@@ -455,6 +454,12 @@ void config::checkOptionsForSanity()
   if ( N_heavy_flavors_input > 0 && !jet_tagged )
   {
     string errMsg = "If heavy quarks are involved, jets must be tagged.";
+    throw eConfig_error( errMsg );
+  }
+  
+  if ( scatt_furtherOfflineParticles && !jet_tagged )
+  {
+    string errMsg = "If recoiled particles are further evolved, jets must be tagged.";
     throw eConfig_error( errMsg );
   }
 }
@@ -625,14 +630,8 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
       maxID = particles_init[i].unique_id;
     particles_init[i].FLAVOR = (*(ptrInitialParticles->particleVector))[i].FLAVOR;
     particles_init[i].m = (*(ptrInitialParticles->particleVector))[i].m;
-    particles_init[i].T = (*(ptrInitialParticles->particleVector))[i].T;
-    particles_init[i].X = (*(ptrInitialParticles->particleVector))[i].X;
-    particles_init[i].Y = (*(ptrInitialParticles->particleVector))[i].Y;
-    particles_init[i].Z = (*(ptrInitialParticles->particleVector))[i].Z;
-    particles_init[i].E = (*(ptrInitialParticles->particleVector))[i].E;
-    particles_init[i].PX = (*(ptrInitialParticles->particleVector))[i].PX;
-    particles_init[i].PY = (*(ptrInitialParticles->particleVector))[i].PY;
-    particles_init[i].PZ = (*(ptrInitialParticles->particleVector))[i].PZ;
+    particles_init[i].Pos = (*(ptrInitialParticles->particleVector))[i].Pos;
+    particles_init[i].Mom = (*(ptrInitialParticles->particleVector))[i].Mom;
     particles_init[i].md2g = (*(ptrInitialParticles->particleVector))[i].md2g;
     particles_init[i].md2q = (*(ptrInitialParticles->particleVector))[i].md2q;
     particles_init[i].isAlreadyInAddedParticles.resize( static_cast< int >( numberOfParticlesToAdd / 2 ), false );
@@ -646,16 +645,13 @@ void config::readAndPrepareInitialSettings( offlineOutputInterface* const offlin
     particlesEvolving[i].init = true;
     particlesEvolving[i].free = false;
     
-    if ( particlesEvolving[i].T < timefirst )
+    if ( particlesEvolving[i].Pos.T() < timefirst )
     {
       particlesEvolving[i].edge = true;
       particlesEvolving[i].init = false;
     }
     
-    particlesEvolving[i].PXold = particles_init[i].PX;
-    particlesEvolving[i].PYold = particles_init[i].PY;
-    particlesEvolving[i].PZold = particles_init[i].PZ;
-    particlesEvolving[i].Eold  = particles_init[i].E;
+    particlesEvolving[i].Old  = particles_init[i].Mom;
   }
   
   particles_atTimeNow = particles_init;
