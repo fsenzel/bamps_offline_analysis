@@ -1,12 +1,12 @@
-//---------------------------------------------
+//--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
-//---------------------------------------------
+//----------------------------------------------------------------------------
 //$HeadURL$
 //$LastChangedDate$
 //$LastChangedRevision$
 //$LastChangedBy$
-//---------------------------------------------
-//---------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 
 #ifndef COORDINATE_BINS_H
@@ -16,8 +16,9 @@
 #include <vector>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/access.hpp>
+#include <boost/serialization/nvp.hpp>
 
-#include "woodsaxon.h"
+#include "particle.h"
 
 using std::vector;
 
@@ -45,9 +46,9 @@ private:
   template<class Archive>
   void serialize(Archive & ar, const unsigned int version)
   {
-    ar & left;
-    ar & right;
-    ar & content;
+    ar & BOOST_SERIALIZATION_NVP( left );
+    ar & BOOST_SERIALIZATION_NVP( right );
+    ar & BOOST_SERIALIZATION_NVP( content );
   }
 };
 
@@ -56,8 +57,10 @@ private:
 class coordinateBins
 {
 public:
-  coordinateBins() : _negative_indices( false ), _min_real( 0 ), _max_real( 0 ), _min_index_limit( 0 ),
-  _max_index_limit( 0 ),  _min_index_active( 0 ), _max_index_active( 0 ), _delta_x( 0 ) { bins.clear(); }
+ coordinateBins() : _min_real( 0 ), _max_real( 0 ), _delta_x( 0 ),
+    _min_index_limit( 0 ), _max_index_limit( 0 ),  
+    _min_index_active( 0 ), _max_index_active( 0 ),
+    _negative_indices( false ) { bins.clear(); }
   coordinateBins( const int _size, const double _min, const double _max );
   ~coordinateBins() {};
 
@@ -104,15 +107,15 @@ private:
   template<class Archive>
   void serialize(Archive & ar, const unsigned int version)
   {
-    ar & bins;
-    ar & _min_real;
-    ar & _max_real;
-    ar & _delta_x;
-    ar & _min_index_limit;
-    ar & _max_index_limit;
-    ar & _min_index_active;
-    ar & _max_index_active;
-    ar & _negative_indices;  
+    ar & BOOST_SERIALIZATION_NVP( bins );
+    ar & BOOST_SERIALIZATION_NVP( _min_real );
+    ar & BOOST_SERIALIZATION_NVP( _max_real );
+    ar & BOOST_SERIALIZATION_NVP( _delta_x );
+    ar & BOOST_SERIALIZATION_NVP( _min_index_limit );
+    ar & BOOST_SERIALIZATION_NVP( _max_index_limit );
+    ar & BOOST_SERIALIZATION_NVP( _min_index_active );
+    ar & BOOST_SERIALIZATION_NVP( _max_index_active );
+    ar & BOOST_SERIALIZATION_NVP( _negative_indices );  
   } 
 };
 
@@ -121,27 +124,31 @@ private:
 class coordinateEtaBins : public coordinateBins
 {
 public:
-  coordinateEtaBins() : coordinateBins(), NinEtaBin( 0 ) {};
-  coordinateEtaBins( const int _size, const double _min, const double _max ) : coordinateBins( _size, _min, _max ), NinEtaBin(0) {};
+  coordinateEtaBins() : coordinateBins(), NinEtaBin( 0 ), timestepScaling(0.2) {};
+  coordinateEtaBins( const int _size, const double _min, const double _max, const double _scaleTimestep = 0.2 ) : coordinateBins( _size, _min, _max ), NinEtaBin(0), timestepScaling(_scaleTimestep) {};
   ~coordinateEtaBins() {};
   
-  void populateEtaBins( coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine
+  void populateEtaBins( std::vector<Particle> & parts, coordinateBins& _dNdEta, const double _etaShift, double _timenow, double& _dt, const double _dx, const double _dEta_fine
  );
-  int constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, WoodSaxon& _param, const int _nTest );
+  int constructEtaBins( const int _NperCell, const double _b, const double _dx, const double _dy, const double _RA, const int _nTest, const int particlesSize );
   int getCentralIndex() const;
   int getIndex( const double _eta ) const;
+  
+  void setTimestepScaling( const double _scaleTimestep ) { timestepScaling = _scaleTimestep; }
   
   int getNinEtaBin() const { return NinEtaBin; }
 
 private:
-  int NinEtaBin;
+  unsigned int NinEtaBin;
+  
+  double timestepScaling;
   
   friend class boost::serialization::access;
   template<class Archive>
   void serialize(Archive & ar, const unsigned int version)
   {
-    ar & boost::serialization::base_object<coordinateBins>(*this);
-    ar & NinEtaBin;
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP( coordinateBins );
+    ar & BOOST_SERIALIZATION_NVP( NinEtaBin );
   } 
 };
 

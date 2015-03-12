@@ -1,22 +1,22 @@
-//---------------------------------------------
+//--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
-//---------------------------------------------
+//----------------------------------------------------------------------------
 //$HeadURL$
 //$LastChangedDate$
 //$LastChangedRevision$
 //$LastChangedBy$
-//---------------------------------------------
-//---------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 
 #ifndef ANALYSIS_H
 #define ANALYSIS_H
 
+#include <fstream>
+#include <math.h>
 #include <stdint.h>
 #include <time.h>
-#include <fstream>
 #include <vector>
-#include <math.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -132,26 +132,36 @@ class analysisRapidityRange
 
 class jetTrackerSingleEvent
 {
-  public:
-    jetTrackerSingleEvent();
-    ~jetTrackerSingleEvent();
-    
-    double R_proj[4];
-    
-    double P_proj_in[4];
-    double P_proj_out[4];
-    
-    double P1_in[4], P2_in[4];
-    double P1_out[4], P2_out[4];
-    
-    int flavor_in;
-    int flavor_out;
-    
-    jetTrackerCollType coll_type;
-    double lambda;
-    double xSection;
-    int cell_ID;
-    int jet_ID_in, jet_ID_out;
+public:
+  jetTrackerSingleEvent() : 
+    R_proj(), 
+    P_proj_in(),
+    P_proj_out(), 
+    P1_in(), P2_in(), P1_out(), P2_out(),
+    lambda(-1), 
+    xSection(-1), 
+    cell_ID(-1)
+  { };
+  ~jetTrackerSingleEvent() {};
+  
+  VectorTXYZ R_proj;
+  
+  VectorEPxPyPz P_proj_in;
+  VectorEPxPyPz P_proj_out;
+  
+  VectorEPxPyPz P1_in;
+  VectorEPxPyPz P2_in;
+  VectorEPxPyPz P1_out;
+  VectorEPxPyPz P2_out;
+  
+  int flavor_in;
+  int flavor_out;
+  
+  jetTrackerCollType coll_type;
+  double lambda;
+  double xSection;
+  int cell_ID;
+  int jet_ID_in, jet_ID_out;
 };
 
 
@@ -185,14 +195,18 @@ public:
   void collectEtDataInitial();
   
   void setSeed( uint32_t _s ) { seed = _s; }
-  uint32_t getSeed( ) { return seed; }
+  uint32_t getSeed( ) const { return seed; }
 
 
-  int addJetEvent_in( const int ID_1, const int ID_2, const int ID_3, const jetTrackerCollType coll_type,
-  const double cross_section, const int cell_ID, const double lambda );
+  int addJetEvent_in( const int ID_1, const int ID_2, const int ID_3, 
+                      const jetTrackerCollType coll_type,
+                      const double cross_section, const int cell_ID, 
+                      const double lambda );
   void addJetEvent_initial( const int jetID );
   void addJetEvents_final();
-  void addJetEvent_out( const int entity_ID, const int added_ID, const int ID_2, const int ID_3, const jetTrackerCollType coll_type );
+  void addJetEvent_out( const int entity_ID, 
+                        const int added_ID, const int ID_2, const int ID_3, 
+                        const jetTrackerCollType coll_type );
   void removeJetEvent_in( const int entity_ID );
   void exchangeJetID( const int oldID, const int newID );
   void makeJetTrackerCopy();
@@ -200,11 +214,22 @@ public:
   
   double getJetTracking_PT() const {return jetTracking_PT;}
   
-  void registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles,
-      const int _nMediumParticles, const int _nColl, const int _nColl22,
-      const int _nColl23, const int _nColl32 );
+  void registerProgressInformationForOutput( 
+           const double _time, 
+           const double _dt, 
+           const int _nAddedParticles,
+           const int _nMediumParticles, 
+           const int _nColl, 
+           const int _nColl22,
+           const int _nColl23, 
+           const int _nColl32 );
   void volumeMidrap(const int ) const;
   
+private:
+  config * const theConfig ;
+
+public:
+
   double tstep[120];
   double tstep_movie[500];
   
@@ -218,8 +243,6 @@ public:
   //--------------------//
 private:
 
-  config * const theConfig ;
-  
   uint32_t seed;
   time_t start;
   

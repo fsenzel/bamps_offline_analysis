@@ -1,12 +1,12 @@
-//---------------------------------------------
+//--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
-//---------------------------------------------
+//----------------------------------------------------------------------------
 //$HeadURL$
 //$LastChangedDate$
 //$LastChangedRevision$
 //$LastChangedBy$
-//---------------------------------------------
-//---------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
 
 #ifndef CELLCONTAINER_H
@@ -18,6 +18,7 @@
 #include "ratesmanager.h"
 #include "coordinateBins.h"
 #include "particle.h"
+
 
 
 class cornerCoordinates
@@ -66,7 +67,7 @@ public:
   int size() const { return particleList.size(); }
   void setCoordinates( const int _index, const double _dx, const int _nx, const double _sizeX, const double _dy, const int _ny, const double _sizeY );
   void prepareAverages();
-  void writeAveragesToParticle( ParticleOffline& _particle ) const;
+  void writeAveragesToParticle( Particle& _particle ) const;
 
 
   double volume;
@@ -82,10 +83,10 @@ public:
   double alpha_s_22;
   double alpha_s_23;
 
-  double md2g_wo_as_scaled_22;
-  double md2q_wo_as_scaled_22;
-  double md2g_wo_as_scaled_23;
-  double md2q_wo_as_scaled_23;
+  double md2g_scaled_22;
+  double md2q_scaled_22;
+  double md2g_scaled_23;
+  double md2q_scaled_23;
 
   double sigma_22;
   double sigma_23;

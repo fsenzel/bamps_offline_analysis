@@ -1,10 +1,10 @@
 C---------------------------------------------
 C provided by subversion
 C---------------------------------------------
-C $HeadURL$
-C $LastChangedDate$
-C $LastChangedRevision$
-C $LastChangedBy$
+C $HeadURL: svn+ssh://senzel@th.physik.uni-frankfurt.de/home/bamps/svn/full/offlineAnalysis/trunk/src/pyshow_event.f $
+C $LastChangedDate: $
+C $LastChangedRevision: -1 $
+C $LastChangedBy: $
 C---------------------------------------------
 C---------------------------------------------
 
@@ -13,7 +13,7 @@ C   BRANCHING THROUGH PYSHOW OF A JET OF 100 GEV ALONG THE Z AXIS.
 C   (based on sample file of Q-PYTHIA by N. Armesto, L. Cunqueiro and 
 C    C. A. Salgado, Eur. Phys. J. C63 (2009) 679 [arXiv:0907.1014 [hep-ph]].) 
 
-      SUBROUTINE SHOWER(px,py,pz1,pz2,flav1,flav2,TAUF,seed)
+      SUBROUTINE FIXEDSHOWEREVENT(px,py,pz,flav1,flav2,seed)
 
 C...Double precision and integer declarations.
       IMPLICIT DOUBLE PRECISION(A-H, O-Z)
@@ -26,7 +26,7 @@ C...Commonblocks.
       DOUBLE PRECISION ejet
       DOUBLE PRECISION PA(6,100)
       INTEGER flav1,flav2
-      DOUBLE PRECISION px,py,pz1,pz2,TAUF,minQ
+      DOUBLE PRECISION px,py,pz
       INTEGER(kind=8) seed
       
       COMMON/PYJETS/N,NPAD,K(4000,5),P(4000,5),V(4000,5)
@@ -34,7 +34,7 @@ C...Commonblocks.
       COMMON/PYDAT2/KCHG(500,4),PMAS(500,4),PARF(2000),VCKM(4,4)
       COMMON/PYSUBS/MSEL,MSELPD,MSUB(500),KFIN(2,-40:40),CKIN(200)
       COMMON/PYPARS/MSTP(200),PARP(200),MSTI(200),PARI(200)
-      COMMON/PYDATR/MRPY(6)
+      COMMON/PYDATR/MRPY(6),RRPY(100)
       COMMON/BAMPS/PA
 
       DO 100 Iqq=1,6,1
@@ -71,8 +71,8 @@ c
          K(1,5)=0
          P(1,1)=px
          P(1,2)=py
-         P(1,3)=pz1
-         P(1,4)=sqrt(px**2+py**2+pz1**2)
+         P(1,3)=pz
+         P(1,4)=sqrt(px**2+py**2+pz**2)
          P(1,5)=PYMASS(K(1,2))
          V(1,1)=0.D0
          V(1,2)=0.D0
@@ -86,8 +86,8 @@ c
          K(2,5)=0
          P(2,1)=-px
          P(2,2)=-py
-         P(2,3)=pz2
-         P(2,4)=sqrt(px**2+py**2+pz2**2)
+         P(2,3)=pz
+         P(2,4)=sqrt(px**2+py**2+pz**2)
          P(2,5)=PYMASS(K(2,2))
          V(2,1)=0.D0
          V(2,2)=0.D0
@@ -99,19 +99,13 @@ c
 C         call qpygin0 ! generate initial nucleon-nucleon position.
 c
 
-	 ejet = max(sqrt(px**2+py**2+pz1**2),sqrt(px**2+py**2+pz2**2))
-         IF (TAUF .GT. 0.D0) THEN
-	   minQ = sqrt(ejet/TAUF)
-         ELSE
-           minQ = -1.D0
-         END IF
+	 ejet = sqrt(px**2+py**2+pz**2)
 
 C          DO 5 I=1, 10, 1
- 4       CALL PYSHOW(1,2,2.D0*ejet,minQ)
+ 4       CALL PYSHOW(1,2,2.D0*ejet)
 C       CONTINUE
 
          CALL PYEDIT(5)
-
        
          ACCEP = .TRUE.
          DO 3 Iqq=1, N, 1

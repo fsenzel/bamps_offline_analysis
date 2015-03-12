@@ -1,14 +1,14 @@
-//---------------------------------------------
+//--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
-//---------------------------------------------
+//----------------------------------------------------------------------------
 //$HeadURL$
 //$LastChangedDate$
 //$LastChangedRevision$
 //$LastChangedBy$
-//---------------------------------------------
-//---------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 
-
+// at revision 912, this is identical to full/branches/vector4D/src/ringcontainer.h
 
 #ifndef RINGCONTAINER_H
 #define RINGCONTAINER_H
@@ -27,9 +27,9 @@ public:
   void clear();
   void relocate( const double _minR, const double _maxR );
   
-  void addParticle( const ParticleOffline& _particle );
-  void addParticleInFormGeom( const ParticleOffline& _particle, const double _time );
-  void addRates( const ParticleOffline& _particle );
+  void addParticle( const Particle& _particle );
+  void addParticleInFormGeom( const Particle& _particle, const double _time );
+  void addRates( const Particle& _particle );
   
   double getAveraged_md2g() const; 
   double getAveraged_md2q() const;
@@ -39,6 +39,16 @@ public:
   double getAveraged_v_z() const { if ( numberOfParticles > 0 ) return ( v_z / numberOfParticles ); else return 0; } 
   double getAveraged_v_r() const { if ( numberOfParticles > 0 ) return ( v_r / numberOfParticles ); else return 0; } 
   double getGamma() const;
+
+  VectorXYZ getAveraged_v() const
+  {
+    if ( numberOfParticles > 0 )
+      return VectorXYZ(v_x,v_y,v_z) * (1./ numberOfParticles);
+    else
+      return VectorXYZ(0,0,0);
+  }
+
+
   
   double getAccumulated_E() const { if ( numberOfParticles > 0 ) return ( E ); else return 0; } 
   double getAveraged_E() const { if ( numberOfParticles > 0 ) return ( E / numberOfParticles ); else return 0; } 
@@ -60,7 +70,7 @@ public:
   double getEnergyDensity() const;
   double getEffectiveTemperature() const;
   
-  double transformEnergyToComovingFrame( double _P[4] ) const;
+  double transformEnergyToComovingFrame( VectorEPxPyPz & P ) const;
   
   double minRadius;
   double maxRadius;

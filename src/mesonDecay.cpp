@@ -122,10 +122,10 @@ void mesonDecay::decayToElectronsPythia()
         // mass from Pythia
         mm = pdt.mSel(id);
         //calculate energy with new mass
-        ee = sqrt( pow( addedParticlesCopy[i].PX, 2.0 ) + pow( addedParticlesCopy[i].PY, 2.0 ) + pow( addedParticlesCopy[i].PZ, 2.0 ) + pow( mm, 2.0 ) );
+        ee = sqrt( addedParticlesCopy[i].Mom.Perp2() + mm*mm );
         // Store the particle in the event record.
         // definition from event.h: int append(int id, int status, int color, int anticolor, double px, double py, double pz, double e, double m = 0.)
-        event.append(  id, 1, 0,   0, addedParticlesCopy[i].PX, addedParticlesCopy[i].PY,  addedParticlesCopy[i].PZ, ee, mm); // add particle to event, status=1 ensures that no message about non vanishing total charge pops up
+        event.append(  id, 1, 0,   0, addedParticlesCopy[i].Mom.Px(), addedParticlesCopy[i].Mom.Py(),  addedParticlesCopy[i].Mom.Pz(), ee, mm); // add particle to event, status=1 ensures that no message about non vanishing total charge pops up
 
         // Generate events. Quit if failure.
         if (!pythia.next()) 
@@ -141,10 +141,10 @@ void mesonDecay::decayToElectronsPythia()
 //         }
         
         // for theta analysis
-        p_tmp[1] = addedParticlesCopy[i].PX;
-        p_tmp[2] = addedParticlesCopy[i].PY;
-        p_tmp[3] = addedParticlesCopy[i].PZ;
-	
+        p_tmp[1] = addedParticlesCopy[i].Mom.Px();
+        p_tmp[2] = addedParticlesCopy[i].Mom.Py();
+        p_tmp[3] = addedParticlesCopy[i].Mom.Pz();
+        
         
         bool found_electron = false; // just for error checking if there are 2 electrons
         // Loop over all particles from this decay and search for the electron
@@ -160,12 +160,12 @@ void mesonDecay::decayToElectronsPythia()
               else
                 addedPartcl_electron[k_e].FLAVOR = positron;
               
-              addedPartcl_electron[k_e].PX = event[j].px();
-              addedPartcl_electron[k_e].PY = event[j].py();
-              addedPartcl_electron[k_e].PZ = event[j].pz();
-              
               addedPartcl_electron[k_e].m = event[j].m();
-              addedPartcl_electron[k_e].E = sqrt( pow( addedPartcl_electron[k_e].PX, 2.0 ) + pow( addedPartcl_electron[k_e].PY, 2.0 ) + pow( addedPartcl_electron[k_e].PZ, 2.0 ) + pow( addedPartcl_electron[k_e].m, 2.0 ) );
+              addedPartcl_electron[k_e].Mom = VectorEPxPyPz( event[i].e(),
+                                                             event[i].px(),
+                                                             event[i].py(),
+                                                             event[i].pz() );
+              addedPartcl_electron[k_e].Mom.SetEbyM( event[j].m() );
               
               found_electron = true;
             }

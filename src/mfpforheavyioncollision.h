@@ -1,10 +1,10 @@
 //--------------------------------------------------------- -*- c++ -*- ------
 //provided by subversion
 //----------------------------------------------------------------------------
-//$HeadURL: file:///home/bamps/svn/full/trunk/src/mfpforheavyioncollision.h $
-//$LastChangedDate: 2012-03-21 22:26:37 +0100 (Wed, 21 Mar 2012) $
-//$LastChangedRevision: 520 $
-//$LastChangedBy: gallmei $
+//$HeadURL$
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 
@@ -35,7 +35,7 @@ private:
   double getGluonDensity( const double T, const double fugacity = 1 ) const ;
   double getQuarkDensity( const double T, const double fugacity = 1 ) const;
 
-  int getStartIndexForTemperatureValues( const double _T, const int _nValues ) const;
+  int getStartIndexForTemperatureValues( const double _T, const unsigned int _nValues ) const;
   
   /** @brief interpolation routine */
   void polint( const double xa[], const double ya[], const int n, const double x, double *y, double *dy ) const;

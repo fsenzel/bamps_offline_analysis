@@ -8,6 +8,7 @@
 //---------------------------------------------
 //---------------------------------------------
 
+// at revision 912, this is identical to full/branches/vector4D/src/ringcontainer.cpp
 
 #include <math.h>
 
@@ -17,22 +18,42 @@
 #include "FPT_compare.h"
 
 
-ringContainer::ringContainer() : minRadius( 0 ), maxRadius( 0 ), deltaR( 0 ), numberOfParticles( 0 ), numberOfGluons( 0 ), numberOfQuarks( 0 ),
-    numberOfActiveParticles( 0 ), md2g( 0 ), md2q( 0 ),
-    v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ), E( 0 ), p_z( 0 ), p_t( 0 ),
-    gamma( 0 ), particleDensity( 0 ), gluonDensity( 0 ), quarkDensity( 0 ), energyDensity( 0 ), averagesPrepared( false ), volume( 0 ),
-    pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ), rates(), numberOfCollectedRateObjects( 0 )
+ringContainer::ringContainer() : 
+  minRadius( 0 ), maxRadius( 0 ), deltaR( 0 ), 
+  rates(), 
+  averagesPrepared( false ),
+  numberOfParticles( 0 ), 
+  numberOfGluons( 0 ), numberOfQuarks( 0 ),
+  numberOfActiveParticles( 0 ), 
+  md2g( 0 ), md2q( 0 ),
+  v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), 
+  E( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ), 
+  p_z( 0 ), p_r( 0 ), p_t( 0 ), 
+  pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ),
+  gamma( 0 ), energyDensity( 0 ), particleDensity( 0 ), 
+  gluonDensity( 0 ), quarkDensity( 0 ), volume( 0 ),
+  numberOfCollectedRateObjects( 0 )
 {
   rates.normalizeRates();
 }
 
 
 
-ringContainer::ringContainer( const double _minR, const double _maxR ) : minRadius( _minR ), maxRadius( _maxR ), deltaR( _maxR - _minR ),
-    numberOfParticles( 0 ), numberOfActiveParticles( 0 ), numberOfGluons( 0 ), numberOfQuarks( 0 ), md2g( 0 ), md2q( 0 ),
-    v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ), E( 0 ), p_z( 0 ), p_t( 0 ),
-    gamma( 0 ), particleDensity( 0 ), gluonDensity( 0 ), quarkDensity( 0 ), energyDensity( 0 ), averagesPrepared( false ), volume( 0 ),
-    pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ), rates(), numberOfCollectedRateObjects( 0 )
+ringContainer::ringContainer( const double _minR, const double _maxR ) : 
+  minRadius( _minR ), maxRadius( _maxR ), deltaR( _maxR - _minR ),
+  rates(),
+  averagesPrepared( false ),
+  numberOfParticles( 0 ), 
+  numberOfGluons( 0 ), numberOfQuarks( 0 ), 
+  numberOfActiveParticles( 0 ), 
+  md2g( 0 ), md2q( 0 ),
+  v_x( 0 ), v_y( 0 ), v_z( 0 ), v_r( 0 ), 
+  E( 0 ), inverseE_gluons( 0 ), inverseE_quarks( 0 ),
+  p_z( 0 ), p_r( 0 ), p_t( 0 ), 
+  pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ),
+  gamma( 0 ), energyDensity( 0 ), particleDensity( 0 ), 
+  gluonDensity( 0 ), quarkDensity( 0 ), volume( 0 ),
+  numberOfCollectedRateObjects( 0 )
 {
   rates.normalizeRates();
 }
@@ -42,7 +63,6 @@ void ringContainer::clear()
 {
   averagesPrepared = false;
   numberOfParticles = 0;
-  numberOfActiveParticles = 0;
   numberOfGluons = 0;
   numberOfQuarks = 0;
   particleDensity = 0;
@@ -71,7 +91,7 @@ void ringContainer::clear()
 
 
 
-void ringContainer::addParticle( const ParticleOffline& _particle )
+void ringContainer::addParticle( const Particle& _particle )
 {
   ++numberOfParticles;
   if ( _particle.FLAVOR == gluon )
@@ -83,51 +103,55 @@ void ringContainer::addParticle( const ParticleOffline& _particle )
     ++numberOfQuarks;
   }
   
-  if ( !_particle.free || FPT_COMP_G( _particle.rate, 0 ) )
+  if ( !_particle.free || FPT_COMP_G( _particle.rate22, 0 ) )
   {
     ++numberOfActiveParticles;
   }
 
 
-  double xt = sqrt( pow( _particle.X, 2 ) + pow( _particle.Y, 2 ) );
+  double xt = _particle.Pos.Perp();
+  double oneE = 1 / _particle.Mom.E();
 
-  E += _particle.E;
+
+  E += _particle.Mom.E();
   if ( _particle.FLAVOR == gluon )
   {
-    inverseE_gluons += 1 / _particle.E;
+    inverseE_gluons += oneE;
   }
   else
   {
-    inverseE_quarks += 1 / _particle.E;
+    inverseE_quarks += oneE;
   }
-  v_z += _particle.PZ / _particle.E;
+  v_z += _particle.Mom.Pz() * oneE;
 
   double pr;
   if ( xt < 1.0e-5 )
   {
-    pr = sqrt( pow( _particle.PX, 2 ) + pow( _particle.PY, 2 ) );
-    v_x += _particle.PX / _particle.E;
-    v_y += _particle.PY / _particle.E;
+    pr = _particle.Mom.Pt();
+    v_x += _particle.Mom.Px() * oneE;
+    v_y += _particle.Mom.Py() * oneE;
   }
   else
   {
-    pr = ( _particle.PX * _particle.X + _particle.PY * _particle.Y ) / xt;
-    v_x += _particle.PX * _particle.X / ( _particle.E * xt );
-    v_y += _particle.PY * _particle.Y / ( _particle.E * xt );
+    double h_x =  _particle.Mom.Px() * _particle.Pos.X() / xt;
+    double h_y =  _particle.Mom.Py() * _particle.Pos.Y() / xt;
+    pr = h_x + h_y;
+    v_x += h_x * oneE;
+    v_y += h_y * oneE;
   }
-  v_r += pr / _particle.E;
+  v_r += pr * oneE;
 
   p_r += pr;
-  p_z += _particle.PZ;
-  p_t += sqrt( _particle.PX * _particle.PX + _particle.PY * _particle.PY );
-  pr2_over_E += pow( pr, 2 ) / _particle.E;
-  pz2_over_E += pow( _particle.PZ, 2 ) / _particle.E;
-  pr_pz_over_E += pr * _particle.PZ / _particle.E;
+  p_z += _particle.Mom.Pz();
+  p_t += _particle.Mom.Perp();
+  pr2_over_E += pow( pr, 2 ) * oneE;
+  pz2_over_E += pow( _particle.Mom.Pz(), 2 ) * oneE;
+  pr_pz_over_E += pr * _particle.Mom.Pz() * oneE;
 }
 
 
 
-void ringContainer::addParticleInFormGeom( const ParticleOffline& _particle, const double _time )
+void ringContainer::addParticleInFormGeom( const Particle& _particle, const double _time )
 {
   ++numberOfParticles;
   if ( _particle.FLAVOR == gluon )
@@ -139,46 +163,49 @@ void ringContainer::addParticleInFormGeom( const ParticleOffline& _particle, con
     ++numberOfQuarks;
   }
 
-  double Eold = sqrt( pow( _particle.PXold, 2 ) + pow( _particle.PYold, 2 ) + pow( _particle.PZold, 2 ) + pow( _particle.m, 2 ) );
-  double cc = ( _time - _particle.T ) / Eold;
-  double zz = _particle.Z + _particle.PZold * cc;
+  double Eold = _particle.Old.E();
+  double oneE = 1 / Eold;
 
-  double xx = _particle.X + _particle.PXold * cc;
-  double yy = _particle.Y + _particle.PYold * cc;
+  double cc = ( _time - _particle.Pos.T() ) * oneE;
+
+  double xx = _particle.Pos.X() + _particle.Old.Px() * cc;
+  double yy = _particle.Pos.Y() + _particle.Old.Py() * cc;
   double xt = sqrt( pow( xx, 2 ) + pow( yy, 2 ) );
 
   E += Eold;
   if ( _particle.FLAVOR == gluon )
   {
-    inverseE_gluons += 1 / Eold;
+    inverseE_gluons += oneE;
   }
   else
   {
-    inverseE_quarks += 1 / Eold;
+    inverseE_quarks += oneE;
   }
-  v_z += _particle.PZold / Eold;
+  v_z += _particle.Old.Pz() * oneE;
 
   double pr;
   if ( xt < 1.0e-5 )
   {
-    pr = sqrt( pow( _particle.PXold, 2 ) + pow( _particle.PYold, 2 ) );
-    v_x += _particle.PXold / Eold;
-    v_y += _particle.PYold / Eold;
+    pr = _particle.Old.Pt();
+    v_x += _particle.Old.Px() * oneE;
+    v_y += _particle.Old.Py() * oneE;
   }
   else
   {
-    pr = ( _particle.PXold * xx + _particle.PYold * yy ) / xt;
-    v_x += _particle.PXold * xx / ( Eold * xt );
-    v_y += _particle.PYold * yy / ( Eold * xt );
+    double h_x = _particle.Old.Px() * xx / xt;
+    double h_y = _particle.Old.Py() * yy / xt;
+    pr = h_x + h_y;
+    v_x += h_x * oneE;
+    v_y += h_y * oneE;
   }
-  v_r += pr / Eold;
+  v_r += pr * oneE;
 
   p_r += pr;
-  p_z += _particle.PZold;
-  p_t += sqrt( _particle.PXold * _particle.PXold + _particle.PYold * _particle.PYold );
-  pr2_over_E += pow( pr, 2 ) / Eold;
-  pz2_over_E += pow( _particle.PZold, 2 ) / Eold;
-  pr_pz_over_E += pr * _particle.PZold / Eold;
+  p_z += _particle.Mom.Pz();
+  p_t += _particle.Mom.Perp();
+  pr2_over_E += pow( pr, 2 ) * oneE;
+  pz2_over_E += pow( _particle.Old.Pz(), 2 ) * oneE;
+  pr_pz_over_E += pr * _particle.Old.Pz() * oneE;
 }
 
 
@@ -187,7 +214,7 @@ void ringContainer::addParticleInFormGeom( const ParticleOffline& _particle, con
 
 
 
-void ringContainer::addRates( const ParticleOffline& _particle )
+void ringContainer::addRates( const Particle& _particle )
 {
   rates.addParticleBasedRates( _particle, GeV );;
   ++numberOfCollectedRateObjects;
@@ -356,7 +383,7 @@ double ringContainer::getEffectiveTemperature() const
 
 
 
-double ringContainer::transformEnergyToComovingFrame(double _P[4]) const
+double ringContainer::transformEnergyToComovingFrame(VectorEPxPyPz & P) const
 {
   if ( !averagesPrepared )
   {
@@ -365,7 +392,10 @@ double ringContainer::transformEnergyToComovingFrame(double _P[4]) const
   }
   
   double Edash = 0;
-  Edash = gamma * ( _P[0] - ( getAveraged_v_x() * _P[1] + getAveraged_v_y() * _P[2] + getAveraged_v_z() * _P[3] ) );
+  if ( numberOfParticles > 0 )
+  {
+    Edash = gamma * ( P.E() - ( v_x * P.Px() + v_y * P.Py() + v_z * P.Pz() ) / numberOfParticles );
+  }
   
   return Edash;
 }

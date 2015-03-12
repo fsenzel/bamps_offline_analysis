@@ -40,9 +40,11 @@ public:
   initialModel( ) {};
 
   /** 
-   * @brief Reserve memory for the Particle vector and sample momenta and positions. 
+   * @brief Reserve memory for the Particle vector and sample momenta
+   * and positions. 
    *
-   * Pure virtual function. Any derived class must at least specify this routine.
+   * Pure virtual function. Any derived class must at least specify
+   * this routine.
    */
   virtual void populateParticleVector( std::vector<Particle>& _particles ) = 0;
 
@@ -52,6 +54,11 @@ public:
    * Loops over all particles and sets the unique ID of every particle.
    */
   void setUniqueID( std::vector<Particle>& _particles );
+
+  /**
+   * @brief Return a 'typical' radius of the model
+   */
+  virtual double Radius();
 
 };
 
@@ -76,6 +83,15 @@ public:
    */
   ~initialModelWS();
 
+  /**
+   * @brief Return a 'typical' radius of the model
+   */
+  virtual double Radius();
+
+  /** 
+   * @brief Reserve memory for the Particle vector and sample momenta
+   * and positions. 
+   */
   virtual void populateParticleVector( std::vector<Particle>& _particles ) = 0;
 
   /** 
