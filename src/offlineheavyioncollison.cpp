@@ -99,11 +99,11 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     theAnalysis( _analysis )
 {  
   // load 2->2 cross section interpolation data
-  if( theConfig->doScattering_22() )
+  if( !theConfig->isOnlyMediumEvolution() && theConfig->doScattering_22() )
     theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom, theConfig->getMaxRunningCoupling(), theConfig->getfixedCouplingValue() );
   
   // load 2->3 cross section interpolation data
-  if( theConfig->doScattering_23() )
+  if( !theConfig->isOnlyMediumEvolution() && theConfig->doScattering_23() )
   {
     if( theConfig->getNlightFlavorsAdded() >= 0 )
     {
@@ -3846,14 +3846,10 @@ void offlineHeavyIonCollision::onlyMediumEvolution( analysis& aa )
 
   stoptime = theConfig -> getRuntime();
   int nn_ana = 0;
-  int nn_ana_movie = 0;
+  int nn_ana_movie = 1;
   int jumpMovieSteps = 0;
 
   aa.initialOutput();
-  if ( theConfig->doOutput_movieOutputJets() )
-  {
-    aa.movieOutput( 0, jumpMovieSteps );
-  }
   if ( theConfig->doOutput_movieOutputBackground() )
   {
     aa.movieOutputMedium( 0, jumpMovieSteps );
@@ -3898,6 +3894,15 @@ void offlineHeavyIonCollision::onlyMediumEvolution( analysis& aa )
     }
 //     cout << "# time = " << simulationTime << "    dt = " << dt << endl;
 
+    if ( doMovieStepMedium )
+    {
+      if( theConfig->doOutput_movieOutputBackground() )
+        aa.movieOutputMedium( nn_ana_movie, jumpMovieSteps );
+      
+      nn_ana_movie++;
+      doMovieStepMedium = false;
+    }
+
     if ( FPT_COMP_E( simulationTime, aa.tstep[nn_ana] ) ) // ask if it is time for analysis
     {
       doAnalysisStep = true;
@@ -3906,10 +3911,7 @@ void offlineHeavyIonCollision::onlyMediumEvolution( analysis& aa )
     if ( FPT_COMP_E( simulationTime, aa.tstep_movie[nn_ana_movie] ) && theConfig->doOutput_movieOutputBackground() ) // ask if it is time for movie output
     {
       doMovieStepMedium = true;
-      if ( theConfig->doOutput_movieOutputBackground() )
-      {
-        cout << "** movie: " << nexttime << endl;
-      }
+      cout << "** movie: " << simulationTime << endl;
     }
     
     if ( doAnalysisStep && doMovieStepMedium )
@@ -3920,16 +3922,6 @@ void offlineHeavyIonCollision::onlyMediumEvolution( analysis& aa )
         throw eHIC_error( errMsg );
       }
     }   
-
-
-    if ( doMovieStepMedium )
-    {
-      if( theConfig->doOutput_movieOutputBackground() )
-        aa.movieOutputMedium( nn_ana_movie - 1, jumpMovieSteps );
-      
-      nn_ana_movie++;
-      doMovieStepMedium = false;
-    }
 
     if ( doAnalysisStep )
     {

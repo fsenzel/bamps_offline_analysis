@@ -333,6 +333,7 @@ private:
   fstream mfpJetsOutputFile;
   fstream printDndyTime;
   fstream progressLogFile;
+  fstream printTMuNu_midRap;
   
   
   

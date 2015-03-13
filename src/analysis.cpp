@@ -246,7 +246,7 @@ analysis::analysis( config* const c ):
  
   
   //--------------------------------------
-  string name_fug, name_temp, mfpName, centralDensitiesName, oscarName_jet, oscarName_background, name_dndy_time;
+  string name_fug, name_temp, mfpName, centralDensitiesName, oscarName_jet, oscarName_background, name_dndy_time, name_TMuNu_midRap;
   if ( studyJpsi )
     name_fug = filename_prefix + "_jpsi_fugacity";
   else
@@ -268,12 +268,15 @@ analysis::analysis( config* const c ):
     centralDensitiesName = "/dev/null";
   
   if ( study_dndy_time )
+  {
     name_dndy_time = filename_prefix + "_dndy_time";
+    name_TMuNu_midRap = filename_prefix + "_TMuNu_midRap";
+  }
   else
+  {
     name_dndy_time = "/dev/null";
-  
-  
-  
+    name_TMuNu_midRap = "/dev/null";
+  }
   
   
   // movie output
@@ -294,6 +297,7 @@ analysis::analysis( config* const c ):
   oscarBackground.open( oscarName_background.c_str(), ios::out );
   oscarJets.open( oscarName_jet.c_str(), ios::out );
   printDndyTime.open( name_dndy_time.c_str(), ios::out );
+  printTMuNu_midRap.open( name_TMuNu_midRap.c_str(), ios::out );
   //--------------------------------------
 
   jetTracking_PT = 10.0;
@@ -525,7 +529,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyYDistribution = false; // rapidity distribution
   studyJets = false; // study jets
   studyCentralDensity = false; // density in central part of collision
-  studyBackground = false; // print also properties like v2, RAA of background
+  studyBackground = true; // print also properties like v2, RAA of background
   study_dndy_time = false; // study background medium's dndy and dedy etc. as a function of time
   study_spatial_density = false;
   studyScatteredMediumParticles = false; // print scattered medium particles
@@ -688,6 +692,17 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       break;
     case background_v2:
       studyBackground = true;
+
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.8 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );
+      rapidityRanges.push_back(yRange);
+
       break;
     case cms_jpsi:
       studyJpsi = true;
@@ -4616,7 +4631,7 @@ void analysis::print_dndy_time( int step )
 {
   double pt;
   
-  const double rapidity_range = 0.5;
+  const double rapidity_range = 0.1;
   
   int number_g = 0;
   int number_q = 0;
@@ -4626,6 +4641,22 @@ void analysis::print_dndy_time( int step )
   
   double pt_g = 0;
   double pt_q = 0;
+
+  double pt2_g = 0;
+  double pt2_q = 0;
+
+  double pz_g = 0.0;
+  double pz_q = 0.0;
+  
+  double pz2_g = 0;
+  double pz2_q = 0;
+
+  double pz2_over_E2_g = 0.0;
+  double pz2_over_E2_q = 0.0;
+
+  double T11 = 0.0;
+  double T22 = 0.0;
+  double T33 = 0.0;
   
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
@@ -4635,26 +4666,35 @@ void analysis::print_dndy_time( int step )
     // space time rapidity
     double strap = 0.5 * log(( particles_atTimeNow[i].Pos.T() + particles_atTimeNow[i].Pos.Z() ) / ( particles_atTimeNow[i].Pos.T() - particles_atTimeNow[i].Pos.Z() ) );
     
-    if( fabs( normrap ) < rapidity_range )
+    if( fabs( strap ) < rapidity_range )
     {
       if( particles_atTimeNow[i].FLAVOR == gluon )
       {
         number_g++;
         energy_g += particles_atTimeNow[i].Mom.E();
         pt_g += particles_atTimeNow[i].Mom.Pt();
+        pt2_g += pt * pt;
+        pz_g += particles_atTimeNow[i].PZ;
+        pz2_g += pow( particles_atTimeNow[i].PZ, 2.0);
       }
       else if( Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == light_quark || Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == anti_light_quark )
       {
         number_q++;
         energy_q += particles_atTimeNow[i].Mom.E();
         pt_q += particles_atTimeNow[i].Mom.Pt();
+        pt2_q += pt * pt;
+        pz_q += particles_atTimeNow[i].PZ;
+        pz2_q += pow( particles_atTimeNow[i].PZ, 2.0);
       }
     }
   }
   
   if ( step == 0 )
-    printDndyTime << "# time   N gluons   N quarks   E gluons   E quarks   E_T gluons   E_T quarks          the same for tube, but densities" << endl;
-  
+  {
+    printDndyTime << "# 1-time   2-N gluons   3-N quarks   4-E gluons   5-E quarks   6-P_T gluons   7-P_T quarks   8-P_T2 gluons   9-P_T2 quarks   10-P_Z gluons   11-P_Z quarks   12-P_Z2 gluons   13-P_Z2 quarks   ";
+    printDndyTime << "14-N gluons   15-N quarks   16-E gluons   17-E quarks   18-P_T gluons   19-P_T quarks   20-P_T2 gluons   21-P_T2 quarks   22-P_Z gluons   23-P_Z quarks   24-P_Z2 gluons   25-P_Z2 quarks   26-P_Z2/E2 gluons 27-P_Z2/E2 quarks";
+    printDndyTime << endl;
+  }
   double time;
   if ( step == 0 )
     time = 0.0;
@@ -4675,7 +4715,18 @@ void analysis::print_dndy_time( int step )
   printDndyTime << pt_g / theConfig->getTestparticles();
   printDndyTime.width( 15 );
   printDndyTime << pt_q / theConfig->getTestparticles();
-  
+  printDndyTime.width( 15 );
+  printDndyTime << pt2_g / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << pt2_q / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << pz_g / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << pz_q / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << pz2_g / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << pz2_q / theConfig->getTestparticles();
   
   
   number_g = 0;
@@ -4684,10 +4735,19 @@ void analysis::print_dndy_time( int step )
   energy_q = 0;
   pt_g = 0;
   pt_q = 0;
+  pt2_g = 0;
+  pt2_q = 0;
+  pz_g = 0;
+  pz_q = 0;
+  pz2_g = 0;
+  pz2_q = 0;
   
-  const double radius = 15.0; //fm
-  const double deta = 0.2; // spacetime rapidty interval
+  const double radius = 1.5; //fm
+  const double deta = 0.5; // spacetime rapidty interval
+  const double deta2 = 0.2; // spacetime rapidty interval
+
   const double dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
+  const double dz2 = time * ( exp( 2.0 * deta2 ) - 1.0 ) / ( exp( 2.0 * deta2 ) + 1.0 ); //translated to spatial coordinate z
   // total length in z direction
   const double zlength = dz*2.0;
   // volume
@@ -4695,6 +4755,13 @@ void analysis::print_dndy_time( int step )
   
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
+    if ( ( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( radius, 2.0 ) ) && ( fabs( particles_atTimeNow[i].Z ) < dz2 ) && ( particles_atTimeNow[i].FLAVOR == gluon ) )
+//    if ( ( fabs( particles_atTimeNow[i].Z ) < dz2 ) && ( particles_atTimeNow[i].FLAVOR == gluon ) )
+    {
+        T11 += particles_atTimeNow[i].PX * particles_atTimeNow[i].PX / particles_atTimeNow[i].E;
+        T22 += particles_atTimeNow[i].PY * particles_atTimeNow[i].PY / particles_atTimeNow[i].E;
+        T33 += particles_atTimeNow[i].PZ * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
+    }
 
     if (( pow( particles_atTimeNow[i].Pos.X(), 2.0 ) + pow( particles_atTimeNow[i].Pos.Y(), 2.0 ) < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Pos.Z() ) < dz ))
     {
@@ -4703,20 +4770,40 @@ void analysis::print_dndy_time( int step )
         number_g++;
         energy_g += particles_atTimeNow[i].Mom.E();
         pt_g += particles_atTimeNow[i].Mom.Pt();
+        pt2_g += pt * pt;
+        pz_g += particles_atTimeNow[i].PZ;
+        pz2_g += pow( particles_atTimeNow[i].PZ, 2.0);
+        pz2_over_E2_g += pow( particles_atTimeNow[i].PZ, 2.0) / pow( particles_atTimeNow[i].E, 2.0);
       }
       else if( Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == light_quark || Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == anti_light_quark )
       {
         number_q++;
         energy_q += particles_atTimeNow[i].Mom.E();
         pt_q += particles_atTimeNow[i].Mom.Pt();
+        pt2_q += pt * pt;
+        pz_q += particles_atTimeNow[i].PZ;
+        pz2_q += pow( particles_atTimeNow[i].PZ, 2.0);
+        pz2_over_E2_q += pow( particles_atTimeNow[i].PZ, 2.0) / pow( particles_atTimeNow[i].E, 2.0);
       }
     }
   }
   
-  printDndyTime.width( 30 );
-  printDndyTime << number_g / theConfig->getTestparticles() / dv;
+//   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+//   {
+//     double strap = 0.5 * log(( (particles_atTimeNow[i].T-theConfig->getTimeshift()) + particles_atTimeNow[i].Z ) / ( (particles_atTimeNow[i].T-theConfig->getTimeshift()) - particles_atTimeNow[i].Z ) );
+//     //     if ( ( fabs( particles_atTimeNow[i].X ) < 0.5 ) && ( fabs( particles_atTimeNow[i].X ) < 0.5 ) && ( fabs( particles_atTimeNow[i].Z ) < dz ) )
+//     if ( ( particles_atTimeNow[i].FLAVOR == gluon ) && ( fabs( particles_atTimeNow[i].X ) < 0.5 ) && ( fabs( particles_atTimeNow[i].Y ) < 0.5 ) && ( fabs( strap ) < deta ) )
+//     {
+//       T11 += particles_atTimeNow[i].PX * particles_atTimeNow[i].PX / particles_atTimeNow[i].E;
+//       T22 += particles_atTimeNow[i].PY * particles_atTimeNow[i].PY / particles_atTimeNow[i].E;
+//       T33 += particles_atTimeNow[i].PZ * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
+//     }
+//   }
+  
   printDndyTime.width( 15 );
-  printDndyTime << number_q / theConfig->getTestparticles() / dv;
+  printDndyTime << number_g / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << number_q / theConfig->getTestparticles();
   printDndyTime.width( 15 );
   printDndyTime << energy_g / theConfig->getTestparticles() / dv;
   printDndyTime.width( 15 );
@@ -4725,9 +4812,35 @@ void analysis::print_dndy_time( int step )
   printDndyTime << pt_g / theConfig->getTestparticles() / dv;
   printDndyTime.width( 15 );
   printDndyTime << pt_q / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << pt2_g / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << pt2_q / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << pz_g / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << pz_q / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << pz2_g / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << pz2_q / theConfig->getTestparticles() / dv;
+  printDndyTime.width( 15 );
+  printDndyTime << pz2_over_E2_g / theConfig->getTestparticles();
+  printDndyTime.width( 15 );
+  printDndyTime << pz2_over_E2_q / theConfig->getTestparticles();
   
   
   printDndyTime << endl;
+
+  printTMuNu_midRap.width( 15 );
+  printTMuNu_midRap << time;
+  printTMuNu_midRap.width( 15 );
+  printTMuNu_midRap << T11 / theConfig->getTestparticles();
+  printTMuNu_midRap.width( 15 );
+  printTMuNu_midRap << T22 / theConfig->getTestparticles();
+  printTMuNu_midRap.width( 15 );
+  printTMuNu_midRap << T33 / theConfig->getTestparticles();
+  printTMuNu_midRap << endl;
 }
 
 
