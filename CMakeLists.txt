@@ -145,6 +145,7 @@ OPTION( GENERATE_BAMPS_LIB_INSTALL_TARGETS "Whether to generate install targets 
 
 ######### Add source directories  #########
 ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(tests)
 
 ## Only process lib/src/ subirectory in case LINK_TO_BAMPS_LIB is false OR the bamps library has not been found ##
 IF ( ( NOT LINK_TO_BAMPS_LIB ) OR ( NOT BAMPS_FOUND ) )
