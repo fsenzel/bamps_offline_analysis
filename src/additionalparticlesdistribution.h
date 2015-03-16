@@ -25,36 +25,36 @@
 class additionalParticlesDistribution
 {
 public:
-  additionalParticlesDistribution( const config*const _config, const INITIAL_STATE_TYPE _initialStateType = miniJetsInitialState );
-  ~additionalParticlesDistribution() {};
+    additionalParticlesDistribution( const config*const _config, const INITIAL_STATE_TYPE _initialStateType = miniJetsInitialState );
+    ~additionalParticlesDistribution() {};
 
-  void populateParticleVector( std::vector< ParticleOffline >& _particles, WoodSaxon& _wsParameter );
-  void prepareParticles( std::vector< ParticleOffline >& _particles );
- 
+    void populateParticleVector( std::vector< ParticleOffline >& _particles, WoodSaxon& _wsParameter );
+    void prepareParticles( std::vector< ParticleOffline >& _particles );
+
 
 private:
-  
-  void deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles );
-  
-  INITIAL_STATE_TYPE initialStateType;
 
-  const config * const configObject;
+    void deleteAllParticlesExceptBottom( std::vector< ParticleOffline >& _particles );
 
-  int numberOfParticlesToAdd;
+    INITIAL_STATE_TYPE initialStateType;
 
-  /** @brief Minimum p_T [GeV] of the added particles */
-  double minimumPT;
+    const config * const configObject;
 
-  /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
-  double minijet_P0;
+    int numberOfParticlesToAdd;
 
-  /** @brief impact parameter in fm */
-  double impactParameter;
-  
-  /** @brief number of testparticles per real particle */
-  int numberOfTestparticles;
+    /** @brief Minimum p_T [GeV] of the added particles */
+    double minimumPT;
 
-  
+    /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
+    double minijet_P0;
+
+    /** @brief impact parameter in fm */
+    double impactParameter;
+
+    /** @brief number of testparticles per real particle */
+    int numberOfTestparticles;
+
+
 };
 
 
@@ -62,9 +62,9 @@ private:
 class eInitialState_error : public std::runtime_error
 {
 public:
-  explicit eInitialState_error( const std::string& what ) : std::runtime_error( what ) {};
+    explicit eInitialState_error( const std::string& what ) : std::runtime_error( what ) {};
 
-  virtual ~eInitialState_error() throw() {};
+    virtual ~eInitialState_error() throw() {};
 };
 
 #endif // INITIALDISTRIBUTION_H

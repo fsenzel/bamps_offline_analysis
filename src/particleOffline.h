@@ -44,7 +44,8 @@ public:
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
-    collision_tag(false)
+    collision_tag(false),
+    production_time(0.0)
   {};
     
   ParticleOffline( const Particle& _particle ) : 
@@ -61,7 +62,8 @@ public:
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
-    collision_tag(false)
+    collision_tag(false),
+    production_time(0.0)
   {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
@@ -74,7 +76,10 @@ public:
   bool initially_produced;
     
   /** @brief Flag for discerning (background) particles that have already produced a photon */
-  bool collision_tag;   
+  bool collision_tag;  
+  
+  /** @brief Producing time of the photon. This may prove useful in discriminating the building up of v2. */
+  double production_time;   
   
   /** @brief Unique number of jpsi dissociation such that the same c+cbar do not reunite directly */
   int jpsi_dissociation_number;

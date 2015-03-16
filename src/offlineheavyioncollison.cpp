@@ -490,7 +490,7 @@ void offlineHeavyIonCollision::mainFramework()
     }
 
     scatterEdgeParticles( edgeCell, edgeCellAdded, nexttime );
-
+ 
     removeDeadParticles();
     if( theConfig->doOutput_progressLog() )
     {
@@ -1279,6 +1279,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         
         for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
         {
+          cout << "Added?" << endl;
           int id = *iIt;
           xt = addedParticles[id].Pos.Perp();
           
@@ -1309,6 +1310,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         
         if ( free )
         {
+          //cout << "All free" << endl;
           list<int>::const_iterator iIt;
           for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
           {
@@ -1553,6 +1555,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               
               if ( again )
               {
+                cout << "AGAIN!" << endl;
                 return;
               }
             }            
@@ -2037,13 +2040,18 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles( cellContainer& 
   for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
   {
     iscat = _allParticlesList[i];
-    if (particles_atTimeNow[iscat].collision_tag == false)
-    {
-      for ( unsigned int j = i + 1; j < _allParticlesList.size(); j++ )
+//     if (particles_atTimeNow[iscat].collision_tag == false)
+//     {
+      //WARNING for ( unsigned int j = i + 1; j < _allParticlesList.size(); j++ )
+    
+      for ( unsigned int j = 0; j < _allParticlesList.size(); j++ )
       {
+        if(jscat!=iscat)
+        {
+
         jscat = _allParticlesList[j];        
-        if (particles_atTimeNow[jscat].collision_tag == false)
-        {  
+/*        if (particles_atTimeNow[jscat].collision_tag == false)
+        { */ 
           F1 = particles_atTimeNow[iscat].FLAVOR;
           M1 = particles_atTimeNow[iscat].m;
           F2 = particles_atTimeNow[jscat].FLAVOR;
@@ -2066,13 +2074,14 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles( cellContainer& 
             s_cutoff_for_pqcd=0.0;
           }
             
-          if ( s < 1.1*lambda2 && FPT_COMP_G(s, s_cutoff_for_pqcd) )
+          if ( s < 1.1*lambda2 )
           {
             probab22 = -1.0;
             cs22 = 0.0; //1/GeV^2
           }
-          else
+          else if( FPT_COMP_G(s, s_cutoff_for_pqcd) )// if s > s_cutoff_for_pqcd...
           {
+            //cout << "s: " << s << " s_cutoff: " << s_cutoff_for_pqcd << endl;
             Vrel = VelRel( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom, M1, M2 );
 
             //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, it will be multiplied in the scattering routines
@@ -2087,29 +2096,31 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles( cellContainer& 
                                         temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
           
             cs22 = scatt22_object.getXSection22( initialStateIndex );
-
+//             cout << "CS:\t" << cs22 << endl;
             // in scatt22_amongAddedParticles was this:
             //probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl * theConfig->getNaddedEvents() ) * theConfig->getJpsiTestparticles();
+//             cout << dt << endl;
             
             //New:
             //WARNING: is dv the cell volume?
             //WARNING: What is theConfig->getNaddedEvents()
             probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt  / ( dv * testpartcl );
-            //cout << "Probab = " << probab22 << " dv = " << dv << " testpartcl = " << testpartcl << " dt = " << dt << " Vrel= " << Vrel << "NaddedEvents" << theConfig->getNaddedEvents() << endl;
+//             cout << "Probab = " << probab22 << "\tdv = " << dv << "\ttestpartcl = " << testpartcl << "\tdt = " << dt << "\tVrel= " << Vrel << "\tNaddedEvents" << theConfig->getNaddedEvents() << endl;
             
             if ( F1 == gluon )
             {
-              probab22 *= scaleFactor;
+              probab22 *= scaleFactor; // scaleFactor is one in my case
             }
             if ( F2 == gluon )
             {
-              probab22 *= scaleFactor;
+              probab22 *= scaleFactor;// scaleFactor is one in my case
             }
+            //cout << "ScaleFactor Gluon: " << scaleFactor << endl;
           }
 
           if ( probab22 > 1.0 )
           {
-    //         cout << "P2322=" << probab2322 << ">1" << endl;
+            cout << "P22=" << probab22 << ">1" << endl;
             again = true;
     //         cout << "dt (old) = " << dt << endl;
             dt = 0.5 / ( probab22 / dt );
@@ -2119,20 +2130,24 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles( cellContainer& 
 
           if ( ran2() < probab22 )
           {
-            particles_atTimeNow[iscat].collision_tag = true;
-            particles_atTimeNow[jscat].collision_tag = true;
+            //WARNING: collision tag neccessary?  
+            //particles_atTimeNow[iscat].collision_tag = true;
+            //particles_atTimeNow[jscat].collision_tag = true;
             scatt22_amongBackgroundParticles_utility( scatt22_object, _cells.particleList, _allParticlesList, iscat, jscat, typ, nexttime );
           }
         }
-      }  
-    } 
+        
+      }
+//       }  
+//     }
   }
+  //WARNING Uncomment
   //WARNING: here all_particlesList.size -1 or not -1 ???
-  for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
+/*  for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
   {
     iscat = _allParticlesList[i];
     particles_atTimeNow[iscat].collision_tag = false;
-  }  
+  }*/  
 }
 
 
@@ -3197,6 +3212,7 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_utility( scatter
   
   ParticleOffline temp_particle_iscat = particles_atTimeNow[iscat];
   ParticleOffline temp_particle_jscat = particles_atTimeNow[jscat];
+  ParticleOffline temp_particle_produced_photon;
 
   F1 = particles_atTimeNow[iscat].FLAVOR;
   M1 = particles_atTimeNow[iscat].m;
@@ -3226,19 +3242,34 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_utility( scatter
                                Pos1new, Pos2new,
                                t_hat );
 
-  if(F2==33 )
-  {
-    //cout << "Photon with Energy E=" << P2new.E() << " GeV produced!" << "PT= " << P2new.Pt() << " - Perp= " << P2new.Perp()<< endl;
-    totalPhotonNumber++;
-    theAnalysis->PtDistributionPhotons(P2new.Pt(), P2new.Rapidity(), P2new.E());
-  }
   if(F1==33 )
   {
     //cout << "Photon with Energy E=" << P2new.E() << " GeV produced!" << "PT= " << P2new.Pt() << " - Perp= " << P2new.Perp()<< endl;
     totalPhotonNumber++;
     theAnalysis->PtDistributionPhotons(P1new.Pt(), P1new.Rapidity(), P1new.E());
-  } 
-  //cout << totalPhotonNumber << " Photons @ time " << nexttime << endl;
+    temp_particle_produced_photon.Mom = P1new;
+    temp_particle_produced_photon.Pos = Pos1new;
+    temp_particle_produced_photon.m = 0.0;
+    temp_particle_produced_photon.initially_produced = false;
+    temp_particle_produced_photon.FLAVOR = photon;
+    temp_particle_produced_photon.production_time = nexttime;
+    noninteractingParticles.push_back(temp_particle_produced_photon);
+  }   
+  if(F2==33 )
+  {
+    //cout << "Photon with Energy E=" << P2new.E() << " GeV produced!" << "PT= " << P2new.Pt() << " - Perp= " << P2new.Perp()<< endl;
+    totalPhotonNumber++;
+    theAnalysis->PtDistributionPhotons(P2new.Pt(), P2new.Rapidity(), P2new.E());   
+    temp_particle_produced_photon.Mom = P2new;
+    temp_particle_produced_photon.Pos = Pos2new;
+    temp_particle_produced_photon.m = 0.0;
+    temp_particle_produced_photon.initially_produced = false;
+    temp_particle_produced_photon.FLAVOR = photon;
+    temp_particle_produced_photon.production_time = nexttime;
+    noninteractingParticles.push_back(temp_particle_produced_photon);
+  }
+  
+  
 }
 
 int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scattering32& scatt32_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, const int iscat, const int jscat, const int kscat, int& n32, const double nexttime )

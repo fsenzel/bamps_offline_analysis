@@ -8,7 +8,7 @@
 //------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------
 
-/** @file 
+/** @file
  * @brief Declarations for the class interpolation_iniQNLO.
  */
 
@@ -23,12 +23,12 @@ using std::string;
 
 class interpolation_nJpsi : interpolation1d // based on interpolation2d
 {
-  public:
+public:
     void configure();
 
     double getN(const double T) const;
 
-  private:
+private:
 
 };
 

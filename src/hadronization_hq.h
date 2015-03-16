@@ -3,10 +3,10 @@
 
 class hadronization_hq
 {
-  public:
+public:
     void heavyQuarkFragmentation();
 
-  private:
+private:
     double getFragmentationZ(const int flav);
     double getFragmentationFunction( const double z, const int flav );
 };

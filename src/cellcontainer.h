@@ -24,24 +24,26 @@
 class cornerCoordinates
 {
 public:
-  cornerCoordinates();
-  cornerCoordinates( const double _x_min, const double _x_max, const double _y_min, const double _y_max, const int _etaIndex );
-  ~cornerCoordinates() {};
+    cornerCoordinates();
+    cornerCoordinates( const double _x_min, const double _x_max, const double _y_min, const double _y_max, const int _etaIndex );
+    ~cornerCoordinates() {};
 
-  void setCorners( const double _x_min, const double _x_max, const double _y_min, const double _y_max, const int _etaIndex );
-  void clear() { setCorners( 0, 0, 0, 0, 0 ); }
-  double getVolume( const coordinateEtaBins& _etaBins, const double _time ) const;
+    void setCorners( const double _x_min, const double _x_max, const double _y_min, const double _y_max, const int _etaIndex );
+    void clear() {
+        setCorners( 0, 0, 0, 0, 0 );
+    }
+    double getVolume( const coordinateEtaBins& _etaBins, const double _time ) const;
 
 
-  double x_min;
-  double x_max;
-  double y_min;
-  double y_max;
+    double x_min;
+    double x_max;
+    double y_min;
+    double y_max;
 //   double z_min;
 //   double z_max;
 //   double eta_min;
 //   double eta_max;
-  int etaIndex;
+    int etaIndex;
 };
 
 
@@ -54,44 +56,48 @@ public:
 class cellContainer
 {
 public:
-  cellContainer();
-  ~cellContainer() {};
+    cellContainer();
+    ~cellContainer() {};
 
-  std::list<int> particleList;
+    std::list<int> particleList;
 
-  ratesManager rates;
+    ratesManager rates;
 
-  void clear();
-  void resetStoredValues();
-  bool empty() const { return particleList.empty(); }
-  int size() const { return particleList.size(); }
-  void setCoordinates( const int _index, const double _dx, const int _nx, const double _sizeX, const double _dy, const int _ny, const double _sizeY );
-  void prepareAverages();
-  void writeAveragesToParticle( Particle& _particle ) const;
+    void clear();
+    void resetStoredValues();
+    bool empty() const {
+        return particleList.empty();
+    }
+    int size() const {
+        return particleList.size();
+    }
+    void setCoordinates( const int _index, const double _dx, const int _nx, const double _sizeX, const double _dy, const int _ny, const double _sizeY );
+    void prepareAverages();
+    void writeAveragesToParticle( Particle& _particle ) const;
 
 
-  double volume;
-  int index;
-  cornerCoordinates corner;
+    double volume;
+    int index;
+    cornerCoordinates corner;
 
-  bool averagesPrepared;
+    bool averagesPrepared;
 
-  int nCollectedAll2223;
-  int nCollected22;
-  int nCollected23;
+    int nCollectedAll2223;
+    int nCollected22;
+    int nCollected23;
 
-  double alpha_s_22;
-  double alpha_s_23;
+    double alpha_s_22;
+    double alpha_s_23;
 
-  double md2g_scaled_22;
-  double md2q_scaled_22;
-  double md2g_scaled_23;
-  double md2q_scaled_23;
+    double md2g_scaled_22;
+    double md2q_scaled_22;
+    double md2g_scaled_23;
+    double md2q_scaled_23;
 
-  double sigma_22;
-  double sigma_23;
+    double sigma_22;
+    double sigma_23;
 
-  double lambdaScaled;
+    double lambdaScaled;
 
 private:
 
@@ -102,10 +108,10 @@ private:
 class eCell_error : public std::runtime_error
 {
 public:
-  explicit eCell_error( const std::string& what ) : std::runtime_error( what ) {};
+    explicit eCell_error( const std::string& what ) : std::runtime_error( what ) {};
 
-  virtual ~eCell_error() throw() {};
+    virtual ~eCell_error() throw() {};
 };
 
 #endif // CELLCONTAINER_H
-// kate: indent-mode cstyle; space-indent on; indent-width 0;
+// kate: indent-mode cstyle; replace-tabs on; 

@@ -190,7 +190,30 @@ analysis::analysis( config* const c ):
       nTimeSteps = 119;
     }
   }
-  else
+  else if (studyPhotons)
+  {
+    tstep[0] = 0.1;      //fm/c
+    tstep[1] = 0.5;      //fm/c
+    tstep[2] = 1.0;      //fm/c
+    tstep[3] = 1.5;      //fm/c
+    tstep[4] = 2.0;      //fm/c
+    tstep[5] = 2.5;      //fm/c
+    tstep[6] = 3.0;      //fm/c
+    tstep[7] = 3.5;      //fm/c
+    tstep[8] = 4.0;      //fm/c
+    tstep[9] = 4.5;      //fm/c
+    tstep[10] = 5.0;      //fm/c
+    tstep[11] = 5.5;      //fm/c
+    tstep[12] = 6.0;      //fm/c
+    tstep[13] = 6.5;      //fm/c
+    tstep[14] = 7.0;      //fm/c
+    tstep[15] = 7.5;      //fm/c
+    tstep[16] = 8.0;      //fm/c
+    tstep[17] = 9.0;      //fm/c
+    tstep[18] = 10.0;
+    tstep[19] = infinity; //fm/c
+    nTimeSteps = 20;
+  } else
   {
     tstep[0] = 0.1;      //fm/c
     tstep[1] = 0.5;      //fm/c
@@ -468,14 +491,12 @@ analysis::analysis( config* const c ):
   }
   showerParticlesInEvent.resize( static_cast<int>( theConfig->getNumberOfParticlesToAdd() / 2 ) );
   
-
   if( studyPhotons )
   { 
-    if( theConfig->doOutput_photons())
-    {
-      //PhotonEnergyBins configuration   
-      PhotondNOverTwoPiptdydptBin.setMinMaxN( 0.0, 3.0, 100 );
-    }    
+    
+    
+    //PhotonEnergyBins configuration   
+    PhotondNOverTwoPiptdydptBin.setMinMaxN( 0.0, 3.0, 100 );
     
     //---- initialisation of PT-binning ----
     minPTPhotons = 0.0;
@@ -761,7 +782,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     default:
       break;
   }
-
+ 
 }
 
 
@@ -908,7 +929,7 @@ void analysis::photonSpectrumOutput()
   
   double DeltaRapidity = fabs(rapidityRanges[2].yright - rapidityRanges[2].yleft)*2.0;
   
-  PhotondNOverTwoPiptdydptBin.print(file1,1.0/(2.0*M_PI*DeltaRapidity*theConfig->getTestparticles()));
+  PhotondNOverTwoPiptdydptBin.print(file1,1.0/(2.0*M_PI*DeltaRapidity*theConfig->getTestparticles()*theConfig->getkFactorEMProcesses()));
   file1.close();
 
   //***** New Method:
@@ -944,7 +965,7 @@ void analysis::photonSpectrumOutput()
     for ( unsigned int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
     {
       DeltaRapidity = fabs(rapidityRanges[yRangeIndex].yright - rapidityRanges[yRangeIndex].yleft)*2.0;
-      file2 <<  ptBins_photons[yRangeIndex][0][i]/(2.0*M_PI*DeltaRapidity*binWidthPTPhotons*ptBinLabelsPhotons[i]*theConfig->getTestparticles())  << sep;
+      file2 <<  ptBins_photons[yRangeIndex][0][i]/(2.0*M_PI*DeltaRapidity*binWidthPTPhotons*ptBinLabelsPhotons[i]*theConfig->getTestparticles()*theConfig->getkFactorEMProcesses())  << sep;
     } 
     file2 << endl;
   }
@@ -976,6 +997,9 @@ void analysis::initialOutput()
   
   if ( studyParticleOutput )
     particleOutput( 0 );
+  
+  //if ( studyPhotons ){ do nothing because no initial photons there :-)}
+  
   
 }
 
@@ -1009,6 +1033,7 @@ void analysis::intermediateOutput( const int nn )
   
   if ( dndyOutput )
     print_dndy( name );
+    
 }
 
 
@@ -1791,7 +1816,7 @@ void analysis::twoPartclCorrelations()
 
 
 
-// compute v2 of gluons and charm quarks
+// compute v2 of gluons,quarks,photons and charm quarks
 void analysis::computeV2RAA( string name, const double _outputTime )
 {
   v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
@@ -1817,84 +1842,92 @@ void analysis::computeV2RAA( string name, const double _outputTime )
     else if( FPT_COMP_GE( pt_min_v2RAA, 90.0 ) )
       nbins_v2RAA = 45;
   }
-  
-  if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() )
+  if (theConfig->doOutput_QCDparticles())
   {
-    theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
-    
-    theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
-    if( mesonDecay )
-      theV2RAA.computeFor( electron_gen, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );
-  }
-  if( studyHQ || studyJpsi )
-  {
-    theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
-    
-    theV2RAA.computeFor( charm, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
-    theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
-    theV2RAA.computeFor( heavy_quark, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
-
-    if ( name == "initial" || name == "final" )
+    if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() )
     {
-      if( hadronization_hq )
-      {
-        theV2RAA.computeFor( dmeson_gen, addedParticlesCopy, addedParticlesCopy.size(), "added", _outputTime, v2jets );
-        theV2RAA.computeFor( bmeson_gen, addedParticlesCopy, addedParticlesCopy.size(), "added", _outputTime, v2jets );
-      }
+      theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
       
+      theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
       if( mesonDecay )
-      {
         theV2RAA.computeFor( electron_gen, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );
-        theV2RAA.computeFor( c_electron, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );  // electrons from charm quarks (D mesons actually)
-        theV2RAA.computeFor( b_electron, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );  // electrons from bottom quarks (B mesons actually)
+    }
+    if( studyHQ || studyJpsi )
+    {
+      theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
+      
+      theV2RAA.computeFor( charm, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
+      theV2RAA.computeFor( bottom, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
+      theV2RAA.computeFor( heavy_quark, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
+
+      if ( name == "initial" || name == "final" )
+      {
+        if( hadronization_hq )
+        {
+          theV2RAA.computeFor( dmeson_gen, addedParticlesCopy, addedParticlesCopy.size(), "added", _outputTime, v2jets );
+          theV2RAA.computeFor( bmeson_gen, addedParticlesCopy, addedParticlesCopy.size(), "added", _outputTime, v2jets );
+        }
+        
+        if( mesonDecay )
+        {
+          theV2RAA.computeFor( electron_gen, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );
+          theV2RAA.computeFor( c_electron, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );  // electrons from charm quarks (D mesons actually)
+          theV2RAA.computeFor( b_electron, addedPartcl_electron, addedPartcl_electron.size(), "added", _outputTime, v2jets );  // electrons from bottom quarks (B mesons actually)
+        }
+      }
+      
+      // also take a look at light parton v2 of background
+      theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+      theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+      
+      if ( studyJpsi )
+      {
+        theV2RAA.setPtBinProperties( 0.0, 15.0, 20 );
+        
+        theV2RAA.computeFor( jpsi, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
+        theV2RAA.computeFor( jpsi_ini, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
+        theV2RAA.computeFor( jpsi_sec, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
       }
     }
-    
-    // also take a look at light parton v2 of background
-    theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    
-    if ( studyJpsi )
+    else if ( theConfig->getPtCutoff() > 80.0 )
     {
-      theV2RAA.setPtBinProperties( 0.0, 15.0, 20 );
+      theV2RAA.setPtBinProperties( 0.8*theConfig->getPtCutoff(), 3.0*theConfig->getPtCutoff(), static_cast< int >( 2.2*theConfig->getPtCutoff() ) );
       
-      theV2RAA.computeFor( jpsi, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
-      theV2RAA.computeFor( jpsi_ini, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
-      theV2RAA.computeFor( jpsi_sec, addedParticles, addedParticles.size(), "added", _outputTime, v2jets );
+      theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+      theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    }
+    else 
+    {
+      theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
+      theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+      theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+      theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+      theV2RAA.computeFor( down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+      theV2RAA.computeFor( strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+      theV2RAA.computeFor( anti_up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+      theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+      theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    }
+    
+    if( studyBackground )
+    {
+      theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+      theV2RAA.computeFor( up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+      theV2RAA.computeFor( down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+      theV2RAA.computeFor( strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+      theV2RAA.computeFor( anti_up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+      theV2RAA.computeFor( anti_down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+      theV2RAA.computeFor( anti_strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+      theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     }
   }
-  else if ( theConfig->getPtCutoff() > 80.0 )
+  
+  if( studyPhotons )
   {
-    theV2RAA.setPtBinProperties( 0.8*theConfig->getPtCutoff(), 3.0*theConfig->getPtCutoff(), static_cast< int >( 2.2*theConfig->getPtCutoff() ) );
-    
-    theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-  }
-  else
-  {
-    theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
-    
-    theV2RAA.computeFor( gluon, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( light_quark, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( anti_up, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( anti_down, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
-    theV2RAA.computeFor( anti_strange, addedParticles, addedParticles.size(), "jets", _outputTime, v2jets );
+    theV2RAA.setPtBinProperties( 0.0, 3.0, 50, 0.0, 3.0, 50 );
+    theV2RAA.computeFor( photon, noninteractingParticles, noninteractingParticles.size(), "photons", _outputTime, v2background );
   }
   
-  if( studyBackground )
-  {
-    theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( anti_up, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( anti_down, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( anti_strange, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-  }
 }
 
 
@@ -1903,6 +1936,10 @@ v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg, std
     theConfig( c ), name( name_arg ), filename_prefix( filename_prefix_arg ), rapidityRanges( rapidityRanges_arg ), pt_min( pt_min_arg ), pt_max( pt_max_arg ), n_g( n_g_arg ), pt_min_background( pt_min_arg ), pt_max_background( pt_max_arg ), n_g_background( n_g_arg )
 {
   eta_bins = rapidityRanges.size();
+  
+  //Photon Angle Bins config
+  PhotonNumberVsAngleBin.setMinMaxN( 0.0 , 90, 100 );
+  lower_time_cutoff_for_v2 = 3.0;
 }
 
 
@@ -1942,15 +1979,21 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
 
   double v2sum[eta_bins];
   int NmbInRange[eta_bins];
+  double v2sumInitialCutOff[eta_bins];
+  int NmbInRangeInitialCutOff[eta_bins];
   int NmbInnerRegion = 0;
   for ( int j = 0;j < eta_bins;j++ )
   {
     v2sum[j] = 0.0;
     NmbInRange[j] = 0;
+    v2sumInitialCutOff[j] = 0.0;
+    NmbInRangeInitialCutOff[j] = 0;
   }
 
   double ptBinsV2[eta_bins][n_bins+1];
   int ptBinsNmb[eta_bins][n_bins+1];
+  double ptBinsV2InitialCutOff[eta_bins][n_bins+1];
+  int ptBinsNmbInitialCutOff[eta_bins][n_bins+1];  
   int ptBinsInnerRegion[n_bins+1];
   for ( int j = 0;j < n_bins + 1;j++ )
   {
@@ -1959,6 +2002,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     {
       ptBinsV2[i][j] = 0.0;
       ptBinsNmb[i][j] = 0.0;
+      ptBinsV2InitialCutOff[i][j] = 0.0;
+      ptBinsNmbInitialCutOff[i][j] = 0.0;
     }
   }
   
@@ -1976,7 +2021,26 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     }
   }
   
+  // compute angle and bin it
+  double angle;
+  for ( int i = 0; i < n_particles; i++ )
+  {
+   //angle = acos(_particles[i].Mom.Px()/_particles[i].Mom.E())
+   //_particles[i].Mom.Phi_x()*180.0/M_PI;
+   angle = acos(fabs(_particles[i].Mom.Px())/_particles[i].Mom.Pt())*180.0/M_PI;
+   PhotonNumberVsAngleBin.add(angle);
+  }  
+  //print angle distribution
+  string filename_angle = filename_prefix + "_" + type + "_" + additionalNameTag + "_angle_distribution_" + name;
+  fstream print_angle_distribution( filename_angle.c_str(), ios::out | ios::trunc );
 
+  print_angle_distribution << "# Number of particles emitted vs angle to x-Axis " << type << endl;
+  print_angle_distribution << "# t = " << _outputTime << endl;
+  print_angle_distribution << "# angle| \t number of photons| \t number of photons/binWidth| ..."  << endl;
+ 
+  PhotonNumberVsAngleBin.print(print_angle_distribution);
+  
+    
   // compute v2 and bin it into pt bins
   for ( int i = 0; i < n_particles; i++ )
   {
@@ -2041,12 +2105,23 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       {
         if ( fabs( eta ) >= rapidityRanges[yRangeIndex].yleft && fabs( eta ) <= rapidityRanges[yRangeIndex].yright )
         {
-          v2sum[yRangeIndex] += v2;
-          NmbInRange[yRangeIndex]++;
-
+          if (_particles[i].production_time > lower_time_cutoff_for_v2 )//WARNING Include check if photon or not
+          {
+             v2sumInitialCutOff[yRangeIndex] += v2;//not used at the moment
+             NmbInRangeInitialCutOff[yRangeIndex]++;
+          }
+             v2sum[yRangeIndex] += v2;
+             NmbInRange[yRangeIndex]++;
+          
+          
           if ( pt <= _pt_max && pt > _pt_min )
           {
             dummy = int(( log( pt ) - log( _pt_min ) ) / d_ln_pt );
+            if (_particles[i].production_time > lower_time_cutoff_for_v2 )//WARNING Include check if photon or not
+            {            
+              ptBinsV2InitialCutOff[yRangeIndex][dummy] += v2;
+              ptBinsNmbInitialCutOff[yRangeIndex][dummy]++;
+            }
             ptBinsV2[yRangeIndex][dummy] += v2;
             ptBinsNmb[yRangeIndex][dummy]++;
             ptBinsAngleDep[yRangeIndex][alphaIndex][dummy]++;
@@ -2156,6 +2231,11 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       print_v2_summed << ptBinsV2[i][k];
       print_v2_summed.width( 10 );
       print_v2_summed << ptBinsNmb[i][k];
+      //WARNING Abfrage if initialCutOff erwuenscht
+      print_v2_summed.width( 20 );
+      print_v2_summed << ptBinsV2InitialCutOff[i][k];      
+      print_v2_summed.width( 10 );
+      print_v2_summed << ptBinsNmbInitialCutOff[i][k];
     }
     print_v2_summed << endl;
   }
@@ -2176,8 +2256,10 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     for ( int i = 0;i < eta_bins;i++ )
     {
       const double delta_eta = 2.0 * ( rapidityRanges[i].yright - rapidityRanges[i].yleft );
-      
-      double nInBin = double( ptBinsNmb[i][k] ) / theConfig->getTestparticles() / dpt / delta_eta;
+      //WARNING: moritz likes it to divide also by pt_out and 2pi
+      //cout << "ANALYSIS" << endl;
+      //cout << "testp: " << theConfig->getTestparticles() << "   delta_eta: " << delta_eta << endl;
+      double nInBin = double( ptBinsNmb[i][k] ) / (double(theConfig->getkFactorEMProcesses())*double(theConfig->getTestparticles())* double(dpt) * double(delta_eta) * double(pt_out) *(2.0*M_PI));
       
       if( _v2type == v2jets )
         nInBin = nInBin / theConfig->getNaddedEvents();
@@ -2190,6 +2272,14 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       
       print_yield.width( 15 );
       print_yield << nInBin;
+      //DEBUG:
+      if (pt_out >0.5 && pt_out < 0.7 && delta_eta==0.7)
+      {
+//         cout << "k-Faktor: " << theConfig->getkFactorEMProcesses()<<endl;
+        cout << "pt=" << pt_out << "\t dN/2piptdptdy=" << nInBin << endl;
+      } 
+      
+      
     }
     print_yield << endl;
   }
@@ -3855,9 +3945,9 @@ void analysis::writeTempAndVel( const int step  )
     return;
 
   // total length of grid system
-  const double xlength = 24.6;
-  const double ylength = 24.6;
-  const double zlength = 12.3;
+  const double xlength = 10;//24.6;
+  const double ylength = 10;//24.6;
+  const double zlength = 5;//12.3;
 
   // number of cells in given direction
   // in cascade IX=40   IY=40   IZ=47
@@ -4126,6 +4216,7 @@ void analysis::writeTempAndVel( const int step  )
   string filename,name;
   stringstream ss;
   ss << time*10;
+  // 1) Cell Info
   filename = filename_prefix + "_tempVel_" + ss.str() + ".dat";
 
   fstream file( filename.c_str(), ios::out | ios::trunc  );
@@ -4155,6 +4246,7 @@ void analysis::writeTempAndVel( const int step  )
     file << vz_cell[i] << endl;
   }
   
+  // 2) Spatial info about cells
   filename = filename + "_spatial";
   
   fstream file_spatial( filename.c_str(), ios::out | ios::trunc  );
@@ -4162,7 +4254,7 @@ void analysis::writeTempAndVel( const int step  )
   for ( int i = 0; i < nCells; i++ )
   {
     const int nxny = nCellsx * nCellsy;
-    const int indexZ = i / nxny;
+    const int indexZ = i / nxny; //Integer
     const int indexY = (i -  indexZ  * nxny) / nCellsx;
     const int indexX = i -  indexZ  * nxny - indexY * nCellsx;
     
@@ -4171,7 +4263,7 @@ void analysis::writeTempAndVel( const int step  )
 //       file_spatial << i << "\t";
       file_spatial << double(indexZ) * zlength / nCellsz << "\t";
       file_spatial << double(indexX) * xlength / nCellsx << "\t";
-      
+
       file_spatial << temp_cell[i] << "\t";
       file_spatial << tempWithQuarks_cell[i] << "\t";
       file_spatial << vx_cell[i] << "\t";
@@ -4180,6 +4272,10 @@ void analysis::writeTempAndVel( const int step  )
     }
   }
 
+ 
+  
+  
+  
   delete[] numberInCell; 
   delete[] vx_cell; 
   delete[] vy_cell;  

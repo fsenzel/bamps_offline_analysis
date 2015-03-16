@@ -33,7 +33,7 @@
 #cmakedefine HAVE_VECTOR_XOP
 
 /* possible types: Scalar, SSE, AVX */
-#cmakedefine VECTOR_IMPL_TYPE ${VECTOR_IMPL_TYPE} 
+#cmakedefine VECTOR_IMPL_TYPE ${VECTOR_IMPL_TYPE}
 #define VECTOR_IMPL_${VECTOR_IMPL_TYPE}
 
 #define PYTHIA_XML_DIR "${Pythia_xmldoc_PATH}"

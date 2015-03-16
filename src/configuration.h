@@ -81,6 +81,7 @@ namespace ns_casc
 //   extern std::vector<ParticleHFelectron> addedPartcl_electron;
   extern std::vector<ParticleOffline> addedPartcl_electron;
   extern std::vector<ParticleOffline> scatteredMediumParticles;
+  extern std::vector<ParticleOffline> noninteractingParticles;
 
 }
 //--------------------------------------------------------//
@@ -223,6 +224,9 @@ class config : public configBase
 
   /** @brief Interface for config::outputSwitch_photons */
   bool doOutput_photons() const { return outputSwitch_photons; } 
+  
+  /** @brief Interface for config::outputSwitch_photons */
+  bool doOutput_QCDparticles() const { return outputSwitch_QCDparticles; } 
   
   /** @brief Interface for config::outputScheme */
   OUTPUT_SCHEME getOutputScheme() const {return  outputScheme;}
@@ -526,6 +530,9 @@ class config : public configBase
   
   /** @brief Specify whether photon-studys output should be written to a file */
   bool outputSwitch_photons;
+  
+  /** @brief Specify whether QCD particle-Observables should be written to a file */
+  bool outputSwitch_QCDparticles;
   
   /** @brief Output schemes to decide which kind of output is printed */
   OUTPUT_SCHEME outputScheme;

@@ -249,6 +249,7 @@ public:
   /** @brief Writes the photonspectra out. */
   void photonSpectrumOutput();
   string file14;//Photonspectra
+
   
 private:
 
@@ -455,6 +456,7 @@ public:
   
   void computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, std::vector< ParticleOffline >& _particles, const int n_particles, string additionalNameTag, const double _outputTime, const v2Type _v2type );
 
+
 private:
   
   config * const theConfig ;
@@ -469,7 +471,8 @@ private:
   
   std::vector<analysisRapidityRange> rapidityRanges;
   
-
+  binning PhotonNumberVsAngleBin;
+  double lower_time_cutoff_for_v2;
 };
 
 
