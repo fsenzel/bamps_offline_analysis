@@ -1841,7 +1841,8 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
                         theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
                         theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
                         theConfig->I23onlineIntegrationIsSet(),
-                        theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), _gluonList.size() );   
+                        theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), 
+                        _gluonList.size(),theConfig->isMatrixElement23_22qt(), theConfig->getLPMMode(), theConfig->getMomentumSampling23() );   
           
           cs23 = scatt23_object.getXSection23( initialStateIndex ); //1/GeV^2
 
@@ -3625,7 +3626,8 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
                         theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
                         theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
                         theConfig->I23onlineIntegrationIsSet(),
-                        theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), _gluonList.size(), theConfig->isMatrixElement23_22qt() );    
+                        theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), _gluonList.size(),
+                        theConfig->isMatrixElement23_22qt(), theConfig->getLPMMode(), theConfig->getMomentumSampling23() );    
             cs23 = scatt23_object.getXSection23( initialStateIndex ); //1/GeV^2
 
             probab23 += pow( 0.197, 2.0 ) * cs23 * Vrel * dt / ( dv * testpartcl );
