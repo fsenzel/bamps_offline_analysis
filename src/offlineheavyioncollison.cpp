@@ -1555,7 +1555,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               
               if ( again )
               {
-                cout << "AGAIN!" << endl;
+                //cout << "AGAIN!" << endl;
                 return;
               }
             }            
