@@ -472,7 +472,7 @@ private:
   std::vector<analysisRapidityRange> rapidityRanges;
   
   binning PhotonNumberVsAngleBin;
-  double lower_time_cutoff_for_v2;
+  double lower_time_cutoff_for_v2,lower_pt_cutoff_for_v2;
 };
 
 

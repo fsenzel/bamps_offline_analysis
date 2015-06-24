@@ -104,7 +104,12 @@ private:
      *
      */
     int totalPhotonNumber;
+    int numberB, numberA;
+    double averageS_smallv2;
+    double averageS_Bigv2;
 
+    
+    
     /**
      * @brief Accumulated number of sampling errors in
      * scattering23::getMomenta23

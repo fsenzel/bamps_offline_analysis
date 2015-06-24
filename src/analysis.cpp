@@ -193,26 +193,33 @@ analysis::analysis( config* const c ):
   else if (studyPhotons)
   {
     tstep[0] = 0.1;      //fm/c
-    tstep[1] = 0.5;      //fm/c
-    tstep[2] = 1.0;      //fm/c
-    tstep[3] = 1.5;      //fm/c
-    tstep[4] = 2.0;      //fm/c
-    tstep[5] = 2.5;      //fm/c
-    tstep[6] = 3.0;      //fm/c
-    tstep[7] = 3.5;      //fm/c
-    tstep[8] = 4.0;      //fm/c
-    tstep[9] = 4.5;      //fm/c
-    tstep[10] = 5.0;      //fm/c
-    tstep[11] = 5.5;      //fm/c
-    tstep[12] = 6.0;      //fm/c
-    tstep[13] = 6.5;      //fm/c
-    tstep[14] = 7.0;      //fm/c
-    tstep[15] = 7.5;      //fm/c
-    tstep[16] = 8.0;      //fm/c
-    tstep[17] = 9.0;      //fm/c
-    tstep[18] = 10.0;
-    tstep[19] = infinity; //fm/c
-    nTimeSteps = 20;
+    tstep[1] = 0.2;      //fm/c
+    tstep[2] = 0.3;      //fm/c    
+    tstep[3] = 0.4;      //fm/c   
+    tstep[4] = 0.5;      //fm/c   
+    tstep[5] = 0.6;      //fm/c    
+    tstep[6] = 0.7;      //fm/c    
+    tstep[7] = 0.8;      //fm/c
+    tstep[8] = 0.9;      //fm/c    
+    tstep[9] = 1.0;      //fm/c
+    tstep[10] = 1.5;      //fm/c
+    tstep[11] = 2.0;      //fm/c
+    tstep[12] = 2.5;      //fm/c
+    tstep[13] = 3.0;      //fm/c
+    tstep[14] = 3.5;      //fm/c
+    tstep[15] = 4.0;      //fm/c
+    tstep[16] = 4.5;      //fm/c
+    tstep[17] = 5.0;      //fm/c
+    tstep[18] = 5.5;      //fm/c
+    tstep[19] = 6.0;      //fm/c
+    tstep[20] = 6.5;      //fm/c
+    tstep[21] = 7.0;      //fm/c
+    tstep[22] = 7.5;      //fm/c
+    tstep[23] = 8.0;      //fm/c
+    tstep[24] = 9.0;      //fm/c
+    tstep[25] = 10.0;
+    tstep[26] = infinity; //fm/c
+    nTimeSteps = 27;
   } else
   {
     tstep[0] = 0.1;      //fm/c
@@ -946,11 +953,11 @@ void analysis::photonSpectrumOutput()
   //  printHeader( file2, ptSpectrum, end );
   //---------------------------------------
 
-  cout << "Rapidity ranges" << endl;
+  /*cout << "Rapidity ranges" << endl;
   cout << rapidityRanges[0].yright << " " << rapidityRanges[0].yleft << endl;
   cout << rapidityRanges[1].yright << " " << rapidityRanges[1].yleft << endl;  
   cout << rapidityRanges[2].yright << " " << rapidityRanges[2].yleft << endl;
-  cout << rapidityRanges[3].yright << " " << rapidityRanges[3].yleft << endl;  
+  cout << rapidityRanges[3].yright << " " << rapidityRanges[3].yleft << endl;*/
   
   //------------- the actual output ---------------
   for ( unsigned int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
@@ -980,7 +987,8 @@ void analysis::photonSpectrumOutput()
 void analysis::initialOutput()
 {
   if ( v2output )
-    computeV2RAA( "initial", 0  );
+    //HACK
+    //computeV2RAA( "initial", 0  );
 
   if ( studyJpsi ) // to consider charm annihaltion is just useful if added particles can scatter
   { 
@@ -1924,8 +1932,13 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   
   if( studyPhotons )
   {
+    cout << "studyPhotons " << noninteractingParticles.size() <<  endl;
+    //if(theConfig->v2_bigger > theConfig->v2_smaller) cout << "bigger! " << theConfig->v2_bigger - theConfig->v2_smaller << endl;
+    //if(theConfig->v2_bigger < theConfig->v2_smaller) cout << "smaller! " << -theConfig->v2_bigger + theConfig->v2_smaller << endl;    
     theV2RAA.setPtBinProperties( 0.0, 3.0, 50, 0.0, 3.0, 50 );
-    theV2RAA.computeFor( photon, noninteractingParticles, noninteractingParticles.size(), "photons", _outputTime, v2background );
+    theV2RAA.computeFor( photon, noninteractingParticles, noninteractingParticles.size(), "perturbative", _outputTime, v2background );
+    theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+    theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
   }
   
 }
@@ -1940,6 +1953,7 @@ v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg, std
   //Photon Angle Bins config
   PhotonNumberVsAngleBin.setMinMaxN( 0.0 , 90, 100 );
   lower_time_cutoff_for_v2 = 3.0;
+  lower_pt_cutoff_for_v2 = 0.5;
 }
 
 
@@ -1981,6 +1995,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   int NmbInRange[eta_bins];
   double v2sumInitialCutOff[eta_bins];
   int NmbInRangeInitialCutOff[eta_bins];
+  double v2sumPtCutOff[eta_bins];
+  int NmbInRangePtCutOff[eta_bins];   
   int NmbInnerRegion = 0;
   for ( int j = 0;j < eta_bins;j++ )
   {
@@ -1988,6 +2004,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     NmbInRange[j] = 0;
     v2sumInitialCutOff[j] = 0.0;
     NmbInRangeInitialCutOff[j] = 0;
+    v2sumPtCutOff[j] = 0.0;
+    NmbInRangePtCutOff[j] = 0;       
   }
 
   double ptBinsV2[eta_bins][n_bins+1];
@@ -2107,11 +2125,17 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
         {
           if (_particles[i].production_time > lower_time_cutoff_for_v2 )//WARNING Include check if photon or not
           {
-             v2sumInitialCutOff[yRangeIndex] += v2;//not used at the moment
+             v2sumInitialCutOff[yRangeIndex] += v2;
              NmbInRangeInitialCutOff[yRangeIndex]++;
           }
-             v2sum[yRangeIndex] += v2;
-             NmbInRange[yRangeIndex]++;
+          if (pt > lower_pt_cutoff_for_v2 )//WARNING Include check if photon or not
+          {
+             v2sumPtCutOff[yRangeIndex] += v2;
+             NmbInRangePtCutOff[yRangeIndex]++;
+          }
+          v2sum[yRangeIndex] += v2;
+          NmbInRange[yRangeIndex]++;
+          
           
           
           if ( pt <= _pt_max && pt > _pt_min )
@@ -2211,14 +2235,63 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     print_v2_tot.width( 15 );
   }
   print_v2_tot << endl;
+  
+  print_v2_tot << "# Cut off initial timesteps! Only count from time " << lower_time_cutoff_for_v2 << " fm" << endl;
+  print_v2_tot << "#average integrated v2 | , for all rapidity bins" << endl; 
+  for ( int i = 0;i < eta_bins;i++ )
+  {
+    if ( NmbInRange[i] > 0 )
+    {
+      print_v2_tot <<  v2sumInitialCutOff[i] / NmbInRangeInitialCutOff[i];
+    }
+    else
+    {
+      print_v2_tot <<  0;
+    }
+    print_v2_tot << '\t' ;
+  } 
+  print_v2_tot << endl;
+  print_v2_tot << "#sum | number , for all rapidity bins" << endl; 
+  for ( int i = 0;i < eta_bins;i++ )
+  {
+    print_v2_tot <<  v2sumInitialCutOff[i] << '\t';
+    print_v2_tot <<  NmbInRangeInitialCutOff[i] << '\t';
+  }
+  print_v2_tot << "# Cut off pt: " << lower_pt_cutoff_for_v2 << " GeV" << endl;
+  print_v2_tot << "#average integrated v2 | , for all rapidity bins" << endl; 
+  print_v2_tot << 4321;
+  for ( int i = 0;i < eta_bins;i++ )
+  {
+    if ( NmbInRange[i] > 0 )
+    {
+      print_v2_tot <<  v2sumPtCutOff[i] / NmbInRangePtCutOff[i];
+    }
+    else
+    {
+      print_v2_tot <<  0;
+    }
+    print_v2_tot << '\t' ;
+  } 
+  print_v2_tot << endl;
+  print_v2_tot << "#sum | number , for all rapidity bins" << endl; 
+  for ( int i = 0;i < eta_bins;i++ )
+  {
+    print_v2_tot <<  v2sumPtCutOff[i] << '\t';
+    print_v2_tot <<  NmbInRangePtCutOff[i] << '\t';
+  }
+  print_v2_tot << "#Total number of photons:" << endl;
+  print_v2_tot << "1234" << '\t' <<  noninteractingParticles.size() << endl;
 
+  
 
   // print summed output, v2 is not computed, but summed v2 and the number in one bin
   print_v2_summed << "# summed v2 of " << type << endl;
   print_v2_summed << "# t = " << _outputTime << endl;
+  print_v2_summed << "# Total summed photon v2" << theConfig->v2average_debug << endl;
   print_v2_summed << "#";
   print_v2_summed.width( 14 );
   print_v2_summed << "pt       summed v_2 and number in bin for different rapidity bins" << endl;
+  
 
   for ( int k = 0;k < n_bins + 1;k++ )
   {
@@ -2273,11 +2346,11 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       print_yield.width( 15 );
       print_yield << nInBin;
       //DEBUG:
-      if (pt_out >0.5 && pt_out < 0.7 && delta_eta==0.7)
+      /*if (pt_out >0.5 && pt_out < 0.7 && delta_eta==0.7)
       {
-//         cout << "k-Faktor: " << theConfig->getkFactorEMProcesses()<<endl;
+        //cout << "k-Faktor: " << theConfig->getkFactorEMProcesses()<<endl;
         cout << "pt=" << pt_out << "\t dN/2piptdptdy=" << nInBin << endl;
-      } 
+      }*/
       
       
     }

@@ -367,6 +367,14 @@ class config : public configBase
   /** Set seed chosen during runtime */
   void setSeed ( uint32_t _seed ){ seed = _seed; };
   
+      /**
+     * @brief Total Number of produced photons
+     *
+     */
+    double v2average_debug;
+    
+ int v2_bigger,v2_smaller;  
+  
  protected:
    /** ----- auxiliary routines ----- */
    /** @brief Sort the options into groups */   

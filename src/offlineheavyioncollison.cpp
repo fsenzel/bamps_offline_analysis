@@ -221,7 +221,9 @@ void offlineHeavyIonCollision::initialize()
 
 void offlineHeavyIonCollision::mainFramework()
 {
+  
   totalPhotonNumber = 0;
+  theConfig->v2average_debug = 0;
   double dt_cascade = 0;
   double dt_backup = 0;
   double nexttime;
@@ -345,6 +347,9 @@ void offlineHeavyIonCollision::mainFramework()
       }
     }
 
+    //
+    //cout << "noninteractingParticles.size = " << noninteractingParticles.size() << endl;
+    
     // evolution of the medium to present time
     double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
     
@@ -2023,12 +2028,12 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
 void offlineHeavyIonCollision::scatt22_amongBackgroundParticles( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime )
 {
   int iscat, jscat, typ;
-  double s, cs22, Vrel;
+  double s, cs22, Vrel,temp1,temp2,temp3;
   double M1, M2;
   double probab22;
   double md2g_wo_as, md2q_wo_as,s_cutoff_for_pqcd;
   int initialStateIndex = -1;
-  FLAVOR_TYPE F1, F2;
+  FLAVOR_TYPE F1here, F2here;
   double temperature;
 
 
@@ -2037,88 +2042,143 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles( cellContainer& 
 
   scattering22 scatt22_object( &theI22 );
   
+  for ( int a = 0; a < static_cast<int>( _allParticlesList.size() ) ; a++ )
+  {
+    iscat = _allParticlesList[a];
+    particles_atTimeNow[iscat].collision_tag = false;
+  }
+  
+  
   for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
   {
-    iscat = _allParticlesList[i];
-//     if (particles_atTimeNow[iscat].collision_tag == false)
-//     {
-      //WARNING for ( unsigned int j = i + 1; j < _allParticlesList.size(); j++ )
-    
-      for ( unsigned int j = 0; j < _allParticlesList.size(); j++ )
+    iscat = _allParticlesList[i];    
+    if(particles_atTimeNow[iscat].collision_tag)  
+    {  
+      continue;
+    }
+
+    for ( unsigned int j = i+1; j < _allParticlesList.size(); j++ )
+    {        
+      jscat = _allParticlesList[j]; 
+      
+      if(particles_atTimeNow[jscat].collision_tag == false)
       {
-        if(jscat!=iscat)
+        if(particles_atTimeNow[iscat].collision_tag)  
+        {  
+          break;
+        }
+
+        if(particles_atTimeNow[iscat].collision_tag ||particles_atTimeNow[jscat].collision_tag )
         {
+          cout << "SHIT####################################################################################" << endl;
+          std::string errMsg = "Error in scatt22_amongBackgroundParticles: collision tags violated.";
+          throw eHIC_error( errMsg );
+        }
+        
+        F1here = particles_atTimeNow[iscat].FLAVOR;
+        M1 = particles_atTimeNow[iscat].m;
+        F2here = particles_atTimeNow[jscat].FLAVOR;
+        M2 = particles_atTimeNow[jscat].m;
+        
+        unsigned int _F1 = std::min( static_cast<unsigned int>( F1here ), static_cast<unsigned int>( F2here ) );
+        unsigned int _F2 = std::max( static_cast<unsigned int>( F1here ), static_cast<unsigned int>( F2here ) );
+        
+        
+        s = (particles_atTimeNow[iscat].Mom + particles_atTimeNow[jscat].Mom).M2();
 
-        jscat = _allParticlesList[j];        
-/*        if (particles_atTimeNow[jscat].collision_tag == false)
-        { */ 
-          F1 = particles_atTimeNow[iscat].FLAVOR;
-          M1 = particles_atTimeNow[iscat].m;
-          F2 = particles_atTimeNow[jscat].FLAVOR;
-          M2 = particles_atTimeNow[jscat].m;
-
-          //cout << "flavors " << F1 << "     " << F2 << endl;
+        
+        
+        if (FPT_COMP_NZ(theConfig->getInfraredCutOffEMProcesses()))
+        {  
+          s_cutoff_for_pqcd=2.0*theConfig->getInfraredCutOffEMProcesses();
+        }  
+        else if (theConfig->getCrossSectionMethod() == 0)
+        {
+          s_cutoff_for_pqcd=0.1; 
+        }else
+        {
+          s_cutoff_for_pqcd=0.0;
+          //cout << "0 #################" << endl;
+        }
           
-          
-          s = (particles_atTimeNow[iscat].Mom + particles_atTimeNow[jscat].Mom).M2();
+        if ( FPT_COMP_L(s,1.1*lambda2) )
+        {
+          probab22 = -1.0;
+          cs22 = 0.0; //1/GeV^2
+        }
+        else if( FPT_COMP_G(s, s_cutoff_for_pqcd) )// if s > s_cutoff_for_pqcd...
+        {
+       
+         
+          Vrel = VelRel( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom, M1, M2 );
 
-          if (FPT_COMP_NZ(theConfig->getInfraredCutOffEMProcesses()))
+          //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, it will be multiplied in the scattering routines
+          md2g_wo_as = ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
+          md2q_wo_as = ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q ) / 2.0;
+          
+          scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
+                                      F1here, F2here, M1, M2, s, md2g_wo_as , md2q_wo_as,
+                                      theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
+                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses(),
+                                      theConfig->getInfraredCutOffEMProcesses(),
+                                      temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+        
+          
+          cs22 = scatt22_object.getXSection22( initialStateIndex );
+          // 1/ GeV^2
+          //100 mb = 10 fm^2 = 100 * 2.58 1/GeV^2
+          //HACK Constant!!!
+          //cs22 = 10 * 2.58;
+          /*if(FPT_COMP_NZ(F1here + F2here))
           {  
-            s_cutoff_for_pqcd=2.0*theConfig->getInfraredCutOffEMProcesses();
-          }  
-          else if (theConfig->getCrossSectionMethod() == 0)
-          {
-            s_cutoff_for_pqcd=0.1; 
-          }else
-          {
-            s_cutoff_for_pqcd=0.0;
-          }
-            
-          if ( s < 1.1*lambda2 )
-          {
-            probab22 = -1.0;
-            cs22 = 0.0; //1/GeV^2
-          }
-          else if( FPT_COMP_G(s, s_cutoff_for_pqcd) )// if s > s_cutoff_for_pqcd...
-          {
-            //cout << "s: " << s << " s_cutoff: " << s_cutoff_for_pqcd << endl;
-            Vrel = VelRel( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom, M1, M2 );
-
-            //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, it will be multiplied in the scattering routines
-            md2g_wo_as = ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
-            md2q_wo_as = ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q ) / 2.0;
-            
-            scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
-                                        F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
-                                        theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
-                                        theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses(),
-                                        theConfig->getInfraredCutOffEMProcesses(),
-                                        temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+            cs22 = 30 * 2.58;
+          }*/
           
-            cs22 = scatt22_object.getXSection22( initialStateIndex );
-//             cout << "CS:\t" << cs22 << endl;
-            // in scatt22_amongAddedParticles was this:
-            //probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl * theConfig->getNaddedEvents() ) * theConfig->getJpsiTestparticles();
-//             cout << dt << endl;
-            
-            //New:
-            //WARNING: is dv the cell volume?
-            //WARNING: What is theConfig->getNaddedEvents()
-            probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt  / ( dv * testpartcl );
-//             cout << "Probab = " << probab22 << "\tdv = " << dv << "\ttestpartcl = " << testpartcl << "\tdt = " << dt << "\tVrel= " << Vrel << "\tNaddedEvents" << theConfig->getNaddedEvents() << endl;
-            
-            if ( F1 == gluon )
-            {
-              probab22 *= scaleFactor; // scaleFactor is one in my case
-            }
-            if ( F2 == gluon )
-            {
-              probab22 *= scaleFactor;// scaleFactor is one in my case
-            }
-            //cout << "ScaleFactor Gluon: " << scaleFactor << endl;
-          }
+          probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt  / ( dv * testpartcl );
+          
+          //cout << probab22 << endl;
+          //probab22 = 0.001;
+          
 
-          if ( probab22 > 1.0 )
+          //cout << "CS:\t" << cs22 << endl;
+          // in scatt22_amongAddedParticles was this:
+          //probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl * theConfig->getNaddedEvents() ) * theConfig->getJpsiTestparticles();
+          //cout << dt << endl;
+          
+          /*
+          double Avv2 =  1.0/2.0*(( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )+( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) );
+          if( FPT_COMP_GZ(Avv2) )
+          {
+            
+            //cout << "v2 = " << Avv2 << "\t s = " << s << endl;
+            //cout << "cs = " << cs22 << " 1/GeV^2" << " = " << cs22/2.58 << " mb" << endl;
+            averageS_Bigv2 += s ;
+            numberA++;
+          }
+          if( FPT_COMP_LZ(Avv2) )
+           {
+            //cout << "v2 = " << Avv2 << "\t s = " << s << endl;
+            //cout << "cs = " << cs22 << " 1/GeV^2" << " = " << cs22/2.58 << " mb" << endl;
+            averageS_smallv2 += s ;
+            numberB++;
+          }  
+          cout << "Big: " << averageS_Bigv2/numberA << "\t Small: " << averageS_smallv2/numberB << endl;
+          */
+          
+          //cout << "Probab = " << probab22 << "\tdv = " << dv << "\ttestpartcl = " << testpartcl << "\tdt = " << dt << "\tVrel= " << Vrel << "\tNaddedEvents" << theConfig->getNaddedEvents() << endl;
+          
+          /*if ( F1 == gluon )
+          {
+            probab22 *= scaleFactor; // scaleFactor is one in my case
+          }
+          if ( F2 == gluon )
+          {
+            probab22 *= scaleFactor;// scaleFactor is one in my case
+          }*/
+          //cout << "ScaleFactor Gluon: " << scaleFactor << endl;
+        
+
+          if ( FPT_COMP_G(probab22, 1.0) )
           {
             cout << "P22=" << probab22 << ">1" << endl;
             again = true;
@@ -2127,27 +2187,58 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles( cellContainer& 
     //         cout << "dt (new) = " << dt << endl;
             return;
           }
+          double randomnumber = ran2();
+          
 
-          if ( ran2() < probab22 )
+          
+          //HACK: 
+          //if( FPT_COMP_GZ(1.0/2.0*(( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )+( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) )) )
+          //{
+          //  probab22 = 2.0;//100% scattering if v2>0
+          //}
+          
+          
+          
+          if ( randomnumber < probab22 )
           {
-            //WARNING: collision tag neccessary?  
-            //particles_atTimeNow[iscat].collision_tag = true;
-            //particles_atTimeNow[jscat].collision_tag = true;
-            scatt22_amongBackgroundParticles_utility( scatt22_object, _cells.particleList, _allParticlesList, iscat, jscat, typ, nexttime );
+            //if( FPT_COMP_GZ(1.0/2.0*(( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )+( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) )) )
+            //{
+              
+            
+              //DEBUG
+              /*cout << "-----------------------" << endl;
+              if ( F1here != gluon )
+              {
+                cout << "F1 px = " << particles_atTimeNow[iscat].Mom.Px() << endl;
+              }
+              if ( F2here != gluon )
+              {
+              cout << "F2 px = " << particles_atTimeNow[jscat].Mom.Px() << endl;  
+              }*/
+              
+              //WARNING: collision tag neccessary?  
+              //HACK
+              particles_atTimeNow[jscat].collision_tag = true;
+              particles_atTimeNow[iscat].collision_tag = true;
+              
+              //if(FPT_COMP_L(s,0.001)){cout << "s: " << s << " s_cutoff: " << s_cutoff_for_pqcd << endl;}
+              /*if( (_F1==0) || (_F2 == 0))
+              {
+                cout << "Ahhhhhhhhhhhhh " <<_F1 << '\t' << _F2 <<'\t'<< temp1<<'\t'<<temp2<<'\t'<<randomnumber<< endl;
+                cout << "WARUM ist hier noch ein gluon?" << endl;
+              }*/
+              
+              //cout << "-----------------" << endl;
+              //cout << "Initial v2: " <<  1.0/2.0*(( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )+( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) )<< endl;;
+              //cout << "Initial Momentum: " << particles_atTimeNow[iscat].Mom.Pz() << '\t' << particles_atTimeNow[jscat].Mom.Pz() << endl;
+              
+              scatt22_amongBackgroundParticles_utility( scatt22_object, _cells.particleList, _allParticlesList, iscat, jscat, typ, nexttime );
+            //}
           }
         }
-        
-      }
-//       }  
-//     }
+      }     
+    }
   }
-  //WARNING Uncomment
-  //WARNING: here all_particlesList.size -1 or not -1 ???
-/*  for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
-  {
-    iscat = _allParticlesList[i];
-    particles_atTimeNow[iscat].collision_tag = false;
-  }*/  
 }
 
 
@@ -3207,19 +3298,18 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_utility( scatter
   double Tmax, TT;
   double M1, M2;
   double t_hat;
-  
-  
-  
+
   ParticleOffline temp_particle_iscat = particles_atTimeNow[iscat];
   ParticleOffline temp_particle_jscat = particles_atTimeNow[jscat];
-  ParticleOffline temp_particle_produced_photon;
+  
 
   F1 = particles_atTimeNow[iscat].FLAVOR;
-  M1 = particles_atTimeNow[iscat].m;
-
+  M1 = particles_atTimeNow[iscat].m;  
+  
   F2 = particles_atTimeNow[jscat].FLAVOR;
   M2 = particles_atTimeNow[jscat].m;
 
+    
   Tmax = std::max( particles_atTimeNow[iscat].Pos.T(), particles_atTimeNow[jscat].Pos.T() );
   TT = ( nexttime - Tmax ) * ran2() + Tmax;
   temp_particle_iscat.Propagate( TT, particles_atTimeNow[iscat].X_traveled );
@@ -3230,46 +3320,156 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_utility( scatter
   temp_particle_jscat.lastInt = particles_atTimeNow[jscat].Pos;
 
   // determine type of scattering, momentum transfer t_hat, new flavor and new masses
-  scatt22_obj.getMomentaAndMasses22( F1, F2, M1, M2, t_hat, typ );
   
-  //cout << F1 << "       " << F2 << endl;
   
-  // translate momemtum transfer t_hat into actual momenta of outgoing particles
+  //HACK largeAngle
+  scatt22_obj.getMomentaAndMasses22( F1, F2, M1, M2, t_hat, typ ); 
+  //t_hat = 0.0;
+  
+  // translate momentum transfer t_hat into actual momenta of outgoing particles
   VectorEPxPyPz P1new, P2new;
-  VectorTXYZ Pos1new, Pos2new;
-   
-  scatt22_obj.setNewMomenta22( P1new, P2new, 
-                               Pos1new, Pos2new,
-                               t_hat );
-
-  if(F1==33 )
+  VectorTXYZ Pos1new = temp_particle_iscat.Pos;
+  VectorTXYZ Pos2new = temp_particle_jscat.Pos;
+  
+  
+  
+  //double v2vorher,v2nachher;
+  
+  
+  
+  
+  //No change in Momenta!
+  /*
+  cout << "Control Momenta: " << endl;
+  cout << "Before: i  Px:\t" << temp_particle_iscat.Mom.Px() << "\tPy:\t" << temp_particle_iscat.Mom.Py() << "\t Pz:\t" << temp_particle_iscat.Mom.Pz()<< endl;
+  cout << "Before: j  Px:\t" << temp_particle_jscat.Mom.Px() << "\tPy:\t" << temp_particle_jscat.Mom.Py() << "\t Pz:\t" << temp_particle_jscat.Mom.Pz()<<endl;
+  
+  
+  cout << "v2 before: " << 1.0/2.0 * (      ( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )  +  ( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) ) << endl;
+  */
+  
+  //v2vorher = 1.0/2.0 * (      ( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )  +  ( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) );
+  
+  scatt22_obj.setNewMomenta22( P1new, P2new, Pos1new, Pos2new, t_hat );
+  
+  
+  //HACK
+  /*
+  if((particles_atTimeNow[iscat].Mom.Pt() > particles_atTimeNow[jscat].Mom.Pt())&& (F1 != gluon))
   {
+    P1new = particles_atTimeNow[iscat].Mom;
+    F1 = photon;
+    F2 = up;
+  }else if ((particles_atTimeNow[jscat].Mom.Pt() > particles_atTimeNow[iscat].Mom.Pt())&& (F2 != gluon))
+  {
+    P2new = particles_atTimeNow[jscat].Mom;
+    F2 = photon;
+    F1 = up; 
+  }else
+  {
+    F1 = up;
+    F2 = up;
+  }*/
+  //v2nachher = 1.0/2.0 * (       ( pow(P1new.Px(), 2.0 ) - pow( P1new.Py(), 2.0 ) ) / pow( P1new.Pt(), 2.0 )     +   ( pow(P2new.Px(), 2.0 ) - pow( P2new.Py(), 2.0 ) ) / pow( P2new.Pt(), 2.0 )      );
+  
+  /*
+  cout << " After: i  Px:\t" << P1new.Px() << "\t Py:\t" << P1new.Py() << "\t Pz:\t" << P1new.Pz() << endl;
+  cout << " After: j  Px:\t" << P2new.Px() << "\t Py:\t" << P2new.Py() << "\t Pz:\t" << P2new.Pz() << endl;
+  
+  cout << "v2 after: " <<  1.0/2.0 * (       ( pow(P1new.Px(), 2.0 ) - pow( P1new.Py(), 2.0 ) ) / pow( P1new.Pt(), 2.0 )     +   ( pow(P2new.Px(), 2.0 ) - pow( P2new.Py(), 2.0 ) ) / pow( P2new.Pt(), 2.0 )      ) << endl;
+  */
+  
+  /*if(FPT_COMP_L(v2vorher,v2nachher))
+  {
+    theConfig->v2_bigger++;
+  }else
+  {
+    theConfig->v2_smaller++;
+  }*/
+  
+
+    
+  
+  //Set the collision tags
+  /*if( ((F1 != 0) && (F2 != 0)))
+  {
+    particles_atTimeNow[jscat].collision_tag = true;
+    particles_atTimeNow[iscat].collision_tag = true;
+  }*/
+ 
+  
+  //WARNING no scattering, just magic photon production! Only quarks
+  //HACK
+  /*if(F1!=gluon)
+  {
+    P1new = temp_particle_iscat.Mom;
+    Pos1new = temp_particle_iscat.Pos;  
+    F1 = photon;
+    particles_atTimeNow[iscat].collision_tag = true;
+  }
+  if(F2!=gluon)
+  {
+    P2new = temp_particle_jscat.Mom;
+    Pos2new = temp_particle_jscat.Pos;
+    F2 = photon;
+    particles_atTimeNow[jscat].collision_tag = true;
+  }*/
+  //cout << "Control: " << endl;
+  //cout << temp_particle_jscat.Mom.Px() << '\t' << temp_particle_iscat.Mom.Px() << '\t' << P1new.Px() << '\t' << P2new.Px() << endl; 
+  
+  //HACK
+  /*if(F1!=gluon && F2 != gluon)
+  {
+    //cout << F1 << "       " << F2 << endl;
+    F1 = photon;
+    F2 = photon;
+    //cout <<"new: "<< F1 << "       " << F2 << endl;
+  }*/
+
+  //HACK
+  if(F1==photon )
+  {
+    ParticleOffline temp_particle_produced_photon1;
     //cout << "Photon with Energy E=" << P2new.E() << " GeV produced!" << "PT= " << P2new.Pt() << " - Perp= " << P2new.Perp()<< endl;
     totalPhotonNumber++;
     theAnalysis->PtDistributionPhotons(P1new.Pt(), P1new.Rapidity(), P1new.E());
-    temp_particle_produced_photon.Mom = P1new;
-    temp_particle_produced_photon.Pos = Pos1new;
-    temp_particle_produced_photon.m = 0.0;
-    temp_particle_produced_photon.initially_produced = false;
-    temp_particle_produced_photon.FLAVOR = photon;
-    temp_particle_produced_photon.production_time = nexttime;
-    noninteractingParticles.push_back(temp_particle_produced_photon);
+    temp_particle_produced_photon1.Mom = P1new;
+    //cout << "!! Photon saved : i  Px:\t" << temp_particle_produced_photon1.Mom.Px() << "\t Py:\t" << temp_particle_produced_photon1.Mom.Py() << "\t Pz:\t" << temp_particle_produced_photon1.Mom.Pz() << endl;
+    temp_particle_produced_photon1.Pos = Pos1new;
+    temp_particle_produced_photon1.m = 0.0;
+    temp_particle_produced_photon1.initially_produced = false;
+    temp_particle_produced_photon1.FLAVOR = photon;
+    temp_particle_produced_photon1.production_time = nexttime;
+    noninteractingParticles.push_back(temp_particle_produced_photon1);
+    //cout << "Size now: " << noninteractingParticles.size() << endl;
+    //theConfig->v2average_debug += ( pow(P1new.Px(), 2.0 ) - pow( P1new.Py(), 2.0 ) ) / pow( P1new.Pt(), 2.0 );
+    //cout << "Final Momentum 1: " << noninteractingParticles.back().Mom.Px() << endl;
   }   
-  if(F2==33 )
+  if(F2==photon )
   {
+    ParticleOffline temp_particle_produced_photon2;
     //cout << "Photon with Energy E=" << P2new.E() << " GeV produced!" << "PT= " << P2new.Pt() << " - Perp= " << P2new.Perp()<< endl;
     totalPhotonNumber++;
     theAnalysis->PtDistributionPhotons(P2new.Pt(), P2new.Rapidity(), P2new.E());   
-    temp_particle_produced_photon.Mom = P2new;
-    temp_particle_produced_photon.Pos = Pos2new;
-    temp_particle_produced_photon.m = 0.0;
-    temp_particle_produced_photon.initially_produced = false;
-    temp_particle_produced_photon.FLAVOR = photon;
-    temp_particle_produced_photon.production_time = nexttime;
-    noninteractingParticles.push_back(temp_particle_produced_photon);
+    temp_particle_produced_photon2.Mom = P2new;
+    temp_particle_produced_photon2.Pos = Pos2new;
+    //cout << "!! Photon saved : i  Px:\t" << temp_particle_produced_photon2.Mom.Px() << "\t Py:\t" << temp_particle_produced_photon2.Mom.Py() << "\t Pz:\t" << temp_particle_produced_photon2.Mom.Pz() << endl;
+    temp_particle_produced_photon2.m = 0.0;
+    temp_particle_produced_photon2.initially_produced = false;
+    temp_particle_produced_photon2.FLAVOR = photon;
+    temp_particle_produced_photon2.production_time = nexttime;
+    noninteractingParticles.push_back(temp_particle_produced_photon2);
+    //cout << "Size now: " << noninteractingParticles.size() << endl;    
+    //theConfig->v2average_debug += ( pow(P2new.Px(), 2.0 ) - pow( P2new.Py(), 2.0 ) ) / pow( P2new.Pt(), 2.0 );
+    //cout << "Final Momentum 2: " << noninteractingParticles.back().Mom.Px()  << endl;
+    //P2new = noninteractingParticles.back().Mom;
+    //cout << "Final v2: " <<  1.0/2.0*(( pow( P1new.Px(), 2.0 ) - pow( P1new.Py(), 2.0 ) ) / pow( P1new.Pt(), 2.0 )+( pow( P2new.Px(), 2.0 ) - pow( P2new.Py(), 2.0 ) ) / pow( P2new.Pt(), 2.0 ) )<< endl;;
+    
+    //for ( int w = 1; w < static_cast<int>( noninteractingParticles.size() ) - 1; w+=2 )
+    //{
+    //cout << 1.0/2.0*(( pow( noninteractingParticles[w-1].Mom.Px(), 2.0 ) - pow( noninteractingParticles[w-1].Mom.Py(), 2.0 ) ) / pow( noninteractingParticles[w-1].Mom.Pt(), 2.0 )+( pow( noninteractingParticles[w].Mom.Px(), 2.0 ) - pow( noninteractingParticles[w].Mom.Py(), 2.0 ) ) / pow( noninteractingParticles[w].Mom.Pt(), 2.0 ) ) << endl;  
+    //}
   }
-  
-  
 }
 
 int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scattering32& scatt32_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, const int iscat, const int jscat, const int kscat, int& n32, const double nexttime )
