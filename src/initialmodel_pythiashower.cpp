@@ -28,6 +28,7 @@ using namespace std;
 extern "C" {
   void fixedshowerevent_( const double* px, const double* py, const double* pz, int* pythiaFlavor1, int* pythiaFlavor2, uint32_t* seed );
   void pythiashowerevent_( const double* ptMin, uint32_t* seed );
+  void photonshowerevent_( const double* ptMin, uint32_t* seed );
   struct
   {
     double pa[100][7];
@@ -35,12 +36,12 @@ extern "C" {
 }
 
 
-initialModel_PYTHIAShower::initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT ) :
+initialModel_PYTHIAShower::initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const SHOWER_TYPE _shower_type, const double _minimumPT ):
   initialModelWS(_config),
   nEventsToGenerate( _config.getNaddedEvents() ),
   seed( _config.getSeed() ),
   filename_prefix( _config.getStandardOutputDirectoryName() + "/" + _config.getJobName() ),
-  shower_type( pythiaShower )
+  shower_type( _shower_type )
 {
   impactParameter = _config.getImpactParameter();
   sqrtS_perNN = _config.getSqrtS();
@@ -61,7 +62,7 @@ initialModel_PYTHIAShower::initialModel_PYTHIAShower( const config& _config, Woo
 }
 
 
-initialModel_PYTHIAShower::initialModel_PYTHIAShower(const config& _config, WoodSaxon& _WoodSaxonParameter, const double _initialPartonPt, const int _initialPartonFlavor, const SHOWER_TYPE _shower_type ):
+initialModel_PYTHIAShower::initialModel_PYTHIAShower(const config& _config, WoodSaxon& _WoodSaxonParameter, const SHOWER_TYPE _shower_type, const double _initialPartonPt, const int _initialPartonFlavor ):
   initialModelWS(_config),
   nEventsToGenerate( _config.getNaddedEvents() ),
   seed( _config.getSeed() ),
@@ -258,6 +259,42 @@ void initialModel_PYTHIAShower::populateParticleVector( std::vector< Particle >&
       _particles = tempParticles;
       break;
     }
+    case photonShower:
+    {
+      string filename = filename_prefix + "_" + "unshoweredParticles";
+      fstream file( filename.c_str(), ios::out | ios::trunc );
+      string sep = "\t";
+
+      file << "#event" << sep << "px" << sep << "py" << sep << "pz" << sep << "E" << sep << "x"
+           << sep << "y" << sep << "z" << sep << "t" << endl;
+
+      for ( int n = 0; n < nEventsToGenerate; n++ )
+      {
+        vector< Particle > tempParticles, initialPartons;
+        getPhotonShowerEvent( tempParticles, initialPartons );
+      
+        sample_TXYZ_singleParticle( tempParticles[0] );
+        for ( int i = 0; i < tempParticles.size(); i++ )
+        {
+          tempParticles[i].Pos.T() = tempParticles[0].Pos.T();
+          tempParticles[i].Pos.X() = tempParticles[0].Pos.X();
+          tempParticles[i].Pos.Y() = tempParticles[0].Pos.Y();
+          tempParticles[i].Pos.Z() = tempParticles[0].Pos.Z();
+          tempParticles[i].N_EVENT_pp = n;
+          tempParticles[i].N_EVENT_AA = n;
+          _particles.push_back( tempParticles[i] );
+        }
+      
+        for( int i = 0; i < initialPartons.size(); i++ )
+        {
+          file << n << sep << initialPartons[i].Mom.Px() << sep << initialPartons[i].Mom.Py() << sep << initialPartons[i].Mom.Pz() << sep << initialPartons[i].Mom.E() 
+          << sep << tempParticles[0].Pos.X() << sep << tempParticles[0].Pos.Y() << sep << tempParticles[0].Pos.Z() << sep << tempParticles[0].Pos.T()
+          << sep << initialPartons[i].FLAVOR << endl;
+        }
+      }
+      file.close();
+      break;
+    }
     default:
       throw ePYTHIAShower_error( "Unknow initial shower type. Unrecoverable error!" );
   }
@@ -414,6 +451,53 @@ void initialModel_PYTHIAShower::getPythiaShowerEvent( vector< Particle >& _parti
   _initialPartons.push_back( tempParticles[7] );
   
   for ( int i = 8; i < tempParticles.size(); i++ )
+  {
+    if ( tempParticles[i].FLAVOR != allFlavors )
+      _particles.push_back( tempParticles[i] );
+  }
+}
+
+void initialModel_PYTHIAShower::getPhotonShowerEvent( vector< Particle >& _particles, vector< Particle >& _initialPartons )
+{
+  _particles.clear();
+  vector< Particle > tempParticles;  
+  
+  // PYTHIA seed has max value 9E8
+  while( seed > 900000000 )
+    seed -= 900000000;
+
+  int attempt = 0;
+  do
+  {
+    tempParticles.clear();
+    
+    photonshowerevent_( &P0, &seed );
+
+    int index = 0;
+    while( bamps_.pa[index][0] != 0.0 )
+    {
+      Particle tempParticle;
+      tempParticle.FLAVOR = mapToPYTHIAflavor( bamps_.pa[index][0] );
+      tempParticle.Mom.Px() = bamps_.pa[index][2];
+      tempParticle.Mom.Py() = bamps_.pa[index][3];
+      tempParticle.Mom.Pz() = bamps_.pa[index][4];
+      tempParticle.Mom.E() = sqrt( tempParticle.Mom.Px() * tempParticle.Mom.Px() + tempParticle.Mom.Py() * tempParticle.Mom.Py() + tempParticle.Mom.Pz() * tempParticle.Mom.Pz() );
+      tempParticle.m = 0.0;
+      tempParticles.push_back( tempParticle );
+      index++;
+    }
+    attempt++;
+  }
+  while( tempParticles.size() == 0 );
+
+  if( attempt > 10 )
+    throw ePYTHIAShower_error( "Too many Attempts needed to get an allowed PYTHIA event." );
+
+  _initialPartons.clear();
+  _initialPartons.push_back( tempParticles[7] );
+  _initialPartons.push_back( tempParticles[8] );
+  
+  for ( int i = 9; i < tempParticles.size(); i++ )
   {
     if ( tempParticles[i].FLAVOR != allFlavors )
       _particles.push_back( tempParticles[i] );

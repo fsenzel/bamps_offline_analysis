@@ -56,7 +56,15 @@
 #include "particle.h"
 #include "bampsvector.h"
 
-class eOfflineOutput_error;
+/** @brief exception class for handling unexpected critical behaviour within simulations of heavy ion collisions  */
+class eOfflineOutput_error : public std::runtime_error
+{
+public:
+  explicit eOfflineOutput_error(const std::string& what) : std::runtime_error(what) {};
+    
+  virtual ~eOfflineOutput_error() throw() {};
+};
+
 enum offlineEventType { event_interaction22, event_interaction23, event_interaction32, event_interactionElastic, 
                         event_particleIdSwap, event_newTimestep, event_endOfCascade, event_dummy = 99 };
 
@@ -1413,15 +1421,6 @@ BOOST_CLASS_TRACKING(offlineDataInitialParticles, boost::serialization::track_ne
 
 BOOST_CLASS_IS_WRAPPER( offlineDataGeneric* )
 
-
-/** @brief exception class for handling unexpected critical behaviour within simulations of heavy ion collisions  */
-class eOfflineOutput_error : public std::runtime_error
-{
-public:
-  explicit eOfflineOutput_error(const std::string& what) : std::runtime_error(what) {};
-    
-  virtual ~eOfflineOutput_error() throw() {};
-};
 
 
 #endif

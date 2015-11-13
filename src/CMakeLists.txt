@@ -20,6 +20,7 @@ SET( SOURCES_lib
   offlineoutput.cpp
   particleOffline.cpp
   pythia6425.f
+  photonshower_event.f90
   pythiashower_event.f90
 )
 

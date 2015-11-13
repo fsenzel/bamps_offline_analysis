@@ -68,13 +68,16 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
       initialmodel = new initialModel_Jpsi( *configObject, _wsParameter );
       break;
     case fixedShowerInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, configObject->getInitialPartonPt(), configObject->getInitialPartonFlavor(), fixedShower );
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixedShower, configObject->getInitialPartonPt(), configObject->getInitialPartonFlavor() );
       break;
     case fixedPartonInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, configObject->getInitialPartonPt(), configObject->getInitialPartonFlavor(), fixedParton );
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixedParton, configObject->getInitialPartonPt(), configObject->getInitialPartonFlavor() );
       break;
     case pythiaShowerInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, minijet_P0 );
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, pythiaShower, minijet_P0 );
+      break;
+    case photonShowerInitialState:
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, photonShower, minijet_P0 );
       break;
     default:
       std::string errMsg = "Model for sampling the initial state not implemented yet!";

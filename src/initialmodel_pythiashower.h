@@ -17,13 +17,13 @@
 #include "configuration.h"
 #include "particle.h"
 
-enum SHOWER_TYPE { fixedShower, fixedParton, pythiaShower };
+enum SHOWER_TYPE { fixedShower, fixedParton, pythiaShower, photonShower };
 
 class initialModel_PYTHIAShower : public initialModelWS
 {
   public:
-    initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT );
-    initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _initialPartonPt, const int _initialPartonFlavor, const SHOWER_TYPE _shower_type );
+    initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const SHOWER_TYPE _shower_type, const double _minimumPT );
+    initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const SHOWER_TYPE _shower_type, const double _initialPartonPt, const int _initialPartonFlavor );
     ~initialModel_PYTHIAShower() {};
     
     void populateParticleVector( std::vector<Particle>& _particles );
@@ -39,8 +39,11 @@ class initialModel_PYTHIAShower : public initialModelWS
     /** @brief Routine for creating one dijet shower out of PYSHOW */
     vector<Particle> getFixedShowerEvent( const double _px, const double _py, const double _pz, const FLAVOR_TYPE _flavorA, const FLAVOR_TYPE _flavorB );
 
-    /** @brief Routine for creating one event out of PYTHIA */
+    /** @brief Routine for creating one parton shower event out of PYTHIA */
     void getPythiaShowerEvent( vector<Particle> &_particles, vector<Particle> &_initialPartons );
+
+    /** @brief Routine for creating one gamma+parton shower event out of PYTHIA */
+    void getPhotonShowerEvent( vector<Particle> &_particles, vector<Particle> &_initialPartons );
     
     /** @brief lower PT-cutoff of PYTHIA spectrum (in GeV) */
     double P0;
@@ -81,12 +84,13 @@ class initialModel_PYTHIAShower : public initialModelWS
           return strange;
         case -3:
           return anti_strange;
+        case 22:
+          return photon;
         default:
 //           std::cout << "Unknown pythia flavor:\t" << _pythiaFlavor << std::endl;
           return allFlavors;
       }
-  };
-
+    };
 };
 
 

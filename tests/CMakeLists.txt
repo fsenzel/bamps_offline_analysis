@@ -13,7 +13,7 @@ macro(bamps_add_test _name)
    add_executable(${_name} ${_name}.cpp)
    target_link_libraries(${_name} offline fullcommon bamps
       ${ROOT_LIBRARIES} 
-      ${Boost_LIBRARIES} rt )
+      ${Boost_LIBRARIES} )
    IF ( Cuba_FOUND )
      TARGET_LINK_LIBRARIES( ${_name} ${Cuba_LIBRARIES} )
    ENDIF ( Cuba_FOUND )
