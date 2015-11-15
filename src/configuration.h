@@ -32,7 +32,7 @@
 
 
 /** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, fixedShowerInitialState, fixedPartonInitialState, pythiaShowerInitialState, photonShowerInitialState };
+enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, fixedShowerInitialState, fixedPartonInitialState, pythiaShowerInitialState, photonShowerInitialState, charmShowerInititalState, bottomShowerInitialState };
 
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };

@@ -475,6 +475,9 @@ int main(int argc, char *argv[])
     theV2RAA.setPtBinProperties( pt_min_v2RAA, pt_max_v2RAA, nbins_v2RAA );
     theV2RAA.computeFor( gluon, unshowered_partons, unshowered_partons.size(), "unshowered_partons" );
     theV2RAA.computeFor( light_quark, unshowered_partons, unshowered_partons.size(), "unshowered_partons" );
+    theV2RAA.computeFor( charm, unshowered_partons, unshowered_partons.size(), "unshowered_partons" );
+    theV2RAA.computeFor( bottom, unshowered_partons, unshowered_partons.size(), "unshowered_partons" );
+    theV2RAA.computeFor( photon, unshowered_partons, unshowered_partons.size(), "unshowered_partons" );
 //     theV2RAA.computeFor( up, unshowered_partons, unshowered_partons.size(), "unshowered_partons" );
 //     theV2RAA.computeFor( down, unshowered_partons, unshowered_partons.size(), "unshowered_partons" );
 //     theV2RAA.computeFor( strange, unshowered_partons, unshowered_partons.size(), "unshowered_partons" );

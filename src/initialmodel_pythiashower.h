@@ -17,13 +17,12 @@
 #include "configuration.h"
 #include "particle.h"
 
-enum SHOWER_TYPE { fixedShower, fixedParton, pythiaShower, photonShower };
+enum SHOWER_TYPE { fixedShower, fixedParton, pythiaShower, photonShower, heavyQuarkShower };
 
 class initialModel_PYTHIAShower : public initialModelWS
 {
   public:
-    initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const SHOWER_TYPE _shower_type, const double _minimumPT );
-    initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const SHOWER_TYPE _shower_type, const double _initialPartonPt, const int _initialPartonFlavor );
+    initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const SHOWER_TYPE _shower_type, const double _minimumPT, const FLAVOR_TYPE _initialPartonFlavor = gluon );
     ~initialModel_PYTHIAShower() {};
     
     void populateParticleVector( std::vector<Particle>& _particles );
@@ -44,7 +43,10 @@ class initialModel_PYTHIAShower : public initialModelWS
 
     /** @brief Routine for creating one gamma+parton shower event out of PYTHIA */
     void getPhotonShowerEvent( vector<Particle> &_particles, vector<Particle> &_initialPartons );
-    
+
+    /** @brief Routine for creating one gamma+parton shower event out of PYTHIA */
+    void getHQShowerEvent( vector<Particle> &_particles, vector<Particle> &_initialPartons );
+
     /** @brief lower PT-cutoff of PYTHIA spectrum (in GeV) */
     double P0;
   
@@ -59,10 +61,7 @@ class initialModel_PYTHIAShower : public initialModelWS
   
     /** @brief Type of shower: shower with fixed initial partons, fixed single parton, or full pythia di-jet event. */
     SHOWER_TYPE shower_type;
-    
-    /** @brief Transverse momentum of initial parton pair */
-    double initialPartonPt;
-    
+
     /** @brief Flavor of initial parton pair */
     int initialPartonFlavor;
     
@@ -84,6 +83,14 @@ class initialModel_PYTHIAShower : public initialModelWS
           return strange;
         case -3:
           return anti_strange;
+        case 4:
+          return charm;
+        case 5:
+          return bottom;
+        case -4:
+          return anti_charm;
+        case -5:
+          return anti_bottom;
         case 22:
           return photon;
         default:

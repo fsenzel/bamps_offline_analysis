@@ -222,7 +222,7 @@ void config::processProgramOptions()
   // some special conversions from integer type values to enum values
   if ( vm.count("initial_state.type") )
   {
-    if ( vm["initial_state.type"].as<int>() < 9 && vm["initial_state.type"].as<int>() >= 0 )
+    if ( vm["initial_state.type"].as<int>() < 11 && vm["initial_state.type"].as<int>() >= 0 )
     {
       initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
     }
@@ -460,6 +460,12 @@ void config::checkOptionsForSanity()
   if ( scatt_furtherOfflineParticles && !jet_tagged )
   {
     string errMsg = "If recoiled particles are further evolved, jets must be tagged.";
+    throw eConfig_error( errMsg );
+  }
+
+  if ( ( initialStateType == charmShowerInititalState || initialStateType == bottomShowerInitialState )  && N_heavy_flavors_input == 0 )
+  {
+    string errMsg = "Heavy quark shower initial state, but number of heavy flavors is set to 0.";
     throw eConfig_error( errMsg );
   }
 }
