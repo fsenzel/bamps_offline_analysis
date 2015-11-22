@@ -2637,10 +2637,6 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
                                particles_atTimeNow[iscat].Pos, addedParticles[jscat].Pos,
                                pt1, pt3, y, phi, pz1 );
 
-  P1new(0) = sqrt( P1new.vec2() );
-  P2new(0) = sqrt( P2new.vec2() );
-  P3new(0) = sqrt( P3new.vec2() );
-
   double pt_out1 = P1new.Perp();
   double pt_out2 = P2new.Perp();
 
@@ -3083,6 +3079,7 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
 
   VectorEPxPyPz P1new, P2new;
   scatt32_obj.setNewMomenta32( P1new, P2new, u, phi );
+// Attention: Has to be modified after implementing heavy-quark 3->2 processes.
   P1new.E() = sqrt( P1new.vec2() );
   P2new.E() = sqrt( P2new.vec2() );
 
