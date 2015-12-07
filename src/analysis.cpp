@@ -1599,9 +1599,9 @@ void analysis::twoPartclCorrelations()
 //                 length2 = sqrt( pow(addedParticles[j].PX_init,2.0) + pow(addedParticles[j].PY_init,2.0) + pow(addedParticles[j].PZ_init,2.0)  );
 //                 dphi_ini = acos( scal_prod / length1 / length2 );
 //
-//                 scal_prod = addedParticles[i].PX*addedParticles[j].PX + addedParticles[i].PY*addedParticles[j].PY + addedParticles[i].PZ*addedParticles[j].PZ;
-//                 length1 = sqrt( pow(addedParticles[i].PX,2.0) + pow(addedParticles[i].PY,2.0) + pow(addedParticles[i].PZ,2.0)  );
-//                 length2 = sqrt( pow(addedParticles[j].PX,2.0) + pow(addedParticles[j].PY,2.0) + pow(addedParticles[j].PZ,2.0)  );
+//                 scal_prod = addedParticles[i].Mom.Px()*addedParticles[j].Mom.Px() + addedParticles[i].Mom.Py()*addedParticles[j].Mom.Py() + addedParticles[i].Mom.Pz()*addedParticles[j].Mom.Pz();
+//                 length1 = sqrt( pow(addedParticles[i].Mom.Px(),2.0) + pow(addedParticles[i].Mom.Py(),2.0) + pow(addedParticles[i].Mom.Pz(),2.0)  );
+//                 length2 = sqrt( pow(addedParticles[j].Mom.Px(),2.0) + pow(addedParticles[j].Mom.Py(),2.0) + pow(addedParticles[j].Mom.Pz(),2.0)  );
 //                 dphi_fin = acos( scal_prod / length1 / length2 );
 
 //                 dphi_fin = cos(dphi_fin);
@@ -2208,7 +2208,7 @@ void analysis::volumeMidrap( const int step ) const
 
   for ( int i = 0;i < particles_atTimeNow.size();i++ )
   {
-//     y = 0.5*log( (particles_atTimeNow[i].E + particles_atTimeNow[i].PZ) / (particles_atTimeNow[i].E - particles_atTimeNow[i].PZ) );
+//     y = 0.5*log( (particles_atTimeNow[i].E + particles_atTimeNow[i].Mom.Pz()) / (particles_atTimeNow[i].E - particles_atTimeNow[i].Mom.Pz()) );
 //     if(fabs(y) <= y_max)
 //     {
 //       zBins.add( fabs(particles_atTimeNow[i].Z) );
@@ -2618,12 +2618,12 @@ void analysis::addJetEvents_final()
 int analysis::addJetEvent_in( const int ID_1, const int ID_2, const int added_ID, const jetTrackerCollType coll_type,
                               const double cross_section, const int cell_ID, const double lambda )
 {
-//   double jet_pt = sqrt( pow( addedParticles[added_ID].PX, 2.0 ) + pow( addedParticles[added_ID].PY, 2.0 ) );
-//   double pt1 = sqrt( pow( particles_atTimeNow[ID_1].PX, 2.0 ) + pow( particles_atTimeNow[ID_1].PY, 2.0 ) );
+//   double jet_pt = sqrt( pow( addedParticles[added_ID].Mom.Px(), 2.0 ) + pow( addedParticles[added_ID].Mom.Py(), 2.0 ) );
+//   double pt1 = sqrt( pow( particles_atTimeNow[ID_1].Mom.Px(), 2.0 ) + pow( particles_atTimeNow[ID_1].Mom.Py(), 2.0 ) );
 //   double pt2 = -1;
 //   if ( ID_2 > 0 )
 //   {
-//     pt2 = sqrt( pow( particles_atTimeNow[ID_2].PX, 2.0 ) + pow( particles_atTimeNow[ID_2].PY, 2.0 ) );
+//     pt2 = sqrt( pow( particles_atTimeNow[ID_2].Mom.Px(), 2.0 ) + pow( particles_atTimeNow[ID_2].Mom.Py(), 2.0 ) );
 //   }
 
   int jetID = added_ID;
@@ -4674,8 +4674,8 @@ void analysis::print_dndy_time( int step )
         energy_g += particles_atTimeNow[i].Mom.E();
         pt_g += particles_atTimeNow[i].Mom.Pt();
         pt2_g += pt * pt;
-        pz_g += particles_atTimeNow[i].PZ;
-        pz2_g += pow( particles_atTimeNow[i].PZ, 2.0);
+        pz_g += particles_atTimeNow[i].Mom.Pz();
+        pz2_g += pow( particles_atTimeNow[i].Mom.Pz(), 2.0);
       }
       else if( Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == light_quark || Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == anti_light_quark )
       {
@@ -4683,8 +4683,8 @@ void analysis::print_dndy_time( int step )
         energy_q += particles_atTimeNow[i].Mom.E();
         pt_q += particles_atTimeNow[i].Mom.Pt();
         pt2_q += pt * pt;
-        pz_q += particles_atTimeNow[i].PZ;
-        pz2_q += pow( particles_atTimeNow[i].PZ, 2.0);
+        pz_q += particles_atTimeNow[i].Mom.Pz();
+        pz2_q += pow( particles_atTimeNow[i].Mom.Pz(), 2.0);
       }
     }
   }
@@ -4755,12 +4755,12 @@ void analysis::print_dndy_time( int step )
   
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    if ( ( pow( particles_atTimeNow[i].X, 2.0 ) + pow( particles_atTimeNow[i].Y, 2.0 ) < pow( radius, 2.0 ) ) && ( fabs( particles_atTimeNow[i].Z ) < dz2 ) && ( particles_atTimeNow[i].FLAVOR == gluon ) )
+    if ( ( pow( particles_atTimeNow[i].Pos.X(), 2.0 ) + pow( particles_atTimeNow[i].Pos.Y(), 2.0 ) < pow( radius, 2.0 ) ) && ( fabs( particles_atTimeNow[i].Pos.Z() ) < dz2 ) && ( particles_atTimeNow[i].FLAVOR == gluon ) )
 //    if ( ( fabs( particles_atTimeNow[i].Z ) < dz2 ) && ( particles_atTimeNow[i].FLAVOR == gluon ) )
     {
-        T11 += particles_atTimeNow[i].PX * particles_atTimeNow[i].PX / particles_atTimeNow[i].E;
-        T22 += particles_atTimeNow[i].PY * particles_atTimeNow[i].PY / particles_atTimeNow[i].E;
-        T33 += particles_atTimeNow[i].PZ * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
+        T11 += particles_atTimeNow[i].Mom.Px() * particles_atTimeNow[i].Mom.Px() / particles_atTimeNow[i].Mom.E();
+        T22 += particles_atTimeNow[i].Mom.Py() * particles_atTimeNow[i].Mom.Py() / particles_atTimeNow[i].Mom.E();
+        T33 += particles_atTimeNow[i].Mom.Pz() * particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
     }
 
     if (( pow( particles_atTimeNow[i].Pos.X(), 2.0 ) + pow( particles_atTimeNow[i].Pos.Y(), 2.0 ) < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Pos.Z() ) < dz ))
@@ -4771,9 +4771,9 @@ void analysis::print_dndy_time( int step )
         energy_g += particles_atTimeNow[i].Mom.E();
         pt_g += particles_atTimeNow[i].Mom.Pt();
         pt2_g += pt * pt;
-        pz_g += particles_atTimeNow[i].PZ;
-        pz2_g += pow( particles_atTimeNow[i].PZ, 2.0);
-        pz2_over_E2_g += pow( particles_atTimeNow[i].PZ, 2.0) / pow( particles_atTimeNow[i].E, 2.0);
+        pz_g += particles_atTimeNow[i].Mom.Pz();
+        pz2_g += pow( particles_atTimeNow[i].Mom.Pz(), 2.0);
+        pz2_over_E2_g += pow( particles_atTimeNow[i].Mom.Pz(), 2.0) / pow( particles_atTimeNow[i].Mom.E(), 2.0);
       }
       else if( Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == light_quark || Particle::mapToGenericFlavorType( particles_atTimeNow[i].FLAVOR ) == anti_light_quark )
       {
@@ -4781,9 +4781,9 @@ void analysis::print_dndy_time( int step )
         energy_q += particles_atTimeNow[i].Mom.E();
         pt_q += particles_atTimeNow[i].Mom.Pt();
         pt2_q += pt * pt;
-        pz_q += particles_atTimeNow[i].PZ;
-        pz2_q += pow( particles_atTimeNow[i].PZ, 2.0);
-        pz2_over_E2_q += pow( particles_atTimeNow[i].PZ, 2.0) / pow( particles_atTimeNow[i].E, 2.0);
+        pz_q += particles_atTimeNow[i].Mom.Pz();
+        pz2_q += pow( particles_atTimeNow[i].Mom.Pz(), 2.0);
+        pz2_over_E2_q += pow( particles_atTimeNow[i].Mom.Pz(), 2.0) / pow( particles_atTimeNow[i].Mom.E(), 2.0);
       }
     }
   }
@@ -4794,9 +4794,9 @@ void analysis::print_dndy_time( int step )
 //     //     if ( ( fabs( particles_atTimeNow[i].X ) < 0.5 ) && ( fabs( particles_atTimeNow[i].X ) < 0.5 ) && ( fabs( particles_atTimeNow[i].Z ) < dz ) )
 //     if ( ( particles_atTimeNow[i].FLAVOR == gluon ) && ( fabs( particles_atTimeNow[i].X ) < 0.5 ) && ( fabs( particles_atTimeNow[i].Y ) < 0.5 ) && ( fabs( strap ) < deta ) )
 //     {
-//       T11 += particles_atTimeNow[i].PX * particles_atTimeNow[i].PX / particles_atTimeNow[i].E;
-//       T22 += particles_atTimeNow[i].PY * particles_atTimeNow[i].PY / particles_atTimeNow[i].E;
-//       T33 += particles_atTimeNow[i].PZ * particles_atTimeNow[i].PZ / particles_atTimeNow[i].E;
+//       T11 += particles_atTimeNow[i].Mom.Px() * particles_atTimeNow[i].Mom.Px() / particles_atTimeNow[i].E;
+//       T22 += particles_atTimeNow[i].Mom.Py() * particles_atTimeNow[i].Mom.Py() / particles_atTimeNow[i].E;
+//       T33 += particles_atTimeNow[i].Mom.Pz() * particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].E;
 //     }
 //   }
   
