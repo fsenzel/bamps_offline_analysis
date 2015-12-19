@@ -81,7 +81,7 @@ namespace ns_casc
 //   extern std::vector<ParticleHFelectron> addedPartcl_electron;
   extern std::vector<ParticleOffline> addedPartcl_electron;
   extern std::vector<ParticleOffline> scatteredMediumParticles;
-  extern std::vector<ParticleOffline> noninteractingParticles;
+  extern std::vector<ParticleOffline> noninteractingParticles; //e.g. photons :-)
 
 }
 //--------------------------------------------------------//
@@ -367,14 +367,12 @@ class config : public configBase
   /** Set seed chosen during runtime */
   void setSeed ( uint32_t _seed ){ seed = _seed; };
   
-      /**
-     * @brief Total Number of produced photons
-     *
-     */
-    double v2average_debug;
-    
- int v2_bigger,v2_smaller;  
-  
+  /** @brief Debug Variables */    
+  double v2average_debug;
+  int v2_bigger,v2_smaller;  
+  unsigned long long int countPositiveV2,countNegativeV2;
+
+ 
  protected:
    /** ----- auxiliary routines ----- */
    /** @brief Sort the options into groups */   

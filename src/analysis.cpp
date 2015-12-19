@@ -788,8 +788,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       
     default:
       break;
-  }
- 
+  } 
 }
 
 
@@ -874,6 +873,12 @@ void analysis::collectEtData( const int step )
   }
 }
 
+/** Bin the Pt distribution for photons with two methods. For double-checking and some tests.
+ * 
+ * @param[in] PTofThisSinglePhoton PT value [GeV] of single photon
+ * @param[in] etaOfThisSinglePhoton eta value of single photon
+ * @param[in] EofSinglePhoton E value [GeV] of single photon
+ */
 void analysis::PtDistributionPhotons( const double PTofThisSinglePhoton, const double etaOfThisSinglePhoton, const double EofSinglePhoton )
 {
   //Binning-Class:
@@ -910,10 +915,10 @@ void analysis::PtDistributionPhotons( const double PTofThisSinglePhoton, const d
 }
 
 /** Photonspectra output
- * 
- * @param[in] 
- * @param[out] 
- * 
+ *  Prints the Spectra from the function PtDistributionPhotons out. For Double-Checking and Tests.
+ *  Generates two files: 
+ *    ...filename_prefix + "_PhotondNOverTwoPiptdydpt_Old
+ *    ...filename_prefix + "_PhotondNOverTwoPiptdydpt_New
  */
 void analysis::photonSpectrumOutput()
 {
@@ -936,7 +941,8 @@ void analysis::photonSpectrumOutput()
   
   double DeltaRapidity = fabs(rapidityRanges[2].yright - rapidityRanges[2].yleft)*2.0;
   
-  PhotondNOverTwoPiptdydptBin.print(file1,1.0/(2.0*M_PI*DeltaRapidity*theConfig->getTestparticles()*theConfig->getkFactorEMProcesses()));
+  //WARNING: Divide manually by K-Factor later, if not 1!!!!!!!!!!!!!!!!!!!!!
+  PhotondNOverTwoPiptdydptBin.print(file1,1.0/(2.0*M_PI*DeltaRapidity*theConfig->getTestparticles()));
   file1.close();
 
   //***** New Method:
@@ -972,7 +978,8 @@ void analysis::photonSpectrumOutput()
     for ( unsigned int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
     {
       DeltaRapidity = fabs(rapidityRanges[yRangeIndex].yright - rapidityRanges[yRangeIndex].yleft)*2.0;
-      file2 <<  ptBins_photons[yRangeIndex][0][i]/(2.0*M_PI*DeltaRapidity*binWidthPTPhotons*ptBinLabelsPhotons[i]*theConfig->getTestparticles()*theConfig->getkFactorEMProcesses())  << sep;
+      //WARNING: Divide manually by K-Factor later, if not 1!!!!!!!!!!!!!!!!!!!!!
+      file2 <<  ptBins_photons[yRangeIndex][0][i]/(2.0*M_PI*DeltaRapidity*binWidthPTPhotons*ptBinLabelsPhotons[i]*theConfig->getTestparticles())  << sep;
     } 
     file2 << endl;
   }
@@ -1934,7 +1941,9 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   {
     cout << "studyPhotons " << noninteractingParticles.size() <<  endl;
     //if(theConfig->v2_bigger > theConfig->v2_smaller) cout << "bigger! " << theConfig->v2_bigger - theConfig->v2_smaller << endl;
-    //if(theConfig->v2_bigger < theConfig->v2_smaller) cout << "smaller! " << -theConfig->v2_bigger + theConfig->v2_smaller << endl;    
+    //if(theConfig->v2_bigger < theConfig->v2_smaller) cout << "smaller! " << -theConfig->v2_bigger + theConfig->v2_smaller << endl; 
+    cout << "# Number of colliding pairs with average positive v2: " << theConfig->countPositiveV2 << endl;
+    cout << "# Number of colliding pairs with average negative v2: " << theConfig->countNegativeV2 << endl;     
     theV2RAA.setPtBinProperties( 0.0, 3.0, 50, 0.0, 3.0, 50 );
     theV2RAA.computeFor( photon, noninteractingParticles, noninteractingParticles.size(), "perturbative", _outputTime, v2background );
     theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
@@ -2169,7 +2178,20 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     }
   }
 
-  // file output
+  // TEST:
+  // Number of average v2 of colliding particle pairs 
+  /*if(_flavTypeToComputeFor == photon )
+  {
+    string filename_average_initial_v2 = filename_prefix + "_" + type + "_" + additionalNameTag + "_collidingPairsInitialV2_" + name;
+  
+    //cout << "# Number of colliding pairs with average positive v2: " << theConfig->countPositiveV2 << endl;
+    //cout << "# Number of colliding pairs with average negative v2: " << theConfig->countNegativeV2 << endl;  
+    //print angle distribution
+    
+    fstream print_average_initial_v2( filename_average_initial_v2.c_str(), ios::out | ios::trunc );
+    print_average_initial_v2 << "#Number of colliding pairs with positive <v2> | Number of colliding pairs with negative <v2>"  << endl;
+    print_average_initial_v2 << theConfig->countPositiveV2 << '\t' << theConfig->countNegativeV2 << endl;   
+  }*/
   double pt_out;
 
   filename_v2_summed = filename_prefix + "_" + type + "_" + additionalNameTag + "_v2_pt_summed_" + name;
@@ -2188,6 +2210,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_v2_tot << "# total v2 of " << type << endl;
   print_v2_tot << "# t = " << _outputTime << endl;
   print_v2_tot << "# bin statistics for 0.35 mid-rapidity:  Avg per bin=" << double( NmbInRange[0] ) / n_c << "   Min=" << binMin << "   Max=" << binMax << endl;
+  //print_v2_tot << "# Number of colliding pairs with average positive v2: " << theConfig->countPositiveV2 << endl;
+  //print_v2_tot << "# Number of colliding pairs with average negative v2: " << theConfig->countNegativeV2 << endl;  
   print_v2_tot << "# total v2, v2_sum and number in range for different rapidity bins" << endl;
 
   print_v2_tot << _pt_min;
@@ -2329,10 +2353,12 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     for ( int i = 0;i < eta_bins;i++ )
     {
       const double delta_eta = 2.0 * ( rapidityRanges[i].yright - rapidityRanges[i].yleft );
-      //WARNING: moritz likes it to divide also by pt_out and 2pi
+      //WARNING: Moritz likes it to divide also by pt_out and 2pi
       //cout << "ANALYSIS" << endl;
       //cout << "testp: " << theConfig->getTestparticles() << "   delta_eta: " << delta_eta << endl;
-      double nInBin = double( ptBinsNmb[i][k] ) / (double(theConfig->getkFactorEMProcesses())*double(theConfig->getTestparticles())* double(dpt) * double(delta_eta) * double(pt_out) *(2.0*M_PI));
+      //WARNING: DIVIDE MANUALLY BY K_FACTOR!!!!
+      //double nInBin = double( ptBinsNmb[i][k] ) / (double(theConfig->getkFactorEMProcesses())*double(theConfig->getTestparticles())* double(dpt) * double(delta_eta) * double(pt_out) *(2.0*M_PI));
+      double nInBin = double( ptBinsNmb[i][k] ) / (double(theConfig->getTestparticles())* double(dpt) * double(delta_eta) * double(pt_out) *(2.0*M_PI));
       
       if( _v2type == v2jets )
         nInBin = nInBin / theConfig->getNaddedEvents();
