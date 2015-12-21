@@ -277,8 +277,7 @@ private:
   bool studyBackground;
   bool studyScatteredMediumParticles;
   bool studyPhotons;
-  
-  
+ 
   
   void writePartclMovie( const int step ) const;
   void yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
@@ -473,6 +472,8 @@ private:
   
   binning PhotonNumberVsAngleBin;
   double lower_time_cutoff_for_v2,lower_pt_cutoff_for_v2;
+  //For Photon studies:
+  bool studyInitialCutOffEffect;
 };
 
 

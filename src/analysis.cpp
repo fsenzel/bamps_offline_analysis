@@ -192,6 +192,20 @@ analysis::analysis( config* const c ):
   }
   else if (studyPhotons)
   {
+    tstep[0] = 0.5;
+    tstep[1] = 1.0;
+    tstep[2] = 2.0;
+    tstep[3] = 3.0;
+    tstep[4] = 4.0;
+    tstep[5] = 5.0;
+    tstep[6] = 6.0;
+    tstep[7] = 7.0;
+    tstep[8] = 8.0;
+    tstep[9] = 9.0;
+    tstep[10] = 10.0;
+    tstep[11] = infinity;
+    nTimeSteps = 12;
+    /*
     tstep[0] = 0.1;      //fm/c
     tstep[1] = 0.2;      //fm/c
     tstep[2] = 0.3;      //fm/c    
@@ -220,6 +234,7 @@ analysis::analysis( config* const c ):
     tstep[25] = 10.0;
     tstep[26] = infinity; //fm/c
     nTimeSteps = 27;
+    */
   } else
   {
     tstep[0] = 0.1;      //fm/c
@@ -770,19 +785,11 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       
     case photons:     
       rapidityRanges.clear();
-      yRange.reset( 0, 0.15 );//rapidityRange[0]
+      yRange.reset( 0, 0.35 );//rapidityRange[0] // RHIC
       rapidityRanges.push_back(yRange);
-      yRange.reset( 0, 0.25 );//1
+      yRange.reset( 0, 0.7 );//1                 // LHC
       rapidityRanges.push_back(yRange);
-      yRange.reset( 0, 0.35 );//2
-      rapidityRanges.push_back(yRange);
-      yRange.reset( 0, 0.45 );
-      rapidityRanges.push_back(yRange);
-      yRange.reset( 0, 0.55 );
-      rapidityRanges.push_back(yRange);
-      yRange.reset( 0, 1.0 );
-      rapidityRanges.push_back(yRange);
-      studyBackground = true;
+      //studyBackground = true;
       studyPhotons=true;
       break;
       
@@ -1945,9 +1952,9 @@ void analysis::computeV2RAA( string name, const double _outputTime )
     cout << "# Number of colliding pairs with average positive v2: " << theConfig->countPositiveV2 << endl;
     cout << "# Number of colliding pairs with average negative v2: " << theConfig->countNegativeV2 << endl;     
     theV2RAA.setPtBinProperties( 0.0, 3.0, 50, 0.0, 3.0, 50 );
-    theV2RAA.computeFor( photon, noninteractingParticles, noninteractingParticles.size(), "perturbative", _outputTime, v2background );
-    theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
-    theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+    theV2RAA.computeFor( photon, noninteractingParticles, noninteractingParticles.size(), "LO", _outputTime, v2background );
+    //theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+    //theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
   }
   
 }
@@ -1961,6 +1968,8 @@ v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg, std
   
   //Photon Angle Bins config
   PhotonNumberVsAngleBin.setMinMaxN( 0.0 , 90, 100 );
+  
+  studyInitialCutOffEffect = false;
   lower_time_cutoff_for_v2 = 3.0;
   lower_pt_cutoff_for_v2 = 0.5;
 }
@@ -2328,11 +2337,13 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       print_v2_summed << ptBinsV2[i][k];
       print_v2_summed.width( 10 );
       print_v2_summed << ptBinsNmb[i][k];
-      //WARNING Abfrage if initialCutOff erwuenscht
-      print_v2_summed.width( 20 );
-      print_v2_summed << ptBinsV2InitialCutOff[i][k];      
-      print_v2_summed.width( 10 );
-      print_v2_summed << ptBinsNmbInitialCutOff[i][k];
+      if(studyInitialCutOffEffect)
+      {
+        print_v2_summed.width( 20 );
+        print_v2_summed << ptBinsV2InitialCutOff[i][k];      
+        print_v2_summed.width( 10 );
+        print_v2_summed << ptBinsNmbInitialCutOff[i][k];       
+      }
     }
     print_v2_summed << endl;
   }
