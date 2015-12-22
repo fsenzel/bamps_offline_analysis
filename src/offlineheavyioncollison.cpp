@@ -125,6 +125,12 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
       theMFP.loadData(); 
   }
   
+  //
+  if( theConfig->doScattering_23_photons() )
+  {
+    theMFP.loadData(); 
+  }
+  
   nGet23Errors = 0;
   nGet32Errors = 0;
   totalPhotonNumber = 0;
@@ -2217,11 +2223,11 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellCon
  */
 void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime )
 {
-  int iscat, jscat, typ;
+  int iscat, jscat, typ,ringIndex;
   double s, cs22, Vrel,temp1,temp2,temp3;
   double M1, M2;
   VectorEPxPyPz P1, P2;
-  double md2g_wo_as, md2q_wo_as,s_cutoff_for_pqcd;
+  double md2g_wo_as, md2q_wo_as,s_cutoff_for_pqcd, lambda,lambda_scaled,xt;
   int initialStateIndex = -1;
   FLAVOR_TYPE F1, F2;
   double temperature;
@@ -2299,18 +2305,45 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
         
         int initialStateIndex = -1;
         
-        betaDistEntry = scatt23_object.setParameter ( VectorXYZ ( 0, 0, 0 ), P1, P2, F1, F2, M1, M2, sqrt ( s ),
-                              md2g_wo_as / s, 1,
-                              theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
-                              theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
-                              theConfig->I23onlineIntegrationIsSet(),
-                              theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(),
-                              theConfig->get23FudgeFactorLpm(), -1, theConfig->isMatrixElement23_22qt(),theConfig->doScattering_23_photons(),theConfig->get23ktCutOffPhotons(),theConfig->getkFactorEMprocesses23(), md2q_wo_as / s );
-
-        cs23Photons = scatt23_object.getTotalCrossSectionForPhotons ( initialStateIndex ); //1/GeV^2
-        cs23Total =  cs23Photons;
-        // 1/ GeV^2
+        //Compute MFP
+        //TODO
+        //xt = particles_atTimeNow[iscat].Pos.Perp();
+        //ringIndex = rings.getIndex( xt );
+        //[lambda]=fm
+        //lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, rings[ringIndex].getEffectiveTemperature(), rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
+        //HACK        
+        lambda = 0.4;//fm
+        lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
+              
+        /*
+        cout << "lambda = " << lambda << endl;  
+        cout << "1/ns = " << 1.0/(rings[ringIndex].getGluonDensity()*1.0) << endl;
+        cout << "E = " <<  particles_atTimeNow[iscat].Mom.E() << endl;
+        cout << "T= : " << rings[ringIndex].getEffectiveTemperature() << endl;
+        cout << rings[ringIndex].getGluonDensity() << endl;
+        cout << rings[ringIndex].getQuarkDensity() << endl;
+        cout <<"sqrt(s)="<< sqrt(s)<< " - New LPM ktCO: " << theConfig->get23FudgeFactorLpm()/lambda_scaled << "\t old(400MeV,X=0.3): " << theConfig->get23ktCutOffPhotons()/sqrt(s) << endl;
+        */
         
+        if( lambda > 0 )
+        {          
+          betaDistEntry = scatt23_object.setParameter ( VectorXYZ ( 0, 0, 0 ), P1, P2, F1, F2, M1, M2, sqrt ( s ),
+                                md2g_wo_as / s, lambda_scaled,
+                                theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
+                                theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
+                                theConfig->I23onlineIntegrationIsSet(),
+                                theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(),
+                                theConfig->get23FudgeFactorLpm(), -1, theConfig->isMatrixElement23_22qt(),theConfig->doScattering_23_photons(),theConfig->get23ktCutOffPhotons(),theConfig->getkFactorEMprocesses23(), md2q_wo_as / s );
+
+          cs23Photons = scatt23_object.getTotalCrossSectionForPhotons ( initialStateIndex ); //1/GeV^2
+          cs23Total =  cs23Photons;
+          // 1/ GeV^2
+        }else
+        {
+          //WARNING: correct error handling for zero mfp.
+          cout << lambda << endl;
+          cs23Total = 0;
+        }       
         probab23 = pow( 0.197, 2.0 ) * cs23Total * Vrel * dt * scaleForSelectedPairs / ( dv * testpartcl );
 
         if ( FPT_COMP_G(probab23, 1.0) )
@@ -2327,7 +2360,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
         if ( randomnumber < probab23 )
         {             
             scatt23_amongBackgroundParticles_photons_utility( scatt23_object, _cells.particleList, _allParticlesList, iscat, jscat, typ, nexttime );
-        }
+        }    
       }
     }
   }
@@ -2394,8 +2427,28 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
             
             int initialStateIndex = -1;
             
+            //Compute MFP
+            //TODO
+            //xt = particles_atTimeNow[iscat].Pos.Perp();
+            //ringIndex = rings.getIndex( xt );
+            //[lambda]=fm
+            //lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, rings[ringIndex].getEffectiveTemperature(), rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
+            //HACK
+            lambda = 0.4;//fm
+            lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
+                  
+            /*
+            cout << "lambda = " << lambda << endl;  
+            cout << "1/ns = " << 1.0/(rings[ringIndex].getGluonDensity()*1.0) << endl;
+            cout << "E = " <<  particles_atTimeNow[iscat].Mom.E() << endl;
+            cout << "T= : " << rings[ringIndex].getEffectiveTemperature() << endl;
+            cout << rings[ringIndex].getGluonDensity() << endl;
+            cout << rings[ringIndex].getQuarkDensity() << endl;
+            cout <<"sqrt(s)="<< sqrt(s)<< " - New LPM ktCO: " << theConfig->get23FudgeFactorLpm()/lambda_scaled << "\t old(400MeV,X=0.3): " << theConfig->get23ktCutOffPhotons()/sqrt(s) << endl;
+            */
+            
             betaDistEntry = scatt23_object.setParameter ( VectorXYZ ( 0, 0, 0 ), P1, P2, F1, F2, M1, M2, sqrt ( s ),
-                                  md2g_wo_as / s, 1,
+                                  md2g_wo_as / s, lambda_scaled,
                                   theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
                                   theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
                                   theConfig->I23onlineIntegrationIsSet(),

@@ -50,7 +50,7 @@ void mfpForHeavyIonCollision::loadData()
     {
         stringstream ssT;
         ssT << int( temperaturesForMfpData[i] * 1000 + 0.001 ); // convert from GeV to MeV and write to stringstream
-        mfp_data tempMFP( ssT.str() );
+        mfp_data tempMFP( ssT.str(), true );//allow manually the loading of tables
 
         mfpData.push_back( tempMFP );
     }
