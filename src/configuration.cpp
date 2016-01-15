@@ -555,6 +555,7 @@ void config::printUsedConfigurationParameters()
     if( Particle::N_heavy_flavor > 0 )
         printOptionsDescriptionToIniFormat( heavy_quark_options, output );
     printOptionsDescriptionToIniFormat( offline_options, output );
+    printOptionsDescriptionToIniFormat( crossSection_options, output);
 }
 
 

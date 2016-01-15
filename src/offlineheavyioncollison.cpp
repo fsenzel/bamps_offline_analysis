@@ -668,6 +668,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
 
   while (( actiontype != event_endOfCascade ) && ( !stop ) )
   {
+    actiontype = event_dummy;
     try
     {
       boost::shared_ptr< offlineDataEventType > ptrEventType = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >();
@@ -677,20 +678,27 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     {
       stop = true;
       _endOfDataFiles = true;
+      actiontype = event_dummy;
     }
     
     if ( actiontype == event_newTimestep )
     {
-      boost::shared_ptr< offlineDataCellConfiguration > ptrCellStructure = offlineInterface->readOfflineDataFromArchive< offlineDataCellConfiguration >();
-      etaBins = ptrCellStructure->etaBins;
-      timenow = ptrCellStructure->timenow;
-      timenext = ptrCellStructure->timenext;
-      randomShiftX = ptrCellStructure->randomShiftX;
-      randomShiftY = ptrCellStructure->randomShiftY;
-      randomShiftEta = ptrCellStructure->randomShiftEta;
-         
-      dt_cascade = timenext - timenow;
-
+      try
+      {
+        boost::shared_ptr< offlineDataCellConfiguration > ptrCellStructure = offlineInterface->readOfflineDataFromArchive< offlineDataCellConfiguration >();
+        etaBins = ptrCellStructure->etaBins;
+        timenow = ptrCellStructure->timenow;
+        timenext = ptrCellStructure->timenext;
+        randomShiftX = ptrCellStructure->randomShiftX;
+        randomShiftY = ptrCellStructure->randomShiftY;
+        randomShiftEta = ptrCellStructure->randomShiftEta;
+          
+        dt_cascade = timenext - timenow;      
+      }
+      catch( boost::archive::archive_exception& err )
+      {
+        cout << "SCHEISE. Zeile 702." << endl;
+      }
       rateGluons_prev = rateGluons;
       rateQuarks_prev = rateQuarks;
       rateAntiQuarks_prev = rateAntiQuarks;
@@ -700,173 +708,210 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
         rateQuarks[i].assign( rings.size(), 0 );
         rateAntiQuarks[i].assign( rings.size(), 0 );
       }
-
-      boost::shared_ptr< offlineDataInteractionRates > ptrRates = offlineInterface->readOfflineDataFromArchive< offlineDataInteractionRates >();
-      rateGluons = ptrRates->gluonRates;
-      rateQuarks = ptrRates->quarkRates;
-      rateAntiQuarks = ptrRates->antiQuarkRates;
+      try
+      {
+        boost::shared_ptr< offlineDataInteractionRates > ptrRates = offlineInterface->readOfflineDataFromArchive< offlineDataInteractionRates >();
+        rateGluons = ptrRates->gluonRates;
+        rateQuarks = ptrRates->quarkRates;
+        rateAntiQuarks = ptrRates->antiQuarkRates;              
+      }
+      catch( boost::archive::archive_exception& err )
+      {
+        cout << "SCHEISE. Zeile 720." << endl;
+      }
     }
     else if ( actiontype == event_interaction22 )
     {
-      boost::shared_ptr< offlineDataInteraction22 > ptrInteraction22 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction22 >();
-      time = ptrInteraction22->time;
-      iscat = ptrInteraction22->iscat;
-      jscat = ptrInteraction22->jscat;
-      Mom1 = ptrInteraction22->Mom1;
-      Mom2 = ptrInteraction22->Mom2;
-      F1 = ptrInteraction22->F1;
-      F2 = ptrInteraction22->F2;
-      
-      if ( time <= ( evolveToTime + 1.0e-6 ) )
+      try
       {
-        particlesEvolving[iscat].init = particlesEvolving[jscat].init = false;
+        boost::shared_ptr< offlineDataInteraction22 > ptrInteraction22 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction22 >();
+        time = ptrInteraction22->time;
+        iscat = ptrInteraction22->iscat;
+        jscat = ptrInteraction22->jscat;
+        Mom1 = ptrInteraction22->Mom1;
+        Mom2 = ptrInteraction22->Mom2;
+        F1 = ptrInteraction22->F1;
+        F2 = ptrInteraction22->F2;
+          
+        if ( time <= ( evolveToTime + 1.0e-6 ) )
+        {
+          particlesEvolving[iscat].init = particlesEvolving[jscat].init = false;
 
-        particlesEvolving[iscat].Propagate( time );
-        particlesEvolving[jscat].Propagate( time );
+          particlesEvolving[iscat].Propagate( time );
+          particlesEvolving[jscat].Propagate( time );
 
-        particlesEvolving[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
-        particlesEvolving[iscat].Mom = Mom1;
-        particlesEvolving[iscat].Mom.E() = sqrt( Mom1.vec2() ); // necessary ???
+          particlesEvolving[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
+          particlesEvolving[iscat].Mom = Mom1;
+          particlesEvolving[iscat].Mom.E() = sqrt( Mom1.vec2() ); // necessary ???
 
-        particlesEvolving[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
-        particlesEvolving[jscat].Mom = Mom2;
-        particlesEvolving[jscat].Mom.E() = sqrt( Mom2.vec2() ); // necessary ???
+          particlesEvolving[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
+          particlesEvolving[jscat].Mom = Mom2;
+          particlesEvolving[jscat].Mom.E() = sqrt( Mom2.vec2() ); // necessary ???
 
+        }
+        else
+        {
+          stop = true;
+          boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interaction22) );        
+          offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
+          offlineInterface->temporaryStoreData< offlineDataInteraction22 >( ptrInteraction22 );
+        }
       }
-      else
+      catch( boost::archive::archive_exception& err )
       {
-        stop = true;
-        boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interaction22) );
-        offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
-        offlineInterface->temporaryStoreData< offlineDataInteraction22 >( ptrInteraction22 );
-      }
+        cout << "SCHEISE. Zeile 764." << endl;
+      }  
     }
     else if ( actiontype == event_interaction23 )
     {
-      boost::shared_ptr< offlineDataInteraction23 > ptrInteraction23 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction23 >();
-      time = ptrInteraction23->time;
-      iscat = ptrInteraction23->iscat;
-      jscat = ptrInteraction23->jscat;
-      kscat = ptrInteraction23->newp;
-      Mom1 = ptrInteraction23->Mom1;
-      Mom2 = ptrInteraction23->Mom2;
-      F1 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F1 );
-      F2 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F2 );
-      F3 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F3 );
-      particlesEvolving[kscat].Pos = ptrInteraction23->Pos3;
-      particlesEvolving[kscat].Mom = ptrInteraction23->Mom3;
-      particlesEvolving[kscat].unique_id = Particle::unique_id_counter;
-      Particle::unique_id_counter++;
-
-      if ( time <= evolveToTime + 1.0e-6 )
+      try
       {
-        particlesEvolving[kscat].Pos.T() = time;
-        particlesEvolving[kscat].FLAVOR = static_cast<FLAVOR_TYPE>( F3 );
-        particlesEvolving[kscat].Mom.E() = sqrt( particlesEvolving[kscat].Mom.vec2() );
-        particlesEvolving[kscat].free = false;
+        boost::shared_ptr< offlineDataInteraction23 > ptrInteraction23 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction23 >();
+        time = ptrInteraction23->time;
+        iscat = ptrInteraction23->iscat;
+        jscat = ptrInteraction23->jscat;
+        kscat = ptrInteraction23->newp;
+        Mom1 = ptrInteraction23->Mom1;
+        Mom2 = ptrInteraction23->Mom2;
+        F1 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F1 );
+        F2 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F2 );
+        F3 = static_cast<FLAVOR_TYPE>( ptrInteraction23->F3 );
+        particlesEvolving[kscat].Pos = ptrInteraction23->Pos3;
+        particlesEvolving[kscat].Mom = ptrInteraction23->Mom3;
+        particlesEvolving[kscat].unique_id = Particle::unique_id_counter;
+        Particle::unique_id_counter++;
+        if ( time <= evolveToTime + 1.0e-6 )
+        {
+          particlesEvolving[kscat].Pos.T() = time;
+          particlesEvolving[kscat].FLAVOR = static_cast<FLAVOR_TYPE>( F3 );
+          particlesEvolving[kscat].Mom.E() = sqrt( particlesEvolving[kscat].Mom.vec2() );
+          particlesEvolving[kscat].free = false;
 
-        particlesEvolving[iscat].init = particlesEvolving[jscat].init = particlesEvolving[kscat].init = false;
+          particlesEvolving[iscat].init = particlesEvolving[jscat].init = particlesEvolving[kscat].init = false;
 
-        particlesEvolving[iscat].Propagate( time );
-        particlesEvolving[jscat].Propagate( time );
+          particlesEvolving[iscat].Propagate( time );
+          particlesEvolving[jscat].Propagate( time );
 
-        particlesEvolving[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
-        particlesEvolving[iscat].Mom = Mom1;
-        particlesEvolving[iscat].Mom.E() = sqrt( Mom1.vec2() ); // necessary ???
+          particlesEvolving[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
+          particlesEvolving[iscat].Mom = Mom1;
+          particlesEvolving[iscat].Mom.E() = sqrt( Mom1.vec2() ); // necessary ???
 
-        particlesEvolving[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
-        particlesEvolving[jscat].Mom = Mom2;
-        particlesEvolving[jscat].Mom.E() = sqrt( Mom2.vec2() ); // necessary ???
+          particlesEvolving[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
+          particlesEvolving[jscat].Mom = Mom2;
+          particlesEvolving[jscat].Mom.E() = sqrt( Mom2.vec2() ); // necessary ???
 
-        numberEvolvingParticles++;//production
+          numberEvolvingParticles++;//production
+        }
+        else
+        {
+          stop = true;
+          boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interaction23) );
+          offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
+          offlineInterface->temporaryStoreData< offlineDataInteraction23 >( ptrInteraction23 );
+        }
       }
-      else
+      catch( boost::archive::archive_exception& err )
       {
-        stop = true;
-        boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interaction23) );
-        offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
-        offlineInterface->temporaryStoreData< offlineDataInteraction23 >( ptrInteraction23 );
+        cout << "SCHEISE. Zeile 817." << endl;
       }
     }
     else if ( actiontype == event_interaction32 )
     {
-      boost::shared_ptr< offlineDataInteraction32 > ptrInteraction32 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction32 >();
-      time = ptrInteraction32->time;
-      iscat = ptrInteraction32->iscat;
-      jscat = ptrInteraction32->jscat;
-      dead = ptrInteraction32->dead;
-      Mom1 = ptrInteraction32->Mom1;
-      Mom2 = ptrInteraction32->Mom2;
-      F1 = ptrInteraction32->F1;
-      F2 = ptrInteraction32->F2;
-
-      if ( time <= evolveToTime + 1.0e-6 )
+      try
       {
-        particlesEvolving[iscat].init = particlesEvolving[jscat].init = false;
+        boost::shared_ptr< offlineDataInteraction32 > ptrInteraction32 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction32 >();
+        time = ptrInteraction32->time;
+        iscat = ptrInteraction32->iscat;
+        jscat = ptrInteraction32->jscat;
+        dead = ptrInteraction32->dead;
+        Mom1 = ptrInteraction32->Mom1;
+        Mom2 = ptrInteraction32->Mom2;
+        F1 = ptrInteraction32->F1;
+        F2 = ptrInteraction32->F2;
+        if ( time <= evolveToTime + 1.0e-6 )
+        {
+          particlesEvolving[iscat].init = particlesEvolving[jscat].init = false;
 
-        particlesEvolving[iscat].Propagate( time );
-        particlesEvolving[jscat].Propagate( time );
+          particlesEvolving[iscat].Propagate( time );
+          particlesEvolving[jscat].Propagate( time );
 
-        particlesEvolving[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
-        particlesEvolving[iscat].Mom = Mom1;
-        particlesEvolving[iscat].Mom.E() = sqrt( Mom1.vec2() ); // necessary ???
+          particlesEvolving[iscat].FLAVOR = static_cast<FLAVOR_TYPE>( F1 );
+          particlesEvolving[iscat].Mom = Mom1;
+          particlesEvolving[iscat].Mom.E() = sqrt( Mom1.vec2() ); // necessary ???
 
-        particlesEvolving[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
-        particlesEvolving[jscat].Mom = Mom2;
-        particlesEvolving[jscat].Mom.E() = sqrt( Mom2.vec2() ); // necessary ???
-        
-        particlesEvolving[dead].dead = true;
-        
-        numberEvolvingParticles--;
+          particlesEvolving[jscat].FLAVOR = static_cast<FLAVOR_TYPE>( F2 );
+          particlesEvolving[jscat].Mom = Mom2;
+          particlesEvolving[jscat].Mom.E() = sqrt( Mom2.vec2() ); // necessary ???
+          
+          particlesEvolving[dead].dead = true;
+          
+          numberEvolvingParticles--;
+        }
+        else
+        {
+          stop = true;
+          boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interaction32) );
+          offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
+          offlineInterface->temporaryStoreData< offlineDataInteraction32 >( ptrInteraction32 );
+        }
       }
-      else
+      catch( boost::archive::archive_exception& err )
       {
-        stop = true;
-        boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interaction32) );
-        offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
-        offlineInterface->temporaryStoreData< offlineDataInteraction32 >( ptrInteraction32 );
+        cout << "SCHEISE. Zeile 862." << endl;
       }
     }
     else if ( actiontype == event_interactionElastic )
     {
-      boost::shared_ptr< offlineDataInteractionElastic > ptrInteractionElastic = offlineInterface->readOfflineDataFromArchive< offlineDataInteractionElastic >();
-      timei = ptrInteractionElastic->ct_i;
-      timej = ptrInteractionElastic->ct_j;
-      iscat = ptrInteractionElastic->iscat;
-      jscat = ptrInteractionElastic->jscat;
-      Mom1 = ptrInteractionElastic->Mom1;
-      Mom2 = ptrInteractionElastic->Mom2;
-      
-      if (( timei <= evolveToTime + 1.0e-6 ) || ( timej <= evolveToTime + 1.0e-6 ) )
+      try
       {
-        particlesEvolving[iscat].init = particlesEvolving[jscat].init = false;
+        boost::shared_ptr< offlineDataInteractionElastic > ptrInteractionElastic = offlineInterface->readOfflineDataFromArchive< offlineDataInteractionElastic >();
+        timei = ptrInteractionElastic->ct_i;
+        timej = ptrInteractionElastic->ct_j;
+        iscat = ptrInteractionElastic->iscat;
+        jscat = ptrInteractionElastic->jscat;
+        Mom1 = ptrInteractionElastic->Mom1;
+        Mom2 = ptrInteractionElastic->Mom2;
+        if (( timei <= evolveToTime + 1.0e-6 ) || ( timej <= evolveToTime + 1.0e-6 ) )
+        {
+          particlesEvolving[iscat].init = particlesEvolving[jscat].init = false;
 
-        particlesEvolving[iscat].Old = particlesEvolving[iscat].Mom;
-        particlesEvolving[jscat].Old = particlesEvolving[jscat].Mom;
+          particlesEvolving[iscat].Old = particlesEvolving[iscat].Mom;
+          particlesEvolving[jscat].Old = particlesEvolving[jscat].Mom;
 
-        particlesEvolving[iscat].Propagate( timei );
-        particlesEvolving[iscat].Mom = Mom1;
-        particlesEvolving[iscat].Mom.E() = sqrt( Mom1.vec2() ); // necessary ???
+          particlesEvolving[iscat].Propagate( timei );
+          particlesEvolving[iscat].Mom = Mom1;
+          particlesEvolving[iscat].Mom.E() = sqrt( Mom1.vec2() ); // necessary ???
 
-        particlesEvolving[jscat].Propagate( timej );
-        particlesEvolving[jscat].Mom = Mom2;
-        particlesEvolving[jscat].Mom.E() = sqrt( Mom2.vec2() ); // necessary ???
+          particlesEvolving[jscat].Propagate( timej );
+          particlesEvolving[jscat].Mom = Mom2;
+          particlesEvolving[jscat].Mom.E() = sqrt( Mom2.vec2() ); // necessary ???
 
+        }
+        else
+        {
+          stop = true;
+          boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interactionElastic) );
+          offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
+          offlineInterface->temporaryStoreData< offlineDataInteractionElastic >( ptrInteractionElastic );
+        }
       }
-      else
+      catch( boost::archive::archive_exception& err )
       {
-        stop = true;
-        boost::shared_ptr< offlineDataEventType > tempPtr( new offlineDataEventType(event_interactionElastic) );
-        offlineInterface->temporaryStoreData< offlineDataEventType >( tempPtr );
-        offlineInterface->temporaryStoreData< offlineDataInteractionElastic >( ptrInteractionElastic );
+        cout << "SCHEISE. Zeile 902." << endl;
       }
     }
     else if ( actiontype == event_particleIdSwap )
     {
-      boost::shared_ptr< offlineDataParticleIdSwap > ptrSwap = offlineInterface->readOfflineDataFromArchive< offlineDataParticleIdSwap >();
-      iscat = ptrSwap->removedParticleID;
-      jscat = ptrSwap->replacingParticleID;
-
+      try
+      {
+        boost::shared_ptr< offlineDataParticleIdSwap > ptrSwap = offlineInterface->readOfflineDataFromArchive< offlineDataParticleIdSwap >();
+        iscat = ptrSwap->removedParticleID;
+        jscat = ptrSwap->replacingParticleID;
+      }
+      catch( boost::archive::archive_exception& err )
+      {
+        cout << "SCHEISE. Zeile 915." << endl;
+      }
       particlesEvolving[iscat] = particlesEvolving[jscat];
     }
   }
