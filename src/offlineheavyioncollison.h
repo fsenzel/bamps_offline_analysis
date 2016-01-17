@@ -74,6 +74,7 @@ private:
     interpolation23 theI23_charm_m2;
     interpolation23 theI23_bottom_m1;
     interpolation23 theI23_bottom_m2;
+    interpolation23 theI23_photons;
 
     /** @brief  interpolation22 object that provides access to tabulated values for the cross section of all 2->2 processes with running coupling */
     interpolation22 theI22;

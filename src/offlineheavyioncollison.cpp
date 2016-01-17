@@ -93,7 +93,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     theConfig( _config ), stoptime_last( 0 ), stoptime( 5.0 ), currentNumber( 0 ), numberEvolvingParticles( _config->getN_init() ),
     rings( _config->getRingNumber(), _config->getCentralRingRadius(), _config->getDeltaR() ),
     testpartcl( _config->getTestparticles() ),
-    theI23_massless( false ), theI23_charm_m1( false ), theI23_charm_m2( false ), theI23_bottom_m1( false ), theI23_bottom_m2( false ), // do not load data files right at construction, but after configure() has been called below
+    theI23_massless( false ), theI23_charm_m1( false ), theI23_charm_m2( false ), theI23_bottom_m1( false ), theI23_bottom_m2( false ), theI23_photons( false ), // do not load data files right at construction, but after configure() has been called below
     offlineInterface( _offlineInterface ),
     theMFP( _config ),
     theAnalysis( _analysis )
@@ -107,27 +107,28 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
   {
     if( theConfig->getNlightFlavorsAdded() >= 0 )
     {
-      theI23_massless.configure( theConfig->I23onlineIntegrationIsSet(), 1, 0.0, theConfig->getKappa23LightPartons(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
+      theI23_massless.configure( theConfig->I23onlineIntegrationIsSet(),false, 1, 0.0, theConfig->getKappa23LightPartons(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons);
     }
     if( Particle::N_heavy_flavor > 0 )
     {
-      theI23_charm_m1.configure( theConfig->I23onlineIntegrationIsSet(), 1, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
-      theI23_charm_m2.configure( theConfig->I23onlineIntegrationIsSet(), 2, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
+      theI23_charm_m1.configure( theConfig->I23onlineIntegrationIsSet(),false, 1, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons );
+      theI23_charm_m2.configure( theConfig->I23onlineIntegrationIsSet(),false, 2, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons );
     }
     if( Particle::N_heavy_flavor > 1 )
     {
-      theI23_bottom_m1.configure( theConfig->I23onlineIntegrationIsSet(), 1, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
-      theI23_bottom_m2.configure( theConfig->I23onlineIntegrationIsSet(), 2, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
+      theI23_bottom_m1.configure( theConfig->I23onlineIntegrationIsSet(),false, 1, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons );
+      theI23_bottom_m2.configure( theConfig->I23onlineIntegrationIsSet(),false, 2, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons);
       
     }
     
     if( theConfig->getJetMfpComputationType() == computeMfpInterpolation || theConfig->getJetMfpComputationType() == thermalMfpGluon )
       theMFP.loadData(); 
   }
-  
+ 
   //
   if( theConfig->doScattering_23_photons() )
   {
+    theI23_photons.configure(false,theConfig->I23onlineIntegrationPhotonsIsSet(), 1, 0.0, 0, "", "", 0, theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), 0, normal_photons);
     theMFP.loadData(); 
   }
   
@@ -1773,7 +1774,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
 //   vector<int> nQuarks( Particle::N_light_flavor, 0 );
 //   vector<int> nAntiQuarks( Particle::N_light_flavor, 0 );
 
-  scattering23 scatt23_object( &theI23_massless, &theI23_charm_m1, &theI23_charm_m2, &theI23_bottom_m1, &theI23_bottom_m2 );
+  scattering23 scatt23_object( &theI23_massless, &theI23_charm_m1, &theI23_charm_m2, &theI23_bottom_m1, &theI23_bottom_m2 , &theI23_photons);
   scattering22 scatt22_object( &theI22 );
   
   double lambda = 0; // fm
@@ -2284,7 +2285,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
   //WARNING: This s-cutoff can be adjusted!
   s_cutoff_for_pqcd = 0.01;
   
-  scattering23 scatt23_object ( &theI23_massless, &theI23_charm_m1, &theI23_charm_m2, &theI23_bottom_m1, &theI23_bottom_m2 );
+  scattering23 scatt23_object ( &theI23_massless, &theI23_charm_m1, &theI23_charm_m2, &theI23_bottom_m1, &theI23_bottom_m2, &theI23_photons );
 
   const int N = _allParticlesList.size();
   //WARNING: this can be adjusted! Was N before.
@@ -4283,7 +4284,7 @@ double offlineHeavyIonCollision::iterateMFP( std::vector< int >& _allParticlesLi
   
   scattering22 scatt22_object( &theI22 );
   scattering32 scatt32_object;
-  scattering23 scatt23_object( &theI23_massless, &theI23_charm_m1, &theI23_charm_m2, &theI23_bottom_m1, &theI23_bottom_m2 );
+  scattering23 scatt23_object( &theI23_massless, &theI23_charm_m1, &theI23_charm_m2, &theI23_bottom_m1, &theI23_bottom_m2, &theI23_photons );
   
   // the rate for 2->2 does not depend on lambda and therefore does not change during the iteration. So it is more efficient to calculate it here:
   //------------------------ 2<->2-----------------------
@@ -4635,7 +4636,7 @@ double offlineHeavyIonCollision::iterate_mfp_bisection( std::vector< int >& _all
 
   scattering22 scatt22_object( &theI22 );
   scattering32 scatt32_object;
-  scattering23 scatt23_object( &theI23_massless, &theI23_charm_m1, &theI23_charm_m2, &theI23_bottom_m1, &theI23_bottom_m2 );
+  scattering23 scatt23_object( &theI23_massless, &theI23_charm_m1, &theI23_charm_m2, &theI23_bottom_m1, &theI23_bottom_m2, &theI23_photons );
   
   // the rate for 2->2 does not depend on lambda and therefore does not change during the iteration. So it is more efficient to calculate it here:
   //------------------------ 2<->2-----------------------
