@@ -99,25 +99,29 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     theAnalysis( _analysis )
 {  
   // load 2->2 cross section interpolation data
-  if( theConfig->doScattering_22() )
-    theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom, theConfig->getMaxRunningCoupling(), theConfig->getfixedCouplingValue() );
-  
+  if( theConfig->doScattering_22() || theConfig->doScattering_22_photons() )
+    theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom, theConfig->getMaxRunningCoupling(), theConfig->getfixedCouplingValue(), theConfig->doScattering_22_photons(), theConfig->getDebyeModePhotons(), theConfig->getVertexModePhotons() );
+   
+  //Loeschen,alt:
+  //if( theConfig->doScattering_22() )
+  //  theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom, theConfig->getMaxRunningCoupling(), theConfig->getfixedCouplingValue() );
+
   // load 2->3 cross section interpolation data
   if( theConfig->doScattering_23() )
   {
     if( theConfig->getNlightFlavorsAdded() >= 0 )
     {
-      theI23_massless.configure( theConfig->I23onlineIntegrationIsSet(),false, 1, 0.0, theConfig->getKappa23LightPartons(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons);
+      theI23_massless.configure( theConfig->I23onlineIntegrationIsSet(),false, 1, 0.0, theConfig->getKappa23LightPartons(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt());
     }
     if( Particle::N_heavy_flavor > 0 )
     {
-      theI23_charm_m1.configure( theConfig->I23onlineIntegrationIsSet(),false, 1, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons );
-      theI23_charm_m2.configure( theConfig->I23onlineIntegrationIsSet(),false, 2, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons );
+      theI23_charm_m1.configure( theConfig->I23onlineIntegrationIsSet(),false, 1, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
+      theI23_charm_m2.configure( theConfig->I23onlineIntegrationIsSet(),false, 2, Particle::Mcharm, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
     }
     if( Particle::N_heavy_flavor > 1 )
     {
-      theI23_bottom_m1.configure( theConfig->I23onlineIntegrationIsSet(),false, 1, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons );
-      theI23_bottom_m2.configure( theConfig->I23onlineIntegrationIsSet(),false, 2, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt(), no_photons);
+      theI23_bottom_m1.configure( theConfig->I23onlineIntegrationIsSet(),false, 1, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
+      theI23_bottom_m2.configure( theConfig->I23onlineIntegrationIsSet(),false, 2, Particle::Mbottom, theConfig->getKappa23HeavyQuarks(), theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(), theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), theConfig->isMatrixElement23_22qt() );
       
     }
     
@@ -126,11 +130,17 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
   }
  
   //
-  if( theConfig->doScattering_23_photons() )
+  if(theConfig->doScattering_23_photons() && !theConfig->I23onlineIntegrationPhotonsIsSet())
   {
-    theI23_photons.configure(false,theConfig->I23onlineIntegrationPhotonsIsSet(), 1, 0.0, 0, "", "", 0, theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), 0, normal_photons);
-    theMFP.loadData(); 
+    cout << "Do the 23 photonproduction from Tables." << endl;
+    theI23_photons.configurePhotons(theConfig->I23onlineIntegrationIsSet(), theConfig->I23onlineIntegrationPhotonsIsSet(), 1, 0.0, 0, "", "", 0, theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), 0, roughTables, theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),theConfig->getLPMModePhotons());
+    theMFP.loadData();    
   }
+  //if( theConfig->doScattering_23_photons() )
+  //{
+  //  theI23_photons.configure(false,theConfig->I23onlineIntegrationPhotonsIsSet(), 1, 0.0, 0, "", "", 0, theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), 0, normal_photons);
+  //  theMFP.loadData(); 
+  //}
   
   nGet23Errors = 0;
   nGet32Errors = 0;
@@ -2149,17 +2159,22 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellCon
 
         
         
-        if (FPT_COMP_NZ(theConfig->getInfraredCutOffEMProcesses()))
-        {  
-          s_cutoff_for_pqcd=2.0*theConfig->getInfraredCutOffEMProcesses();
-        }  
-        else if (theConfig->getCrossSectionMethod() == 0)
+        if ( theConfig->getCrossSectionMethod() == 0 )
         {
-          s_cutoff_for_pqcd=0.1; 
-        }else
+          if ( ( theConfig->doScattering_22_photons() ) && ( FPT_COMP_NZ ( theConfig->getInfraredCutOffEMProcesses() ) ) )
+          {
+            s_cutoff_for_pqcd = 2.0 * theConfig->getInfraredCutOffEMProcesses();
+            //cout << s_cutoff_for_pqcd << endl;
+          }
+          else   // Debye-screened 22 photonproduction
+          {
+            s_cutoff_for_pqcd = 0.1;
+          }
+
+        }
+        else // const cross section or some such.
         {
-          s_cutoff_for_pqcd=0.0;
-          //cout << "0 #################" << endl;
+          s_cutoff_for_pqcd = 0.0;
         }
           
         if ( FPT_COMP_L(s,1.1*lambda2) )
@@ -2177,14 +2192,28 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellCon
           md2g_wo_as = ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
           md2q_wo_as = ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q ) / 2.0;
           
+          int initialStateIndex = -1;
+          
           scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
                                       F1here, F2here, M1, M2, s, md2g_wo_as , md2q_wo_as,
                                       theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
                                       theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
-                                      theConfig->getInfraredCutOffEMProcesses(),
+                                      theConfig->getInfraredCutOffEMProcesses(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
                                       temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
         
-          cs22 = scatt22_object.getXSection22onlyPhotons( initialStateIndex );
+          switch ( theConfig->getCrossSectionMethod() )
+          {
+            case 0:  // PQCD cross sections
+              cs22 = scatt22_object.getXSection22onlyPhotons ( initialStateIndex );
+              break;
+            case 1:  // const cross section
+              cs22 = theConfig->getInputCrossSectionValue() * 0.1 / ( pow ( 0.197, 2.0 ) );
+              break;
+            default
+                :
+              string errMsg = "Error in method of cross section";
+              throw eHIC_error ( errMsg );
+          }
           // 1/ GeV^2
           //100 mb = 10 fm^2 = 100 * 2.58 1/GeV^2
           
@@ -2352,16 +2381,18 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
         int initialStateIndex = -1;
         
         //Compute MFP
-        //TODO
-        //xt = particles_atTimeNow[iscat].Pos.Perp();
-        //ringIndex = rings.getIndex( xt );
+        xt = particles_atTimeNow[iscat].Pos.Perp();
+        ringIndex = rings.getIndex( xt );
         //[lambda]=fm
-        //lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, rings[ringIndex].getEffectiveTemperature(), rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
-        //HACK        
-        lambda = 0.4;//fm
+        lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, rings[ringIndex].getEffectiveTemperature(), rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
+        cout << "MFP [fm] = " << lambda << endl;
+
+        //TEST:       
+        //lambda = 0.4;//fm
+        
         lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
               
-        /*
+        
         cout << "lambda = " << lambda << endl;  
         cout << "1/ns = " << 1.0/(rings[ringIndex].getGluonDensity()*1.0) << endl;
         cout << "E = " <<  particles_atTimeNow[iscat].Mom.E() << endl;
@@ -2369,7 +2400,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
         cout << rings[ringIndex].getGluonDensity() << endl;
         cout << rings[ringIndex].getQuarkDensity() << endl;
         cout <<"sqrt(s)="<< sqrt(s)<< " - New LPM ktCO: " << theConfig->get23FudgeFactorLpm()/lambda_scaled << "\t old(400MeV,X=0.3): " << theConfig->get23ktCutOffPhotons()/sqrt(s) << endl;
-        */
+        
         
         if( lambda > 0 )
         {          
@@ -2379,7 +2410,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
                                 theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
                                 theConfig->I23onlineIntegrationIsSet(),
                                 theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(),
-                                theConfig->get23FudgeFactorLpm(), -1, theConfig->isMatrixElement23_22qt(),theConfig->doScattering_23_photons(),theConfig->get23ktCutOffPhotons(),theConfig->getkFactorEMprocesses23(), md2q_wo_as / s );
+                                theConfig->get23FudgeFactorLpm(), -1, theConfig->isMatrixElement23_22qt(),theConfig->I23onlineIntegrationPhotonsIsSet(),theConfig->get23ktCutOffPhotons(), theConfig->getkFactorEMprocesses23(), md2q_wo_as / s, theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),theConfig->getLPMModePhotons() );
 
           cs23Photons = scatt23_object.getTotalCrossSectionForPhotons ( initialStateIndex ); //1/GeV^2
           cs23Total =  cs23Photons;
@@ -2404,7 +2435,9 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
         double randomnumber = ran2();
         
         if ( randomnumber < probab23 )
-        {             
+        {       
+            particles_atTimeNow[jscat].collision_tag = true;
+            particles_atTimeNow[iscat].collision_tag = true;
             scatt23_amongBackgroundParticles_photons_utility( scatt23_object, _cells.particleList, _allParticlesList, iscat, jscat, typ, nexttime );
         }    
       }
@@ -2473,17 +2506,21 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
             
             int initialStateIndex = -1;
             
+            
             //Compute MFP
-            //TODO
-            //xt = particles_atTimeNow[iscat].Pos.Perp();
-            //ringIndex = rings.getIndex( xt );
+            xt = particles_atTimeNow[iscat].Pos.Perp();
+            ringIndex = rings.getIndex( xt );
             //[lambda]=fm
-            //lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, rings[ringIndex].getEffectiveTemperature(), rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
-            //HACK
-            lambda = 0.4;//fm
+            lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, rings[ringIndex].getEffectiveTemperature(), rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
+            cout << "MFP [fm] = " << lambda << endl;
+            
+            
+            //TEST:       
+            //lambda = 0.4;//fm
+            
             lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
                   
-            /*
+            
             cout << "lambda = " << lambda << endl;  
             cout << "1/ns = " << 1.0/(rings[ringIndex].getGluonDensity()*1.0) << endl;
             cout << "E = " <<  particles_atTimeNow[iscat].Mom.E() << endl;
@@ -2491,21 +2528,28 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
             cout << rings[ringIndex].getGluonDensity() << endl;
             cout << rings[ringIndex].getQuarkDensity() << endl;
             cout <<"sqrt(s)="<< sqrt(s)<< " - New LPM ktCO: " << theConfig->get23FudgeFactorLpm()/lambda_scaled << "\t old(400MeV,X=0.3): " << theConfig->get23ktCutOffPhotons()/sqrt(s) << endl;
-            */
             
-            betaDistEntry = scatt23_object.setParameter ( VectorXYZ ( 0, 0, 0 ), P1, P2, F1, F2, M1, M2, sqrt ( s ),
-                                  md2g_wo_as / s, lambda_scaled,
-                                  theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
-                                  theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
-                                  theConfig->I23onlineIntegrationIsSet(),
-                                  theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(),
-                                  theConfig->get23FudgeFactorLpm(), -1, theConfig->isMatrixElement23_22qt(),theConfig->doScattering_23_photons(),theConfig->get23ktCutOffPhotons(),theConfig->getkFactorEMprocesses23(), md2q_wo_as / s );
+            
+            if( lambda > 0 )
+            {          
+              betaDistEntry = scatt23_object.setParameter ( VectorXYZ ( 0, 0, 0 ), P1, P2, F1, F2, M1, M2, sqrt ( s ),
+                                    md2g_wo_as / s, lambda_scaled,
+                                    theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
+                                    theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
+                                    theConfig->I23onlineIntegrationIsSet(),
+                                    theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(),
+                                    theConfig->get23FudgeFactorLpm(), -1, theConfig->isMatrixElement23_22qt(),theConfig->I23onlineIntegrationPhotonsIsSet(),theConfig->get23ktCutOffPhotons(), theConfig->getkFactorEMprocesses23(), md2q_wo_as / s, theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),theConfig->getLPMModePhotons() );
 
-            cs23Photons = scatt23_object.getTotalCrossSectionForPhotons ( initialStateIndex ); //1/GeV^2
-            cs23Total =  cs23Photons;
-            // 1/ GeV^2
-            
-            probab23 = pow( 0.197, 2.0 ) * cs23Total * Vrel * dt  / ( dv * testpartcl );
+              cs23Photons = scatt23_object.getTotalCrossSectionForPhotons ( initialStateIndex ); //1/GeV^2
+              cs23Total =  cs23Photons;
+              // 1/ GeV^2
+            }else
+            {
+              //WARNING: correct error handling for zero mfp.
+              cout << lambda << endl;
+              cs23Total = 0;
+            }       
+            probab23 = pow( 0.197, 2.0 ) * cs23Total * Vrel * dt * scaleForSelectedPairs / ( dv * testpartcl );
 
             if ( FPT_COMP_G(probab23, 1.0) )
             {
@@ -2517,7 +2561,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
               return;
             }
             double randomnumber = ran2();
-            
+                  
             if ( randomnumber < probab23 )
             {             
                 particles_atTimeNow[jscat].collision_tag = true;
@@ -2593,12 +2637,13 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
         else
           temperature = addedParticles[jscat].temperature;
 
-        scatt22_object.setParameter( addedParticles[iscat].Mom, addedParticles[jscat].Mom,
-                                     F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
-                                     theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
-                                     theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(),
-                                     temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-      
+          scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
+                                      F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
+                                      theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
+                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
+                                      theConfig->getInfraredCutOffEMProcesses(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
+                                      temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+       
         cs22 = scatt22_object.getXSection22( initialStateIndex );
 
         // multipy with Jpsi testparticle number, produce Jpsi in every choosen collision, but annihilate ccbar only in every 1/N_test_Jpsi collision to get the correct rate
@@ -3679,47 +3724,32 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility(
   //cout << temp_particle_jscat.Mom.Px() << '\t' << temp_particle_iscat.Mom.Px() << '\t' << P1new.Px() << '\t' << P2new.Px() << endl; 
       
   if(F1==photon )
-  {
-    ParticleOffline temp_particle_produced_photon1;
+  { 
     //cout << "Photon with Energy E=" << P2new.E() << " GeV produced!" << "PT= " << P2new.Pt() << " - Perp= " << P2new.Perp()<< endl;
     totalPhotonNumber++;
-    theAnalysis->PtDistributionPhotons(P1new.Pt(), P1new.Rapidity(), P1new.E());
-    temp_particle_produced_photon1.Mom = P1new;
-    //cout << "!! Photon saved : i  Px:\t" << temp_particle_produced_photon1.Mom.Px() << "\t Py:\t" << temp_particle_produced_photon1.Mom.Py() << "\t Pz:\t" << temp_particle_produced_photon1.Mom.Pz() << endl;
-    temp_particle_produced_photon1.Pos = Pos1new;
-    temp_particle_produced_photon1.m = 0.0;
-    temp_particle_produced_photon1.initially_produced = false;
+    theAnalysis->PtDistributionPhotons(P1new.Pt(), P1new.Rapidity(), P1new.E());  
+    ParticleOffline temp_particle_produced_photon1;
     temp_particle_produced_photon1.FLAVOR = photon;
+    temp_particle_produced_photon1.m = 0.0;
+    temp_particle_produced_photon1.Mom = P1new;
+    temp_particle_produced_photon1.Pos = Pos1new;
+    temp_particle_produced_photon1.initially_produced = false;   
     temp_particle_produced_photon1.production_time = nexttime;
     noninteractingParticles.push_back(temp_particle_produced_photon1);
-    //cout << "Size now: " << noninteractingParticles.size() << endl;
-    //theConfig->v2average_debug += ( pow(P1new.Px(), 2.0 ) - pow( P1new.Py(), 2.0 ) ) / pow( P1new.Pt(), 2.0 );
-    //cout << "Final Momentum 1: " << noninteractingParticles.back().Mom.Px() << endl;
   }   
   if(F2==photon )
   {
-    ParticleOffline temp_particle_produced_photon2;
     //cout << "Photon with Energy E=" << P2new.E() << " GeV produced!" << "PT= " << P2new.Pt() << " - Perp= " << P2new.Perp()<< endl;
     totalPhotonNumber++;
-    theAnalysis->PtDistributionPhotons(P2new.Pt(), P2new.Rapidity(), P2new.E());   
+    theAnalysis->PtDistributionPhotons(P2new.Pt(), P2new.Rapidity(), P2new.E());     
+    ParticleOffline temp_particle_produced_photon2;
+    temp_particle_produced_photon2.FLAVOR = photon;
+    temp_particle_produced_photon2.m = 0.0;
     temp_particle_produced_photon2.Mom = P2new;
     temp_particle_produced_photon2.Pos = Pos2new;
-    //cout << "!! Photon saved : i  Px:\t" << temp_particle_produced_photon2.Mom.Px() << "\t Py:\t" << temp_particle_produced_photon2.Mom.Py() << "\t Pz:\t" << temp_particle_produced_photon2.Mom.Pz() << endl;
-    temp_particle_produced_photon2.m = 0.0;
-    temp_particle_produced_photon2.initially_produced = false;
-    temp_particle_produced_photon2.FLAVOR = photon;
+    temp_particle_produced_photon2.initially_produced = false;    
     temp_particle_produced_photon2.production_time = nexttime;
     noninteractingParticles.push_back(temp_particle_produced_photon2);
-    //cout << "Size now: " << noninteractingParticles.size() << endl;    
-    //theConfig->v2average_debug += ( pow(P2new.Px(), 2.0 ) - pow( P2new.Py(), 2.0 ) ) / pow( P2new.Pt(), 2.0 );
-    //cout << "Final Momentum 2: " << noninteractingParticles.back().Mom.Px()  << endl;
-    //P2new = noninteractingParticles.back().Mom;
-    //cout << "Final v2: " <<  1.0/2.0*(( pow( P1new.Px(), 2.0 ) - pow( P1new.Py(), 2.0 ) ) / pow( P1new.Pt(), 2.0 )+( pow( P2new.Px(), 2.0 ) - pow( P2new.Py(), 2.0 ) ) / pow( P2new.Pt(), 2.0 ) )<< endl;;
-    
-    //for ( int w = 1; w < static_cast<int>( noninteractingParticles.size() ) - 1; w+=2 )
-    //{
-    //cout << 1.0/2.0*(( pow( noninteractingParticles[w-1].Mom.Px(), 2.0 ) - pow( noninteractingParticles[w-1].Mom.Py(), 2.0 ) ) / pow( noninteractingParticles[w-1].Mom.Pt(), 2.0 )+( pow( noninteractingParticles[w].Mom.Px(), 2.0 ) - pow( noninteractingParticles[w].Mom.Py(), 2.0 ) ) / pow( noninteractingParticles[w].Mom.Pt(), 2.0 ) ) << endl;  
-    //}
   }
 }
 
