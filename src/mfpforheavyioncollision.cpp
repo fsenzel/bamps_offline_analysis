@@ -58,6 +58,7 @@ void mfpForHeavyIonCollision::loadData()
     fugacityDependenceEvaluatedAtFugacityOne = fugacityDependence( 1, 1 );
 
     data_loaded = true;
+    cout << "Loaded mfp data!" << endl;
 }
 
 

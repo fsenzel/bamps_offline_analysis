@@ -181,7 +181,8 @@ private:
     void scatt22_offlineWithAddedParticles_utility( scattering22& scatt22_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, const int iscat, const int jscat, int& typ, const double nexttime );
     void scatt22_amongAddedParticles_utility( scattering22& scatt22_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, const int iscat, const int jscat, int& typ, const double nexttime );
     void scatt22_amongBackgroundParticles_photons_utility( scattering22& scatt22_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, const int iscat, const int jscat, int& typ, const double nexttime );
-    void scatt23_amongBackgroundParticles_photons_utility( scattering23& scatt23_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, const int iscat, const int jscat, int& typ, const double nexttime );
+    void scatt23_amongBackgroundParticles_photons_utility_1( scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime, const double scaleForSelectedPairs, bool & again );
+    void scatt23_amongBackgroundParticles_photons_utility_2( scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime );
 
     /** @brief Goes through all added particles and decays J/psi if the temperature of the surrounding medium is larger than the dissocation temperature */
     void jpsi_dissociation_td( const double time );

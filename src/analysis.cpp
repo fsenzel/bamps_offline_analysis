@@ -2141,12 +2141,12 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       {
         if ( fabs( eta ) >= rapidityRanges[yRangeIndex].yleft && fabs( eta ) <= rapidityRanges[yRangeIndex].yright )
         {
-          if (_particles[i].production_time > lower_time_cutoff_for_v2 )//WARNING Include check if photon or not
+          if (_particles[i].production_time > lower_time_cutoff_for_v2 )//TODO Include check if photon or not
           {
              v2sumInitialCutOff[yRangeIndex] += v2;
              NmbInRangeInitialCutOff[yRangeIndex]++;
           }
-          if (pt > lower_pt_cutoff_for_v2 )//WARNING Include check if photon or not
+          if (pt > lower_pt_cutoff_for_v2 )//TODO Include check if photon or not
           {
              v2sumPtCutOff[yRangeIndex] += v2;
              NmbInRangePtCutOff[yRangeIndex]++;
@@ -2159,7 +2159,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
           if ( pt <= _pt_max && pt > _pt_min )
           {
             dummy = int(( log( pt ) - log( _pt_min ) ) / d_ln_pt );
-            if (_particles[i].production_time > lower_time_cutoff_for_v2 )//WARNING Include check if photon or not
+            if (_particles[i].production_time > lower_time_cutoff_for_v2 )//TODO Include check if photon or not
             {            
               ptBinsV2InitialCutOff[yRangeIndex][dummy] += v2;
               ptBinsNmbInitialCutOff[yRangeIndex][dummy]++;
@@ -2364,9 +2364,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     for ( int i = 0;i < eta_bins;i++ )
     {
       const double delta_eta = 2.0 * ( rapidityRanges[i].yright - rapidityRanges[i].yleft );
+      
       //WARNING: Moritz likes it to divide also by pt_out and 2pi
-      //cout << "ANALYSIS" << endl;
-      //cout << "testp: " << theConfig->getTestparticles() << "   delta_eta: " << delta_eta << endl;
       //WARNING: DIVIDE MANUALLY BY K_FACTOR!!!!
       //double nInBin = double( ptBinsNmb[i][k] ) / (double(theConfig->getkFactorEMProcesses())*double(theConfig->getTestparticles())* double(dpt) * double(delta_eta) * double(pt_out) *(2.0*M_PI));
       double nInBin = double( ptBinsNmb[i][k] ) / (double(theConfig->getTestparticles())* double(dpt) * double(delta_eta) * double(pt_out) *(2.0*M_PI));
