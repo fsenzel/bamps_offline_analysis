@@ -370,7 +370,9 @@ void offlineHeavyIonCollision::mainFramework()
     //cout << "noninteractingParticles.size = " << noninteractingParticles.size() << endl;
     
     // evolution of the medium to present time
+    cout << "before evolveMedium " << simulationTime << "\t" << endOfDataFiles << endl;
     double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
+    cout << "after evolveMedium " << simulationTime << "\t" << endOfDataFiles << endl;
     
     // specify time step
     if ( theConfig->useFixed_dt() )
@@ -463,9 +465,10 @@ void offlineHeavyIonCollision::mainFramework()
     // collide added particles with gluonic medium
     deadParticleList.clear();
     
-    //std::cout << "Scattering! " << endl;
+    cout << "before scattering! " << endl;
     scattering( nexttime, again );
-
+    cout << "aftrer scattering" << endl;
+    
     // if time step is too large -> collide again with smaller time step
     while ( again )
     {
@@ -507,41 +510,43 @@ void offlineHeavyIonCollision::mainFramework()
       scattering( nexttime, again );
     }
 
-    scatterEdgeParticles( edgeCell, edgeCellAdded, nexttime );
- 
-    removeDeadParticles();
-    if( theConfig->doOutput_progressLog() )
-    {
-      theAnalysis->registerProgressInformationForOutput( simulationTime, dt, addedParticles.size(), particles_atTimeNow.size(), ncoll, ncoll22, ncoll23, ncoll32 );
-    }
-    
-    if ( doAnalysisStep )
-    {
-      theAnalysis->intermediateOutput( nn_ana );
-      theAnalysis->collectPtData( nn_ana );
-      theAnalysis->collectYData( nn_ana );
-      theAnalysis->collectEtData( nn_ana );
-      nn_ana++;
-      doAnalysisStep = false;
-      dt = dt_backup;
-    }
-    
-    if ( doMovieStep )
-    {
-      theAnalysis->mfpJetsOutput( nn_ana_movie, jumpMovieSteps );
-      
-      if ( theConfig->doOutput_movieOutputJets() )
+      cout << "after again - before scatter edge" << endl;
+      scatterEdgeParticles( edgeCell, edgeCellAdded, nexttime );
+  
+      removeDeadParticles();
+      if( theConfig->doOutput_progressLog() )
       {
-        theAnalysis->movieOutput( nn_ana_movie, jumpMovieSteps );
+        theAnalysis->registerProgressInformationForOutput( simulationTime, dt, addedParticles.size(), particles_atTimeNow.size(), ncoll, ncoll22, ncoll23, ncoll32 );
       }
-      nn_ana_movie++;
-      doMovieStep = false;
-      doMovieStepMedium = true;
-      dt = dt_backup;
-    }
-    theAnalysis->printCentralDensities( simulationTime );
-    
-    
+      
+      if ( doAnalysisStep )
+      {
+        theAnalysis->intermediateOutput( nn_ana );
+        theAnalysis->collectPtData( nn_ana );
+        theAnalysis->collectYData( nn_ana );
+        theAnalysis->collectEtData( nn_ana );
+        nn_ana++;
+        doAnalysisStep = false;
+        dt = dt_backup;
+      }
+      
+      if ( doMovieStep )
+      {
+        theAnalysis->mfpJetsOutput( nn_ana_movie, jumpMovieSteps );
+        
+        if ( theConfig->doOutput_movieOutputJets() )
+        {
+          theAnalysis->movieOutput( nn_ana_movie, jumpMovieSteps );
+        }
+        nn_ana_movie++;
+        doMovieStep = false;
+        doMovieStepMedium = true;
+        dt = dt_backup;
+      }
+      
+      theAnalysis->printCentralDensities( simulationTime );
+      
+      
 //     // just error checking if masses and flavors are correct
 //     for ( int j = 0; j < addedParticles.size(); j++ )
 //     {
@@ -560,13 +565,13 @@ void offlineHeavyIonCollision::mainFramework()
 //         cout << "Error! Particle " << j << " with flavor " << addedParticles[j].FLAVOR << " should not exist: Nf = " << theConfig->getNlightFlavorsAdded() << " + " <<   theConfig->getNheavyFlavorsAdded() <<  endl;
 //     }
 
-    // analyse timesteps
-    dt_sum += dt;
-    n_dt++;
-    
-    simulationTime = nexttime;
-  }
-  while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
+      // analyse timesteps
+      dt_sum += dt;
+      n_dt++;
+      
+      simulationTime = nexttime;
+    }
+    while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
 
   
   if( theConfig->isHadronizationHQ() )
