@@ -659,6 +659,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
   VectorEPxPyPz Mom1, Mom2;
   FLAVOR_TYPE F1, F2, F3;
 
+  cout << "1";
   // give partcl from cascade the values for cell structurement which could have changed in collisions()
   for ( unsigned int k = 0; k < particles_atTimeNow.size(); k++ )
   {
@@ -667,7 +668,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     particlesEvolving[k].free = particles_atTimeNow[k].free;
     particlesEvolving[k].isAlreadyInAddedParticles = particles_atTimeNow[k].isAlreadyInAddedParticles;
   }
-
+  cout << "2";
   if ( evolveToTime <= stoptime_last )
   {
     for ( int i = 0; i < theConfig->getN_init(); i++ )
@@ -679,9 +680,9 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
 
     numberEvolvingParticles = theConfig->getN_init();
   }
-
+  cout << "3";
   offlineEventType actiontype = event_dummy;
-
+  cout << "4";
   while (( actiontype != event_endOfCascade ) && ( !stop ) )
   {
     actiontype = event_dummy;
@@ -696,7 +697,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       _endOfDataFiles = true;
       actiontype = event_dummy;
     }
-    
+    cout << "5";
     if ( actiontype == event_newTimestep )
     {
       try
@@ -735,6 +736,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       {
         cout << "SCHEISE. Zeile 720." << endl;
       }
+      cout << "6";
     }
     else if ( actiontype == event_interaction22 )
     {
@@ -777,6 +779,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       {
         cout << "SCHEISE. Zeile 764." << endl;
       }  
+      cout << "7";
     }
     else if ( actiontype == event_interaction23 )
     {
@@ -830,6 +833,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       {
         cout << "SCHEISE. Zeile 817." << endl;
       }
+      cout << "8";
     }
     else if ( actiontype == event_interaction32 )
     {
@@ -875,6 +879,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       {
         cout << "SCHEISE. Zeile 862." << endl;
       }
+      cout << "9";
     }
     else if ( actiontype == event_interactionElastic )
     {
@@ -915,6 +920,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       {
         cout << "SCHEISE. Zeile 902." << endl;
       }
+      cout << "10 ";
     }
     else if ( actiontype == event_particleIdSwap )
     {
@@ -929,8 +935,10 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
         cout << "SCHEISE. Zeile 915." << endl;
       }
       particlesEvolving[iscat] = particlesEvolving[jscat];
+      cout << "11";
     }
   }
+  cout << "12";
 
   for ( int i = 0; i < numberEvolvingParticles; i++ )
   {
@@ -939,13 +947,13 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       particlesEvolving[i].init = false;
     }
   }
-
+  cout << "13";
   // duplicate partcl from cascade to partclAtTimeNow
   particles_atTimeNow = particlesEvolving;
   
   // particles vector is larger and in size constant. But consider for partclAtTimenow only actual physical present particles (number is numberEvolvingParticles)
   particles_atTimeNow.resize( numberEvolvingParticles ); 
-
+  cout << "14";
   // propagate particles_atTimeNow to current time
   for ( unsigned int i = 0; i < particles_atTimeNow.size(); i++ )
   {
@@ -954,7 +962,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       particles_atTimeNow[i].Propagate( evolveToTime );
     }
   }
-
+  cout << "15" << endl;
   stoptime_last = evolveToTime;
   return dt_cascade;
 }
