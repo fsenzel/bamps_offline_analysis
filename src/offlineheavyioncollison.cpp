@@ -688,11 +688,15 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     actiontype = event_dummy;
     try
     {
-      boost::shared_ptr< offlineDataEventType > ptrEventType = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >();
-      actiontype = ptrEventType->event;
+      //Kai's idea:
+      actiontype = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >()->event;
+      
+      //boost::shared_ptr< offlineDataEventType > ptrEventType = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >();
+      //actiontype = ptrEventType->event;
     }    
     catch ( boost::archive::archive_exception& err )
     {
+      cout << "try catch for actiontype = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >()->event;" << endl;
       stop = true;
       _endOfDataFiles = true;
       actiontype = event_dummy;
