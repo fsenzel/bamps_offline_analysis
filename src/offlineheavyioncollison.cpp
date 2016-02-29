@@ -700,7 +700,15 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       stop = true;
       _endOfDataFiles = true;
       actiontype = event_dummy;
+    } catch(...) 
+    {
+    // this executes if f() throws std::string or int or any other unrelated type
+      stop = true;
+      _endOfDataFiles = true;
+      actiontype = event_dummy;
     }
+    
+    
     cout << "5";
     if ( actiontype == event_newTimestep )
     {
