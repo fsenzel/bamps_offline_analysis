@@ -370,9 +370,7 @@ void offlineHeavyIonCollision::mainFramework()
     //cout << "noninteractingParticles.size = " << noninteractingParticles.size() << endl;
     
     // evolution of the medium to present time
-    cout << "before evolveMedium " << simulationTime << "\t" << endOfDataFiles << endl;
     double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
-    cout << "after evolveMedium " << simulationTime << "\t" << endOfDataFiles << endl;
     
     // specify time step
     if ( theConfig->useFixed_dt() )
@@ -465,9 +463,7 @@ void offlineHeavyIonCollision::mainFramework()
     // collide added particles with gluonic medium
     deadParticleList.clear();
     
-    cout << "before scattering! " << endl;
     scattering( nexttime, again );
-    cout << "aftrer scattering" << endl;
     
     // if time step is too large -> collide again with smaller time step
     while ( again )
@@ -510,7 +506,6 @@ void offlineHeavyIonCollision::mainFramework()
       scattering( nexttime, again );
     }
 
-      cout << "after again - before scatter edge" << endl;
       scatterEdgeParticles( edgeCell, edgeCellAdded, nexttime );
   
       removeDeadParticles();
@@ -659,7 +654,6 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
   VectorEPxPyPz Mom1, Mom2;
   FLAVOR_TYPE F1, F2, F3;
 
-  cout << "1";
   // give partcl from cascade the values for cell structurement which could have changed in collisions()
   for ( unsigned int k = 0; k < particles_atTimeNow.size(); k++ )
   {
@@ -668,7 +662,6 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     particlesEvolving[k].free = particles_atTimeNow[k].free;
     particlesEvolving[k].isAlreadyInAddedParticles = particles_atTimeNow[k].isAlreadyInAddedParticles;
   }
-  cout << "2";
   if ( evolveToTime <= stoptime_last )
   {
     for ( int i = 0; i < theConfig->getN_init(); i++ )
@@ -680,36 +673,34 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
 
     numberEvolvingParticles = theConfig->getN_init();
   }
-  cout << "3";
   offlineEventType actiontype = event_dummy;
-  cout << "4";
   while (( actiontype != event_endOfCascade ) && ( !stop ) )
   {
     actiontype = event_dummy;
     try
     {
       //Kai's idea:
-      actiontype = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >()->event;
+      //actiontype = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >()->event;
       
-      //boost::shared_ptr< offlineDataEventType > ptrEventType = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >();
-      //actiontype = ptrEventType->event;
+      boost::shared_ptr< offlineDataEventType > ptrEventType = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >();
+      actiontype = ptrEventType->event;
     }    
     catch ( boost::archive::archive_exception& err )
     {
-      cout << "try catch for actiontype = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >()->event;" << endl;
+      cout << " try catch for actiontype = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >()->event;" << endl;
       stop = true;
       _endOfDataFiles = true;
       actiontype = event_dummy;
     } catch(...) 
     {
-    // this executes if f() throws std::string or int or any other unrelated type
+      // this executes if f() throws std::string or int or any other unrelated type
+      cout << " unknown try catch for actiontype = offlineInterface->readOfflineDataFromArchive< offlineDataEventType >()->event;" << endl;
       stop = true;
       _endOfDataFiles = true;
       actiontype = event_dummy;
     }
     
-    
-    cout << "5";
+
     if ( actiontype == event_newTimestep )
     {
       try
@@ -726,7 +717,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       }
       catch( boost::archive::archive_exception& err )
       {
-        cout << "SCHEISE. Zeile 702." << endl;
+        cout << "try catch for actiontype == event_newTimestep" << endl;
       }
       rateGluons_prev = rateGluons;
       rateQuarks_prev = rateQuarks;
@@ -746,9 +737,8 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       }
       catch( boost::archive::archive_exception& err )
       {
-        cout << "SCHEISE. Zeile 720." << endl;
+        cout << "try catch for boost::shared_ptr< offlineDataInteractionRates > ptrRates = offlineInterface->readOfflineDataFromArchive< offlineDataInteractionRates >();" << endl;
       }
-      cout << "6";
     }
     else if ( actiontype == event_interaction22 )
     {
@@ -789,9 +779,8 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       }
       catch( boost::archive::archive_exception& err )
       {
-        cout << "SCHEISE. Zeile 764." << endl;
+        cout << "try catch for boost::shared_ptr< offlineDataInteraction22 > ptrInteraction22 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction22 >();" << endl;
       }  
-      cout << "7";
     }
     else if ( actiontype == event_interaction23 )
     {
@@ -843,9 +832,8 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       }
       catch( boost::archive::archive_exception& err )
       {
-        cout << "SCHEISE. Zeile 817." << endl;
+        cout << "try catch for boost::shared_ptr< offlineDataInteraction23 > ptrInteraction23 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction23 >();" << endl;
       }
-      cout << "8";
     }
     else if ( actiontype == event_interaction32 )
     {
@@ -889,9 +877,8 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       }
       catch( boost::archive::archive_exception& err )
       {
-        cout << "SCHEISE. Zeile 862." << endl;
+        cout << "try catch for boost::shared_ptr< offlineDataInteraction32 > ptrInteraction32 = offlineInterface->readOfflineDataFromArchive< offlineDataInteraction32 >();" << endl;
       }
-      cout << "9";
     }
     else if ( actiontype == event_interactionElastic )
     {
@@ -930,9 +917,8 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       }
       catch( boost::archive::archive_exception& err )
       {
-        cout << "SCHEISE. Zeile 902." << endl;
+        cout << "try catch for boost::shared_ptr< offlineDataInteractionElastic > ptrInteractionElastic = offlineInterface->readOfflineDataFromArchive< offlineDataInteractionElastic >();" << endl;
       }
-      cout << "10 ";
     }
     else if ( actiontype == event_particleIdSwap )
     {
@@ -944,13 +930,12 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       }
       catch( boost::archive::archive_exception& err )
       {
-        cout << "SCHEISE. Zeile 915." << endl;
+        cout << "try catch for boost::shared_ptr< offlineDataParticleIdSwap > ptrSwap = offlineInterface->readOfflineDataFromArchive< offlineDataParticleIdSwap >();" << endl;
       }
       particlesEvolving[iscat] = particlesEvolving[jscat];
-      cout << "11";
     }
   }
-  cout << "12";
+
 
   for ( int i = 0; i < numberEvolvingParticles; i++ )
   {
@@ -959,13 +944,13 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       particlesEvolving[i].init = false;
     }
   }
-  cout << "13";
+
   // duplicate partcl from cascade to partclAtTimeNow
   particles_atTimeNow = particlesEvolving;
   
   // particles vector is larger and in size constant. But consider for partclAtTimenow only actual physical present particles (number is numberEvolvingParticles)
   particles_atTimeNow.resize( numberEvolvingParticles ); 
-  cout << "14";
+
   // propagate particles_atTimeNow to current time
   for ( unsigned int i = 0; i < particles_atTimeNow.size(); i++ )
   {
@@ -974,7 +959,6 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
       particles_atTimeNow[i].Propagate( evolveToTime );
     }
   }
-  cout << "15" << endl;
   stoptime_last = evolveToTime;
   return dt_cascade;
 }

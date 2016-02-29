@@ -59,7 +59,8 @@ cms_jpsi = 151,
 // jets:
 background_jets = 161,
 central_densities = 171,
-photons = 40
+photons = 40,
+photons_plus_background = 41
 };
 
 

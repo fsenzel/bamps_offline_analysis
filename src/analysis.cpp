@@ -789,9 +789,18 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 0.7 );//1                 // LHC
       rapidityRanges.push_back(yRange);
-      //studyBackground = true;
       studyPhotons=true;
       break;
+    
+    case photons_plus_background:  
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.35 );//rapidityRange[0] // RHIC
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.7 );//1                 // LHC
+      rapidityRanges.push_back(yRange);
+      studyBackground = true;
+      studyPhotons=true;
+      break;      
       
     default:
       break;
@@ -1969,7 +1978,7 @@ v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg, std
   //Photon Angle Bins config
   PhotonNumberVsAngleBin.setMinMaxN( 0.0 , 90, 100 );
   
-  studyInitialCutOffEffect = false;
+  studyInitialCutOffEffect = true;
   lower_time_cutoff_for_v2 = 3.0;
   lower_pt_cutoff_for_v2 = 0.5;
 }
@@ -2221,9 +2230,10 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_v2_tot << "# bin statistics for 0.35 mid-rapidity:  Avg per bin=" << double( NmbInRange[0] ) / n_c << "   Min=" << binMin << "   Max=" << binMax << endl;
   //print_v2_tot << "# Number of colliding pairs with average positive v2: " << theConfig->countPositiveV2 << endl;
   //print_v2_tot << "# Number of colliding pairs with average negative v2: " << theConfig->countNegativeV2 << endl;  
-  print_v2_tot << "# total v2, v2_sum and number in range for different rapidity bins" << endl;
-
+  print_v2_tot << "#pt_min\t#total v2 for different rapidity bins" << endl;
+  //This is the trigger info for Moritz Analysis scripts
   print_v2_tot << _pt_min;
+  
   print_v2_tot.width( 15 );
   for ( int i = 0;i < eta_bins;i++ )
   {
@@ -2237,6 +2247,9 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     }
     print_v2_tot.width( 15 );
   }
+  
+  print_v2_tot << "[#v2_sum\t#number in range], for different rapidity bins" << endl;
+  
   for ( int i = 0;i < eta_bins;i++ )
   {
     print_v2_tot <<  v2sum[i];
@@ -2246,6 +2259,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   }
   print_v2_tot << endl;
 
+  /** WARNING This output is not necesary
   print_v2_tot << _pt_max;
   print_v2_tot.width( 15 );
   for ( int i = 0;i < eta_bins;i++ )
@@ -2268,9 +2282,13 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     print_v2_tot.width( 15 );
   }
   print_v2_tot << endl;
+  */
   
   print_v2_tot << "# Cut off initial timesteps! Only count from time " << lower_time_cutoff_for_v2 << " fm" << endl;
-  print_v2_tot << "#average integrated v2 | , for all rapidity bins" << endl; 
+  print_v2_tot << "#1234\t#average integrated v2, for all rapidity bins" << endl; 
+  print_v2_tot << 1234;
+  print_v2_tot.width( 15 );
+  
   for ( int i = 0;i < eta_bins;i++ )
   {
     if ( NmbInRange[i] > 0 )
@@ -2284,15 +2302,18 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     print_v2_tot << '\t' ;
   } 
   print_v2_tot << endl;
-  print_v2_tot << "#sum | number , for all rapidity bins" << endl; 
+  
+  print_v2_tot << "[#sum\t#number], for all rapidity bins, for lower time cutoff" << endl; 
   for ( int i = 0;i < eta_bins;i++ )
   {
     print_v2_tot <<  v2sumInitialCutOff[i] << '\t';
     print_v2_tot <<  NmbInRangeInitialCutOff[i] << '\t';
   }
+  print_v2_tot << endl;
   print_v2_tot << "# Cut off pt: " << lower_pt_cutoff_for_v2 << " GeV" << endl;
-  print_v2_tot << "#average integrated v2 | , for all rapidity bins" << endl; 
+  print_v2_tot << "#4321\t#average integrated v2, for all rapidity bins" << endl; 
   print_v2_tot << 4321;
+  print_v2_tot.width( 15 );
   for ( int i = 0;i < eta_bins;i++ )
   {
     if ( NmbInRange[i] > 0 )
@@ -2306,24 +2327,26 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     print_v2_tot << '\t' ;
   } 
   print_v2_tot << endl;
-  print_v2_tot << "#sum | number , for all rapidity bins" << endl; 
+  print_v2_tot << "[#sum\t#number], for all rapidity bins, for lower pt cutoff" << endl; 
   for ( int i = 0;i < eta_bins;i++ )
   {
     print_v2_tot <<  v2sumPtCutOff[i] << '\t';
     print_v2_tot <<  NmbInRangePtCutOff[i] << '\t';
   }
-  print_v2_tot << "#Total number of photons:" << endl;
-  print_v2_tot << "1234" << '\t' <<  noninteractingParticles.size() << endl;
+  print_v2_tot << endl;
+  print_v2_tot << "#5678\t#Total number of photons:" << endl;
+  print_v2_tot << "5678" << '\t' <<  noninteractingParticles.size() << endl;
 
   
 
+  //V2 over pt
   // print summed output, v2 is not computed, but summed v2 and the number in one bin
   print_v2_summed << "# summed v2 of " << type << endl;
   print_v2_summed << "# t = " << _outputTime << endl;
-  print_v2_summed << "# Total summed photon v2" << theConfig->v2average_debug << endl;
+  print_v2_summed << "# Total summed photon v2" << "\t" << theConfig->v2average_debug << endl;
   print_v2_summed << "#";
   print_v2_summed.width( 14 );
-  print_v2_summed << "pt       summed v_2 and number in bin for different rapidity bins" << endl;
+  print_v2_summed << "#pt\t[#summed v_2\t#number in bin],for different rapidity bins" << endl;
   
 
   for ( int k = 0;k < n_bins + 1;k++ )
@@ -2350,14 +2373,12 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
 
   // print yield for RAA
   print_yield << "# " << type << " yield distribution" << endl;
-  print_yield << "# t = " << _outputTime << endl;
-  print_yield << "#";
-  print_yield.width( 14 );
-  print_yield << "pt       yield for different rapidity bins" << endl;
+  print_yield << "# t = " << _outputTime << " fm" << endl;
+  print_yield << "#pt\t#yield for different rapidity bins" << endl;
 
   for ( int k = 0;k < n_bins + 1;k++ )
   {
-    print_yield.width( 15 );
+    //print_yield.width( 15 );
     pt_out = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
     print_yield << pt_out;
     const double dpt = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt ) - exp( double( k ) * d_ln_pt + log( _pt_min ) );
