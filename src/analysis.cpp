@@ -2247,7 +2247,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     }
     print_v2_tot.width( 15 );
   }
-  
+  print_v2_tot << endl;
   print_v2_tot << "[#v2_sum\t#number in range], for different rapidity bins" << endl;
   
   for ( int i = 0;i < eta_bins;i++ )
