@@ -1407,7 +1407,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         else
         {
           //             if (( cells[j].size() + cellsAdded[j].size() ) >= cellcut )     // enough particles in cell -> scatter
-          if ( true )
+          if (true)
           {
             nGluons = 0;
             nGluonsAdded = 0;
@@ -2117,179 +2117,66 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellCon
   FLAVOR_TYPE F1here, F2here;
   double temperature;
 
-
+  unsigned int m1, m2;
   list<int>::const_iterator iIt;
   list<int>::const_iterator jIt;
 
   scattering22 scatt22_object( &theI22 );
   
-  for ( int a = 0; a < static_cast<int>( _allParticlesList.size() ) ; a++ )
-  {
-    iscat = _allParticlesList[a];
-    particles_atTimeNow[iscat].collision_tag = false;
-  }
-  
-  
-  for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
-  {
-    iscat = _allParticlesList[i];    
-    if(particles_atTimeNow[iscat].collision_tag)  
-    {  
-      continue;
-    }
+  const int N = _allParticlesList.size();
+  //this can be adjusted!
+  const int consideredPairs = N;     //number of pairs to be considered (on the average)
+  // The cross section needs to be scaled since only a certain number "consideredPairs" of all pairs
+  // is taken for simulation. The scale factor depends on the inital state (gg->X has a different number of pairs than gq->X etc.)
+  double scaleForSelectedPairs = 0;
+  const int allPairs = binomial ( N, 2 );
 
-    for ( unsigned int j = i+1; j < _allParticlesList.size(); j++ )
-    {        
-      jscat = _allParticlesList[j]; 
-      
-      if(particles_atTimeNow[jscat].collision_tag == false)
+  if ( allPairs >= 50 )
+  {   //only a certain number consideredPairs of all pairs will be considered  
+    for ( int i = 0; i < consideredPairs; i++ )
+    {
+      do
       {
-        if(particles_atTimeNow[iscat].collision_tag)  
-        {  
-          break;
-        }
-
-        if(particles_atTimeNow[iscat].collision_tag ||particles_atTimeNow[jscat].collision_tag )
+        m1 = int ( _allParticlesList.size() * ran2() );
+        if ( m1 == _allParticlesList.size() ) 
         {
-          cout << "SHIT####################################################################################" << endl;
-          std::string errMsg = "Error in scatt22_amongBackgroundParticles: collision tags violated.";
-          throw eHIC_error( errMsg );
+          m1 = _allParticlesList.size() - 1;
         }
-        
-        F1here = particles_atTimeNow[iscat].FLAVOR;
-        M1 = particles_atTimeNow[iscat].m;
-        F2here = particles_atTimeNow[jscat].FLAVOR;
-        M2 = particles_atTimeNow[jscat].m;
-        
-        unsigned int _F1 = std::min( static_cast<unsigned int>( F1here ), static_cast<unsigned int>( F2here ) );
-        unsigned int _F2 = std::max( static_cast<unsigned int>( F1here ), static_cast<unsigned int>( F2here ) );
-        
-        
-        s = (particles_atTimeNow[iscat].Mom + particles_atTimeNow[jscat].Mom).M2();
-
-        
-        
-        if ( theConfig->getCrossSectionMethod() == 0 )
+        iscat = _allParticlesList[m1];       
+      }
+      while ( particles_atTimeNow[iscat].dead );
+      do
+      {
+        m2 = int ( _allParticlesList.size() * ran2() );
+        if ( m2 == _allParticlesList.size() ) 
         {
-          if ( ( theConfig->doScattering_22_photons() ) && ( FPT_COMP_NZ ( theConfig->getInfraredCutOffEMProcesses() ) ) )
-          {
-            s_cutoff_for_pqcd = 2.0 * theConfig->getInfraredCutOffEMProcesses();
-            //cout << s_cutoff_for_pqcd << endl;
-          }
-          else   // Debye-screened 22 photonproduction
-          {
-            s_cutoff_for_pqcd = 0.1;
-          }
-
+          m2 = _allParticlesList.size() - 1;
         }
-        else // const cross section or some such.
+        jscat = _allParticlesList[m2]; 
+      }
+      while ( jscat == iscat || particles_atTimeNow[jscat].dead );
+      
+      scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
+      scatt22_amongBackgroundParticles_photons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);     
+    }                                                    
+  }
+  else
+  {
+    for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
+    {
+      iscat = _allParticlesList[i];    
+      for ( unsigned int j = i+1; j < _allParticlesList.size(); j++ )
+      {              
+        jscat = _allParticlesList[j]; 
+        scaleForSelectedPairs=1.0;  
+        if(particles_atTimeNow[iscat].dead || particles_atTimeNow[jscat].dead)
         {
-          s_cutoff_for_pqcd = 0.0;
-        }
-          
-        if ( FPT_COMP_L(s,1.1*lambda2) )
+          continue;
+        }else
         {
-          probab22 = -1.0;
-          cs22 = 0.0; //1/GeV^2
-        }
-        else if( FPT_COMP_G(s, s_cutoff_for_pqcd) )// if s > s_cutoff_for_pqcd...
-        {
-       
-         
-          Vrel = VelRel( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom, M1, M2 );
-
-          //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, it will be multiplied in the scattering routines
-          md2g_wo_as = ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
-          md2q_wo_as = ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q ) / 2.0;
-          
-          int initialStateIndex = -1;
-          
-          scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
-                                      F1here, F2here, M1, M2, s, md2g_wo_as , md2q_wo_as,
-                                      theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
-                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
-                                      theConfig->getInfraredCutOffEMProcesses(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
-                                      temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-        
-          switch ( theConfig->getCrossSectionMethod() )
-          {
-            case 0:  // PQCD cross sections
-              cs22 = scatt22_object.getXSection22onlyPhotons ( initialStateIndex );
-              break;
-            case 1:  // const cross section
-              cs22 = theConfig->getInputCrossSectionValue() * 0.1 / ( pow ( 0.197, 2.0 ) );
-              break;
-            default
-                :
-              string errMsg = "Error in method of cross section";
-              throw eHIC_error ( errMsg );
-          }
-          // 1/ GeV^2
-          //100 mb = 10 fm^2 = 100 * 2.58 1/GeV^2
-          
-          probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt  / ( dv * testpartcl );
-          
-          
-          /*TEST:
-          double Avv2 =  1.0/2.0*(( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )+( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) );
-          if( FPT_COMP_GZ(Avv2) )
-          {
-            
-            //cout << "v2 = " << Avv2 << "\t s = " << s << endl;
-            //cout << "cs = " << cs22 << " 1/GeV^2" << " = " << cs22/2.58 << " mb" << endl;
-            averageS_Bigv2 += s ;
-            numberA++;
-          }
-          if( FPT_COMP_LZ(Avv2) )
-           {
-            //cout << "v2 = " << Avv2 << "\t s = " << s << endl;
-            //cout << "cs = " << cs22 << " 1/GeV^2" << " = " << cs22/2.58 << " mb" << endl;
-            averageS_smallv2 += s ;
-            numberB++;
-          }  
-          cout << "Big: " << averageS_Bigv2/numberA << "\t Small: " << averageS_smallv2/numberB << endl;
-          */
-          
-          //cout << "Probab = " << probab22 << "\tdv = " << dv << "\ttestpartcl = " << testpartcl << "\tdt = " << dt << "\tVrel= " << Vrel << "\tNaddedEvents" << theConfig->getNaddedEvents() << endl;
-          
-        
-
-          if ( FPT_COMP_G(probab22, 1.0) )
-          {
-            cout << "P22=" << probab22 << ">1" << endl;
-            again = true;
-    //         cout << "dt (old) = " << dt << endl;
-            dt = 0.5 / ( probab22 / dt );
-    //         cout << "dt (new) = " << dt << endl;
-            return;
-          }
-          double randomnumber = ran2();
-          
-          
-          if ( randomnumber < probab22 )
-          {
-            //TEST:
-            /*if( FPT_COMP_GZ(1.0/2.0*(( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )+(( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) ))) )
-            {
-             theConfig->countPositiveV2++;
-            }else
-            {
-             theConfig->countNegativeV2++;
-            }*/
-          
-
-            //WARNING: collision tag neccessary?  
-            particles_atTimeNow[jscat].collision_tag = true;
-            particles_atTimeNow[iscat].collision_tag = true;
-                          
-            //cout << "-----------------" << endl;
-            //cout << "Initial v2: " <<  1.0/2.0*(( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )+( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) )<< endl;;
-            //cout << "Initial Momentum: " << particles_atTimeNow[iscat].Mom.Pz() << '\t' << particles_atTimeNow[jscat].Mom.Pz() << endl;
-            
-            scatt22_amongBackgroundParticles_photons_utility( scatt22_object, _cells.particleList, _allParticlesList, iscat, jscat, typ, nexttime );
-          }
-        }
-      }     
+          scatt22_amongBackgroundParticles_photons_utility_1(scatt22_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);
+        } 
+      }
     }
   }
 }
@@ -3424,7 +3311,154 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22
   }
 }
 
-void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility( scattering22& scatt22_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesList, const int iscat, const int jscat, int& typ, const double nexttime )
+//std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesList,
+void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_1( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime, double scaleForSelectedPairs, bool & again )
+{
+  FLAVOR_TYPE F1, F2;
+  double Tmax, TT;
+  double M1, M2;
+  double t_hat, s_cutoff_for_pqcd,s,xt ;
+  double Vrel,md2g_wo_as,md2q_wo_as,cs22,probab22;
+  int ringIndex;
+  double temperature = 0.0;
+  
+  ParticleOffline temp_particle_iscat = particles_atTimeNow[iscat];
+  ParticleOffline temp_particle_jscat = particles_atTimeNow[jscat];
+  
+
+  F1 = particles_atTimeNow[iscat].FLAVOR;
+  M1 = particles_atTimeNow[iscat].m;  
+  
+  F2 = particles_atTimeNow[jscat].FLAVOR;
+  M2 = particles_atTimeNow[jscat].m;
+
+  unsigned int _F1 = std::min( static_cast<unsigned int>( F1), static_cast<unsigned int>( F2 ) );
+  unsigned int _F2 = std::max( static_cast<unsigned int>( F1), static_cast<unsigned int>( F2 ) );
+        
+  s = (particles_atTimeNow[iscat].Mom + particles_atTimeNow[jscat].Mom).M2();
+  if ( theConfig->getCrossSectionMethod() == 0 )
+  {
+    if ( ( theConfig->doScattering_22_photons() ) && ( FPT_COMP_NZ ( theConfig->getInfraredCutOffEMProcesses() ) ) )
+    {
+      s_cutoff_for_pqcd = 2.0 * theConfig->getInfraredCutOffEMProcesses();
+      //cout << s_cutoff_for_pqcd << endl;
+    }
+    else   // Debye-screened 22 photonproduction
+    {
+      //WARNING
+      s_cutoff_for_pqcd = 0.001;
+    }
+
+  }
+  else // const cross section or some such.
+  {
+    s_cutoff_for_pqcd = 0.0;
+  } 
+  if( FPT_COMP_G(s, s_cutoff_for_pqcd) )// if s > s_cutoff_for_pqcd...
+  {
+    Vrel = VelRel( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom, M1, M2 );
+
+    //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, it will be multiplied in the scattering routines
+    md2g_wo_as = ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
+    md2q_wo_as = ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q ) / 2.0;
+    
+    int initialStateIndex = -1;
+    
+    //Compute LRF temperature, encoded in md2g
+    xt = particles_atTimeNow[iscat].Pos.Perp();
+    ringIndex = rings.getIndex( xt );
+    double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
+    temperature = effectiveTemperatureFromRings;//Doesn't do anything here.
+    double Nf=3.0;
+    double scaled_LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) ) / s;
+    double scaled_LRF_md2q_wo_as = 1.0/9.0 * scaled_LRF_md2g_wo_as ;
+  
+    scatt22_obj.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
+                                F1, F2, M1, M2, s, scaled_LRF_md2g_wo_as , scaled_LRF_md2q_wo_as,
+                                theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
+                                theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
+                                theConfig->getInfraredCutOffEMProcesses(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
+                                temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+  
+    switch ( theConfig->getCrossSectionMethod() )
+    {
+      case 0:  // PQCD cross sections
+        cs22 = scatt22_obj.getXSection22onlyPhotons ( initialStateIndex );
+        break;
+      case 1:  // const cross section
+        cs22 = theConfig->getInputCrossSectionValue() * 0.1 / ( pow ( 0.197, 2.0 ) );
+        break;
+      default
+          :
+        string errMsg = "Error in method of cross section";
+        throw eHIC_error ( errMsg );
+    }
+    // 1/ GeV^2
+    //100 mb = 10 fm^2 = 100 * 2.58 1/GeV^2
+    
+    probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt * scaleForSelectedPairs  / ( dv * testpartcl );
+     
+    /*TEST:
+    double Avv2 =  1.0/2.0*(( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )+( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) );
+    if( FPT_COMP_GZ(Avv2) )
+    {
+      
+      //cout << "v2 = " << Avv2 << "\t s = " << s << endl;
+      //cout << "cs = " << cs22 << " 1/GeV^2" << " = " << cs22/2.58 << " mb" << endl;
+      averageS_Bigv2 += s ;
+      numberA++;
+    }
+    if( FPT_COMP_LZ(Avv2) )
+      {
+      //cout << "v2 = " << Avv2 << "\t s = " << s << endl;
+      //cout << "cs = " << cs22 << " 1/GeV^2" << " = " << cs22/2.58 << " mb" << endl;
+      averageS_smallv2 += s ;
+      numberB++;
+    }  
+    cout << "Big: " << averageS_Bigv2/numberA << "\t Small: " << averageS_smallv2/numberB << endl;
+    */
+    
+    //cout << "Probab = " << probab22 << "\tdv = " << dv << "\ttestpartcl = " << testpartcl << "\tdt = " << dt << "\tVrel= " << Vrel << "\tNaddedEvents" << theConfig->getNaddedEvents() << endl;
+    
+  
+
+    if ( FPT_COMP_G(probab22, 2.0) )
+    {
+      cout << "P23 photons=" << probab22 << ">1" << endl;
+      again = true;
+      dt = 0.5 * dt;
+    }else if ( FPT_COMP_G(probab22, 1.0) )
+    {
+      cout << "P23 photons=" << probab22 << ">1" << endl;
+      again = true;
+      cout << "dt (old) = " << dt << endl;
+      dt = 0.5 / ( probab22 / dt );
+      cout << "dt (new) = " << dt << endl;
+      return;
+    }
+  
+    if ( ran2() < probab22 )
+    {
+      //TEST:
+      /*if( FPT_COMP_GZ(1.0/2.0*(( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[iscat].Mom.Pt(), 2.0 )+(( pow( particles_atTimeNow[jscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[jscat].Mom.Py(), 2.0 ) ) / pow( particles_atTimeNow[jscat].Mom.Pt(), 2.0 ) ))) )
+      {
+        theConfig->countPositiveV2++;
+      }else
+      {
+        theConfig->countNegativeV2++;
+      }*/
+
+      scatt22_amongBackgroundParticles_photons_utility_2( scatt22_obj, iscat, jscat, nexttime );
+    }  
+  }else
+  {
+    probab22 = -1.0;
+    cs22 = 0.0; //1/GeV^2 
+  }
+}
+
+//std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesList,
+void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_2( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime)
 {
   FLAVOR_TYPE F1, F2;
   double Tmax, TT;
@@ -3452,6 +3486,7 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility(
   temp_particle_jscat.lastInt = particles_atTimeNow[jscat].Pos;
 
   // determine type of scattering, momentum transfer t_hat, new flavor and new masses
+  int typ;
   scatt22_obj.getMomentaAndMasses22onlyPhotons( F1, F2, M1, M2, t_hat, typ ); 
 
   // translate momentum transfer t_hat into actual momenta of outgoing particles
