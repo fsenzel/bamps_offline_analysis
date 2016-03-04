@@ -3345,8 +3345,8 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     }
     else   // Debye-screened 22 photonproduction
     {
-      //WARNING
-      s_cutoff_for_pqcd = 0.001;
+      //Same lower cutoff as used for tables.
+      s_cutoff_for_pqcd =  0.1;//( 1.1 * ns_casc::lambda2 ) ;
     }
 
   }
@@ -3370,11 +3370,11 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
     temperature = effectiveTemperatureFromRings;//Doesn't do anything here.
     double Nf=3.0;
-    double scaled_LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) ) / s;
-    double scaled_LRF_md2q_wo_as = 1.0/9.0 * scaled_LRF_md2g_wo_as ;
+    double LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) );
+    double LRF_md2q_wo_as = 1.0/9.0 * LRF_md2g_wo_as ;
   
     scatt22_obj.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
-                                F1, F2, M1, M2, s, scaled_LRF_md2g_wo_as , scaled_LRF_md2q_wo_as,
+                                F1, F2, M1, M2, s, LRF_md2g_wo_as , LRF_md2q_wo_as,
                                 theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
                                 theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
                                 theConfig->getInfraredCutOffEMProcesses(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
