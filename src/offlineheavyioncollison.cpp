@@ -132,7 +132,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
   if(theConfig->doScattering_23_photons() && !theConfig->I23onlineIntegrationPhotonsIsSet())
   {
     cout << "Do the 23 photonproduction from Tables." << endl;
-    theI23_photons.configurePhotons(theConfig->I23onlineIntegrationIsSet(), theConfig->I23onlineIntegrationPhotonsIsSet(), 1, 0.0, 0, "", "", 0, theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), 0, roughTables, theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),theConfig->getLPMModePhotons());
+    theI23_photons.configurePhotons(theConfig->I23onlineIntegrationIsSet(), theConfig->I23onlineIntegrationPhotonsIsSet(), 1, 0.0, 0, "", "", 0, theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), 0, normal_photons, theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),theConfig->getLPMModePhotons());
     theMFP.loadData();    
   }else if(theConfig->doScattering_23_photons())
   {
@@ -3369,10 +3369,11 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     ringIndex = rings.getIndex( xt );
     double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
     temperature = effectiveTemperatureFromRings;//Doesn't do anything here.
+    
     double Nf=3.0;
     double LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) );
     double LRF_md2q_wo_as = 1.0/9.0 * LRF_md2g_wo_as ;
-  
+    //if (temperature > 1.2)cout << temperature << "\t"<<LRF_md2q_wo_as << endl;
     scatt22_obj.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
                                 F1, F2, M1, M2, s, LRF_md2g_wo_as , LRF_md2q_wo_as,
                                 theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
