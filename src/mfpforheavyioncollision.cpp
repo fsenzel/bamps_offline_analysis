@@ -81,7 +81,6 @@ double mfpForHeavyIonCollision::getMeanFreePath(const double _E, const FLAVOR_TY
 
     const int nInterpolValues = 4;
     int startIndex = getStartIndexForTemperatureValues( _T, nInterpolValues );
-
     double xa[nInterpolValues+1], ya[nInterpolValues+1];
 
     for ( int i = 0; i < nInterpolValues; i++ )
@@ -144,18 +143,24 @@ int mfpForHeavyIonCollision::getStartIndexForTemperatureValues(const double _T, 
         throw eMFP_heavy_ion_error( errMsg );
     }
 
-    unsigned int nn = 0;
+    int nn = 0;
     while ( temperaturesForMfpData[nn] < _T && nn < temperaturesForMfpData.size() )
     {
         ++nn;
     }
 
     nn = nn - _nValues / 2;
-    if ( nn < 0 )
+    //nn declared as unsigned int gave problems when below zero! Thats why here some additional checks for nn truly < zero are needed.
+    if( nn+1 == 0 )
     {
-        nn = 0;
-    }
-    else if ( nn + _nValues > temperaturesForMfpData.size() )
+      nn = 0;
+    }    
+    
+    if ( nn < 0 || nn+1 < 0.0)
+    {
+      //cout << "nn" << nn << "\t" << temperaturesForMfpData.size() << endl;
+      nn = 0;
+    }else if ( nn + _nValues > temperaturesForMfpData.size() )
     {
         while ( nn + _nValues > temperaturesForMfpData.size() )
         {

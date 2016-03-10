@@ -3634,16 +3634,32 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     //Compute MFP
     xt = particles_atTimeNow[iscat].Pos.Perp();
     ringIndex = rings.getIndex( xt );
-    //[lambda]=fm
-    lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, rings[ringIndex].getEffectiveTemperature(), rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
-    
     double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
+    if(effectiveTemperatureFromRings>2.5)
+    {
+      effectiveTemperatureFromRings = 2.5;
+    }
+    //[lambda]=fm
+    lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, effectiveTemperatureFromRings, rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
+    
+    
     
     //TEST:       
     //lambda = 0.4;//fm
     //cout << "MFP [fm] = " << lambda << endl;
     
     lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
+          
+    //if(lambda_scaled>100.0)
+    //{
+    //  cout << sqrt( s ) << endl;
+    //  cout << "Big lambda: " << lambda_scaled << "\t" << lambda << endl;
+    //}
+    /*if(lambda_scaled>1.0)
+    {
+      cout << lambda_scaled << endl;
+    }*/  
+    
           
     /*TEST
     cout << "lambda = " << lambda << endl;  
@@ -3676,7 +3692,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     }else
     {
       //TODO: correct error handling for zero mfp.
-      cout << lambda << endl;
+      //cout << lambda << "\t" << effectiveTemperatureFromRings << endl;
       cs23Total = 0;
     }       
     probab23 = pow( 0.197, 2.0 ) * cs23Total * Vrel * dt * scaleForSelectedPairs / ( dv * testpartcl );
