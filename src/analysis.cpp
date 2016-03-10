@@ -200,8 +200,13 @@ analysis::analysis( config* const c ):
       tstep[118] = infinity; //fm/c
       nTimeSteps = 119;
     }
-  }
-  else
+  }else if(studyEtSpectra)
+  {
+    tstep[0] = 0.1;      //fm/c
+    tstep[1] = 0.2;      //fm/c
+    tstep[2] = infinity; //fm/c
+    nTimeSteps = 3;
+  }else
   {
     tstep[0] = 0.1;      //fm/c
     tstep[1] = 0.5;      //fm/c
@@ -394,11 +399,7 @@ analysis::analysis( config* const c ):
     //--------------------------------------
   }
   
-  
-  
-  
-  
-  
+
   if( studyYDistribution || studyEtSpectra )
   {
     //------ initialisation of rapidity binning ------
@@ -682,7 +683,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       break;
     case dndy_time:
-      study_dndy_time = true;
+      study_dndy_time = false;
+      studyEtSpectra = true;
+      //rapidity -6 ...6, with bins 0.1
       break;
     case temperature_velocity_cells:
       studyTempAndVelocity = true;
@@ -838,6 +841,7 @@ void analysis::collectEtData( const int step )
     transverseEnergyDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
     transverseEnergyDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
     transverseEnergyDistribution( anti_light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+    printEtDistribution(step);
   }
 }
 
@@ -916,6 +920,10 @@ void analysis::intermediateOutput( const int nn )
 
 void analysis::finalOutput( const double _stoptime )
 {
+  if( studyEtSpectra)
+  {
+    collectEtData(_stoptime);
+  }
   
   if( studyPtSpectra )
   {  
@@ -2464,7 +2472,78 @@ void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Pa
   }
 }
 
+void analysis::printEtDistribution(const int step )
+{
+  string filename,timename;
+  stringstream ss;
 
+  if ( step == 0 )
+    timename = "initial";
+  else if ( step == nTimeSteps )
+    timename = "final";
+  else
+  {
+    ss << step;
+    timename = "step" + ss.str();
+  }
+
+  //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+  filename = filename_prefix + "_dEtdy_" + "_" + timename + ".dat";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
+
+  //---- print header if file is empty ----
+  time_t end;
+  time( &end );
+
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if ( size == 0 )
+    printHeader( file, dEdy, end );
+  
+//   // populate temporary _ptBins with temporary "references" to the actual data structures according to the requested flavor
+//   for ( int yRange = 0; yRange < rapidityRanges.size(); yRange++ )
+//   {
+//     _EtBinsQ.push_back(  transverseEnergyGluons[step][yRange] );
+//     _EtBinsG.push_back(  transverseEnergyGluons[step][yRange] );
+//     
+// //     switch ( _flavTypeToComputeFor )
+// //     {
+// //       case gluon:
+// //         _EtBins.push_back(  transverseEnergyGluons[step][yRange] );
+// //         break;
+// //       case light_quark:
+// //         _EtBins.push_back( transverseEnergyQuarks[step][yRange]  );
+// //         break;
+// //       default:
+// //         string errMsg = "error in printEtDistribution, flavor not specified";
+// //         throw eAnalysis_error( errMsg );
+// //         break;
+// //     }
+//   }
+  file << "#Et_Gluons\t#EtQuarks\t#EtQuarks/dy\t#EtGluons/dy" << endl;
+ for ( int i = 0; i <= numberBinsY; i++ )
+  {
+
+    file <<   transverseEnergyGluons[step][i];
+    file << "\t";
+    file <<   transverseEnergyQuarks[step][i];
+    file << "\t";
+    file <<   transverseEnergyGluons[step][i]/binWidthY;
+    file << "\t";
+    file <<   transverseEnergyQuarks[step][i]/binWidthY;
+    file << endl;
+  }
+  
+
+ 
+ file.close();
+ 
+ 
+ 
+  
+  
+}
 
 
 void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
@@ -2480,10 +2559,6 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
   {
     _EtBins = transverseEnergyQuarks;
   }
-  else if ( _flavTypeToComputeFor == anti_light_quark )
-  {
-    _EtBins = transverseEnergyAntiQuarks;
-  }
   else
   {
     string errMsg = "error in yDistribution, flavor not specified";
@@ -2496,14 +2571,13 @@ void analysis::transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComput
     y = _particles[j].Mom.Rapidity();
     
     FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
-    if ( (  genFlavor == _flavTypeToComputeFor ) ||
-      ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
+    if ( (  genFlavor == _flavTypeToComputeFor ) || ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
     {
       if ( y <= maxY && y >= minY)
       {
         if ( y == maxY )
         {
-          _EtBins[step][numberBinsPT - 1] += Et;
+          _EtBins[step][numberBinsY - 1] += Et;
         }
         else
         {
@@ -2958,6 +3032,9 @@ void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
     break;
   case ptSpectrumSoft:
     f << "#soft pt-spectra " << endl;
+    break;
+  case dEdy:
+    f << "#dEtdy" << endl;
     break;
   case jets:
     f << "#jet tracking informatino " << endl;

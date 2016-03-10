@@ -36,7 +36,7 @@ using std::fstream;
 class config;
 
 enum jetTrackerCollType {initial_jet, final_jet, c2to2, c2to3, c3to2, production};
-enum anaType {ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets};
+enum anaType{ptSpectrum, ptSpectrumSoft, dEdy, rapidityDistribution, quarkNumbers, all, initial, final, jets};
 enum v2Type {v2jets, v2background};
 
 const string sep = "\t";
@@ -288,6 +288,7 @@ private:
   void printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor);
   void printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor );
   void printYDistribution();
+  void printEtDistribution(const int step);
   
   
   int nTimeSteps;
