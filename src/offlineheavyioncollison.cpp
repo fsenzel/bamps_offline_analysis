@@ -255,6 +255,8 @@ void offlineHeavyIonCollision::mainFramework()
   int jpsicreation_backup = 0;
   int jpsi_dissociation_from_temperature_backup = 0;
   int jpsi_dissociation_backup = 0;
+  bool onlyMediumEvolution=theConfig->isOnlyMediumEvolution();
+  
   
   list<int> edgeCellCopy, edgeCellAddedCopy;
 
@@ -355,6 +357,11 @@ void offlineHeavyIonCollision::mainFramework()
   int n_again = 0;
 
   
+  cout << "Maximum Run Time set to " << stoptime << endl;
+  if(onlyMediumEvolution)
+  {
+    cout << "ONLY MEDIUM EVOLUTION" << endl;
+  }
   do
   {
     // remove init tag from particles after their formation
@@ -369,26 +376,49 @@ void offlineHeavyIonCollision::mainFramework()
     //
     //cout << "noninteractingParticles.size = " << noninteractingParticles.size() << endl;
     
-    // evolution of the medium to present time
-    double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
-    
-    // specify time step
-    if ( theConfig->useFixed_dt() )
+    if(onlyMediumEvolution)
     {
-      dt = theConfig->getFixed_dt();
-    }
-    else if ( dt_cascade_from_data >= 0 )
+      // time for next analysis or movie
+      double time_ana = theAnalysis->tstep[nn_ana];
+      double time_movie = theAnalysis->tstep_movie[nn_ana_movie];
+      // determine which one is earlier/smaller
+      if( time_movie < time_ana && theConfig->doOutput_movieOutputBackground() )
+        simulationTime = time_movie;
+      else
+        simulationTime = time_ana;
+
+      if(simulationTime > stoptime)
+      {
+        
+        break;
+      }
+      
+      // evolution of the medium to this time
+      double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
+      
+    }else
     {
-      dt_cascade = dt_cascade_from_data;
-      dt = dt_cascade * factor_dt;  // use time step from original medium evolution but make it slightly smaller
+      // evolution of the medium to present time
+      double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
+      // specify time step
+      if ( theConfig->useFixed_dt() )
+      {
+        dt = theConfig->getFixed_dt();
+      }
+      else if ( dt_cascade_from_data >= 0 )
+      {
+        dt_cascade = dt_cascade_from_data;
+        dt = dt_cascade * factor_dt;  // use time step from original medium evolution but make it slightly smaller
+      }
     }
-    
+     
     if ( endOfDataFiles )
     {
       cout << "* End of data files reached. Aborting." << endl;
       cout << "# time = " << simulationTime << "    dt = " << dt << endl;
       break;
     }
+    
     cout << "# time = " << simulationTime << "    dt = " << dt << endl;
 
     p23_collected_gluon = 0;
@@ -424,87 +454,90 @@ void offlineHeavyIonCollision::mainFramework()
     jpsi_dissociation_backup = ns_heavy_quarks::jpsi_dissociation;
     //--------------------------
 
-    nexttime = simulationTime + dt;
-
-    if( nexttime >= theAnalysis->tstep_movie[nn_ana_movie] || nexttime >= theAnalysis->tstep[nn_ana] )
+    if (!onlyMediumEvolution)
     {
-      dt_backup = dt;
-      
-      if( nexttime >= theAnalysis->tstep[nn_ana] )  // ask if it is time for analysis
-      {
-        nexttime = theAnalysis->tstep[nn_ana];
-        dt = nexttime - simulationTime;
-        doAnalysisStep = true;
-        cout << "profile " << nexttime << endl;
-      }
-      if( nexttime >= theAnalysis->tstep_movie[nn_ana_movie] )  // ask if it is time for movie output
-      {
-        nexttime = theAnalysis->tstep_movie[nn_ana_movie];
-        dt = nexttime - simulationTime;
-        doMovieStep = true;
-        if ( theConfig->doOutput_movieOutputJets() || theConfig->doOutput_movieOutputBackground() )
-        {
-          cout << "** movie: " << nexttime << endl;
-        }
-      }
-      
-      if ( doAnalysisStep && doMovieStep )
-      {
-        if( !FPT_COMP_E( theAnalysis->tstep[nn_ana], theAnalysis->tstep_movie[nn_ana_movie] ) )
-        {
-          string errMsg( "time steps for movie output and general analysis output do not match" );
-          throw eHIC_error( errMsg );
-        }
-      }      
-    }
-    
-    cell_ID( nexttime );
-
-    // collide added particles with gluonic medium
-    deadParticleList.clear();
-    
-    scattering( nexttime, again );
-    
-    // if time step is too large -> collide again with smaller time step
-    while ( again )
-    {
-      p23_collected_gluon = 0;
-      n23_collected_gluon = 0;
-      p23_collected_quark = 0;
-      n23_collected_quark = 0;
-      lambdaJet_gluon = 0;
-      lambdaJet_quark = 0;
-      
-      doAnalysisStep = false;
-      doMovieStep = false;
-      n_again++;
-
-      dt_cascade = dt / factor_dt; // use same dt for next time steps until cascade data defines new dt.
-
-      particles_atTimeNow = particles_atTimeNowCopy;
-      addedParticles = addedParticlesCopy;
-      cells = cellsCopy;
-      cellsAdded = cellsAddedCopy;
-      edgeCell = edgeCellCopy;
-      edgeCellAdded = edgeCellAddedCopy;
-      
-      ncoll = ncoll_backup;
-      ncoll22 = ncoll22_backup;
-      ncoll23 = ncoll23_backup;
-      ncoll32 = ncoll32_backup;
-      ncolle = ncolle_backup;
-      ns_heavy_quarks::charmAnnihil = charmAnnihil_backup;
-      ns_heavy_quarks::jpsicreation = jpsicreation_backup;
-      ns_heavy_quarks::jpsi_dissociation_from_temperature = jpsi_dissociation_from_temperature_backup;
-      ns_heavy_quarks::jpsi_dissociation = jpsi_dissociation_backup;
-
       nexttime = simulationTime + dt;
 
-      cell_ID( nexttime );
+      
+      if( nexttime >= theAnalysis->tstep_movie[nn_ana_movie] || nexttime >= theAnalysis->tstep[nn_ana] )
+      {
+        dt_backup = dt;
+        
+        if( nexttime >= theAnalysis->tstep[nn_ana] )  // ask if it is time for analysis
+        {
+          nexttime = theAnalysis->tstep[nn_ana];
+          dt = nexttime - simulationTime;
+          doAnalysisStep = true;
+          cout << "profile " << nexttime << endl;
+        }
+        if( nexttime >= theAnalysis->tstep_movie[nn_ana_movie] )  // ask if it is time for movie output
+        {
+          nexttime = theAnalysis->tstep_movie[nn_ana_movie];
+          dt = nexttime - simulationTime;
+          doMovieStep = true;
+          if ( theConfig->doOutput_movieOutputJets() || theConfig->doOutput_movieOutputBackground() )
+          {
+            cout << "** movie: " << nexttime << endl;
+          }
+        }
+        
+        
+        if ( doAnalysisStep && doMovieStep )
+        {
+          if( !FPT_COMP_E( theAnalysis->tstep[nn_ana], theAnalysis->tstep_movie[nn_ana_movie] ) )
+          {
+            string errMsg( "time steps for movie output and general analysis output do not match" );
+            throw eHIC_error( errMsg );
+          }
+        }      
+      }
+    
 
+      cell_ID( nexttime );
+      // collide added particles with gluonic medium
       deadParticleList.clear();
       scattering( nexttime, again );
-    }
+         
+      // if time step is too large -> collide again with smaller time step
+      while ( again )
+      {
+        p23_collected_gluon = 0;
+        n23_collected_gluon = 0;
+        p23_collected_quark = 0;
+        n23_collected_quark = 0;
+        lambdaJet_gluon = 0;
+        lambdaJet_quark = 0;
+        
+        doAnalysisStep = false;
+        doMovieStep = false;
+        n_again++;
+
+        dt_cascade = dt / factor_dt; // use same dt for next time steps until cascade data defines new dt.
+
+        particles_atTimeNow = particles_atTimeNowCopy;
+        addedParticles = addedParticlesCopy;
+        cells = cellsCopy;
+        cellsAdded = cellsAddedCopy;
+        edgeCell = edgeCellCopy;
+        edgeCellAdded = edgeCellAddedCopy;
+        
+        ncoll = ncoll_backup;
+        ncoll22 = ncoll22_backup;
+        ncoll23 = ncoll23_backup;
+        ncoll32 = ncoll32_backup;
+        ncolle = ncolle_backup;
+        ns_heavy_quarks::charmAnnihil = charmAnnihil_backup;
+        ns_heavy_quarks::jpsicreation = jpsicreation_backup;
+        ns_heavy_quarks::jpsi_dissociation_from_temperature = jpsi_dissociation_from_temperature_backup;
+        ns_heavy_quarks::jpsi_dissociation = jpsi_dissociation_backup;
+
+        nexttime = simulationTime + dt;
+
+        cell_ID( nexttime );
+
+        deadParticleList.clear();
+        scattering( nexttime, again );
+      }
 
       scatterEdgeParticles( edgeCell, edgeCellAdded, nexttime );
   
@@ -513,7 +546,7 @@ void offlineHeavyIonCollision::mainFramework()
       {
         theAnalysis->registerProgressInformationForOutput( simulationTime, dt, addedParticles.size(), particles_atTimeNow.size(), ncoll, ncoll22, ncoll23, ncoll32 );
       }
-      
+     
       if ( doAnalysisStep )
       {
         theAnalysis->intermediateOutput( nn_ana );
@@ -524,48 +557,57 @@ void offlineHeavyIonCollision::mainFramework()
         doAnalysisStep = false;
         dt = dt_backup;
       }
-      
+        
       if ( doMovieStep )
       {
-        theAnalysis->mfpJetsOutput( nn_ana_movie, jumpMovieSteps );
-        
-        if ( theConfig->doOutput_movieOutputJets() )
-        {
-          theAnalysis->movieOutput( nn_ana_movie, jumpMovieSteps );
+          theAnalysis->mfpJetsOutput( nn_ana_movie, jumpMovieSteps );
+          
+          if ( theConfig->doOutput_movieOutputJets() )
+          {
+            theAnalysis->movieOutput( nn_ana_movie, jumpMovieSteps );
+          }
+          nn_ana_movie++;
+          doMovieStep = false;
+          doMovieStepMedium = true;
+          dt = dt_backup;
         }
-        nn_ana_movie++;
-        doMovieStep = false;
-        doMovieStepMedium = true;
-        dt = dt_backup;
-      }
-      
+        
       theAnalysis->printCentralDensities( simulationTime );
-      
-      
-//     // just error checking if masses and flavors are correct
-//     for ( int j = 0; j < addedParticles.size(); j++ )
-//     {
-//       double E_check = sqrt( pow( addedParticles[j].PX, 2 ) + pow( addedParticles[j].PY, 2 ) + pow( addedParticles[j].PZ, 2 ) + pow( addedParticles[j].m, 2 ) );
-//       if( !FPT_COMP_E( addedParticles[j].E, E_check ) )
-//         cout << "Error! Particle " << j << " does not fulfill E^2 = p^2 + m^2." << endl;
-//       
-//       if( !FPT_COMP_E( addedParticles[j].m, Particle::getMass( addedParticles[j].FLAVOR ) ) )
-//         cout << "Error! Particle " << j << " with flavor " << addedParticles[j].FLAVOR << " has wrong mass: " << addedParticles[j].m << "  " << Particle::getMass( addedParticles[j].FLAVOR )  << endl;
-//       
-//       if( ( addedParticles[j].FLAVOR > 2 * theConfig->getNlightFlavorsAdded() ) && 
-//           ( ( addedParticles[j].FLAVOR <= 2 * 3 ) || 
-//             ( addedParticles[j].FLAVOR > 2 * ( 3 + theConfig->getNheavyFlavorsAdded() ) ) ) &&
-//           !( addedParticles[j].FLAVOR >= 50 && addedParticles[j].FLAVOR < 50 + Particle::N_psi_states )
-//         )
-//         cout << "Error! Particle " << j << " with flavor " << addedParticles[j].FLAVOR << " should not exist: Nf = " << theConfig->getNlightFlavorsAdded() << " + " <<   theConfig->getNheavyFlavorsAdded() <<  endl;
-//     }
+        
 
       // analyse timesteps
       dt_sum += dt;
       n_dt++;
       
       simulationTime = nexttime;
+      
     }
+    else
+    {
+      
+      /*cell_ID( simulationTime );
+
+      // collide added particles with gluonic medium
+      deadParticleList.clear();
+    
+      scattering( simulationTime, again );*/
+      
+      if ( FPT_COMP_E( simulationTime, theAnalysis->tstep[nn_ana] ) ) // ask if it is time for analysis
+      {
+        doAnalysisStep = true;
+        cout << "Analyse: " << simulationTime << endl;
+      }
+      if ( doAnalysisStep )
+      {
+        theAnalysis->intermediateOutput( nn_ana );
+        theAnalysis->collectPtData( nn_ana );
+        theAnalysis->collectYData( nn_ana );
+        //theAnalysis->collectEtData( nn_ana );
+        nn_ana++;
+        doAnalysisStep = false;
+      }
+    }
+  }
     while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
 
   
@@ -590,54 +632,57 @@ void offlineHeavyIonCollision::mainFramework()
   theAnalysis->finalOutput( stoptime );
   //theAnalysis->addJetEvents_final();
   
-  cout << "Photon spectra printed" << endl;
-  theAnalysis->photonSpectrumOutput();
-  
-  cout << "number of errors in get32(...) = " << nGet32Errors << endl;
-  cout << "number of errors in get23(...) = " << nGet23Errors << endl;
-  
-  cout << "==========================" << endl;
-  cout << "Total Number of Photons = " << totalPhotonNumber << endl;
-  // List particle numbers for all flavors
-  cout << "==========================" << endl;
-  cout << "Added particles:" << endl;
-  cout << "# of all=" << addedParticles.size() << endl;
-  int fl_sum = 0;
-  cout << "Flavor       Number    Number wo testparticles per Event" << endl;
-  for( int i = 0; i <= 10; i++ )
+  if(!onlyMediumEvolution)
   {
+    cout << "Photon spectra printed" << endl;
+    theAnalysis->photonSpectrumOutput();
+    
+    cout << "number of errors in get32(...) = " << nGet32Errors << endl;
+    cout << "number of errors in get23(...) = " << nGet23Errors << endl;
+    
+    cout << "==========================" << endl;
+    cout << "Total Number of Photons = " << totalPhotonNumber << endl;
+    // List particle numbers for all flavors
+    cout << "==========================" << endl;
+    cout << "Added particles:" << endl;
+    cout << "# of all=" << addedParticles.size() << endl;
+    int fl_sum = 0;
+    cout << "Flavor       Number    Number wo testparticles per Event" << endl;
+    for( int i = 0; i <= 10; i++ )
+    {
+      for( unsigned int j = 0; j < addedParticles.size(); j++ )
+        if(addedParticles[j].FLAVOR == i)
+          fl_sum++;
+      cout.width(5);
+      cout << i;
+      cout.width(12);
+      cout << fl_sum;
+      cout.width(16);
+      cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;
+      fl_sum = 0;
+    }
     for( unsigned int j = 0; j < addedParticles.size(); j++ )
-      if(addedParticles[j].FLAVOR == i)
+      if(addedParticles[j].FLAVOR == jpsi)
         fl_sum++;
     cout.width(5);
-    cout << i;
+    cout << "Jpsi";
     cout.width(12);
     cout << fl_sum;
     cout.width(16);
-    cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() << endl;
+    cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() << endl;
     fl_sum = 0;
+    double sum = 0.0;
+    for( unsigned int j = 0; j < addedParticles.size(); j++ )
+      sum += addedParticles[j].Mom.E();
+    cout << "E(end) = " << sum << endl;
+    cout << "==========================" << endl;
+
+    cout << "number of jet collisions: " << ncoll << endl;
+
+    cout << "average dt = " << dt_sum / n_dt << endl;
+    cout << "last dt = " << dt << endl;
+    cout << "number of agains: = " << n_again << endl;
   }
-  for( unsigned int j = 0; j < addedParticles.size(); j++ )
-    if(addedParticles[j].FLAVOR == jpsi)
-      fl_sum++;
-  cout.width(5);
-  cout << "Jpsi";
-  cout.width(12);
-  cout << fl_sum;
-  cout.width(16);
-  cout << double( fl_sum ) / testpartcl / theConfig->getNaddedEvents() / theConfig->getJpsiTestparticles() << endl;
-  fl_sum = 0;
-  double sum = 0.0;
-  for( unsigned int j = 0; j < addedParticles.size(); j++ )
-    sum += addedParticles[j].Mom.E();
-  cout << "E(end) = " << sum << endl;
-  cout << "==========================" << endl;
-
-  cout << "number of jet collisions: " << ncoll << endl;
-
-  cout << "average dt = " << dt_sum / n_dt << endl;
-  cout << "last dt = " << dt << endl;
-  cout << "number of agains: = " << n_again << endl;
 }
 
 
@@ -1295,6 +1340,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
     }
     
     rings.prepareAverages( dz, testpartcl );
+    
     if ( etaSliceIndex == centralEtaIndex )
     {
       theAnalysis->centralRingsCopyFromCascade = rings;
@@ -3465,7 +3511,8 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
   double Tmax, TT;
   double M1, M2;
   double t_hat;
-
+  ELASTIC_MODE_PHOTONS mechanism;
+  
   ParticleOffline temp_particle_iscat = particles_atTimeNow[iscat];
   ParticleOffline temp_particle_jscat = particles_atTimeNow[jscat];
   
@@ -3476,7 +3523,22 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
   F2 = particles_atTimeNow[jscat].FLAVOR;
   M2 = particles_atTimeNow[jscat].m;
 
-    
+  unsigned int F1_ = std::min(static_cast<unsigned int>(F1), static_cast<unsigned int>(F2));
+  unsigned int F2_ = std::max(static_cast<unsigned int>(F1), static_cast<unsigned int>(F2));
+  
+  if (FPT_COMP_Z(F1_ * F2_) && (F1 != F2_))
+  {
+    //Only Compton Process here:
+    mechanism = OnlyCompton;
+  }
+  if ((F2_ - F1_) == 1 && (F2_ % 2) == 0)
+  {
+    //Only Annihilation Process here:
+    mechanism = OnlyAnnihilation;
+  }  
+  
+  
+  
   Tmax = std::max( particles_atTimeNow[iscat].Pos.T(), particles_atTimeNow[jscat].Pos.T() );
   TT = ( nexttime - Tmax ) * ran2() + Tmax;
   temp_particle_iscat.Propagate( TT, particles_atTimeNow[iscat].X_traveled );
@@ -3569,6 +3631,7 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     temp_particle_produced_photon1.Pos = Pos1new;
     temp_particle_produced_photon1.initially_produced = false;   
     temp_particle_produced_photon1.production_time = nexttime;
+    temp_particle_produced_photon1.production_mechanism = mechanism;
     noninteractingParticles.push_back(temp_particle_produced_photon1);
   }   
   if(F2==photon )
@@ -3583,6 +3646,7 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     temp_particle_produced_photon2.Pos = Pos2new;
     temp_particle_produced_photon2.initially_produced = false;    
     temp_particle_produced_photon2.production_time = nexttime;
+    temp_particle_produced_photon2.production_mechanism = mechanism;
     noninteractingParticles.push_back(temp_particle_produced_photon2);
   }
 }

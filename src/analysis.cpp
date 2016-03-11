@@ -57,10 +57,13 @@ analysis::analysis( config* const c ):
   time( &start );
   //-----------------------
   
+  cout << "Output Scheme: " << outputScheme << endl;
   handle_output_studies( outputScheme );
    
   // to create the tsteps use such a bash script:
   // for (( I=50; $I <= 80; I++ )); do   J=$(echo "scale=1; ($I+1)/10" | bc); echo "tstep[$I]=$J;" ; done
+  
+    
   if( studyJpsi ) // jpsi evolution: more timesteps
   {
     tstep[0]=.005;
@@ -192,50 +195,122 @@ analysis::analysis( config* const c ):
   }
   else if (studyPhotons)
   {
-    tstep[0] = 0.5;
-    tstep[1] = 1.0;
-    tstep[2] = 2.0;
-    tstep[3] = 3.0;
-    tstep[4] = 4.0;
-    tstep[5] = 5.0;
-    tstep[6] = 6.0;
-    tstep[7] = 7.0;
-    tstep[8] = 8.0;
-    tstep[9] = 9.0;
-    tstep[10] = 10.0;
-    tstep[11] = infinity;
-    nTimeSteps = 12;
-    /*
-    tstep[0] = 0.1;      //fm/c
-    tstep[1] = 0.2;      //fm/c
-    tstep[2] = 0.3;      //fm/c    
-    tstep[3] = 0.4;      //fm/c   
-    tstep[4] = 0.5;      //fm/c   
-    tstep[5] = 0.6;      //fm/c    
-    tstep[6] = 0.7;      //fm/c    
-    tstep[7] = 0.8;      //fm/c
-    tstep[8] = 0.9;      //fm/c    
-    tstep[9] = 1.0;      //fm/c
-    tstep[10] = 1.5;      //fm/c
-    tstep[11] = 2.0;      //fm/c
-    tstep[12] = 2.5;      //fm/c
-    tstep[13] = 3.0;      //fm/c
-    tstep[14] = 3.5;      //fm/c
-    tstep[15] = 4.0;      //fm/c
-    tstep[16] = 4.5;      //fm/c
-    tstep[17] = 5.0;      //fm/c
-    tstep[18] = 5.5;      //fm/c
-    tstep[19] = 6.0;      //fm/c
-    tstep[20] = 6.5;      //fm/c
-    tstep[21] = 7.0;      //fm/c
-    tstep[22] = 7.5;      //fm/c
-    tstep[23] = 8.0;      //fm/c
-    tstep[24] = 9.0;      //fm/c
-    tstep[25] = 10.0;
-    tstep[26] = infinity; //fm/c
-    nTimeSteps = 27;
-    */
-  } else
+    tstep[0] = 0.2;
+    tstep[1] = 0.4;
+    tstep[2] = 0.6;
+    tstep[3] = 0.8;
+    tstep[4] = 1.0;
+    tstep[5] = 2.0;
+    tstep[6] = 3.0;
+    tstep[7] = 4.0;
+    tstep[8] = 5.0;
+    tstep[9] = 6.0;
+    tstep[10] = 7.0;
+    tstep[11] = 8.0;
+    tstep[12] = 9.0;
+    tstep[13] = 10.0;
+    tstep[14] = infinity;
+    nTimeSteps = 15;
+  } 
+  else if (studyEtSpectra)
+  {
+      tstep[0] =1.;      //fm/c
+      tstep[1] = 2.;      //fm/c
+      tstep[2] = 3.;      //fm/c
+      tstep[3] = 4.;      //fm/c
+      tstep[4] = 5.;      //fm/c
+      tstep[5] = 6.;      //fm/c
+      tstep[6] = 7.;      //fm/c
+      tstep[7] = infinity; //fm/cn
+      nTimeSteps = 8;
+  }
+  else if (studyNumberOfBackgroundQuarks)
+  {
+    tstep[0]=.15;
+    tstep[1]=.2;
+    tstep[2]=.3;
+    tstep[3]=.4;
+    tstep[4]=.5;
+    tstep[5]=.6;
+    tstep[6]=.7;
+    tstep[7]=.8;
+    tstep[8]=.9;
+    tstep[9]=1.0;
+    tstep[10]=1.1;
+    tstep[11]=1.2;
+    tstep[12]=1.3;
+    tstep[13]=1.4;
+    tstep[14]=1.5;
+    tstep[15]=1.6;
+    tstep[16]=1.7;
+    tstep[17]=1.8;
+    tstep[18]=1.9;
+    tstep[19]=2.0;
+    tstep[20]=2.1;
+    tstep[21]=2.2;
+    tstep[22]=2.3;
+    tstep[23]=2.4;
+    tstep[24]=2.5;
+    tstep[25]=2.6;
+    tstep[26]=2.7;
+    tstep[27]=2.8;
+    tstep[28]=2.9;
+    tstep[29]=3.0;
+    tstep[30]=3.1;
+    tstep[31]=3.2;
+    tstep[32]=3.3;
+    tstep[33]=3.4;
+    tstep[34]=3.5;
+    tstep[35]=3.6;
+    tstep[36]=3.7;
+    tstep[37]=3.8;
+    tstep[38]=3.9;
+    tstep[39]=4.0;
+    tstep[40]=4.1;
+    tstep[41]=4.2;
+    tstep[42]=4.3;
+    tstep[43]=4.4;
+    tstep[44]=4.5;
+    tstep[45]=4.6;
+    tstep[46]=4.7;
+    tstep[47]=4.8;
+    tstep[48]=4.9;
+    tstep[49]=5.0;
+    tstep[50]=5.1;
+    tstep[51]=5.2;
+    tstep[52]=5.3;
+    tstep[53]=5.4;
+    tstep[54]=5.5;
+    tstep[55]=5.6;
+    tstep[56]=5.7;
+    tstep[57]=5.8;
+    tstep[58]=5.9;
+    tstep[59]=6.0;
+    tstep[60]=6.1;
+    tstep[61]=6.2;
+    tstep[62]=6.3;
+    tstep[63]=6.4;
+    tstep[64]=6.5;
+    tstep[65]=6.6;
+    tstep[66]=6.7;
+    tstep[67]=6.8;
+    tstep[68]=6.9;
+    tstep[69]=7.0;
+    tstep[70]=7.1;
+    tstep[71]=7.2;
+    tstep[72]=7.3;
+    tstep[73]=7.4;
+    tstep[74]=7.5;
+    tstep[75]=7.6;
+    tstep[76]=7.7;
+    tstep[77]=7.8;
+    tstep[78]=7.9;
+    tstep[79]=8.0;
+    tstep[80]=8.1;
+    tstep[81]=infinity;
+    nTimeSteps = 82;
+  }
+  else
   {
     tstep[0] = 0.1;      //fm/c
     tstep[1] = 0.5;      //fm/c
@@ -261,6 +336,12 @@ analysis::analysis( config* const c ):
   }
   //--------------------------------------
 
+  if (studyNumberOfBackgroundQuarks)
+  {
+    NumberOfQuarks.resize(nTimeSteps+1);
+    NumberOfAntiquarks.resize(nTimeSteps+1);
+    NumberOfGluons.resize(nTimeSteps+1);
+  }
 
   //---- times for output of data --------
   int tempCount_tstep = 0;
@@ -473,6 +554,9 @@ analysis::analysis( config* const c ):
     //--------------------------------------------------
   }
 
+  
+  
+  
   if( studyJpsi )
   {
     numberJpsi_all_time = new int[nTimeSteps+1];
@@ -580,6 +664,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyBackground = false; // print also properties like v2, RAA of background
   studyScatteredMediumParticles = false; // print scattered medium particles
   studyPhotons = false; // transverse momentum spectra of photons
+  studyNumberOfBackgroundQuarks = false; // study Number Of Background quarks and antiquarks and gluons
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -604,6 +689,12 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   // add a new case for your outpute scheme which you can create in configuration.h
   switch ( _outputScheme )
   {
+    case studyOnlyEtSpectra:  
+      studyEtSpectra = true;
+      break;
+    case studyNumberOfParticles:
+      studyNumberOfBackgroundQuarks = true;
+      break;
     case phenix_hq_electrons:
       studyHQ = true;
       
@@ -873,7 +964,12 @@ void analysis::collectYData( const int step )
 void analysis::collectEtDataInitial()
 {
   if( studyEtSpectra )
-    collectEtData( -1 );
+  {
+    transverseEnergyDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(),0 );
+    transverseEnergyDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(),0 );
+    transverseEnergyDistribution( anti_light_quark, particles_atTimeNow, particles_atTimeNow.size(), 0 );
+    printEtDistribution(0);
+  }
 }
 
 
@@ -881,12 +977,73 @@ void analysis::collectEtData( const int step )
 {
   //are issued starting with 0
   //0 is reserved for initial output, thus step is incremented
-  if( studyEtSpectra )
+  //if( studyEtSpectra )
+  //{
+  //  transverseEnergyDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  //  transverseEnergyDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  //  transverseEnergyDistribution( anti_light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+  //  printEtDistribution(step+1);
+ // }
+}
+
+void analysis::printEtDistribution(const int step )
+{
+  string filename,timename;
+  stringstream ss,sst;
+
+  if ( step == 0 )
   {
-    transverseEnergyDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
-    transverseEnergyDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
-    transverseEnergyDistribution( anti_light_quark, particles_atTimeNow, particles_atTimeNow.size(), step + 1 );
+    timename = "initial";
   }
+  else if ( step == nTimeSteps + 1 )
+  { 
+    timename = "final";
+  }
+  else
+  {
+    ss << step;
+    timename = "timestep_" + ss.str()+"_time_";
+    sst << tstep[step];
+    timename += sst.str() + "fm";
+  }
+
+  //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+  filename = filename_prefix + "_dEtdy" + "_" + timename + ".dat";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
+
+  //---- print header if file is empty ----
+  time_t end;
+  time( &end );
+
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if ( size == 0 )
+    printHeader( file, dEtdy, end );
+  
+  file << "#Et_Gluons\t#EtQuarks\t#EtQuarks/dy\t#EtGluons/dy" << endl;
+ for ( int i = 0; i <= numberBinsY; i++ )
+  {
+    file <<  minY + (  (i*binWidthY )  +  (  (i+1)*binWidthY ) )/2.;
+    file << "\t";
+    file <<   transverseEnergyGluons[step][i];
+    file << "\t";
+    file <<   transverseEnergyQuarks[step][i];
+    file << "\t";
+    file <<   transverseEnergyGluons[step][i]/binWidthY;
+    file << "\t";
+    file <<   transverseEnergyQuarks[step][i]/binWidthY;
+    file << endl;
+  }
+  
+
+ 
+ file.close();
+ 
+ 
+ 
+  
+  
 }
 
 /** Bin the Pt distribution for photons with two methods. For double-checking and some tests.
@@ -1044,6 +1201,20 @@ void analysis::intermediateOutput( const int nn )
   ss << tstep[nn];
   name = ss.str() + "fm";
 
+ if( studyEtSpectra)
+  { 
+    cout << "Analyse Et Spectra at analysis timestep " << nn << " at time " <<  tstep[nn] << endl;
+    transverseEnergyDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), nn+1 );
+    transverseEnergyDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), nn+1 );
+    printEtDistribution(nn+1);
+  }
+  
+  if( studyNumberOfBackgroundQuarks )
+  {
+    saveNumberOfMediumParticles(nn);
+  }
+  
+  
   if ( v2output && v2outputIntermediateSteps )
     computeV2RAA( name, tstep[nn] );
 
@@ -1071,6 +1242,20 @@ void analysis::intermediateOutput( const int nn )
 
 void analysis::finalOutput( const double _stoptime )
 {
+ int step = _stoptime;
+ 
+  if( studyNumberOfBackgroundQuarks )
+  {
+    printNumberOfMediumParticles();
+  }
+ 
+ if( studyEtSpectra)
+  { 
+    cout << "Analyse Et Spectra at final timestep (maybe the same output as the last analysis timestep.) " << nTimeSteps +1 << endl;
+    transverseEnergyDistribution( gluon, particles_atTimeNow, particles_atTimeNow.size(), nTimeSteps +1 );
+    transverseEnergyDistribution( light_quark, particles_atTimeNow, particles_atTimeNow.size(), nTimeSteps +1);
+    printEtDistribution(nTimeSteps +1);
+  }
   
   if( studyPtSpectra )
   {  
@@ -2017,7 +2202,10 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     _pt_min = 0.1;
   
   const double d_ln_pt = ( log( _pt_max ) - log( _pt_min ) ) / n_bins;
-
+  double d_ln_pt_v2=0.;
+  double _pt_min_v2=0.;
+  double _pt_max_v2=0.;
+  
   double v2sum[eta_bins];
   int NmbInRange[eta_bins];
   double v2sumInitialCutOff[eta_bins];
@@ -2035,22 +2223,59 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     NmbInRangePtCutOff[j] = 0;       
   }
 
-  double ptBinsV2[eta_bins][n_bins+1];
+  int v2pt_binnumber;
+  v2pt_binnumber = 10;   
+  _pt_min_v2 = 0.1;
+  _pt_max_v2 = 3.;
+  d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
+  
+  if(_flavTypeToComputeFor==photon)
+  {
+    v2pt_binnumber = 10;   
+    _pt_min_v2 = 0.1;
+    _pt_max_v2 = 3.;
+    d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
+  }
+  else
+  {
+    v2pt_binnumber =n_bins;
+  }
+  double ptBinsV2[eta_bins][v2pt_binnumber+1];
+  double ptBinsV2InitialCutOff[eta_bins][v2pt_binnumber+1];  
+  int ptBinsNmbV2[eta_bins][v2pt_binnumber+1];
+  int ptBinsNmbInitialCutOffV2[eta_bins][v2pt_binnumber+1];
+  
   int ptBinsNmb[eta_bins][n_bins+1];
-  double ptBinsV2InitialCutOff[eta_bins][n_bins+1];
+  int ptBinsNmbCompton[eta_bins][n_bins+1];
+  int ptBinsNmbAnnihilation[eta_bins][n_bins+1];
+  
   int ptBinsNmbInitialCutOff[eta_bins][n_bins+1];  
   int ptBinsInnerRegion[n_bins+1];
+  
   for ( int j = 0;j < n_bins + 1;j++ )
   {
     ptBinsInnerRegion[j] = 0;
     for ( int i = 0;i < eta_bins;i++ )
     {
-      ptBinsV2[i][j] = 0.0;
       ptBinsNmb[i][j] = 0.0;
-      ptBinsV2InitialCutOff[i][j] = 0.0;
+      ptBinsNmbCompton[i][j] = 0.0;
+      ptBinsNmbAnnihilation[i][j] = 0.0;
       ptBinsNmbInitialCutOff[i][j] = 0.0;
     }
   }
+  for ( int j = 0;j < v2pt_binnumber + 1;j++ )
+  {
+    for ( int i = 0;i < eta_bins;i++ )
+    {
+      ptBinsV2[i][j] = 0.0;
+      ptBinsNmbV2[i][j] = 0.0;
+
+      ptBinsV2InitialCutOff[i][j] = 0.0;
+      ptBinsNmbInitialCutOffV2[i][j] =0.0;
+    }
+  }
+  
+  
   
   const double deltaAlpha = 15; // degrees
   const int nAlphaBins = 6;  // 90° / 15°
@@ -2065,6 +2290,10 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       }
     }
   }
+  
+  
+
+  
   
   // compute angle and bin it
   double angle;
@@ -2163,25 +2392,49 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
           v2sum[yRangeIndex] += v2;
           NmbInRange[yRangeIndex]++;
           
+          // Differential V2, has different number of pt bins
+          if ( pt <= _pt_max_v2 && pt > _pt_min_v2 )
+          {
+            dummy = int(( log( pt ) - log( _pt_min_v2 ) ) / d_ln_pt_v2 );
+            if (_particles[i].production_time > lower_time_cutoff_for_v2 )
+            {            
+              ptBinsV2InitialCutOff[yRangeIndex][dummy] += v2;
+              ptBinsNmbInitialCutOffV2[yRangeIndex][dummy]++;
+            }           
+            ptBinsV2[yRangeIndex][dummy] += v2;     
+            ptBinsNmbV2[yRangeIndex][dummy]++;
+          }
           
           
+          // Yield
           if ( pt <= _pt_max && pt > _pt_min )
           {
             dummy = int(( log( pt ) - log( _pt_min ) ) / d_ln_pt );
             if (_particles[i].production_time > lower_time_cutoff_for_v2 )//TODO Include check if photon or not
             {            
-              ptBinsV2InitialCutOff[yRangeIndex][dummy] += v2;
               ptBinsNmbInitialCutOff[yRangeIndex][dummy]++;
             }
-            ptBinsV2[yRangeIndex][dummy] += v2;
+
             ptBinsNmb[yRangeIndex][dummy]++;
             ptBinsAngleDep[yRangeIndex][alphaIndex][dummy]++;
-          }  
+            
+            if(_particles[i].production_mechanism == OnlyCompton)
+            {
+              ptBinsNmbCompton[yRangeIndex][dummy]++;
+            }
+            if(_particles[i].production_mechanism == OnlyAnnihilation)
+            {
+              ptBinsNmbAnnihilation[yRangeIndex][dummy]++;
+            }            
+            
+          }
         }
       }
     }
   }
 
+  cout << "binning done" << endl;
+  
   int binMax = 0;
   int binMin = n_particles;
   for ( int k = 0; k < n_bins + 1; k++ )
@@ -2210,6 +2463,10 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     print_average_initial_v2 << "#Number of colliding pairs with positive <v2> | Number of colliding pairs with negative <v2>"  << endl;
     print_average_initial_v2 << theConfig->countPositiveV2 << '\t' << theConfig->countNegativeV2 << endl;   
   }*/
+  
+  
+  
+  
   double pt_out;
 
   filename_v2_summed = filename_prefix + "_" + type + "_" + additionalNameTag + "_v2_pt_summed_" + name;
@@ -2349,39 +2606,53 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   print_v2_summed << "#pt\t[#summed v_2\t#number in bin],for different rapidity bins" << endl;
   
 
-  for ( int k = 0;k < n_bins + 1;k++ )
+  for ( int k = 0;k < v2pt_binnumber + 1;k++ )
   {
     print_v2_summed.width( 15 );
-    pt_out = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
+    pt_out = exp( double( k ) * d_ln_pt_v2 + log( _pt_min_v2 ) + d_ln_pt_v2 / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
     print_v2_summed << pt_out;
     for ( int i = 0;i < eta_bins;i++ )
     {
       print_v2_summed.width( 15 );
       print_v2_summed << ptBinsV2[i][k];
       print_v2_summed.width( 10 );
-      print_v2_summed << ptBinsNmb[i][k];
+      print_v2_summed << ptBinsNmbV2[i][k];
       if(studyInitialCutOffEffect)
       {
         print_v2_summed.width( 20 );
         print_v2_summed << ptBinsV2InitialCutOff[i][k];      
         print_v2_summed.width( 10 );
-        print_v2_summed << ptBinsNmbInitialCutOff[i][k];       
+        print_v2_summed << ptBinsNmbInitialCutOffV2[i][k];       
       }
     }
     print_v2_summed << endl;
   }
 
+  cout << "differential v2 printout done" << endl;
+  
+  //*****
+  //***** Print the PT-Spectrum
+  //*****
   // print yield for RAA
   print_yield << "# " << type << " yield distribution" << endl;
   print_yield << "# t = " << _outputTime << " fm" << endl;
-  print_yield << "#pt\t#yield for different rapidity bins" << endl;
-
+  
+  print_yield << "#pt     \t";
+  for ( int i = 0;i < eta_bins;i++ )
+  {
+    const double delta_eta =  ( rapidityRanges[i].yright - rapidityRanges[i].yleft );
+    print_yield << "#Tot_Rap_" << delta_eta << "\t#Compt_Rap_"<<delta_eta<<"\t#Annih_Rap_"<<delta_eta;   
+  }
+  print_yield << endl;
   for ( int k = 0;k < n_bins + 1;k++ )
   {
     //print_yield.width( 15 );
     pt_out = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt / 2.0 ); // +dpt/2.0 to shift value in the middle of the intervall, important for small number of bins
+    
     print_yield << pt_out;
+    
     const double dpt = exp( double( k ) * d_ln_pt + log( _pt_min ) + d_ln_pt ) - exp( double( k ) * d_ln_pt + log( _pt_min ) );
+    
     for ( int i = 0;i < eta_bins;i++ )
     {
       const double delta_eta = 2.0 * ( rapidityRanges[i].yright - rapidityRanges[i].yleft );
@@ -2402,6 +2673,17 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       
       print_yield.width( 15 );
       print_yield << nInBin;
+      
+      if( theConfig->doScattering_22_photons())
+      {
+        double nInBinCompton = double( ptBinsNmbCompton[i][k] ) / (double(theConfig->getTestparticles())* double(dpt) * double(delta_eta) * double(pt_out) *(2.0*M_PI));
+        double nInBinAnnihilation = double( ptBinsNmbAnnihilation[i][k] ) / (double(theConfig->getTestparticles())* double(dpt) * double(delta_eta) * double(pt_out) *(2.0*M_PI));
+        print_yield.width( 15 );
+        print_yield << nInBinCompton;  
+        print_yield.width( 15 );
+        print_yield << nInBinAnnihilation;  
+      }
+
       //DEBUG:
       /*if (pt_out >0.5 && pt_out < 0.7 && delta_eta==0.7)
       {
@@ -3267,6 +3549,12 @@ void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
 {
   switch ( mode )
   {
+  case numbOfPartcles:
+    f << "#Number of Quarks and Gluons" << endl;
+    break;
+    case dEtdy:
+    f << "#Et-spectrum" << endl;
+    break;
   case ptSpectrum:
     f << "#pt-spectra " << endl;
     break;
@@ -4853,6 +5141,54 @@ void analysis::scatteredMediumParticlesOutput( const int step )
          << scatteredMediumParticles[i].N_EVENT_pp << endl;
   }
   file.close();
+}
+
+void analysis::saveNumberOfMediumParticles( const int step)
+{
+  for( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+    FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( particles_atTimeNow[i].FLAVOR ) );
+
+    switch(genFlavor)
+    {
+      case light_quark:
+        NumberOfQuarks[step]++;
+      break;
+      case anti_light_quark:
+        NumberOfAntiquarks[step]++;
+      break;
+      case gluon:
+        NumberOfGluons[step]++;
+      break;
+    }  
+  }
+}
+
+void analysis::printNumberOfMediumParticles()
+{  
+   //creates filename
+  string filename = filename_prefix + "_" + "_NumberOfMediumParticles.dat";
+  fstream file( filename.c_str(), ios::out | ios::trunc ); 
+  //---- print header if file is empty ----
+  time_t end;
+  time( &end );
+
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if( size == 0 )
+    printHeader( file, numbOfPartcles, end );
+  //---------------------------------------  
+  file << "#Quarks\t#nAntiquarks\t#nGluons" << endl;
+  for (int i=0;i<nTimeSteps;i++)
+  {
+    file << tstep[i] << "\t" << NumberOfQuarks[i];
+    file << "\t" << NumberOfAntiquarks[i];
+    file << "\t" << NumberOfGluons[i];
+    file << endl;
+  }
+  
+  file.close();  
 }
 
 

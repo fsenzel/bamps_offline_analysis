@@ -46,6 +46,10 @@ enum JET_MFP_COMPUTATION_TYPE { computeMfpLastTimestep, computeMfpIteration, com
 enum OUTPUT_SCHEME { no_output = 0,  
 light_parton_phenix = 10,
 light_parton_lhc = 20,
+
+studyOnlyEtSpectra = 205,
+studyNumberOfParticles = 206,
+
 // heavy quarks:
 phenix_hq_electrons = 101,
 alice_hq_electrons = 111,
@@ -198,6 +202,9 @@ class config : public configBase
 
   /** ------------------------------- */
 
+  /** @brief Interface for config::onlyMediumEvolution */
+  double isOnlyMediumEvolution() const { return onlyMediumEvolution; }
+  
   /** -------- output options ------- */   
   /** @brief Interface for config::outputSwitch_progressLog */
   bool doOutput_progressLog() const { return outputSwitch_progressLog; }  
@@ -610,9 +617,10 @@ class config : public configBase
   
   /** @brief Number of testparticles for J/psi (in addition to the number employed for the rest of added particles) */
   int jpsi_testparticles;
-  
-  
-  
+
+  /** @brief Whether to do only medium evolution without scatterings or rate and debye mass calculations */
+  bool onlyMediumEvolution;
+    
   // heavy quark output
   /** @brief Whether correlation analysis of heavy quark pairs is done */
   bool hqCorrelationsOutput;

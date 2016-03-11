@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "particle.h"
+#include <globalsettings.h>
 
 
 /**
@@ -45,7 +46,8 @@ public:
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
     collision_tag(false),
-    production_time(0.0)
+    production_time(0.0),
+    production_mechanism(ComptonPlusAnnihilation)
   {};
     
   ParticleOffline( const Particle& _particle ) : 
@@ -63,7 +65,8 @@ public:
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
     collision_tag(false),
-    production_time(0.0)
+    production_time(0.0),
+    production_mechanism(ComptonPlusAnnihilation)
   {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
@@ -80,6 +83,9 @@ public:
   
   /** @brief Producing time of the photon. This may prove useful in discriminating the building up of v2. */
   double production_time;   
+  
+  /** @brief Production mechanism for this photon.*/
+  ELASTIC_MODE_PHOTONS production_mechanism;
   
   /** @brief Unique number of jpsi dissociation such that the same c+cbar do not reunite directly */
   int jpsi_dissociation_number;

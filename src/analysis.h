@@ -37,7 +37,7 @@ using std::fstream;
 class config;
 
 enum jetTrackerCollType {initial_jet, final_jet, c2to2, c2to3, c3to2, production};
-enum anaType {ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets, photonPtDist};
+enum anaType {numbOfPartcles, dEtdy, ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets, photonPtDist};
 enum v2Type {v2jets, v2background};
 
 const string sep = "\t";
@@ -194,6 +194,10 @@ public:
   void collectYDataInitial();
   void collectEtData( const int step );
   void collectEtDataInitial();
+  void printEtDistribution(const int step);
+  
+  void saveNumberOfMediumParticles( const int step );
+  void printNumberOfMediumParticles();
   
   /** @brief Generate the Energy-distribution for Photons. */
   void PtDistributionPhotons( const double PTofThisSinglePhoton , const double etaOfThisSinglePhoton, const double EofSinglePhoton  ); 
@@ -246,6 +250,7 @@ public:
   void mediumParticlesOutput( const int step );
   //--------------------//
   
+  
   /** @brief Writes the photonspectra out. */
   void photonSpectrumOutput();
   string file14;//Photonspectra
@@ -277,6 +282,7 @@ private:
   bool studyBackground;
   bool studyScatteredMediumParticles;
   bool studyPhotons;
+  bool studyNumberOfBackgroundQuarks;
  
   
   void writePartclMovie( const int step ) const;
@@ -296,7 +302,7 @@ private:
   void printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor);
   void printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor );
   void printYDistribution();
-    
+  
   int nTimeSteps;
   int nTimeSteps_movie;
   
@@ -310,6 +316,9 @@ private:
   double minY, maxY, binWidthY;
   int numberBinsY;  
 
+  std::vector<int> NumberOfQuarks,NumberOfAntiquarks,NumberOfGluons;
+  
+  
   std::vector<analysisRapidityRange> rapidityRanges;
   
   double minPT, maxPT, binWidthPT, minPTPhotons, maxPTPhotons, binWidthPTPhotons;
