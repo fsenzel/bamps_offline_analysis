@@ -167,10 +167,10 @@ private:
             cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
             const double scaleFactor, bool& again, const double nexttime, analysisRingStructure& _analysisRings );
 
-    void scatt22_amongAddedParticles( cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, const double scaleFactor, bool& again, const double nexttime );
-
-    void scatt22_amongBackgroundParticles_photons( cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, const double scaleFactor, bool& again, const double nexttime );
-    void scatt23_amongBackgroundParticles_photons( cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, const double scaleFactor, bool& again, const double nexttime );
+    void scatt22_amongAddedParticles( cellContainer& _cellAdded, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+    double computeBackgroundv2OfCell(  std::vector< int >& allParticlesList );
+    void scatt22_amongBackgroundParticles_photons( cellContainer& _cellAdded, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+    void scatt23_amongBackgroundParticles_photons( cellContainer& _cellAdded, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
 
     void scatt32_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
                                             cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,

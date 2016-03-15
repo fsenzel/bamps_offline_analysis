@@ -1672,16 +1672,25 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               scaleFactor = static_cast<double>( nGluons ) / static_cast<double>( nGluons - n32 );
             }
             
+            
+            
+            
             if( theConfig->isScatt_amongBackgroundParticles() )
             {
-              if( theConfig->doScattering_22_photons())
-              {
-                scatt22_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
+              //if ( computeBackgroundv2OfCell(allParticlesList)>0.01 )                
+              //{ 
+              if ( true )                
+              {              
+                //cout << "v2 of cell = " <<computeBackgroundv2OfCell(allParticlesList)<<  endl;
+                if( theConfig->doScattering_22_photons())
+                {
+                  scatt22_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
+                }
+                if( theConfig->doScattering_23_photons())
+                {
+                  scatt23_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
+                }             
               }
-              if( theConfig->doScattering_23_photons())
-              {
-                scatt23_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
-              }             
               
               if ( again )
               {
@@ -2149,6 +2158,18 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
     iscat = *iIt;
     addedParticles[iscat].Propagate( nexttime, addedParticles[iscat].X_traveled );
   }
+}
+
+double offlineHeavyIonCollision::computeBackgroundv2OfCell( std::vector< int >& allParticlesList )
+{
+  int iscat;
+  double v2=0.0;
+  for ( int i = 0; i <  allParticlesList.size(); i++ )
+  {
+      iscat = allParticlesList[i];     
+      v2+=(pow(particles_atTimeNow[iscat].Mom.Px(),2.0)-pow(particles_atTimeNow[iscat].Mom.Py(),2.0))/particles_atTimeNow[iscat].Mom.Pt();
+  }
+  return v2/allParticlesList.size();   
 }
 
 //Change this to scatt2223_amongBackgroundParticles!
@@ -3821,8 +3842,8 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
   get23errors += scatt23_obj.getPhotonMomenta23_metropolis( pt1, pt3, y, phi, pz1 );
   
   //TEST
-  //scatt23_obj.setNewMomenta23( P1new, P2new, P3new,temp_particle_iscat.Pos, temp_particle_jscat.Pos,pt1, pt3, y, phi, pz1 );
-  scatt23_obj.setNewMomenta23onlyCMBoost( P1new, P2new, P3new,temp_particle_iscat.Pos, temp_particle_jscat.Pos,pt1, pt3, y, phi, pz1 );
+  scatt23_obj.setNewMomenta23( P1new, P2new, P3new,temp_particle_iscat.Pos, temp_particle_jscat.Pos,pt1, pt3, y, phi, pz1 );
+  //scatt23_obj.setNewMomenta23onlyCMBoost( P1new, P2new, P3new,temp_particle_iscat.Pos, temp_particle_jscat.Pos,pt1, pt3, y, phi, pz1 );
   
   ParticleOffline temp_particle_produced_photon1;
   totalPhotonNumber++;

@@ -335,20 +335,21 @@ analysis::analysis( config* const c ):
     nTimeSteps = 20;
   }
   //--------------------------------------
-
+  
+    
   if (studyNumberOfBackgroundQuarks)
   {
     NumberOfQuarks.resize(nTimeSteps+1);
     NumberOfAntiquarks.resize(nTimeSteps+1);
     NumberOfGluons.resize(nTimeSteps+1);
-  }
-  for (int i=0;i<nTimeSteps;i++)
-  {
-    NumberOfQuarks[i]=0;
-    NumberOfAntiquarks[i]=0;
-    NumberOfGluons[i]=0;
-  }
   
+    for (int i=0;i<nTimeSteps-1;i++)
+    {
+      NumberOfQuarks[i]=0;
+      NumberOfAntiquarks[i]=0;
+      NumberOfGluons[i]=0;
+    }
+  }
   
   //---- times for output of data --------
   int tempCount_tstep = 0;
