@@ -40,6 +40,7 @@ enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
 /** @brief Enumeration type for different variants of computing the mean free path of added particles */
 enum JET_MFP_COMPUTATION_TYPE { computeMfpLastTimestep, computeMfpIteration, computeMfpInterpolation, fixedMfp, thermalMfpGluon };
 
+
 /** @brief Enumeration type for different output schemes to decide which kind of output is printed 
  * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
 */

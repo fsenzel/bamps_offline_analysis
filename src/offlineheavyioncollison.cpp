@@ -3819,7 +3819,10 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
                     
   int get23errors;
   get23errors += scatt23_obj.getPhotonMomenta23_metropolis( pt1, pt3, y, phi, pz1 );
-  scatt23_obj.setNewMomenta23( P1new, P2new, P3new,temp_particle_iscat.Pos, temp_particle_jscat.Pos,pt1, pt3, y, phi, pz1 );
+  
+  //TEST
+  //scatt23_obj.setNewMomenta23( P1new, P2new, P3new,temp_particle_iscat.Pos, temp_particle_jscat.Pos,pt1, pt3, y, phi, pz1 );
+  scatt23_obj.setNewMomenta23onlyCMBoost( P1new, P2new, P3new,temp_particle_iscat.Pos, temp_particle_jscat.Pos,pt1, pt3, y, phi, pz1 );
   
   ParticleOffline temp_particle_produced_photon1;
   totalPhotonNumber++;

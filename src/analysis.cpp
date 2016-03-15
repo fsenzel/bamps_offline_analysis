@@ -342,7 +342,14 @@ analysis::analysis( config* const c ):
     NumberOfAntiquarks.resize(nTimeSteps+1);
     NumberOfGluons.resize(nTimeSteps+1);
   }
-
+  for (int i=0;i<nTimeSteps;i++)
+  {
+    NumberOfQuarks[i]=0;
+    NumberOfAntiquarks[i]=0;
+    NumberOfGluons[i]=0;
+  }
+  
+  
   //---- times for output of data --------
   int tempCount_tstep = 0;
   tstep_movie[tempCount_tstep] = 0.1;
@@ -5179,13 +5186,17 @@ void analysis::printNumberOfMediumParticles()
   if( size == 0 )
     printHeader( file, numbOfPartcles, end );
   //---------------------------------------  
+  file << "#All number divided by Ntest = " << theConfig->getTestparticles() << endl;
   file << "#Quarks\t#nAntiquarks\t#nGluons" << endl;
-  for (int i=0;i<nTimeSteps;i++)
+  for (int i=0;i<nTimeSteps-1;i++)
   {
-    file << tstep[i] << "\t" << NumberOfQuarks[i];
-    file << "\t" << NumberOfAntiquarks[i];
-    file << "\t" << NumberOfGluons[i];
-    file << endl;
+    if(NumberOfQuarks[i] >0 || NumberOfAntiquarks[i]>0 || NumberOfGluons[i]>0)
+    {
+      file << tstep[i] << "\t" << NumberOfQuarks[i]/theConfig->getTestparticles();
+      file << "\t" << NumberOfAntiquarks[i]/theConfig->getTestparticles();
+      file << "\t" << NumberOfGluons[i]/theConfig->getTestparticles();
+      file << endl;
+    }    
   }
   
   file.close();  

@@ -20,7 +20,6 @@
 #include "particle.h"
 #include <globalsettings.h>
 
-
 /**
  * @brief Provides properties of a particle needed in the offline reconstruction of BAMPS events.
  *
