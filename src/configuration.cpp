@@ -122,6 +122,8 @@ config::config() :
     mfpAddedRangeVariation( 100.0 ),
     fixed_mfp_added( 1.0 ),
     onlyMediumEvolution( false ),
+    analysisPhotonsTimeCut( 0.0 ),
+    analysisPhotonsPTCut( 0.0 ),
 //  interpolationBorder(50),
 // ---- offline reconstruction options ----
     pathdirOfflineData("offline_data"),
@@ -377,6 +379,8 @@ void config::initializeProgramOptions()
     ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "treatment for the mean free path of added particles ( 0 = computeMfpLastTimestep, 1 = computeMfpIteration, 2 = computeMfpInterpolation, 3 = fixedMfp, 4 = thermalMfpGluon)")
     ("misc.fixed_mfp_added", po::value<double>( &fixed_mfp_added )->default_value( fixed_mfp_added ), "Mean free path of added particles set by hand. Does not depend on energy of particle" )
     ("misc.mfpAddedRangeVariation", po::value<double>( &mfpAddedRangeVariation )->default_value( mfpAddedRangeVariation ), "Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be" )
+    ("misc.analysisPhotonsTimeCut", po::value<double>( &analysisPhotonsTimeCut )->default_value( analysisPhotonsTimeCut ), "in fm/c. At what time the photon production starts. Default 0.0 fm/c." )
+    ("misc.analysisPhotonsPTCut", po::value<double>( &analysisPhotonsPTCut )->default_value( analysisPhotonsPTCut ), "in GeV. Above what pT the photon production is counted. Default 0.0 GeV ." )   
     ;
 
 

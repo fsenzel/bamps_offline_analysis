@@ -50,6 +50,7 @@ light_parton_lhc = 20,
 
 studyOnlyEtSpectra = 205,
 studyNumberOfParticles = 206,
+SpatialPhotons = 207,
 
 // heavy quarks:
 phenix_hq_electrons = 101,
@@ -304,6 +305,11 @@ class config : public configBase
   
   /** @brief Interface for config::mfp_added */
   double getFixedMfpAdded() const {return fixed_mfp_added;}
+  
+  /** @brief Interface for config::analysisPhotonsTimeCut */
+  double getAnalysisPhotonsTimeCut() const {return analysisPhotonsTimeCut;}
+  /** @brief Interface for config::analysisPhotonsPTCut */
+  double getAnalysisPhotonsPTCut() const {return analysisPhotonsPTCut;}
   
 //   /** @brief Interface for config::interpolationBorder */
 //   double getMFPInterpolationBorder() const {return interpolationBorder;}
@@ -622,6 +628,11 @@ class config : public configBase
   /** @brief Whether to do only medium evolution without scatterings or rate and debye mass calculations */
   bool onlyMediumEvolution;
     
+  /** @brief Only photons produced later than this value in fm/c will be counted in the [v_2] analysis. */
+  double analysisPhotonsTimeCut;
+  /** @brief Only photons produced higher than this value in GeV will be counted in the [v_2] analysis. */
+  double analysisPhotonsPTCut;
+  
   // heavy quark output
   /** @brief Whether correlation analysis of heavy quark pairs is done */
   bool hqCorrelationsOutput;

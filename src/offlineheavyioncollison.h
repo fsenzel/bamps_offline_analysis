@@ -98,6 +98,7 @@ private:
     double Bimp;
     /** @brief Number of test particles per real particle */
     int testpartcl;
+    
     //--------------------------------------------------------------------------
 
     /**
@@ -109,6 +110,8 @@ private:
     double averageS_smallv2;
     double averageS_Bigv2;
 
+    /** @brief Simply a count of computational timesteps */
+    unsigned simpleTimestepcount;
     
     
     /**

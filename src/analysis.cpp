@@ -310,6 +310,14 @@ analysis::analysis( config* const c ):
     tstep[81]=infinity;
     nTimeSteps = 82;
   }
+  else if(studySpatialPhotons) 
+  {
+    tstep[0]=.2;
+    tstep[1]=.3;
+    tstep[2]=.4; 
+    tstep[3]=infinity;
+    nTimeSteps = 4;
+  }
   else
   {
     tstep[0] = 0.1;      //fm/c
@@ -611,6 +619,8 @@ analysis::analysis( config* const c ):
     
     //PhotonEnergyBins configuration   
     PhotondNOverTwoPiptdydptBin.setMinMaxN( 0.0, 3.0, 100 );
+    cellV2.setMinMaxN(-1.0,1.0,20);
+    cellV2Weighted.setMinMaxN(-1.0,1.0,20);
     
     //---- initialisation of PT-binning ----
     minPTPhotons = 0.0;
@@ -673,6 +683,8 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyScatteredMediumParticles = false; // print scattered medium particles
   studyPhotons = false; // transverse momentum spectra of photons
   studyNumberOfBackgroundQuarks = false; // study Number Of Background quarks and antiquarks and gluons
+  studySpatialPhotons = false;
+  
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -703,6 +715,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     case studyNumberOfParticles:
       studyNumberOfBackgroundQuarks = true;
       break;
+    case SpatialPhotons: 
+      studySpatialPhotons = true;
+      break; 
     case phenix_hq_electrons:
       studyHQ = true;
       
@@ -1095,6 +1110,85 @@ void analysis::PtDistributionPhotons( const double PTofThisSinglePhoton, const d
   }  
 }
 
+/** Bin the cellV2 distribution
+ * 
+ * @param[in] cellV2ofThisCell
+ */
+void analysis::cellV2Distribution( const double cellV2ofThisCell, const unsigned int weight)
+{ 
+  cellV2.add(cellV2ofThisCell); 
+  if(weight>0)
+  {
+    for(unsigned int i = 1;i<weight;i++)
+    {
+      cellV2Weighted.add(cellV2ofThisCell);
+    }
+  }  
+}
+
+
+void analysis::printCellV2Distribution( const double nexttime, unsigned int timestepCount)
+{
+  time_t end;
+  time( &end );
+  
+  string timename,timeInFm;
+  stringstream ss,ss2;
+
+  ss << timestepCount;
+  ss2 << nexttime;
+  timename = ss.str();
+  timeInFm = ss2.str();
+  
+  //NORMAL, not weighted:  
+  string filename1 = filename_prefix + "_CellV2Distribution_time_" + timename ;
+  fstream file1( filename1.c_str(), ios::out | ios::trunc );
+
+  //print header if file is empty
+  file1.seekp( 0, ios::end );
+  long size = file1.tellp();
+  file1.seekp( 0, ios::beg );
+  if ( size == 0 )
+    printHeader( file1, cellV2DistributionHeader,end );
+
+  file1 << "#time in fm:" << endl;
+  file1 << "#4321\t" << timeInFm << endl;
+  file1 << endl;
+  file1 << "#Mean cell v2" << endl;
+  file1 << cellV2.getMean()<<"\t0.\t1234\t1234" << endl;
+  file1 << cellV2.getMean()<<"\t10000\t1234\t1234" << endl;
+  file1 << endl;
+  cellV2.print(file1);
+  file1.close();
+  cellV2.deleteBins();
+
+  //Weighhted with Photon number produced in cell:   
+  string filename2 = filename_prefix + "_CellV2DistributionWeightedWithPhotons_time_" + timename ;
+  fstream file2( filename2.c_str(), ios::out | ios::trunc );
+
+  file2 << "#Weighted wit number of photons produced in cell" << endl;
+  
+  //print header if file is empty
+  file2.seekp( 0, ios::end );
+  long size2 = file2.tellp();
+  file2.seekp( 0, ios::beg );
+  if ( size2 == 0 )
+    printHeader( file2, cellV2DistributionHeader,end );
+
+  file2 << "#time in fm:" << endl;
+  file2 << "#4321\t" << timeInFm << endl;
+  file2 << endl;
+  file2 << "#Mean cell v2" << endl;
+  file2 << cellV2Weighted.getMean()<<"\t0.\t1234\t1234" << endl;
+  file2 << cellV2Weighted.getMean()<<"\t10000\t1234\t1234" << endl;
+  file2 << endl;
+  cellV2Weighted.print(file2);
+  file2.close();
+  cellV2Weighted.deleteBins();
+  
+}
+
+
 /** Photonspectra output
  *  Prints the Spectra from the function PtDistributionPhotons out. For Double-Checking and Tests.
  *  Generates two files: 
@@ -1243,7 +1337,14 @@ void analysis::intermediateOutput( const int nn )
   
   if ( dndyOutput )
     print_dndy( name );
-    
+
+  if (studySpatialPhotons)
+  {
+    cout << "interm output" << endl;
+    writePhotonSpaceProfile(nn+1);  
+  
+  }
+  
 }
 
 
@@ -2172,8 +2273,8 @@ v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg, std
   PhotonNumberVsAngleBin.setMinMaxN( 0.0 , 90, 100 );
   
   studyInitialCutOffEffect = true;
-  lower_time_cutoff_for_v2 = 3.0;
-  lower_pt_cutoff_for_v2 = 0.5;
+  lower_time_cutoff_for_v2 = theConfig->getAnalysisPhotonsTimeCut();
+  lower_pt_cutoff_for_v2 = theConfig->getAnalysisPhotonsPTCut();
 }
 
 
@@ -3557,12 +3658,15 @@ void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
 {
   switch ( mode )
   {
+  case cellV2DistributionHeader:
+    f << "#V2-distribution of cells of background particles "<<endl;
+    break;
   case numbOfPartcles:
     f << "#Number of Quarks and Gluons" << endl;
     break;
-    case dEtdy:
-    f << "#Et-spectrum" << endl;
-    break;
+  case dEtdy:
+  f << "#Et-spectrum" << endl;
+  break;
   case ptSpectrum:
     f << "#pt-spectra " << endl;
     break;
@@ -4341,6 +4445,98 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   delete[] tempWithQuarks_cell;
 }
 
+// writes spatial profile of photons
+void analysis::writePhotonSpaceProfile( const int step  )
+{
+  string filename,name;
+  stringstream ss;
+  double time;
+  
+  if ( step != 0 && step != nTimeSteps )
+    time = tstep[step-1];
+  else
+    return;
+  
+  ss << time*10;
+  filename = filename_prefix + "_tempVel_" + ss.str() + ".dat";
+  filename = filename + "_spatial";
+  
+  fstream file_spatial( filename.c_str(), ios::out | ios::trunc  );
+  
+  int IXY = IX * IY;
+  // total length of grid system
+  const double xlength = 24.6;
+  const double ylength = 24.6;
+  // number of cells in given direction
+  // in cascade IX=40   IY=40   IZ=47
+  const int nCellsx = 41;
+  const int nCellsy = 41;  
+  const int zlength = 12.3;
+  const int nCellsz = 41;  
+  int cell_id,cell_id2D,nx,ny,nz;
+  const int nCells = nCellsx * nCellsy * nCellsz;
+  const int nCells2D = nCellsx * nCellsy;
+  double dv = xlength * ylength * zlength / nCells; // volume of each cell
+  double dx = xlength / nCellsx;
+  double dy = ylength / nCellsy;
+  
+  numberInCell = new int[nCells]; // number of all particles in cell
+  numberInCell2D = new int[nCells2D]; // number of all particles in cell
+    // set all properties to 0
+  for ( int i = 0; i < nCells; i++ )
+  {
+    numberInCell[i] = 0;
+  }
+  for ( int i = 0; i < nCells2D; i++ )
+  {
+    numberInCell2D[i] = 0;
+  }
+    // sum over all particles
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+    // determine cell id
+    if ( fabs( particles_atTimeNow[i].Pos.X() - xlength / 2.0 ) < 1.0e-6 )
+      nx = nCellsx - 1;
+    else
+      nx = int(( particles_atTimeNow[i].Pos.X() / xlength + 0.5 ) * nCellsx );
+
+    if ( fabs( particles_atTimeNow[i].Pos.Y() - ylength / 2.0 ) < 1.0e-6 )
+      ny = nCellsy - 1;
+    else
+      ny = int(( particles_atTimeNow[i].Pos.Y() / ylength + 0.5 ) * nCellsy );
+
+    if ( fabs( particles_atTimeNow[i].Pos.Z() - zlength / 2.0 ) < 1.0e-6 )
+      nz = nCellsz - 1;
+    else
+      nz = int(( particles_atTimeNow[i].Pos.Z() / zlength + 0.5 ) * nCellsz );
+
+
+    if (( nx >= nCellsx ) || ( nx < 0 ) || ( ny >= nCellsy ) || ( ny < 0 ) || ( nz >= nCellsz ) || ( nz < 0 ) )
+    {
+      cout << "err cell_ID in temp output" << endl;
+      cout << particles_atTimeNow[i].Pos.T() << "\t" << particles_atTimeNow[i].Pos.X() << "\t" << particles_atTimeNow[i].Pos.Y();
+      cout << "\t" << particles_atTimeNow[i].Pos.Z() << endl;
+      cout << nx << "\t" << ny << "\t" << nz << endl;
+    }
+    else
+    {
+      cell_id = nx + nCellsx * ny + nCellsx * nCellsy * nz;
+      cell_id2D = nx + nCellsx * ny;
+      ++numberInCell[cell_id];
+      ++numberInCell2D[cell_id2D];
+    }
+  }
+  
+  for(int i = 0; i < nCellsx;i++)
+  {
+    for(int j = 0; j < nCellsy; j++ )
+    {
+      int cellID2Dhere = i + nCellsx * j ;
+      file_spatial << dx*i << "\t" << dy*j << "\t" << numberInCell2D[cellID2Dhere] << endl;
+    }
+  }
+  file_spatial.close();
+}
 
 
 
@@ -5155,20 +5351,23 @@ void analysis::saveNumberOfMediumParticles( const int step)
 {
   for( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( particles_atTimeNow[i].FLAVOR ) );
-
-    switch(genFlavor)
+    if(fabs(particles_atTimeNow[i].Pos.Rapidity() )<0.1 )
     {
-      case light_quark:
-        NumberOfQuarks[step]++;
-      break;
-      case anti_light_quark:
-        NumberOfAntiquarks[step]++;
-      break;
-      case gluon:
-        NumberOfGluons[step]++;
-      break;
-    }  
+      FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( particles_atTimeNow[i].FLAVOR ) );
+
+      switch(genFlavor)
+      {
+        case light_quark:
+          NumberOfQuarks[step]++;
+          break;
+        case anti_light_quark:
+          NumberOfAntiquarks[step]++;
+          break;
+        case gluon:
+          NumberOfGluons[step]++;
+          break;
+      }  
+    }
   }
 }
 

@@ -258,6 +258,7 @@ void offlineHeavyIonCollision::mainFramework()
   bool onlyMediumEvolution=theConfig->isOnlyMediumEvolution();
   
   
+  
   list<int> edgeCellCopy, edgeCellAddedCopy;
 
   dx = theConfig->get_dx();
@@ -330,6 +331,11 @@ void offlineHeavyIonCollision::mainFramework()
   theAnalysis->collectPtDataInitial();
   theAnalysis->collectYDataInitial();
   theAnalysis->collectEtDataInitial();
+  
+  //TEST
+  //theAnalysis->printCellV2Distribution(nexttime, simpleTimestepcount);
+  //simpleTimestepcount++;
+  
   simulationTime = theConfig->getTimefirst(); //fm/c
 
   while( simulationTime >= theAnalysis->tstep[nn_ana] )
@@ -497,7 +503,8 @@ void offlineHeavyIonCollision::mainFramework()
       // collide added particles with gluonic medium
       deadParticleList.clear();
       scattering( nexttime, again );
-         
+      //theAnalysis->printCellV2Distribution(nexttime, simpleTimestepcount);
+      //simpleTimestepcount++; 
       // if time step is too large -> collide again with smaller time step
       while ( again )
       {
@@ -549,6 +556,8 @@ void offlineHeavyIonCollision::mainFramework()
      
       if ( doAnalysisStep )
       {
+        theAnalysis->printCellV2Distribution(nexttime, simpleTimestepcount);
+        simpleTimestepcount++;
         theAnalysis->intermediateOutput( nn_ana );
         theAnalysis->collectPtData( nn_ana );
         theAnalysis->collectYData( nn_ana );
@@ -1297,7 +1306,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
     
     rings.clear();
     rings.setLongitudinalGeometry( etaBins[etaSliceIndex].left, etaBins[etaSliceIndex].right, simulationTime );
-    
     for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
     {
       list<int>::const_iterator iIt;
@@ -1672,16 +1680,10 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               scaleFactor = static_cast<double>( nGluons ) / static_cast<double>( nGluons - n32 );
             }
             
-            
-            
-            
+         
+            unsigned int tempPhotons = totalPhotonNumber;
             if( theConfig->isScatt_amongBackgroundParticles() )
             {
-              //if ( computeBackgroundv2OfCell(allParticlesList)>0.01 )                
-              //{ 
-              if ( true )                
-              {              
-                //cout << "v2 of cell = " <<computeBackgroundv2OfCell(allParticlesList)<<  endl;
                 if( theConfig->doScattering_22_photons())
                 {
                   scatt22_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
@@ -1690,8 +1692,11 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                 {
                   scatt23_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
                 }             
-              }
-              
+                
+                tempPhotons = totalPhotonNumber - tempPhotons;
+                
+                theAnalysis->cellV2Distribution(  computeBackgroundv2OfCell(allParticlesList), tempPhotons  ); 
+                             
               if ( again )
               {
                 //cout << "AGAIN!" << endl;
@@ -1723,6 +1728,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                 return;
               }
             }
+            
+            
             
           }
           else  //if(nmb < cellcut)
@@ -1811,6 +1818,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
           }
         }
     }
+    
   }
   
   formGeomCopy.clear();
@@ -2167,7 +2175,10 @@ double offlineHeavyIonCollision::computeBackgroundv2OfCell( std::vector< int >& 
   for ( int i = 0; i <  allParticlesList.size(); i++ )
   {
       iscat = allParticlesList[i];     
-      v2+=(pow(particles_atTimeNow[iscat].Mom.Px(),2.0)-pow(particles_atTimeNow[iscat].Mom.Py(),2.0))/particles_atTimeNow[iscat].Mom.Pt();
+      if(fabs(particles_atTimeNow[iscat].Mom.Rapidity())<0.35 && particles_atTimeNow[iscat].Mom.Pt()>1.5 )
+      {
+        v2+=(pow(particles_atTimeNow[iscat].Mom.Px(),2.0)-pow(particles_atTimeNow[iscat].Mom.Py(),2.0))/pow(particles_atTimeNow[iscat].Mom.Pt(),2.0);
+      }
   }
   return v2/allParticlesList.size();   
 }
@@ -2915,9 +2926,6 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
     }
   }
 }
-
-
-
 
 
 int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scattering23& scatt23_obj, cellContainer& _cell, int iscat, const int jscat, bool& again, const double nexttime )

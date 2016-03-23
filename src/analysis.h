@@ -37,7 +37,7 @@ using std::fstream;
 class config;
 
 enum jetTrackerCollType {initial_jet, final_jet, c2to2, c2to3, c3to2, production};
-enum anaType {numbOfPartcles, dEtdy, ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets, photonPtDist};
+enum anaType {numbOfPartcles, dEtdy, ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets, photonPtDist,cellV2DistributionHeader};
 enum v2Type {v2jets, v2background};
 
 
@@ -202,6 +202,10 @@ public:
   
   /** @brief Generate the Energy-distribution for Photons. */
   void PtDistributionPhotons( const double PTofThisSinglePhoton , const double etaOfThisSinglePhoton, const double EofSinglePhoton  ); 
+  /** @brief Generate the cellV2-distribution. */
+  void cellV2Distribution(const double cellV2ofThisCell, const unsigned int weight);
+  /** @brief Print out the cellV2-distribution. */
+  void printCellV2Distribution( const double nexttime, unsigned int timestepCount);
   
   void setSeed( uint32_t _s ) { seed = _s; }
   uint32_t getSeed( ) const { return seed; }
@@ -284,6 +288,7 @@ private:
   bool studyScatteredMediumParticles;
   bool studyPhotons;
   bool studyNumberOfBackgroundQuarks;
+  bool studySpatialPhotons;
  
   
   void writePartclMovie( const int step ) const;
@@ -345,6 +350,7 @@ private:
   std::vector<double> ptSoftBinLabels;
   
   binning PhotondNOverTwoPiptdydptBin;
+  binning cellV2,cellV2Weighted;
   
   double jetTracking_PT;  
   
@@ -362,6 +368,7 @@ private:
   void writeTempInTube( const int step  );
   void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  );
   void print_dndy(const string subfix );
+  void writePhotonSpaceProfile( const int step  );
   
   bool v2output;
   bool v2outputIntermediateSteps;
@@ -369,6 +376,7 @@ private:
   
   
   int *numberInCell; 
+  int *numberInCell2D; 
   int *temp_numberInCell; 
   double *vx_cell; 
   double *vy_cell;  
