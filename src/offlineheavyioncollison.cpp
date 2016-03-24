@@ -556,8 +556,8 @@ void offlineHeavyIonCollision::mainFramework()
      
       if ( doAnalysisStep )
       {
-        theAnalysis->printCellV2Distribution(nexttime, simpleTimestepcount);
-        simpleTimestepcount++;
+        //theAnalysis->printCellV2Distribution(nexttime, simpleTimestepcount);
+        //simpleTimestepcount++;
         theAnalysis->intermediateOutput( nn_ana );
         theAnalysis->collectPtData( nn_ana );
         theAnalysis->collectYData( nn_ana );

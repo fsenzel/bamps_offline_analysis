@@ -312,11 +312,89 @@ analysis::analysis( config* const c ):
   }
   else if(studySpatialPhotons) 
   {
-    tstep[0]=.2;
-    tstep[1]=.3;
-    tstep[2]=.4; 
-    tstep[3]=infinity;
-    nTimeSteps = 4;
+    tstep[0]=.15;
+    tstep[1]=.2;
+    tstep[2]=.3;
+    tstep[3]=.4;
+    tstep[4]=.5;
+    tstep[5]=.6;
+    tstep[6]=.7;
+    tstep[7]=.8;
+    tstep[8]=.9;
+    tstep[9]=1.0;
+    tstep[10]=1.1;
+    tstep[11]=1.2;
+    tstep[12]=1.3;
+    tstep[13]=1.4;
+    tstep[14]=1.5;
+    tstep[15]=1.6;
+    tstep[16]=1.7;
+    tstep[17]=1.8;
+    tstep[18]=1.9;
+    tstep[19]=2.0;
+    tstep[20]=2.1;
+    tstep[21]=2.2;
+    tstep[22]=2.3;
+    tstep[23]=2.4;
+    tstep[24]=2.5;
+    tstep[25]=2.6;
+    tstep[26]=2.7;
+    tstep[27]=2.8;
+    tstep[28]=2.9;
+    tstep[29]=3.0;
+    tstep[30]=3.1;
+    tstep[31]=3.2;
+    tstep[32]=3.3;
+    tstep[33]=3.4;
+    tstep[34]=3.5;
+    tstep[35]=3.6;
+    tstep[36]=3.7;
+    tstep[37]=3.8;
+    tstep[38]=3.9;
+    tstep[39]=4.0;
+    tstep[40]=4.1;
+    tstep[41]=4.2;
+    tstep[42]=4.3;
+    tstep[43]=4.4;
+    tstep[44]=4.5;
+    tstep[45]=4.6;
+    tstep[46]=4.7;
+    tstep[47]=4.8;
+    tstep[48]=4.9;
+    tstep[49]=5.0;
+    tstep[50]=5.1;
+    tstep[51]=5.2;
+    tstep[52]=5.3;
+    tstep[53]=5.4;
+    tstep[54]=5.5;
+    tstep[55]=5.6;
+    tstep[56]=5.7;
+    tstep[57]=5.8;
+    tstep[58]=5.9;
+    tstep[59]=6.0;
+    tstep[60]=6.1;
+    tstep[61]=6.2;
+    tstep[62]=6.3;
+    tstep[63]=6.4;
+    tstep[64]=6.5;
+    tstep[65]=6.6;
+    tstep[66]=6.7;
+    tstep[67]=6.8;
+    tstep[68]=6.9;
+    tstep[69]=7.0;
+    tstep[70]=7.1;
+    tstep[71]=7.2;
+    tstep[72]=7.3;
+    tstep[73]=7.4;
+    tstep[74]=7.5;
+    tstep[75]=7.6;
+    tstep[76]=7.7;
+    tstep[77]=7.8;
+    tstep[78]=7.9;
+    tstep[79]=8.0;
+    tstep[80]=8.1;
+    tstep[81]=infinity;
+    nTimeSteps = 82;
   }
   else
   {
@@ -1068,6 +1146,10 @@ void analysis::printEtDistribution(const int step )
   
   
 }
+
+
+
+
 
 /** Bin the Pt distribution for photons with two methods. For double-checking and some tests.
  * 
@@ -2342,7 +2424,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   {
     v2pt_binnumber = 10;   
     _pt_min_v2 = 0.1;
-    _pt_max_v2 = 3.;
+    _pt_max_v2 = 4.5;
     d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
   }
   else
@@ -4450,28 +4532,36 @@ void analysis::writePhotonSpaceProfile( const int step  )
 {
   string filename,name;
   stringstream ss;
-  double time;
+  double time,time_from_step_before;
   
-  if ( step != 0 && step != nTimeSteps )
+  
+  if ( step == 1 )
+  {  
     time = tstep[step-1];
+    time_from_step_before = 0.0;
+  }else if ( step > 1 && step != nTimeSteps )
+  {
+    time = tstep[step-1];
+    time_from_step_before = tstep[step-2];
+  }
   else
     return;
   
-  ss << time*10;
-  filename = filename_prefix + "_tempVel_" + ss.str() + ".dat";
-  filename = filename + "_spatial";
+  ss << step;
+  filename = filename_prefix + "_phSpatial_" + ss.str() + ".dat";
+  //filename = filename + "_spatial";
   
   fstream file_spatial( filename.c_str(), ios::out | ios::trunc  );
   
   int IXY = IX * IY;
   // total length of grid system
-  const double xlength = 24.6;
-  const double ylength = 24.6;
+  const double xlength = 11;
+  const double ylength = 11;
   // number of cells in given direction
   // in cascade IX=40   IY=40   IZ=47
-  const int nCellsx = 41;
-  const int nCellsy = 41;  
-  const int zlength = 12.3;
+  const int nCellsx = 200;
+  const int nCellsy = 200;  
+  const int zlength = 47;
   const int nCellsz = 41;  
   int cell_id,cell_id2D,nx,ny,nz;
   const int nCells = nCellsx * nCellsy * nCellsz;
@@ -4482,6 +4572,8 @@ void analysis::writePhotonSpaceProfile( const int step  )
   
   numberInCell = new int[nCells]; // number of all particles in cell
   numberInCell2D = new int[nCells2D]; // number of all particles in cell
+  photonNumberInCell2D = new int[nCells2D]; // number of all photons in cell
+  
     // set all properties to 0
   for ( int i = 0; i < nCells; i++ )
   {
@@ -4490,9 +4582,13 @@ void analysis::writePhotonSpaceProfile( const int step  )
   for ( int i = 0; i < nCells2D; i++ )
   {
     numberInCell2D[i] = 0;
+    photonNumberInCell2D[i]=0;
   }
-    // sum over all particles
-  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  
+  //******************************
+  //1.) Background Particle Number
+  //******************************
+  /*for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
     // determine cell id
     if ( fabs( particles_atTimeNow[i].Pos.X() - xlength / 2.0 ) < 1.0e-6 )
@@ -4526,13 +4622,59 @@ void analysis::writePhotonSpaceProfile( const int step  )
       ++numberInCell2D[cell_id2D];
     }
   }
+  */
   
+  //******************************
+  //2.) Photon Number
+  //******************************
+  for ( int i = 0; i < noninteractingParticles.size(); i++ )
+  {
+    if (noninteractingParticles[i].Mom.Rapidity() > 0.35 )
+    {
+      continue;
+    }
+    if (noninteractingParticles[i].production_time < time_from_step_before || noninteractingParticles[i].production_time > time )
+    {
+      continue;
+    }    
+    // determine cell id
+    if ( fabs( noninteractingParticles[i].Pos.X() - xlength / 2.0 ) < 1.0e-6 )
+      nx = nCellsx - 1;
+    else
+      nx = int(( noninteractingParticles[i].Pos.X() / xlength + 0.5 ) * nCellsx );
+
+    if ( fabs( noninteractingParticles[i].Pos.Y() - ylength / 2.0 ) < 1.0e-6 )
+      ny = nCellsy - 1;
+    else
+      ny = int(( noninteractingParticles[i].Pos.Y() / ylength + 0.5 ) * nCellsy );
+
+    //if ( fabs( noninteractingParticles[i].Pos.Z() - zlength / 2.0 ) < 1.0e-6 )
+    //  nz = nCellsz - 1;
+    //else
+    //  nz = int(( noninteractingParticles[i].Pos.Z() / zlength + 0.5 ) * nCellsz );
+
+
+    if (( nx >= nCellsx ) || ( nx < 0 ) || ( ny >= nCellsy ) || ( ny < 0 ) )
+    {
+      cout << "err cell_ID in temp output" << endl;
+      cout << particles_atTimeNow[i].Pos.T() << "\t" << particles_atTimeNow[i].Pos.X() << "\t" << particles_atTimeNow[i].Pos.Y();
+      cout << "\t" << particles_atTimeNow[i].Pos.Z() << endl;
+      cout << nx << "\t" << ny << "\t" << nz << endl;
+    }
+    else
+    {
+      cell_id2D = nx + nCellsx * ny;
+      ++photonNumberInCell2D[cell_id2D];
+    }
+  }
+  
+
   for(int i = 0; i < nCellsx;i++)
   {
     for(int j = 0; j < nCellsy; j++ )
     {
       int cellID2Dhere = i + nCellsx * j ;
-      file_spatial << dx*i << "\t" << dy*j << "\t" << numberInCell2D[cellID2Dhere] << endl;
+      file_spatial << dx*i << "\t" << dy*j << "\t" << photonNumberInCell2D[cellID2Dhere] << endl;
     }
   }
   file_spatial.close();
