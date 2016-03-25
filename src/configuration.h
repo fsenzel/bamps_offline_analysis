@@ -308,9 +308,19 @@ class config : public configBase
   
   /** @brief Interface for config::analysisPhotonsTimeCut */
   double getAnalysisPhotonsTimeCut() const {return analysisPhotonsTimeCut;}
+  
   /** @brief Interface for config::analysisPhotonsPTCut */
   double getAnalysisPhotonsPTCut() const {return analysisPhotonsPTCut;}
   
+  /** @brief Interface for minAllowedParentPT for Photonproduction */
+  double getMinAllowedParentPT() const {return minAllowedParentPT;}
+  
+  /** @brief Interface for maxAllowedParentPT for Photonproduction */  
+  double getMaxAllowedParentPT() const {return maxAllowedParentPT;}  
+  
+  /** @brief Interface for restrictParentPTForPhotonproduction for Photonproduction */  
+  bool getRestrictParentPTForPhotons() const {return restrictParentPTForPhotonproduction;} 
+ 
 //   /** @brief Interface for config::interpolationBorder */
 //   double getMFPInterpolationBorder() const {return interpolationBorder;}
   /** ------------------------------------ */
@@ -630,8 +640,18 @@ class config : public configBase
     
   /** @brief Only photons produced later than this value in fm/c will be counted in the [v_2] analysis. */
   double analysisPhotonsTimeCut;
+  
   /** @brief Only photons produced higher than this value in GeV will be counted in the [v_2] analysis. */
   double analysisPhotonsPTCut;
+  
+  /** @brief Restrict the parent particles PT for photonproduction. The particle with the highest pt will be compared to this limit. */
+  double minAllowedParentPT;
+  
+  /** @brief Restrict the parent particles PT for photonproduction. The particle with the highest pt will be compared to this limit. */  
+  double maxAllowedParentPT;
+  
+  /** @brief Restrict the parent particles PT for photonproduction. The particle with the highest pt will be compared to limit minAllowedParentPT < PT < maxAllowedParentPT. */
+  bool restrictParentPTForPhotonproduction;
   
   // heavy quark output
   /** @brief Whether correlation analysis of heavy quark pairs is done */

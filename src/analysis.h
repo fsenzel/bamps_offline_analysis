@@ -378,7 +378,7 @@ private:
   int *numberInCell; 
   int *numberInCell2D; 
   int *photonNumberInCell2D; 
-  
+  double *photonV2SumInCell2D;
   
   int *temp_numberInCell; 
   double *vx_cell; 

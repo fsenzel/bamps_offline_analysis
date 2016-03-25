@@ -190,6 +190,8 @@ private:
     void scatt23_amongBackgroundParticles_photons_utility_1( scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime, const double scaleForSelectedPairs, bool & again );
     void scatt23_amongBackgroundParticles_photons_utility_2( scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime );
 
+    bool parentParticlesAllowed(const int iscat, const int jscat);
+    
     /** @brief Goes through all added particles and decays J/psi if the temperature of the surrounding medium is larger than the dissocation temperature */
     void jpsi_dissociation_td( const double time );
 

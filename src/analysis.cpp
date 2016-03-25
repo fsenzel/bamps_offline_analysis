@@ -1422,9 +1422,7 @@ void analysis::intermediateOutput( const int nn )
 
   if (studySpatialPhotons)
   {
-    cout << "interm output" << endl;
-    writePhotonSpaceProfile(nn+1);  
-  
+    writePhotonSpaceProfile(nn+1);   
   }
   
 }
@@ -2468,8 +2466,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   
   
   
-  const double deltaAlpha = 15; // degrees
-  const int nAlphaBins = 6;  // 90° / 15°
+  const double deltaAlpha = 30; // degrees
+  const int nAlphaBins = 3;  // 90° / 15°
   double ptBinsAngleDep[eta_bins][nAlphaBins][n_bins+1];
   for ( int i = 0; i < eta_bins; i++ )
   {
@@ -4569,10 +4567,12 @@ void analysis::writePhotonSpaceProfile( const int step  )
   double dv = xlength * ylength * zlength / nCells; // volume of each cell
   double dx = xlength / nCellsx;
   double dy = ylength / nCellsy;
+  double v2 = 0.;
   
   numberInCell = new int[nCells]; // number of all particles in cell
   numberInCell2D = new int[nCells2D]; // number of all particles in cell
   photonNumberInCell2D = new int[nCells2D]; // number of all photons in cell
+  photonV2SumInCell2D = new double[nCells2D]; // Sum of v2 in Cell
   
     // set all properties to 0
   for ( int i = 0; i < nCells; i++ )
@@ -4583,6 +4583,7 @@ void analysis::writePhotonSpaceProfile( const int step  )
   {
     numberInCell2D[i] = 0;
     photonNumberInCell2D[i]=0;
+    photonV2SumInCell2D[i]=0.0;
   }
   
   //******************************
@@ -4664,17 +4665,28 @@ void analysis::writePhotonSpaceProfile( const int step  )
     else
     {
       cell_id2D = nx + nCellsx * ny;
+      v2 = (pow(noninteractingParticles[i].Mom.Px(),2.0)-pow(noninteractingParticles[i].Mom.Py(),2.0))/pow(noninteractingParticles[i].Mom.Pt(),2.0);
+      photonV2SumInCell2D[cell_id2D] += v2;
       ++photonNumberInCell2D[cell_id2D];
     }
   }
   
-
+  file_spatial << "#x\t#y\t#PhNum\t#PhV2"<< endl;
   for(int i = 0; i < nCellsx;i++)
   {
     for(int j = 0; j < nCellsy; j++ )
     {
       int cellID2Dhere = i + nCellsx * j ;
-      file_spatial << dx*i << "\t" << dy*j << "\t" << photonNumberInCell2D[cellID2Dhere] << endl;
+      if(photonNumberInCell2D[cellID2Dhere]>0 && photonV2SumInCell2D[cellID2Dhere]>0)
+      {
+        file_spatial << dx*i << "\t" << dy*j << "\t" << photonNumberInCell2D[cellID2Dhere] << "\t" << 1.0 << endl;
+      }else if (photonNumberInCell2D[cellID2Dhere]>0 && photonV2SumInCell2D[cellID2Dhere]<0)
+      {
+        file_spatial << dx*i << "\t" << dy*j << "\t" << photonNumberInCell2D[cellID2Dhere] << "\t" << -1.0 << endl;        
+      }else
+      {
+        file_spatial << dx*i << "\t" << dy*j << "\t" << photonNumberInCell2D[cellID2Dhere] << "\t" << "0" << endl;          
+      }
     }
   }
   file_spatial.close();

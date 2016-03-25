@@ -124,6 +124,9 @@ config::config() :
     onlyMediumEvolution( false ),
     analysisPhotonsTimeCut( 0.0 ),
     analysisPhotonsPTCut( 0.0 ),
+    restrictParentPTForPhotonproduction(false),
+    minAllowedParentPT( 0.0 ),
+    maxAllowedParentPT( 100000.0 ),
 //  interpolationBorder(50),
 // ---- offline reconstruction options ----
     pathdirOfflineData("offline_data"),
@@ -381,6 +384,11 @@ void config::initializeProgramOptions()
     ("misc.mfpAddedRangeVariation", po::value<double>( &mfpAddedRangeVariation )->default_value( mfpAddedRangeVariation ), "Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be" )
     ("misc.analysisPhotonsTimeCut", po::value<double>( &analysisPhotonsTimeCut )->default_value( analysisPhotonsTimeCut ), "in fm/c. At what time the photon production starts. Default 0.0 fm/c." )
     ("misc.analysisPhotonsPTCut", po::value<double>( &analysisPhotonsPTCut )->default_value( analysisPhotonsPTCut ), "in GeV. Above what pT the photon production is counted. Default 0.0 GeV ." )   
+    ("misc.restrictParentPTForPhotonproduction", po::value<bool>( &restrictParentPTForPhotonproduction )->default_value( restrictParentPTForPhotonproduction ), "if true, restrict the highest parent PT for Photon-Production to lie between minAllowedParentPT and maxAllowedParentPT." )
+    ("misc.minAllowedParentPT", po::value<double>( &minAllowedParentPT )->default_value( minAllowedParentPT ), "in GeV. Highest PT of the two parents must be greater than this parameter." )     
+    ("misc.maxAllowedParentPT", po::value<double>( &maxAllowedParentPT )->default_value( maxAllowedParentPT ), "in GeV. Highest PT of the two parents must be smaller than this parameter." )
+   
+    
     ;
 
 

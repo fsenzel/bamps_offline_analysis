@@ -2234,8 +2234,21 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellCon
       }
       while ( jscat == iscat || particles_atTimeNow[jscat].dead );
       
-      scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
-      scatt22_amongBackgroundParticles_photons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);     
+      if(theConfig->getRestrictParentPTForPhotons())
+      {
+        if(parentParticlesAllowed(iscat,jscat))
+        {
+          scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
+          scatt22_amongBackgroundParticles_photons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);    
+        }else
+        {
+          continue;
+        }
+      }else
+      {
+        scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
+        scatt22_amongBackgroundParticles_photons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);         
+      }
     }                                                    
   }
   else
@@ -2252,7 +2265,19 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellCon
           continue;
         }else
         {
-          scatt22_amongBackgroundParticles_photons_utility_1(scatt22_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);
+          if(theConfig->getRestrictParentPTForPhotons())
+          {
+            if(parentParticlesAllowed(iscat,jscat))
+            {
+              scatt22_amongBackgroundParticles_photons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);    
+            }else
+            {
+              continue;
+            }
+          }else
+          {
+            scatt22_amongBackgroundParticles_photons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);         
+          }
         } 
       }
     }
@@ -2319,8 +2344,22 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
       }
       while ( jscat == iscat );
       
-      scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
-      scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);
+
+      if(theConfig->getRestrictParentPTForPhotons())
+      {
+        if(parentParticlesAllowed(iscat,jscat))
+        {
+          scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
+          scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again); 
+        }else
+        {
+          continue;
+        }
+      }else
+      {
+        scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
+        scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);        
+      }
     }                                                    
   }
   else
@@ -2332,7 +2371,19 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
       {              
         jscat = _allParticlesList[j]; 
         scaleForSelectedPairs=1.0;        
-        scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);
+        if(theConfig->getRestrictParentPTForPhotons())
+        {
+          if(parentParticlesAllowed(iscat,jscat))
+          {            
+            scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again); 
+          }else
+          {
+            continue;
+          }
+        }else
+        {          
+          scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);        
+        }
       }
     }
   }
@@ -3383,6 +3434,26 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22
     // reset charm quarks
     addedParticles[iscat] = temp_particle_iscat;
     addedParticles[jscat] = temp_particle_jscat;
+  }
+}
+
+bool offlineHeavyIonCollision::parentParticlesAllowed(const int iscat,const int jscat)
+{
+  double maxPT,minAllowed,maxAllowed;
+  if( theConfig->getRestrictParentPTForPhotons()==false )
+  {
+    std::string errMsg = "No restriction  for parent PT and still tries to restrict.";
+    throw eHIC_error( errMsg );
+  }
+  minAllowed = theConfig->getMinAllowedParentPT();
+  maxAllowed = theConfig->getMaxAllowedParentPT();
+  maxPT = std::max(particles_atTimeNow[iscat].Mom.Pt(),particles_atTimeNow[jscat].Mom.Pt());
+  if(maxPT > minAllowed && maxPT < maxAllowed)
+  {
+    return true;
+  }else
+  {
+    return false;
   }
 }
 
