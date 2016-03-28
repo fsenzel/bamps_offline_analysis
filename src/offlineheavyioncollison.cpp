@@ -2455,7 +2455,7 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
                                       F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
                                       theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
                                       theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
-                                      theConfig->getInfraredCutOffEMProcesses(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
+                                      theConfig->getInfraredCutOffEMProcesses(), theConfig->getKappa22Photons(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
                                       temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
        
         cs22 = scatt22_object.getXSection22( initialStateIndex );
@@ -3524,7 +3524,7 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
                                 F1, F2, M1, M2, s, LRF_md2g_wo_as , LRF_md2q_wo_as,
                                 theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
                                 theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
-                                theConfig->getInfraredCutOffEMProcesses(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
+                                theConfig->getInfraredCutOffEMProcesses(),theConfig->getKappa22Photons(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
                                 temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
   
     switch ( theConfig->getCrossSectionMethod() )
@@ -3809,7 +3809,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     
     
     //TEST:       
-    //lambda = 0.4;//fm
+    //lambda = 10.5;//fm
     //cout << "MFP [fm] = " << lambda << endl;
     
     lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
@@ -3835,9 +3835,14 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     cout <<"sqrt(s)="<< sqrt(s)<< " - New LPM ktCO: " << theConfig->get23FudgeFactorLpm()/lambda_scaled << "\t old(400MeV,X=0.3): " << theConfig->get23ktCutOffPhotons()/sqrt(s) << endl;
     */
     
+    //TEST
+    //cout << "theConfig->get23ktCutOffPhotons() " << theConfig->get23ktCutOffPhotons() << endl;
+    //cout << "theConfig->getLPMModePhotons()    " << theConfig->getLPMModePhotons()    << endl;
+    
+    
+    
     if( lambda > 0 )
     {          
-      
       double Nf=3.0;
       double scaled_LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) ) / s;
       double scaled_LRF_md2q_wo_as = 1.0/9.0 * scaled_LRF_md2g_wo_as ;
