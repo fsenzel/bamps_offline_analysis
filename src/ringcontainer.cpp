@@ -230,7 +230,8 @@ void ringContainer::relocate( const double _minR, const double _maxR )
     clear();
 }
 
-
+//WARNING
+//This is the ring volume in LAB frame. When this is used, be aware that the computed quantity is a LAB-frame quantity (if no other boost-parameter is added.)
 double ringContainer::getVolume( const double _dz ) const
 {
     return ( M_PI * ( pow( maxRadius, 2 ) - pow( minRadius, 2 ) ) * _dz );   //fm^3
@@ -359,6 +360,7 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
         md2q = pow( 0.197, 3 ) * 2 * M_PI / volume * 8.0 / 3.0 * ( invEg + invEq );
 
         gamma = 1 / sqrt( 1.0 - pow( getAveraged_v_z(), 2 ) - pow( getAveraged_v_r(), 2 ) );
+                     
         particleDensity = numberOfParticles / ( _Ntest * volume * gamma );
         gluonDensity = numberOfGluons / ( _Ntest * volume * gamma );
         quarkDensity = numberOfQuarks / ( _Ntest * volume * gamma );
@@ -366,6 +368,10 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
         energyDensity = ( E - ( 2 * getAveraged_v_r() * p_r ) - ( 2 * getAveraged_v_z() * p_z )
                           + ( pow( getAveraged_v_r(), 2 ) * pr2_over_E ) + ( pow( getAveraged_v_z(), 2 ) * pz2_over_E )
                           + ( 2 * getAveraged_v_r() * getAveraged_v_z() * pr_pz_over_E ) ) * pow( gamma, 2 ) / ( _Ntest * volume );                //GeV/fm^3
+                          
+        //cout << "Quark fugacity " <<  quarkDensity/(12/pow(M_PI,2.0)*pow((energyDensity / (3 * particleDensity)),3.0))  << endl;                                        
+        //cout << "sqrt(Debye-Mass^2*pi/8/(Nc+Nf)): "<< sqrt(md2g*M_PI/8.0/(Particle::N_light_flavor + ns_casc::Ncolor)) << "\t"<< (energyDensity / (3 * particleDensity)) << "\t" << endl;                  
+                          
     }
 }
 

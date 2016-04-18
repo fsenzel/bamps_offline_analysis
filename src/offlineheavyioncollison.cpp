@@ -1460,8 +1460,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         }
         else
         {
-          //             if (( cells[j].size() + cellsAdded[j].size() ) >= cellcut )     // enough particles in cell -> scatter
-          if (true)
+          //WARNING Cellcut? included 11.4.
+          if (( cells[j].size() ) >= cellcut )     // enough particles in cell -> scatter
           {
             nGluons = 0;
             nGluonsAdded = 0;
@@ -1533,6 +1533,11 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               particles_atTimeNow[id].md2g = rings[nc].getAveraged_md2g();
               particles_atTimeNow[id].md2q = rings[nc].getAveraged_md2q();
               particles_atTimeNow[id].temperature = rings[nc].getEffectiveTemperature();
+              if(etaSliceIndex == centralEtaIndex)
+              {
+                //cout<< "Gamma: "<< rings[nc].getGamma() << "\t" << "sqrt(Debye-Mass^2*pi/8/(Nc+Nf)): "<< sqrt(particles_atTimeNow[id].md2g*M_PI/8.0/(Particle::N_light_flavor + Ncolor))<<"   vs Teff= " << particles_atTimeNow[id].temperature<< "\t" << particles_atTimeNow[id].temperature / sqrt(particles_atTimeNow[id].md2g*M_PI/8.0/(Particle::N_light_flavor + Ncolor))<< endl;
+              }
+
               if ( particles_atTimeNow[id].FLAVOR == gluon )
               {
                 particles_atTimeNow[id].rate = rateGluons[etaSliceIndex][nc];
@@ -3464,7 +3469,7 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
   double Tmax, TT;
   double M1, M2;
   double t_hat, s_cutoff_for_pqcd,s,xt ;
-  double Vrel,md2g_wo_as,md2q_wo_as,cs22,probab22;
+  double Vrel,md2g_wo_as,md2q_wo_as,cs22,probab22,md2_wo_as_gluon_use,md2_wo_as_quark_use;
   int ringIndex;
   double temperature = 0.0;
   
@@ -3519,9 +3524,17 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     double Nf=3.0;
     double LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) );
     double LRF_md2q_wo_as = 1.0/9.0 * LRF_md2g_wo_as ;
+    
+    //WARNING: Decide, which Debye mass should be used. Either LRF_md2g_wo_as or md2g_wo_as
+    md2_wo_as_gluon_use  = md2g_wo_as;
+    md2_wo_as_quark_use = md2q_wo_as;    
+    
+    
+    
+    
     //if (temperature > 1.2)cout << temperature << "\t"<<LRF_md2q_wo_as << endl;
     scatt22_obj.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
-                                F1, F2, M1, M2, s, LRF_md2g_wo_as , LRF_md2q_wo_as,
+                                F1, F2, M1, M2, s, md2_wo_as_gluon_use , md2_wo_as_quark_use,
                                 theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
                                 theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
                                 theConfig->getInfraredCutOffEMProcesses(),theConfig->getKappa22Photons(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
@@ -3765,6 +3778,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
 {
   FLAVOR_TYPE F1, F2;
   double M1,M2,s,probab22,cs22,Vrel,md2g_wo_as,md2q_wo_as,xt,lambda,lambda_scaled,cs23Photons,probab23,s_cutoff_for_pqcd,betaDistEntry,cs23Total;
+  double md2_wo_as_gluon_use,md2_wo_as_quark_use;
   int ringIndex;
   VectorEPxPyPz P1, P2;
   
@@ -3847,13 +3861,18 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
       double scaled_LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) ) / s;
       double scaled_LRF_md2q_wo_as = 1.0/9.0 * scaled_LRF_md2g_wo_as ;
       
+      //WARNING: Decide, which Debye mass should be used. Either scaled_LRF_md2g_wo_as or md2g_wo_as/s
+      md2_wo_as_gluon_use  = md2g_wo_as/s;
+      md2_wo_as_quark_use = md2q_wo_as/s;
+      
+      
       betaDistEntry = scatt23_obj.setParameter ( VectorXYZ ( 0, 0, 0 ), P1, P2, F1, F2, M1, M2, sqrt ( s ),
-                            scaled_LRF_md2g_wo_as, lambda_scaled,
+                            md2_wo_as_gluon_use, lambda_scaled,
                             theConfig->getK23LightPartons(), theConfig->getK23HeavyQuarks(),
                             theConfig->getKappa23LightPartons(), theConfig->getKappa23HeavyQuarks(),
                             theConfig->I23onlineIntegrationIsSet(),
                             theConfig->get23GluonFormationTimeTyp(), theConfig->getMatrixElement23(), theConfig->isMd2CounterTermInI23(),
-                            theConfig->get23FudgeFactorLpm(), -1, theConfig->isMatrixElement23_22qt(),theConfig->I23onlineIntegrationPhotonsIsSet(),theConfig->get23ktCutOffPhotons(), theConfig->getkFactorEMprocesses23(), scaled_LRF_md2q_wo_as, theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),theConfig->getLPMModePhotons() );
+                            theConfig->get23FudgeFactorLpm(), -1, theConfig->isMatrixElement23_22qt(),theConfig->I23onlineIntegrationPhotonsIsSet(),theConfig->get23ktCutOffPhotons(), theConfig->getkFactorEMprocesses23(), md2_wo_as_quark_use, theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),theConfig->getLPMModePhotons() );
       
       cs23Photons = scatt23_obj.getTotalCrossSectionForPhotons ( initialStateIndex ); //1/GeV^2
       cs23Total =  cs23Photons;

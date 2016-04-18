@@ -702,7 +702,7 @@ analysis::analysis( config* const c ):
     
     //---- initialisation of PT-binning ----
     minPTPhotons = 0.0;
-    maxPTPhotons = 3.0;
+    maxPTPhotons = 5.0;
     binWidthPTPhotons = 0.03;
     numberBinsPTPhotons = int(( maxPTPhotons - minPTPhotons + 0.001 ) / binWidthPTPhotons );
     
@@ -2420,9 +2420,9 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   
   if(_flavTypeToComputeFor==photon)
   {
-    v2pt_binnumber = 10;   
+    v2pt_binnumber = 20;   
     _pt_min_v2 = 0.1;
-    _pt_max_v2 = 4.5;
+    _pt_max_v2 = 8.0;
     d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
   }
   else
