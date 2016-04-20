@@ -356,10 +356,12 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
         {
             invEq = inverseE_quarks / ( 2.0 * gQ * _Ntest );
         }
-        md2g = pow( 0.197, 3 ) * 16 * M_PI / volume * ( ns_casc::Ncolor * invEg + Particle::N_light_flavor * invEq );
-        md2q = pow( 0.197, 3 ) * 2 * M_PI / volume * 8.0 / 3.0 * ( invEg + invEq );
-
         gamma = 1 / sqrt( 1.0 - pow( getAveraged_v_z(), 2 ) - pow( getAveraged_v_r(), 2 ) );
+        
+        md2g = pow( 0.197, 3 ) * 16 * M_PI / (volume/gamma) * ( ns_casc::Ncolor * invEg + Particle::N_light_flavor * invEq );
+        md2q = pow( 0.197, 3 ) * 2 * M_PI / (volume/gamma) * 8.0 / 3.0 * ( invEg + invEq );
+
+        
                      
         particleDensity = numberOfParticles / ( _Ntest * volume * gamma );
         gluonDensity = numberOfGluons / ( _Ntest * volume * gamma );

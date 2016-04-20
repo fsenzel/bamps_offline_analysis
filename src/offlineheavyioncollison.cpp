@@ -3526,9 +3526,19 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     double LRF_md2q_wo_as = 1.0/9.0 * LRF_md2g_wo_as ;
     
     //WARNING: Decide, which Debye mass should be used. Either LRF_md2g_wo_as or md2g_wo_as
-    md2_wo_as_gluon_use  = md2g_wo_as;
-    md2_wo_as_quark_use = md2q_wo_as;    
-    
+    if (theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScale2piT)
+    {
+      md2_wo_as_gluon_use  = md2g_wo_as;
+      md2_wo_as_quark_use = md2q_wo_as;           
+    }else if (theConfig->getDebyeModePhotons()==LatticeDebye || theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScaleMD2)  
+    {
+      md2_wo_as_gluon_use  = LRF_md2g_wo_as;
+      md2_wo_as_quark_use  = LRF_md2q_wo_as;           
+    }else 
+    {
+      md2_wo_as_gluon_use  = md2g_wo_as;
+      md2_wo_as_quark_use = md2q_wo_as;    
+    }
     
     
     
@@ -3862,8 +3872,23 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
       double scaled_LRF_md2q_wo_as = 1.0/9.0 * scaled_LRF_md2g_wo_as ;
       
       //WARNING: Decide, which Debye mass should be used. Either scaled_LRF_md2g_wo_as or md2g_wo_as/s
-      md2_wo_as_gluon_use  = md2g_wo_as/s;
-      md2_wo_as_quark_use = md2q_wo_as/s;
+      
+      //WARNING: Decide, which Debye mass should be used. Either LRF_md2g_wo_as or md2g_wo_as
+      if (theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScale2piT)
+      {
+        md2_wo_as_gluon_use  = md2g_wo_as/s;
+        md2_wo_as_quark_use = md2q_wo_as/s;      
+      }else if (theConfig->getDebyeModePhotons()==LatticeDebye || theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScaleMD2)  
+      {
+        md2_wo_as_gluon_use  = scaled_LRF_md2g_wo_as;
+        md2_wo_as_quark_use  = scaled_LRF_md2g_wo_as;           
+      }else 
+      {
+        md2_wo_as_gluon_use  = md2g_wo_as/s;
+        md2_wo_as_quark_use = md2q_wo_as/s;  
+      }     
+ 
+
       
       
       betaDistEntry = scatt23_obj.setParameter ( VectorXYZ ( 0, 0, 0 ), P1, P2, F1, F2, M1, M2, sqrt ( s ),
