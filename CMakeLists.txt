@@ -17,6 +17,7 @@ INCLUDE(CPack)
 
 ######### Setup host properties (Vector, RDTSCP, ...) #########
 INCLUDE(HostProperties)
+SetVectorImplType()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS_MARCH}")
 
 ######### check that C++11 code compiles #########
