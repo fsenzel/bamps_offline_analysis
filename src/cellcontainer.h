@@ -75,7 +75,10 @@ public:
     void prepareAverages();
     void writeAveragesToParticle( Particle& _particle ) const;
 
-
+    //For the use with Photon Bremsstrahlung
+    void compute22MeanFreePath();
+    void addSpecificRate(int _specificInteractionType, const double _P );
+    
     double volume;
     int index;
     cornerCoordinates corner;
@@ -98,7 +101,7 @@ public:
     double sigma_23;
 
     double lambdaScaled;
-
+    std::vector<double> SpecificMFP;
 private:
 
 };

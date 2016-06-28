@@ -109,6 +109,8 @@ private:
     int numberB, numberA;
     double averageS_smallv2;
     double averageS_Bigv2;
+    long int averageQuarkNumber;
+    long int countForAverageaverageQuarkNumber;
 
     /** @brief Simply a count of computational timesteps */
     unsigned simpleTimestepcount;
@@ -172,9 +174,9 @@ private:
 
     void scatt22_amongAddedParticles( cellContainer& _cellAdded, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
     double computeBackgroundv2OfCell(  std::vector< int >& allParticlesList );
-    void scatt22_amongBackgroundParticles_photons( cellContainer& _cellAdded, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
-    void scatt23_amongBackgroundParticles_photons( cellContainer& _cellAdded, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
-
+    void scatt22_amongBackgroundParticles_photons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+    void scatt23_amongBackgroundParticles_photons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+        
     void scatt32_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
                                             cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
                                             int& n32, bool& again, const double nexttime );
@@ -187,9 +189,19 @@ private:
     void scatt22_amongBackgroundParticles_photons_utility_1( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime, double scaleForSelectedPairs, bool & again  );
     void scatt22_amongBackgroundParticles_photons_utility_2( scattering22& scatt22_obj, const int iscat, const int jscat, const double nexttime );
 
-    void scatt23_amongBackgroundParticles_photons_utility_1( scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime, const double scaleForSelectedPairs, bool & again );
-    void scatt23_amongBackgroundParticles_photons_utility_2( scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime );
+    void scatt23_amongBackgroundParticles_photons_utility_1(cellContainer& _cells, scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime, const double scaleForSelectedPairs, bool & again );
+    void scatt23_amongBackgroundParticles_photons_utility_2(scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime );
 
+    void scatt22ForRates(   cellContainer& _cells,std::vector< int >& _allParticlesList,  const interpolation22& theI22, const int NumberOfCellsAveraged );
+    void scatt22ForRatesUtility(scattering22& scatt22_obj, const int iscat, const int jscat, const interpolation22& theI22,  cellContainer& _cells,std::vector< int >& _allParticlesList, const int NumberOfCellsAveraged );
+    void NumbersInCell(  std::vector< int >& ThisCell, double & NumberGluonsInCell, double & NumberUpsInCell, double & NumberAntiupsInCell, double & NumberDownsInCell, double & NumberAntisdownsInCell, double &NumberStrangesInCell, double & NumberAntiStrangesInCell);
+
+    
+    
+    double getLambdaFromRates(int _F1,int _F2, ratesManager& rates);
+    int getSpecificScatteringType(int _F1, int _F2);
+    
+    
     bool parentParticlesAllowed(const int iscat, const int jscat);
     
     /** @brief Goes through all added particles and decays J/psi if the temperature of the surrounding medium is larger than the dissocation temperature */

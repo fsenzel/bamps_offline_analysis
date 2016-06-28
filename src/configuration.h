@@ -48,6 +48,9 @@ enum OUTPUT_SCHEME { no_output = 0,
 light_parton_phenix = 10,
 light_parton_lhc = 20,
 
+temperatureCustom = 201,
+temperature_velocity_cells = 202, // creates output used by Alex Meistrenko for his model
+studySpecificMFP = 203,
 studyOnlyEtSpectra = 205,
 studyNumberOfParticles = 206,
 SpatialPhotons = 207,
@@ -320,6 +323,9 @@ class config : public configBase
   
   /** @brief Interface for restrictParentPTForPhotonproduction for Photonproduction */  
   bool getRestrictParentPTForPhotons() const {return restrictParentPTForPhotonproduction;} 
+  
+  /** @brief Interface for mfpCellAveraging */  
+  bool getMfpCellAveraging() const {return mfpCellAveraging;}   
  
 //   /** @brief Interface for config::interpolationBorder */
 //   double getMFPInterpolationBorder() const {return interpolationBorder;}
@@ -652,6 +658,9 @@ class config : public configBase
   
   /** @brief Restrict the parent particles PT for photonproduction. The particle with the highest pt will be compared to limit minAllowedParentPT < PT < maxAllowedParentPT. */
   bool restrictParentPTForPhotonproduction;
+  
+  /** @brief If there should be averaging over 3 cells to compute the mean free path. */
+  bool mfpCellAveraging;
   
   // heavy quark output
   /** @brief Whether correlation analysis of heavy quark pairs is done */

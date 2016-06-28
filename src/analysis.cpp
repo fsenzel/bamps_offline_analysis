@@ -396,6 +396,92 @@ analysis::analysis( config* const c ):
     tstep[81]=infinity;
     nTimeSteps = 82;
   }
+  else if(studyTempCustom) 
+  {
+    tstep[0]=.15;
+    tstep[1]=.2;
+    tstep[2]=.3;
+    tstep[3]=.4;
+    tstep[4]=.5;
+    tstep[5]=.6;
+    tstep[6]=.7;
+    tstep[7]=.8;
+    tstep[8]=.9;
+    tstep[9]=1.0;
+    tstep[10]=1.1;
+    tstep[11]=1.2;
+    tstep[12]=1.3;
+    tstep[13]=1.4;
+    tstep[14]=1.5;
+    tstep[15]=1.6;
+    tstep[16]=1.7;
+    tstep[17]=1.8;
+    tstep[18]=1.9;
+    tstep[19]=2.0;
+    tstep[20]=2.1;
+    tstep[21]=2.2;
+    tstep[22]=2.3;
+    tstep[23]=2.4;
+    tstep[24]=2.5;
+    tstep[25]=2.6;
+    tstep[26]=2.7;
+    tstep[27]=2.8;
+    tstep[28]=2.9;
+    tstep[29]=3.0;
+    tstep[30]=3.1;
+    tstep[31]=3.2;
+    tstep[32]=3.3;
+    tstep[33]=3.4;
+    tstep[34]=3.5;
+    tstep[35]=3.6;
+    tstep[36]=3.7;
+    tstep[37]=3.8;
+    tstep[38]=3.9;
+    tstep[39]=4.0;
+    tstep[40]=4.1;
+    tstep[41]=4.2;
+    tstep[42]=4.3;
+    tstep[43]=4.4;
+    tstep[44]=4.5;
+    tstep[45]=4.6;
+    tstep[46]=4.7;
+    tstep[47]=4.8;
+    tstep[48]=4.9;
+    tstep[49]=5.0;
+    tstep[50]=5.1;
+    tstep[51]=5.2;
+    tstep[52]=5.3;
+    tstep[53]=5.4;
+    tstep[54]=5.5;
+    tstep[55]=5.6;
+    tstep[56]=5.7;
+    tstep[57]=5.8;
+    tstep[58]=5.9;
+    tstep[59]=6.0;
+    tstep[60]=6.1;
+    tstep[61]=6.2;
+    tstep[62]=6.3;
+    tstep[63]=6.4;
+    tstep[64]=6.5;
+    tstep[65]=6.6;
+    tstep[66]=6.7;
+    tstep[67]=6.8;
+    tstep[68]=6.9;
+    tstep[69]=7.0;
+    tstep[70]=7.1;
+    tstep[71]=7.2;
+    tstep[72]=7.3;
+    tstep[73]=7.4;
+    tstep[74]=7.5;
+    tstep[75]=7.6;
+    tstep[76]=7.7;
+    tstep[77]=7.8;
+    tstep[78]=7.9;
+    tstep[79]=8.0;
+    tstep[80]=8.1;
+    tstep[81]=infinity;
+    nTimeSteps = 82;
+  }
   else
   {
     tstep[0] = 0.1;      //fm/c
@@ -460,6 +546,8 @@ analysis::analysis( config* const c ):
     name_fug = filename_prefix + "_jpsi_fugacity";
   else
     name_fug = "/dev/null";
+  
+  
   
   if( studyTempInTube )
     name_temp = filename_prefix + "_temperature";
@@ -648,8 +736,18 @@ analysis::analysis( config* const c ):
     //--------------------------------------------------
   }
 
-  
-  
+  if(studyMFP)
+  {
+    cout << " !!! Only computes inverse rates (specific mean free path) and prints them out!!!\n 23-Photonproduction switched off, never mind the input-switch!!!" << endl;
+    
+    string full_filename = theConfig->getStandardOutputDirectoryName() + "/" +theConfig->getJobName() + "_MFPaveraged" +  ".dat";
+    cout << "filename: " <<  full_filename << endl;
+    cout << endl;
+    fstream outfile( full_filename.c_str(), ios::out | ios::trunc);
+    outfile << "#AverageInverseRates" << endl;
+    outfile << "#t" << "\t" << "#Lambda1"<< "\t" << "#Lambda2"<< "\t" << "#Lambda3"<<endl;
+    outfile.close();     
+  }
   
   if( studyJpsi )
   {
@@ -762,7 +860,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyPhotons = false; // transverse momentum spectra of photons
   studyNumberOfBackgroundQuarks = false; // study Number Of Background quarks and antiquarks and gluons
   studySpatialPhotons = false;
-  
+  studyTempAndVelocity = false;
+  studyTempCustom = false;
+  studyMFP = false; //study the specific mean free path
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -787,6 +887,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   // add a new case for your outpute scheme which you can create in configuration.h
   switch ( _outputScheme )
   {
+    case studySpecificMFP:
+      studyMFP = true;
+      break;
     case studyOnlyEtSpectra:  
       studyEtSpectra = true;
       break;
@@ -796,6 +899,12 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     case SpatialPhotons: 
       studySpatialPhotons = true;
       break; 
+    case temperatureCustom:
+      studyTempCustom = true;
+      break;
+    case temperature_velocity_cells:
+      studyTempAndVelocity = true;
+      break;
     case phenix_hq_electrons:
       studyHQ = true;
       
@@ -1413,6 +1522,12 @@ void analysis::intermediateOutput( const int nn )
   
   if ( studyTempAndVelocity ) // hydro
     writeTempAndVel( nn + 1  );
+  
+  if (studyTempCustom) //Moritz
+  {
+    writeTempCustom(nn+1);   
+    writeTempInTube(nn+1);
+  }  
   
 //   if ( charmTestJet )
 //    analyseCharmTestJetEvolution( nn + 1 );
@@ -4308,10 +4423,15 @@ void analysis::writeTempInTube( const int step  )
 {
   const string sep = "  ";
 
-  double temp, tempWithQuarks, energyDensity;
+  double temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks;
   int n_jpsi;
   double dr, dz, deta;
 
+  string filename = filename_prefix + "_TempFugInTube" + ".dat";
+  //filename = filename + "_spatial";
+  
+  fstream printTempInTube( filename.c_str(), ios::out | ios::app  );
+  
 
   double time;
   if ( step == 0 )
@@ -4324,54 +4444,77 @@ void analysis::writeTempInTube( const int step  )
   if ( step == 0 )
   {
     // file header
-    printTempInTube << "#temperature" << endl;
-    printTempInTube << "# time  temp, tempWithQuarks, energy dens. for different boxes" << endl;
+    //printTempInTube << "#temperature" << endl;
+    printTempInTube << "# time\ttemp,\ttempWithQuarks,\tenergy dens.,\tfugGluons,\tfugacityQuarks,\tdensGluons,\tdensQuarks." << endl;
     return;
   }
 
-  printTempInTube.width( 10 );
+  //printTempInTube.width( 10 );
   printTempInTube << time ;
   printTempInTube<< "\t";
 
 
-  dr = 2.0; //fm
+  dr = 1.5; //fm
   deta = 0.5; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
 //   cout << "deta=" << deta << "   dz=" << dz << endl;
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
   printTempInTube << "\t";
   printTempInTube << energyDensity;
-  printTempInTube.width( 20 );
+  printTempInTube << "\t";
+  printTempInTube << fugacityGluons;
+  printTempInTube << "\t";
+  printTempInTube << fugacityQuarks;
+  printTempInTube << "\t";
+  printTempInTube << densityGluons;
+  printTempInTube << "\t";
+  printTempInTube << densityQuarks;
+  //printTempInTube.width( 20 );
   
-
+/*
   dr = 5.0; //fm
   deta = 0.5; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
   printTempInTube << "\t";
   printTempInTube << energyDensity;
+  printTempInTube << "\t";
+  printTempInTube << fugacityGluons;
+  printTempInTube << "\t";
+  printTempInTube << fugacityQuarks;
+  printTempInTube << "\t";
+  printTempInTube << densityGluons;
+  printTempInTube << "\t";
+  printTempInTube << densityQuarks;
   printTempInTube.width( 20 );
 
   dr = 2.0; //fm
   deta = 1.0; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
   printTempInTube << "\t";
   printTempInTube << energyDensity;
-  printTempInTube.width( 20 );
+  printTempInTube << "\t";
+  printTempInTube << fugacityGluons;
+  printTempInTube << "\t";
+  printTempInTube << fugacityQuarks;
+  printTempInTube << "\t";
+  printTempInTube << densityGluons;
+  printTempInTube << "\t";
+  printTempInTube << densityQuarks;
   printTempInTube.width( 20 );
 
 
@@ -4379,23 +4522,33 @@ void analysis::writeTempInTube( const int step  )
   deta = 1.0; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
-  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity  );
+  calculateTempInTube( time, dr, dz, temp, tempWithQuarks, energyDensity, fugacityGluons, fugacityQuarks, densityGluons, densityQuarks );
   printTempInTube << temp;
   printTempInTube << "\t";
   printTempInTube << tempWithQuarks;
   printTempInTube << "\t";
   printTempInTube << energyDensity;
+  printTempInTube << "\t";
+  printTempInTube << fugacityGluons;
+  printTempInTube << "\t";
+  printTempInTube << fugacityQuarks;
+  printTempInTube << "\t";
+  printTempInTube << densityGluons;
+  printTempInTube << "\t";
+  printTempInTube << densityQuarks;
   printTempInTube.width( 20 );
-
+*/
 
 
   printTempInTube << endl;
 
 }
 
+
+
 // writes temperature and velocity of all specified cells in a file, used by Alex Meistrenko as input
-void analysis::calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  )
-{
+void analysis::calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity, double & fugacityGluons, double & fugacityQuarks, double & densityGluons, double & densityQuarks  )
+{  
   int cell_id;
   double pr, XT;
   
@@ -4406,7 +4559,7 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   const double zlength = dz*2.0;
 
   // volume
-  dv = M_PI * pow( radius , 2.0 ) * zlength; // 1/GeV^3
+  dv = M_PI * pow( radius , 2.0 ) * zlength; // fm^3
 
   
   // the following routine is written for several cells -> here we do not need this, just set nCells = 1
@@ -4428,6 +4581,12 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   gama_cell = new double[nCells];
   temp_cell = new double[nCells];
   tempWithQuarks_cell = new double[nCells];
+  
+  int numberGluons = 0;
+  int numberQuarks = 0;
+  
+  double numberGluonsEquil, numberQuarksEquil;
+  
 
 
   // set all properties to 0
@@ -4462,6 +4621,10 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
         cell_id = 0;
         
         ++numberInCell[cell_id];
+        if( particles_atTimeNow[i].FLAVOR == gluon )
+          numberGluons++;
+        else
+          numberQuarks++;
         
         XT = particles_atTimeNow[i].Pos.Perp();
         if ( XT < 1.0e-5 )
@@ -4507,6 +4670,15 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   temp = temp_cell[0];
   tempWithQuarks = tempWithQuarks_cell[0];
   energyDensity = em_cell[0]; // GeV/fm^3
+  
+  numberGluonsEquil = 16.0 * pow( temp , 3.0 ) / pow( M_PI , 2.0) * dv / pow( 0.197 , 3.0 ) * theConfig->getTestparticles();
+  numberQuarksEquil = 12.0 * Particle::N_light_flavor * pow( temp , 3.0 ) / pow( M_PI , 2.0) * dv / pow( 0.197 , 3.0 ) * theConfig->getTestparticles();
+  
+  fugacityGluons = double(numberGluons) / numberGluonsEquil;
+  fugacityQuarks = double(numberQuarks) / numberQuarksEquil;
+  
+  densityGluons = double(numberGluons) / dv / theConfig->getTestparticles(); // 1/fm^3
+  densityQuarks = double(numberQuarks) / dv / theConfig->getTestparticles(); // 1/fm^3
 
   delete[] numberInCell; 
   delete[] vx_cell; 
@@ -4524,6 +4696,7 @@ void analysis::calculateTempInTube( const double time, const double radius, cons
   delete[] temp_cell;
   delete[] tempWithQuarks_cell;
 }
+
 
 // writes spatial profile of photons
 void analysis::writePhotonSpaceProfile( const int step  )
@@ -4692,6 +4865,363 @@ void analysis::writePhotonSpaceProfile( const int step  )
   file_spatial.close();
 }
 
+// writes temperature and velocity of all specified cells in a file, used by Moritz
+void analysis::writeTempCustom( const int step  )
+{
+  
+  int nx, ny, nz, cell_id;
+  double time, pr, XT;
+ 
+  const int minNmbTemp = 50; // minimum number of particles to calculate temperature from
+//   const int minNmbTemp = 2; // minimum number of particles to calculate temperature from
+  const int minNmbTempCell = 10; // minimum number of particles in one cell to calculate a Temperature. If the number is below this value, the cell is taken as empty (no temperature)
+  
+  binning binNumber("output/number.dat", -0.5, 49.5, 50);
+  binning binTempCells("output/tempCells.dat", 0.0, 3., 70);
+  binning binTempRings("output/tempRings.dat", 0.0, 2.2, 70);
+  
+  int count_tempCell = 0;
+  int count_tempNeighborCells = 0;
+  int count_noTemp = 0;
+  
+  int IXY = IX * IY;
+
+  if ( step != 0 && step != nTimeSteps )
+    time = tstep[step-1];
+  else
+    return;
+  
+ 
+  // total length of grid system
+  const double xlength = 25;//24.6;
+  const double ylength = 25;//24.6;
+  const double zlength = 13;//12.3;
+
+  // number of cells in given direction
+  // in cascade IX=40   IY=40   IZ=47
+  const int nCellsx = 10;
+  const int nCellsy = 10;
+  const int nCellsz = 50;
+  nCells = nCellsx * nCellsy * nCellsz;
+  
+  dv = xlength * ylength * zlength / nCells; // volume of each cell
+
+//   int numberInCell[nCells]; // number of all particles in cell
+//   double vx_cell[nCells]; // total x-velocity of all particles in cell
+//   double vy_cell[nCells];  
+//   double vz_cell[nCells];
+//   double vr_cell[nCells];
+//   double em_cell[nCells];// total energy of all particles in cell
+//   double prm_cell[nCells];
+//   double pzm_cell[nCells];
+//   double pr2em_cell[nCells];
+//   double pz2em_cell[nCells];
+//   double przem_cell[nCells];
+//   double densn_cell[nCells];
+//   double gama_cell[nCells];
+//   double temp_cell[nCells];
+//   double tempWithQuarks_cell[nCells];
+
+
+  numberInCell = new int[nCells]; // number of all particles in cell
+  numberInCellQuarks = new int[nCells]; // number of all particles in cell
+  numberInCellGluons = new int[nCells]; // number of all particles in cell
+  fugacityGluons = new double[nCells]; 
+  fugacityQuarks = new double[nCells]; 
+  
+  
+  temp_numberInCell = new int[nCells]; // number of all particles in cell
+  vx_cell = new double[nCells]; // total x-velocity of all particles in cell
+  vy_cell = new double[nCells];  
+  vz_cell = new double[nCells];
+  vr_cell = new double[nCells];
+  em_cell = new double[nCells];// total energy of all particles in cell
+  prm_cell = new double[nCells];
+  pzm_cell = new double[nCells];
+  pr2em_cell = new double[nCells];
+  pz2em_cell = new double[nCells];
+  przem_cell = new double[nCells];
+  densn_cell = new double[nCells];
+  gama_cell = new double[nCells];
+  temp_cell = new double[nCells];
+  tempWithQuarks_cell = new double[nCells];
+  
+  // for copy. If too few particles in one cell, the particles from the surrounding cells are added from _org. Otherwise one would double or triple add particles from cells
+  numberInCell_org = new int[nCells]; // number of all particles in cell
+  vx_cell_org = new double[nCells]; // total x-velocity of all particles in cell
+  vy_cell_org = new double[nCells];  
+  vz_cell_org = new double[nCells];
+  vr_cell_org = new double[nCells];
+  em_cell_org = new double[nCells];// total energy of all particles in cell
+  prm_cell_org = new double[nCells];
+  pzm_cell_org = new double[nCells];
+  pr2em_cell_org = new double[nCells];
+  pz2em_cell_org = new double[nCells];
+  przem_cell_org = new double[nCells];
+// 
+
+//   for ( int i = 0; i < nCells; i++ )
+//   {
+//     const int nxny = nCellsx * nCellsy;
+//     const int indexZ = i / nxny;
+//     const int indexY = (i -  indexZ  * nxny) / nCellsx;
+//     const int indexX = i -  indexZ  * nxny - indexY * nCellsx;
+//     
+//     energy[i] = 0.0;
+//     numberInCell[i] = indexX + nCellsx * indexY + nCellsx * nCellsy * indexZ;
+//     vx[i] = double(indexX) * xlength / nCellsx;
+//     vy[i] = double(indexY) * ylength / nCellsy;
+//     vz[i] = double(indexZ) * zlength / nCellsz;
+//   }
+
+  // set all properties to 0
+  for ( int i = 0; i < nCells; i++ )
+  {
+    numberInCell[i] = 0;
+    numberInCellQuarks[i] = 0;
+    numberInCellGluons[i] = 0;
+    fugacityQuarks[i]=0;
+    fugacityGluons[i]=0;
+    temp_numberInCell[i] = 0;
+    vx_cell[i] = 0.0; 
+    vy_cell[i] = 0.0;  
+    vz_cell[i] = 0.0;
+    vr_cell[i] = 0.0;
+    em_cell[i] = 0.0;
+    prm_cell[i] = 0.0;
+    pzm_cell[i] = 0.0;
+    pr2em_cell[i] = 0.0;
+    pz2em_cell[i] = 0.0;
+    przem_cell[i] = 0.0;
+    densn_cell[i] = 0.0;
+    gama_cell[i] = 0.0;
+    temp_cell[i] = 0.0;
+    tempWithQuarks_cell[i] = 0.0;
+    
+    numberInCell_org[i] = 0;
+    vx_cell_org[i] = 0.0; 
+    vy_cell_org[i] = 0.0;  
+    vz_cell_org[i] = 0.0;
+    vr_cell_org[i] = 0.0;
+    em_cell_org[i] = 0.0;
+    prm_cell_org[i] = 0.0;
+    pzm_cell_org[i] = 0.0;
+    pr2em_cell_org[i] = 0.0;
+    pz2em_cell_org[i] = 0.0;
+    przem_cell_org[i] = 0.0;
+  }
+  
+  // sum over all particles
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+    if ( FPT_COMP_E( particles_atTimeNow[i].Pos.T(), time ) && particles_atTimeNow[i].FLAVOR < 7 ) // only gluons and light quarks
+    {
+      // determine cell id
+      if ( fabs( particles_atTimeNow[i].Pos.X() - xlength / 2.0 ) < 1.0e-6 )
+        nx = nCellsx - 1;
+      else
+        nx = int(( particles_atTimeNow[i].Pos.X() / xlength + 0.5 ) * nCellsx );
+
+      if ( fabs( particles_atTimeNow[i].Pos.Y() - ylength / 2.0 ) < 1.0e-6 )
+        ny = nCellsy - 1;
+      else
+        ny = int(( particles_atTimeNow[i].Pos.Y() / ylength + 0.5 ) * nCellsy );
+
+      if ( fabs( particles_atTimeNow[i].Pos.Z() - zlength / 2.0 ) < 1.0e-6 )
+        nz = nCellsz - 1;
+      else
+        nz = int(( particles_atTimeNow[i].Pos.Z() / zlength + 0.5 ) * nCellsz );
+
+
+      if (( nx >= nCellsx ) || ( nx < 0 ) || ( ny >= nCellsy ) || ( ny < 0 ) || ( nz >= nCellsz ) || ( nz < 0 ) )
+      {
+        /*cout << "err cell_ID in temp output" << endl;
+        cout << particles_atTimeNow[i].Pos.T() << "\t" << particles_atTimeNow[i].Pos.X() << "\t" << particles_atTimeNow[i].Pos.Y();
+        cout << "\t" << particles_atTimeNow[i].Pos.Z() << endl;
+        cout << nx << "\t" << ny << "\t" << nz << endl;*/
+      }
+      else
+      {
+        cell_id = nx + nCellsx * ny + nCellsx * nCellsy * nz;
+        
+        if(particles_atTimeNow[i].FLAVOR != gluon )
+        {
+          ++numberInCellQuarks[cell_id];
+        }
+        if(particles_atTimeNow[i].FLAVOR == gluon)
+        {
+          ++numberInCellGluons[cell_id];
+        }        
+        ++numberInCell[cell_id];
+        
+        XT = particles_atTimeNow[i].Pos.Perp();
+        if ( XT < 1.0e-5 )
+        {
+          pr = particles_atTimeNow[i].Mom.Pt();
+        }
+        else
+        {
+          pr = ( particles_atTimeNow[i].Mom.Px() * particles_atTimeNow[i].Pos.X()
+                 + particles_atTimeNow[i].Mom.Py() * particles_atTimeNow[i].Pos.Y() ) / XT;
+        }
+        vr_cell[cell_id] += pr / particles_atTimeNow[i].Mom.E();
+        vx_cell[cell_id] += particles_atTimeNow[i].Mom.Px() / particles_atTimeNow[i].Mom.E();
+        vy_cell[cell_id] += particles_atTimeNow[i].Mom.Py() / particles_atTimeNow[i].Mom.E();
+        vz_cell[cell_id] += particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
+        
+        em_cell[cell_id] += particles_atTimeNow[i].Mom.E();
+        prm_cell[cell_id] += pr;
+        pzm_cell[cell_id] += particles_atTimeNow[i].Mom.Pz();
+        pr2em_cell[cell_id] += pr * pr / particles_atTimeNow[i].Mom.E();
+        pz2em_cell[cell_id] += particles_atTimeNow[i].Mom.Pz() * particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
+        przem_cell[cell_id] += pr * particles_atTimeNow[i].Mom.Pz() / particles_atTimeNow[i].Mom.E();
+        
+        // temp of particles summed
+        tempWithQuarks_cell[cell_id] += particles_atTimeNow[i].temperature;
+        if( particles_atTimeNow[i].temperature >= 0.1)
+          ++temp_numberInCell[cell_id];
+      }
+    }
+  }
+  
+  // duplicate properties of cell
+  for ( int i = 0; i < nCells; i++ )
+  {
+    numberInCell_org[i] = numberInCell[i];
+    vr_cell_org[i] = vr_cell[i];
+    vx_cell_org[i] = vx_cell[i];
+    vy_cell_org[i] = vy_cell[i];
+    vz_cell_org[i] = vz_cell[i];
+    
+    em_cell_org[i] = em_cell[i];
+    prm_cell_org[i] = prm_cell[i];
+    pzm_cell_org[i] = pzm_cell[i];
+    pr2em_cell_org[i] = pr2em_cell[i];
+    pz2em_cell_org[i] = pz2em_cell[i];
+    przem_cell_org[i] = przem_cell[i];
+  }
+
+  
+  // determine cells which do not have enough particles
+  for ( int i = 0; i < nCells; i++ )
+  {
+    // If less than minNmbTempCell particles are in the cell it is taken as empty
+    if(numberInCell[i] >= minNmbTempCell)
+    {
+      // If less than minNmbTemp particles are in the cell the temperature the 6 neighbor cells are also taken into account
+      if(numberInCell[i] < minNmbTemp)
+      {
+        int cell_id_neighbor;
+        
+        //neighbors in x direction
+        cell_id_neighbor = i-1;
+        addNeighborCells( i, cell_id_neighbor );
+        cell_id_neighbor = i+1;
+        addNeighborCells( i, cell_id_neighbor );
+        //neighbors in y direction
+        cell_id_neighbor = i+IX;
+        addNeighborCells( i, cell_id_neighbor );
+        cell_id_neighbor = i-IX;
+        addNeighborCells( i, cell_id_neighbor );
+        //neighbors in z direction
+        cell_id_neighbor = i-IXY;
+        addNeighborCells( i, cell_id_neighbor );
+        cell_id_neighbor = i+IXY;
+        addNeighborCells( i, cell_id_neighbor );
+      }
+    }
+  }
+  
+  // calculate temperature for each cell
+  for ( int i = 0; i < nCells; i++ )
+  {
+    // If less than minNmbTempCell particles are in the cell it is taken as empty
+    if(numberInCell[i] >= minNmbTempCell)
+    {
+      // If more than minNmbTemp particles are in the cell the temperature is calculated by them
+      if(numberInCell[i] >= minNmbTemp)
+      {
+        calcTempCell( i );
+        
+        tempWithQuarks_cell[i] = tempWithQuarks_cell[i]/temp_numberInCell[i];
+
+        binTempCells.add(temp_cell[i]);
+        count_tempCell++;
+      }
+      else // take also 6 neighbor cells into account
+      {
+        count_noTemp++;
+        
+        temp_cell[i] = 0.0; // not enough particles in surrounding to calculate temperature
+        
+        vx_cell[i] = 0.0;
+        vy_cell[i] = 0.0;
+        vz_cell[i] = 0.0;
+      }
+    }
+    else
+    {
+      if(numberInCell[i] == 0)
+      {
+        temp_cell[i] = -2.0; // completely empty
+        vx_cell[i] = 0.0;
+        vy_cell[i] = 0.0;
+        vz_cell[i] = 0.0;
+      }
+      else
+      {
+        temp_cell[i] = -1.0; // very few particles
+        vx_cell[i] = 0.0;
+        vy_cell[i] = 0.0;
+        vz_cell[i] = 0.0;
+      }
+    }
+  }
+
+  double avFQ = 0.;
+  double avFG = 0.;
+  double avT = 0.;
+  for(int i=1;i<=nCells;i++)
+  {
+    avFQ += fugacityQuarks[i];  
+    avFG += fugacityGluons[i];
+    avT += temp_cell[i];
+  }
+  avFQ /=count_tempCell; 
+  avFG /=count_tempCell;
+  avT /=count_tempCell;
+  
+  
+  string filename,name;
+  stringstream ss;
+  ss << time*10;
+  //+ ss.str() 
+  filename = filename_prefix + "_central" + ".dat";
+  fstream file_central( filename.c_str(), ios::out | ios::app  );
+  
+  const int middle_cell_id = nCellsx/2 + nCellsx * nCellsy/2 +nCellsx*nCellsy*nCellsz/2;
+  cout  << time <<'\t'<< "T   " << '\t' << "FUgQ   " << '\t'<< "FugG  " << '\t' << "nQUARKS  " << '\t'<< "nGluons  "  << '\t' << "nTot   " << endl;
+  cout  << time <<'\t'<< temp_cell[middle_cell_id] << '\t' << fugacityQuarks[middle_cell_id] << '\t'<<fugacityGluons[middle_cell_id] << '\t' << numberInCellQuarks[middle_cell_id] << '\t'<< numberInCellGluons[middle_cell_id]<< '\t' << numberInCell[middle_cell_id] << '\t'<< numberInCellQuarks[middle_cell_id]+numberInCellGluons[middle_cell_id]  << endl;
+
+  file_central << time <<'\t'<<avT<<'\t'<<avFQ<<'\t'<<avFG<<'\t'<< temp_cell[middle_cell_id] << '\t' << fugacityQuarks[middle_cell_id] << '\t'<<fugacityGluons[middle_cell_id] << '\t' << numberInCellQuarks[middle_cell_id] << '\t'<< numberInCellGluons[middle_cell_id]<< '\t' << numberInCell[middle_cell_id] << endl;
+
+  
+  delete[] numberInCell; 
+  delete[] vx_cell; 
+  delete[] vy_cell;  
+  delete[] vz_cell;
+  delete[] vr_cell;
+  delete[] em_cell;
+  delete[] prm_cell;
+  delete[] pzm_cell;
+  delete[] pr2em_cell;
+  delete[] pz2em_cell;
+  delete[] przem_cell;
+  delete[] densn_cell;
+  delete[] gama_cell;
+  delete[] temp_cell;
+  delete[] tempWithQuarks_cell;
+}
 
 
 
@@ -4721,15 +5251,15 @@ void analysis::writeTempAndVel( const int step  )
     return;
 
   // total length of grid system
-  const double xlength = 10;//24.6;
-  const double ylength = 10;//24.6;
-  const double zlength = 5;//12.3;
+  const double xlength = 25;//24.6;
+  const double ylength = 25;//24.6;
+  const double zlength = 25;//12.3;
 
   // number of cells in given direction
   // in cascade IX=40   IY=40   IZ=47
-  const int nCellsx = 41;
-  const int nCellsy = 41;
-  const int nCellsz = 41;
+  const int nCellsx = 10;
+  const int nCellsy = 10;
+  const int nCellsz = 10;
   nCells = nCellsx * nCellsy * nCellsz;
   
   dv = xlength * ylength * zlength / nCells; // volume of each cell
@@ -5048,9 +5578,13 @@ void analysis::writeTempAndVel( const int step  )
     }
   }
 
- 
+  // 2) Central info 
+  filename = filename + "_central";
+  fstream file_central( filename.c_str(), ios::out | ios::trunc  );
   
-  
+  const int middle_cell_id = nCellsx/2 + nCellsx * nCellsy/2 +nCellsx*nCellsy*nCellsz/2;
+  file_central << temp_cell[middle_cell_id] << endl;
+
   
   delete[] numberInCell; 
   delete[] vx_cell; 
@@ -5089,7 +5623,12 @@ void analysis::calcTempCell( const int cell_id )
   / theConfig->getTestparticles() / dv * gama_cell[cell_id] * gama_cell[cell_id];//GeV/fm^3
   
   temp_cell[cell_id] = em_cell[cell_id] / ( 3.0 * densn_cell[cell_id] );
-  // assume thermal equilibrium and additional quark flavor
+  
+  double neqQ = 3.0*2.0*3.0*2.0/pow(M_PI,2.0)*pow(temp_cell[cell_id],3.0)/(pow(0.197,3.0));
+  double neqG = 16.0/pow(M_PI,2.0)*pow(temp_cell[cell_id],3.0)/(pow(0.197,3.0));
+  fugacityQuarks[cell_id] = (double(numberInCellQuarks[cell_id])/ dv/ theConfig->getTestparticles()* gama_cell[cell_id] )/neqQ;
+  fugacityGluons[cell_id] = (double(numberInCellGluons[cell_id])/ dv/ theConfig->getTestparticles()* gama_cell[cell_id] )/neqG;
+  // assume thermal equilibrium and additional quark flavor* gama_cell[cell_id]
 //   int Nflavor_temp = 3;
 //   tempWithQuarks_cell[cell_id] = pow(pi*pi/3.0 / (16.+12.*Nflavor_temp) * em_cell[cell_id]  * pow(0.197,3.0) , 1.0/4.0);
 }

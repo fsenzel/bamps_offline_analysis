@@ -109,6 +109,53 @@ double mfpForHeavyIonCollision::getMeanFreePath(const double _E, const FLAVOR_TY
     return interpolResult;
 }
 
+//Not used at the moment, and not tested.
+double mfpForHeavyIonCollision::getMeanFreePathForPhotonBremsstrahlung(const double _E, const FLAVOR_TYPE _F, const double _T, const double _ngTest, const double _nqTest, const UNIT_TYPE _unit ) const
+{
+    if( !data_loaded )
+    {
+        string errMsg = "MFP data not loaded yet.";
+        throw eMFP_heavy_ion_error( errMsg );
+    }
+
+    const double gluonFugacity = _ngTest / ( getGluonDensity( _T ) );
+    double quarkFugacity;
+    if( Particle::N_light_flavor != 0 )
+        quarkFugacity = _nqTest / ( getQuarkDensity( _T ) );
+    else
+        quarkFugacity = 0.0;
+
+    const double scaleForFugacity = fugacityDependence( gluonFugacity, quarkFugacity ) / fugacityDependenceEvaluatedAtFugacityOne;
+
+    const int nInterpolValues = 4;
+    int startIndex = getStartIndexForTemperatureValues( _T, nInterpolValues );
+    double xa[nInterpolValues+1], ya[nInterpolValues+1];
+
+    for ( int i = 0; i < nInterpolValues; i++ )
+    {
+        xa[i+1] = temperaturesForMfpData[ startIndex + i ];
+        ya[i+1] = mfpData[ startIndex + i ].getLambda( _E, _F );  //1/GeV
+    }
+
+    double interpolResult = 0, interpolError = 0;
+    polint( xa, ya, nInterpolValues, _T, &interpolResult, &interpolError );
+
+    double conversionFactor = 1;
+    switch( _unit )
+    {
+    case GeV:
+        conversionFactor = 1;
+        break;
+    case fm:
+        conversionFactor = 0.197;
+        break;
+    }
+    interpolResult *= conversionFactor;
+
+    interpolResult *= scaleForFugacity;
+
+    return interpolResult;
+}
 
 
 double mfpForHeavyIonCollision::fugacityDependence( const double _gluonFugacity, const double _quarkFugacity ) const

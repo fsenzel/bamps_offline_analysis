@@ -26,7 +26,7 @@ public:
     ~mfpForHeavyIonCollision();
 
     double getMeanFreePath( const double _E, const FLAVOR_TYPE _F, const double _T, const double _ngTest, const double _nqTest, const UNIT_TYPE _unit ) const;
-
+    double getMeanFreePathForPhotonBremsstrahlung(const double _E, const FLAVOR_TYPE _F, const double _T, const double _ngTest, const double _nqTest, const UNIT_TYPE _unit) const;
     void loadData();
 
 

@@ -32,6 +32,7 @@ cellContainer::cellContainer() :
     sigma_23( 0 ),
     lambdaScaled( 0 )
 {
+    SpecificMFP.assign(3,0);
     particleList.clear();
 }
 
@@ -55,12 +56,15 @@ void cellContainer::clear()
     md2g_scaled_23 = 0;
     md2q_scaled_23 = 0;
     lambdaScaled = 0;
+    SpecificMFP.assign(3,0);
+
     averagesPrepared = false;
 }
 
 
 void cellContainer::resetStoredValues()
 {
+    SpecificMFP.assign(3,0);
     nCollectedAll2223 = 0;
     nCollected22 = 0;
     nCollected23 = 0;
@@ -77,7 +81,23 @@ void cellContainer::resetStoredValues()
     averagesPrepared = false;
 }
 
+/**
+ * Routine to store (collect) a probability for specified 2->2 interaction process
+ *
+ * @param[in] _specificInteractionType Type of the rate to be stored (0: qq -> qq, 1: qqbar->qqbar + qqbar->qqbarDash, 2: qqbarDash->qqbarDash, qq'->qq')
+ * @param[in] _P Probability to be stored
+ */
+void cellContainer::addSpecificRate(int _specificInteractionType, const double _P )
+{
+  rates.addSpecific(_specificInteractionType, _P);
+}
 
+void cellContainer::compute22MeanFreePath()
+{
+  SpecificMFP[0] = rates.getLambdaSpecific( 0, fm);
+  SpecificMFP[1] = rates.getLambdaSpecific( 1, fm);
+  SpecificMFP[2] = rates.getLambdaSpecific( 2, fm);
+}
 
 void cellContainer::setCoordinates( const int _index, const double _dx, const int _nx, const double _sizeX, const double _dy, const int _ny, const double _sizeY )
 {

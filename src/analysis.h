@@ -289,6 +289,8 @@ private:
   bool studyPhotons;
   bool studyNumberOfBackgroundQuarks;
   bool studySpatialPhotons;
+  bool studyTempCustom;
+  bool studyMFP;
  
   
   void writePartclMovie( const int step ) const;
@@ -366,9 +368,10 @@ private:
   void writeTempAndVel( const int step  );
   void addNeighborCells( const int cell_id, const int neighborCell_id );
   void writeTempInTube( const int step  );
-  void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  );
+  void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity, double & fugacityGluons, double & fugacityQuarks, double & densityGluons, double & densityQuarks  );
   void print_dndy(const string subfix );
   void writePhotonSpaceProfile( const int step  );
+  void writeTempCustom( const int step  );
   
   bool v2output;
   bool v2outputIntermediateSteps;
@@ -376,6 +379,10 @@ private:
   
   
   int *numberInCell; 
+  int *numberInCellQuarks;
+  int *numberInCellGluons;
+  double *fugacityQuarks;
+  double *fugacityGluons;
   int *numberInCell2D; 
   int *photonNumberInCell2D; 
   double *photonV2SumInCell2D;

@@ -47,7 +47,8 @@ extern int IX, IY, IZ;
 
 namespace
 {
-  const int cellcut = 4;
+  //WARNING Cellcut changed from 4 to 2
+  const int cellcut = 2;
   double dx, dy, dv, transLen;
   double timenow, timenext;
   double simulationTime;
@@ -99,7 +100,8 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     theAnalysis( _analysis )
 {  
   // load 2->2 cross section interpolation data
-  if( theConfig->doScattering_22() || theConfig->doScattering_22_photons() )
+  // Scattering23_photons has mean free path routine (scatt22ForRates) which uses the I22.
+  if( theConfig->doScattering_22() || theConfig->doScattering_22_photons() || theConfig->doScattering_23_photons())
     theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom, theConfig->getMaxRunningCoupling(), theConfig->getfixedCouplingValue(), theConfig->doScattering_22_photons(), theConfig->getDebyeModePhotons(), theConfig->getVertexModePhotons() );
    
   //Loeschen,alt:
@@ -336,6 +338,7 @@ void offlineHeavyIonCollision::mainFramework()
   //theAnalysis->printCellV2Distribution(nexttime, simpleTimestepcount);
   //simpleTimestepcount++;
   
+  
   simulationTime = theConfig->getTimefirst(); //fm/c
 
   while( simulationTime >= theAnalysis->tstep[nn_ana] )
@@ -362,7 +365,7 @@ void offlineHeavyIonCollision::mainFramework()
   double dt_sum = 0.0;
   int n_again = 0;
 
-  
+
   cout << "Maximum Run Time set to " << stoptime << endl;
   if(onlyMediumEvolution)
   {
@@ -502,7 +505,8 @@ void offlineHeavyIonCollision::mainFramework()
       cell_ID( nexttime );
       // collide added particles with gluonic medium
       deadParticleList.clear();
-      scattering( nexttime, again );
+      scattering( nexttime, again);
+      
       //theAnalysis->printCellV2Distribution(nexttime, simpleTimestepcount);
       //simpleTimestepcount++; 
       // if time step is too large -> collide again with smaller time step
@@ -619,6 +623,9 @@ void offlineHeavyIonCollision::mainFramework()
   }
     while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
 
+
+
+    
   
   if( theConfig->isHadronizationHQ() )
   {
@@ -1264,12 +1271,26 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   double dz, cc, zz, eta;
   bool free;
   list<int> formGeomCopy;
-  vector<int> gluonList, allParticlesList;
+  vector<int> gluonList, allParticlesList, allParticlesListWithNeighbors;
   vector<int> gluonListAdded, allParticlesListAdded;
   
   again = false;
   
   IXY = IX * IY;
+  
+  //used for MFP analysis:
+  bool computeAveragedMfp = theConfig->getMfpCellAveraging();
+  int  numberOfCellsAveragedForMfp = 5;
+  double lambdaSpecific1=0.;
+  double lambdaSpecific2=0.;
+  double lambdaSpecific3=0.;
+  long int count_for_average_lambda1 = 0;
+  long int count_for_average_lambda2 = 0;
+  long int count_for_average_lambda3 = 0;
+  long int averageNumberOfParticles  = 0;
+  long int count_for_average_NumberOfParticles = 0;
+  averageQuarkNumber = 0.;
+  countForAverageaverageQuarkNumber=0;
   
   formGeomCopy = formGeom;
 
@@ -1299,6 +1320,9 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   int centralEtaIndex = static_cast<int>( etaBins.size() ) / 2;
   
   // go through cells
+  
+  cout << etaBins.min_index()<< "\t" << etaBins.max_index() << endl;
+  cout << "Central: " << centralEtaIndex << endl;
   for ( int etaSliceIndex = etaBins.min_index(); etaSliceIndex <= etaBins.max_index(); etaSliceIndex++ )
   {
     //---------- populate the ring structure for averages ----------
@@ -1356,19 +1380,65 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
     //---------- populate the ring structure for averages ----------
     
     // scatterings in cell or not?
+    //For each eta-slice, the cells have the same volume.
     dv = dx * dy * dz;
+    //Loop through cells
     for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
-    {
-      //WARNING! Wor the use without added particles.
+    { 
+      /*if ( !( cells[j].empty()) )
+      { 
+        cells[j].resetStoredValues();
+        cout << cells[j].size() << endl;
+        allParticlesListWithNeighbors.clear(); 
+        allParticlesListWithNeighbors.reserve( cells[j].size() );
+      }*/
+
+      
+      int EdgecellOfList = 0;
+      if(computeAveragedMfp==true)
+      {      
+        allParticlesListWithNeighbors.clear();  
+        
+        if( (j== IXY * (etaSliceIndex+1) - 1 ) && (!( cells[j].empty())  || !( cells[j-1].empty())  ||  !( cells[j-2].empty())  ||  !( cells[j-3].empty())  ||  !( cells[j-4].empty())))
+        { 
+          numberOfCellsAveragedForMfp = 5;
+          EdgecellOfList = 2;
+          allParticlesListWithNeighbors.reserve( round(  (cells[j-4].size()+cells[j-3].size()+cells[j-2].size() + cells[j-1].size()+cells[j].size())*1.1 ) );
+          
+        }else
+        if(  (j== IXY *  etaSliceIndex  )  && ( !( cells[j].empty()) || !( cells[j+1].empty()) || !( cells[j+2].empty()) ||  !( cells[j+3].empty())  ||  !( cells[j+4].empty())))
+        {
+          numberOfCellsAveragedForMfp = 5;
+          EdgecellOfList = 1;
+          allParticlesListWithNeighbors.reserve( round(   (cells[j].size() + cells[j+1].size()+cells[j+2].size()+cells[j+3].size()+cells[j+4].size())*1.1 ) );
+          
+        }else  
+        if( (j>IXY * etaSliceIndex) && (j< (IXY * ( etaSliceIndex + 1 ) - 1) ) && (  !( cells[j].empty())  ||  !( cells[j-1].empty())  ||  !( cells[j+1].empty())  ||  !( cells[j-2].empty()) ||  !( cells[j+2].empty()) )      )
+        {  
+          numberOfCellsAveragedForMfp = 5;
+          EdgecellOfList = 0;   
+          allParticlesListWithNeighbors.reserve( round(  (cells[j-2].size()+cells[j-1].size() + cells[j].size()+cells[j+1].size()+cells[j+2].size())*1.1  ) );
+        }else
+        {  
+          numberOfCellsAveragedForMfp = 1;         
+          allParticlesListWithNeighbors.reserve(cells[j].size());
+        }
+        
+      }
+      
+      //WARNING! For the use without added particles.
       // if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
       if ( !( cells[j].empty()) )
       {      
         cells[j].resetStoredValues();
         cellsAdded[j].resetStoredValues();
-        gluonList.clear();
+        
+        gluonList.clear();        
         allParticlesList.clear();
+        
         gluonList.reserve( cells[j].size() );
         allParticlesList.reserve( cells[j].size() );
+        
         gluonListAdded.clear();
         allParticlesListAdded.clear();
         gluonListAdded.reserve( cellsAdded[j].size() );
@@ -1474,6 +1544,98 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             int nAntiBottomQuarks = 0;
             vector<int> nLightQuarksAdded( Particle::N_light_flavor , 0 );
             vector<int> nAntiLightQuarksAdded( Particle::N_light_flavor, 0 );
+            
+            
+            if(computeAveragedMfp)
+            {
+              if(EdgecellOfList==0)
+              {
+              list<int>::const_iterator iIt;
+                for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }       
+                for ( iIt = cells[j-1].particleList.begin(); iIt != cells[j-1].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+                for ( iIt = cells[j+1].particleList.begin(); iIt != cells[j+1].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+                for ( iIt = cells[j-2].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+                for ( iIt = cells[j+2].particleList.begin(); iIt != cells[j+2].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+              }
+              if(EdgecellOfList==1)
+              {
+              list<int>::const_iterator iIt;
+                for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }       
+                for ( iIt = cells[j+1].particleList.begin(); iIt != cells[j+1].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+                for ( iIt = cells[j+2].particleList.begin(); iIt != cells[j+2].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+                for ( iIt = cells[j+3].particleList.begin(); iIt != cells[j+3].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+                for ( iIt = cells[j+4].particleList.begin(); iIt != cells[j+4].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+              }           
+              if(EdgecellOfList==2)
+              {
+              list<int>::const_iterator iIt;
+                for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }       
+                for ( iIt = cells[j-1].particleList.begin(); iIt != cells[j-1].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+                for ( iIt = cells[j-2].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+                for ( iIt = cells[j-3].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+                for ( iIt = cells[j-4].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
+                {
+                  id = *iIt;
+                  allParticlesListWithNeighbors.push_back( id );
+                }  
+              }                
+            }
             
             list<int>::const_iterator iIt;
             for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
@@ -1630,6 +1792,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               }
             }
             
+            
             // calculate actual mean free path of added particles within this timestep in order to use it for both 3->2 and 2->3 processes
             if ( theConfig->getJetMfpComputationType() == computeMfpLastTimestep && ( theConfig->doScattering_23() || theConfig->doScattering_32() ) )
             {
@@ -1667,6 +1830,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               }
             }
 
+      
+            
             int n32 = 0;
             
             if( theConfig->isScatt_offlineWithAddedParticles() && theConfig->doScattering_32() )
@@ -1685,7 +1850,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               scaleFactor = static_cast<double>( nGluons ) / static_cast<double>( nGluons - n32 );
             }
             
-         
+            
             unsigned int tempPhotons = totalPhotonNumber;
             if( theConfig->isScatt_amongBackgroundParticles() )
             {
@@ -1695,7 +1860,73 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                 }
                 if( theConfig->doScattering_23_photons())
                 {
-                  scatt23_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
+                  cells[j].rates.clearSpecific();
+
+                  
+                  if (theConfig->getOutputScheme()==203 )                  
+                  {     
+                    if(etaSliceIndex == centralEtaIndex)
+                    {
+                      if(computeAveragedMfp)
+                      {  
+                        averageNumberOfParticles += allParticlesListWithNeighbors.size();
+                      }else
+                      {
+                        averageNumberOfParticles += allParticlesList.size();
+                      }
+                      count_for_average_NumberOfParticles++;
+                  
+                      if(computeAveragedMfp)
+                      {
+                        scatt22ForRates(cells[j],allParticlesListWithNeighbors, theI22, numberOfCellsAveragedForMfp);
+                      }else
+                      {
+                        scatt22ForRates(cells[j],allParticlesList, theI22, 1);                    
+                      }
+        
+                      if(FPT_COMP_GZ(getLambdaFromRates( 1,1, cells[j].rates)))
+                      {
+                        lambdaSpecific1 += getLambdaFromRates( 1,1, cells[j].rates);
+                        count_for_average_lambda1++;
+                      }
+                      if(FPT_COMP_GZ(getLambdaFromRates( 1,2, cells[j].rates)))
+                      {                 
+                        lambdaSpecific2 += getLambdaFromRates( 1,2, cells[j].rates);
+                        count_for_average_lambda2++;
+                      }
+                      if(FPT_COMP_GZ(getLambdaFromRates( 1,3, cells[j].rates)))
+                      {                
+                        lambdaSpecific3 += getLambdaFromRates( 1,3, cells[j].rates);
+                        count_for_average_lambda3++;    
+                      }   
+                    }
+                  }else
+                  {
+                    if(computeAveragedMfp)
+                    {
+                      scatt22ForRates(cells[j],allParticlesListWithNeighbors, theI22, numberOfCellsAveragedForMfp);
+                    }else
+                    {
+                      scatt22ForRates(cells[j],allParticlesList, theI22, 1);                    
+                    }
+      
+                    if(FPT_COMP_GZ(getLambdaFromRates( 1,1, cells[j].rates)))
+                    {
+                      lambdaSpecific1 += getLambdaFromRates( 1,1, cells[j].rates);
+                      count_for_average_lambda1++;
+                    }
+                    if(FPT_COMP_GZ(getLambdaFromRates( 1,2, cells[j].rates)))
+                    {                 
+                      lambdaSpecific2 += getLambdaFromRates( 1,2, cells[j].rates);
+                      count_for_average_lambda2++;
+                    }
+                    if(FPT_COMP_GZ(getLambdaFromRates( 1,3, cells[j].rates)))
+                    {                
+                      lambdaSpecific3 += getLambdaFromRates( 1,3, cells[j].rates);
+                      count_for_average_lambda3++;    
+                    } 
+                    scatt23_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
+                  }
                 }             
                 
                 tempPhotons = totalPhotonNumber - tempPhotons;
@@ -1831,7 +2062,24 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   // J/psi dissociation: if temperature in cell is higher than Td = 2 Tc, decay J/psi to two charm quarks
   if( Particle::N_psi_states > 0 )
     jpsi_dissociation_td( nexttime );
-  
+     
+  if(theConfig->getOutputScheme() == 203)
+  {
+    string full_filename = theConfig->getStandardOutputDirectoryName() + "/" +theConfig->getJobName() + "_MFPaveraged" +  ".dat";
+    fstream outfile( full_filename.c_str(), ios::out | ios::app);
+    outfile.precision( 8 );
+    int avQNumber = 0; 
+    if(countForAverageaverageQuarkNumber>0)
+    {
+      avQNumber = averageQuarkNumber/countForAverageaverageQuarkNumber;
+    }
+    if(count_for_average_NumberOfParticles>0)
+    {
+      cout    << nexttime << "\t" << lambdaSpecific1/count_for_average_lambda1 << "\t" << lambdaSpecific2/count_for_average_lambda2<< "\t" <<  lambdaSpecific3/count_for_average_lambda3 << "\t" << averageNumberOfParticles/count_for_average_NumberOfParticles << "\t" << avQNumber << endl;
+      outfile << nexttime << "\t" << lambdaSpecific1/count_for_average_lambda1 << "\t" << lambdaSpecific2/count_for_average_lambda2<< "\t" <<  lambdaSpecific3/count_for_average_lambda3 << "\t" << averageNumberOfParticles/count_for_average_NumberOfParticles << "\t" << avQNumber << endl;
+      outfile.close();
+    }
+  }
   cout << "Total photons " << totalPhotonNumber << endl;
 }
 
@@ -2188,7 +2436,8 @@ double offlineHeavyIonCollision::computeBackgroundv2OfCell( std::vector< int >& 
   return v2/allParticlesList.size();   
 }
 
-//Change this to scatt2223_amongBackgroundParticles!
+
+
 void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime )
 {
   int iscat, jscat, typ;
@@ -2355,7 +2604,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
         if(parentParticlesAllowed(iscat,jscat))
         {
           scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
-          scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again); 
+          scatt23_amongBackgroundParticles_photons_utility_1( _cells, scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again); 
         }else
         {
           continue;
@@ -2363,7 +2612,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
       }else
       {
         scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
-        scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);        
+        scatt23_amongBackgroundParticles_photons_utility_1( _cells, scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);        
       }
     }                                                    
   }
@@ -2380,14 +2629,14 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
         {
           if(parentParticlesAllowed(iscat,jscat))
           {            
-            scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again); 
+            scatt23_amongBackgroundParticles_photons_utility_1( _cells, scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again); 
           }else
           {
             continue;
           }
         }else
         {          
-          scatt23_amongBackgroundParticles_photons_utility_1(scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);        
+          scatt23_amongBackgroundParticles_photons_utility_1( _cells, scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);        
         }
       }
     }
@@ -3462,6 +3711,7 @@ bool offlineHeavyIonCollision::parentParticlesAllowed(const int iscat,const int 
   }
 }
 
+
 //std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesList,
 void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_1( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime, double scaleForSelectedPairs, bool & again )
 {
@@ -3774,6 +4024,58 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
   }
 }
 
+int offlineHeavyIonCollision::getSpecificScatteringType(int _F1, int _F2)
+{
+  if( _F1 > _F2 )
+  {
+    cout << "F1: " << _F1 << "   F2: " << _F2 << endl;
+    std::string errMsg = "Please sort the flavors in box::getSpecificScatteringType. _F1 must be smaller or equal than _F2";
+    throw eHIC_error( errMsg );
+  }
+  int scatteringType =0;
+  
+  if(_F1 + _F2 == 0)
+  {
+    scatteringType = -1;
+  }else if(_F1*_F2 == 0)
+  {
+    scatteringType = -1;
+  }else if ( _F1 == _F2 )  // qq -> qq, qbarqbar -> qbarqbar  (only for light quarks)
+  {
+    scatteringType = 0;
+  }else if( (_F2 - _F1) == 1 &&  (_F2 % 2) == 0 ) //qqbar->qqbar
+  {
+    scatteringType = 1;
+  }else if( _F2 != _F1 )  //qqbar' -> qqbar'= qq' -> qq'
+  {
+    scatteringType = 2;
+  }else
+  {
+    scatteringType = -1;
+  }
+  
+  return scatteringType;
+}
+
+double offlineHeavyIonCollision::getLambdaFromRates(int _F1,int _F2, ratesManager& rates)
+{
+  //0.0001; 0.00001;
+  double TuneMFPArbitrary = 1.0;
+  int scatteringType = getSpecificScatteringType(_F1,_F2);
+  double lambda;
+  if(scatteringType > -1)
+  {
+    lambda = rates.getLambdaSpecific(scatteringType,fm)*TuneMFPArbitrary;
+    //cout << lambda << endl;
+    
+    return lambda;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
 /**
  * Handles the Sampling of the inelastic photons and saves them in the photon vector.
  * @param[in] scatt23_obj
@@ -3784,7 +4086,7 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
  * @param[out] again
  * 
  */
-void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_1( scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime, double scaleForSelectedPairs, bool & again )
+void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_1(cellContainer& _cells, scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime, double scaleForSelectedPairs, bool & again )
 {
   FLAVOR_TYPE F1, F2;
   double M1,M2,s,probab22,cs22,Vrel,md2g_wo_as,md2q_wo_as,xt,lambda,lambda_scaled,cs23Photons,probab23,s_cutoff_for_pqcd,betaDistEntry,cs23Total;
@@ -3803,9 +4105,13 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
   unsigned int _F1 = std::min( static_cast<unsigned int>( F1 ), static_cast<unsigned int>( F2 ) );
   unsigned int _F2 = std::max( static_cast<unsigned int>( F1 ), static_cast<unsigned int>( F2 ) );
   
+  //Get the Rates for the mean free path
+  _cells.rates.clearSpecific();
+  
+  
+  
   //This s-cutoff can be adjusted!
   s_cutoff_for_pqcd = 1.1*lambda2; //1.1*LambdaQCD^2=1.1*0.2*0.2=0.044
-  
   s = (particles_atTimeNow[iscat].Mom + particles_atTimeNow[jscat].Mom).M2();
   
   if( FPT_COMP_G(s, s_cutoff_for_pqcd) )// if s > s_cutoff_for_pqcd...
@@ -3820,6 +4126,10 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     int initialStateIndex = -1;
     
     //Compute MFP
+    lambda = getLambdaFromRates( _F1,_F2, _cells.rates);      
+    lambda_scaled = lambda * sqrt( s ) / 0.197;// lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
+    
+    
     xt = particles_atTimeNow[iscat].Pos.Perp();
     ringIndex = rings.getIndex( xt );
     double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
@@ -3828,15 +4138,15 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
       effectiveTemperatureFromRings = 2.5;
     }
     //[lambda]=fm
+    /*
     lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, effectiveTemperatureFromRings, rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
-    
-    
+    lambda = _cells.SpecificMFP[0];
+    */
     
     //TEST:       
     //lambda = 10.5;//fm
     //cout << "MFP [fm] = " << lambda << endl;
-    
-    lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
+    //lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
           
     //if(lambda_scaled>100.0)
     //{
@@ -3937,6 +4247,265 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     cs22 = 0.0; //1/GeV^2
   }
 }
+
+void offlineHeavyIonCollision::NumbersInCell( std::vector< int >& ThisCell, double & NumberGluonsInCell, double & NumberUpsInCell, double & NumberAntiupsInCell, double & NumberDownsInCell, double & NumberAntisdownsInCell, double &NumberStrangesInCell, double & NumberAntiStrangesInCell )
+{ 
+  int wscat;
+
+  NumberGluonsInCell =0 ;
+  NumberUpsInCell =0 ;
+  NumberAntiupsInCell =0 ;
+  NumberDownsInCell =0 ;
+  NumberAntisdownsInCell =0 ;
+  NumberStrangesInCell =0 ;
+  NumberAntiStrangesInCell =0 ;
+
+  for ( int i = 0; i < static_cast<int>( ThisCell.size() ) - 1; i++ )
+  {
+    wscat =  ThisCell[i];    
+    if (particles_atTimeNow[wscat].FLAVOR == gluon){NumberGluonsInCell++;}
+    if (particles_atTimeNow[wscat].FLAVOR == up){NumberUpsInCell++;}
+    if (particles_atTimeNow[wscat].FLAVOR == anti_up){NumberAntiupsInCell++;}
+    if (particles_atTimeNow[wscat].FLAVOR == down){NumberDownsInCell++;}
+    if (particles_atTimeNow[wscat].FLAVOR == anti_down){NumberAntisdownsInCell++;}
+    if (particles_atTimeNow[wscat].FLAVOR == strange){NumberStrangesInCell++;}
+    if (particles_atTimeNow[wscat].FLAVOR == anti_strange){NumberAntiStrangesInCell++;}
+  }      
+}
+
+
+void offlineHeavyIonCollision::scatt22ForRates(  cellContainer& _cells,std::vector< int >& _allParticlesList,  const interpolation22& theI22, const int _NumberOfCellsAveraged)
+{
+ 
+  int iscat, jscat;
+  
+  
+  list<int>::const_iterator iIt;
+  list<int>::const_iterator jIt;
+ 
+  scattering22 scatt22_object( &theI22 );
+ 
+  for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
+  {
+    iscat = _allParticlesList[i];    
+    for ( unsigned int j = i+1; j < _allParticlesList.size(); j++ )
+    {              
+      jscat = _allParticlesList[j]; 
+      if(particles_atTimeNow[iscat].dead || particles_atTimeNow[jscat].dead)
+      {
+        continue;
+      }else
+      { 
+        scatt22ForRatesUtility(scatt22_object, iscat, jscat, theI22, _cells,_allParticlesList, _NumberOfCellsAveraged);
+      }
+    }
+  }
+}
+
+void offlineHeavyIonCollision::scatt22ForRatesUtility(scattering22& scatt22_obj, const int iscat, const int jscat, const interpolation22& theI22,  cellContainer& _cells,std::vector< int >& _allParticlesList, const int NumberOfCellsAveraged)
+{
+  FLAVOR_TYPE F1, F2;
+  double M1, M2;
+  double s,s_cutoff_for_pqcd;
+  double Vrel,md2g_wo_as,md2q_wo_as,cs22,probab22,md2_wo_as_gluon_use,md2_wo_as_quark_use;
+  double t_hat,xt ;
+  int ringIndex;
+  double temperature = 0.0;
+  
+  ParticleOffline temp_particle_iscat = particles_atTimeNow[iscat];
+  ParticleOffline temp_particle_jscat = particles_atTimeNow[jscat];
+
+  double ng,nu,nub,nd,ndb,ns,nsb;
+  NumbersInCell(_allParticlesList,ng,nu,nub,nd,ndb,ns,nsb);  
+  
+  double AverageQuarkNumber = (nu+nd+ns+nub+ndb+nsb)/6.;
+
+  double AverageQuarkNumberMinusOne = 0;
+  double SumOfQuarkNumber = nu+nd+ns+nub+ndb+nsb;
+  averageQuarkNumber += SumOfQuarkNumber;
+  countForAverageaverageQuarkNumber++;
+  //cout << ng << "\t" << nu << "\t" << nub << "\t" << nd << "\t" << ndb << "\t" << ns << "\t" << nsb << "\t" << endl;
+  
+  
+  F1 = particles_atTimeNow[iscat].FLAVOR;
+  M1 = particles_atTimeNow[iscat].m;  
+  
+  F2 = particles_atTimeNow[jscat].FLAVOR;
+  M2 = particles_atTimeNow[jscat].m;
+  
+  unsigned int _F1 = std::min( static_cast<unsigned int>( F1), static_cast<unsigned int>( F2 ) );
+  unsigned int _F2 = std::max( static_cast<unsigned int>( F1), static_cast<unsigned int>( F2 ) );
+
+  s = (particles_atTimeNow[iscat].Mom + particles_atTimeNow[jscat].Mom).M2();
+  Vrel = VelRel( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom, M1, M2 );
+  s_cutoff_for_pqcd = 0.1;
+  
+  if ( FPT_COMP_G ( s, s_cutoff_for_pqcd ) )
+  {
+    //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, it will be multiplied in the scattering routines
+    md2g_wo_as = ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
+    md2q_wo_as = ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q ) / 2.0;
+  
+    int initialStateIndex = -1;
+    //Compute LRF temperature, encoded in md2g
+    xt = particles_atTimeNow[iscat].Pos.Perp();
+    ringIndex = rings.getIndex( xt );
+    double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
+    temperature = effectiveTemperatureFromRings;//Doesn't do anything here.
+    
+    double Nf=3.0;
+    double LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) );
+    double LRF_md2q_wo_as = 1.0/9.0 * LRF_md2g_wo_as ;
+    
+    //WARNING: Decide, which Debye mass should be used. Either LRF_md2g_wo_as or md2g_wo_as
+    if (theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScale2piT)
+    {
+      md2_wo_as_gluon_use  = md2g_wo_as;
+      md2_wo_as_quark_use = md2q_wo_as;           
+    }else if (theConfig->getDebyeModePhotons()==LatticeDebye || theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScaleMD2)  
+    {
+      md2_wo_as_gluon_use  = LRF_md2g_wo_as;
+      md2_wo_as_quark_use  = LRF_md2q_wo_as;           
+    }else 
+    {
+      md2_wo_as_gluon_use  = md2g_wo_as;
+      md2_wo_as_quark_use = md2q_wo_as;    
+    }
+    
+    scatt22_obj.setParameter ( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom, F1, F2, M1, M2, s,md2_wo_as_gluon_use , md2_wo_as_quark_use,
+                                  theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
+                                  theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
+                                  theConfig->getInfraredCutOffEMProcesses(),theConfig->getKappa22Photons(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(), 0.0, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi()
+                                ); // md2g_wo_as, md2q_wo_as are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+
+    //****************************************************************************************************
+
+    int scatteringType = getSpecificScatteringType(_F1,_F2);
+    cs22=0.0;
+    
+    if(scatteringType == 0) // qq -> qq, qbarqbar -> qbarqbar  (only for light quarks)
+    {
+      cs22 = scatt22_obj.getXSection22Specific ( 227 );
+      probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt  / ( NumberOfCellsAveraged * dv * testpartcl );
+      if(_F1 != _F2)
+      {
+        std::string errMsg = "Wrong scattering type in scatt22ForRatesUtility.";
+        throw eHIC_error( errMsg );
+      }
+      double specificQuarkNumberFactor=0;
+      switch ( _F1 )
+      {
+        case 1:  // up quark
+          specificQuarkNumberFactor = nu-1;
+          break;
+        case 2:  // up-bar quark
+          specificQuarkNumberFactor = nub-1;
+          break;
+        case 3:  // down quark
+          specificQuarkNumberFactor = nd-1;
+          break;
+        case 4:  // up quark
+          specificQuarkNumberFactor = ndb-1;
+          break;
+        case 5:  // up quark
+          specificQuarkNumberFactor = ns-1;
+          break;
+        case 6:  // up quark
+          specificQuarkNumberFactor = nsb-1;
+          break;
+        /* Mapped according to:
+        * 0 = g (gluon)
+        * 1 = u (up)
+        * 2 = ub (anti-up)
+        * 3 = d (down)
+        * 4 = db (anti-down)
+        * 5 = s (strange)
+        * 6 = sb (anti-strange)
+        */        
+      }  
+      double FlavorAverage = 1./6.;
+      _cells.rates.addSpecific(scatteringType,FlavorAverage*probab22/dt*2.0/(specificQuarkNumberFactor) , pow( 0.197, 2.0 ) * cs22 * Vrel/ ( dv * testpartcl ) );  
+    }
+    else if(scatteringType == 1)//qqbar->qqbar
+    {      
+      cs22 = scatt22_obj.getXSection22Specific ( 224 );
+      probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt   / ( dv * testpartcl );
+      double specificQuarkNumberFactor=0;
+      switch ( _F1 )
+      {
+        case 1:  // up quark
+          specificQuarkNumberFactor = (nu+nub)/2.0;
+          break;
+        case 2:  // up-bar quark
+          specificQuarkNumberFactor = (nu+nub)/2.0;
+          break;
+        case 3:  // down quark
+          specificQuarkNumberFactor = (nd+ndb)/2.0;
+          break;
+        case 4:  // up quark
+          specificQuarkNumberFactor = (nd+ndb)/2.0;
+          break;
+        case 5:  // up quark
+          specificQuarkNumberFactor = (ns+nsb)/2.0;
+          break;
+        case 6:  // up quark
+          specificQuarkNumberFactor = (ns+nsb)/2.0;
+          break;
+        /* Mapped according to:
+        * 0 = g (gluon)
+        * 1 = u (up)
+        * 2 = ub (anti-up)
+        * 3 = d (down)
+        * 4 = db (anti-down)
+        * 5 = s (strange)
+        * 6 = sb (anti-strange)
+        */        
+      } 
+      double FlavorAverage = 1./3.;
+      _cells.rates.addSpecific(scatteringType,FlavorAverage*probab22/dt/(specificQuarkNumberFactor) , pow( 0.197, 2.0 ) * cs22 * Vrel/ ( dv * testpartcl ) );  
+    }
+    else if (scatteringType == 2)//qqbar' -> qqbar'= qq' -> qq'
+    {
+      cs22 = scatt22_obj.getXSection22Specific ( 228 );
+      probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt   / ( dv * testpartcl );
+      double specificQuarkNumberFactor=0;
+      switch ( _F1 )
+      {
+        case 1:  // up quark
+          specificQuarkNumberFactor = (nu+nub)/2.0;
+          break;
+        case 2:  // up-bar quark
+          specificQuarkNumberFactor = (nu+nub)/2.0;
+          break;
+        case 3:  // down quark
+          specificQuarkNumberFactor = (nd+ndb)/2.0;
+          break;
+        case 4:  // up quark
+          specificQuarkNumberFactor = (nd+ndb)/2.0;
+          break;
+        case 5:  // up quark
+          specificQuarkNumberFactor = (ns+nsb)/2.0;
+          break;
+        case 6:  // up quark
+          specificQuarkNumberFactor = (ns+nsb)/2.0;
+          break;
+        /* Mapped according to:
+        * 0 = g (gluon)
+        * 1 = u (up)
+        * 2 = ub (anti-up)
+        * 3 = d (down)
+        * 4 = db (anti-down)
+        * 5 = s (strange)
+        * 6 = sb (anti-strange)
+        */        
+      }         
+      double FlavorAverage = 1./6.;
+      _cells.rates.addSpecific(scatteringType,FlavorAverage*probab22/dt/(specificQuarkNumberFactor) , pow( 0.197, 2.0 ) * cs22 * Vrel/ ( dv * testpartcl ) );    
+
+    }  
+  }
+}
+
 
 /**
  * Handles the Sampling of the inelastic photons and saves them in the photon vector.
