@@ -1320,9 +1320,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   int centralEtaIndex = static_cast<int>( etaBins.size() ) / 2;
   
   // go through cells
-  
-  cout << etaBins.min_index()<< "\t" << etaBins.max_index() << endl;
-  cout << "Central: " << centralEtaIndex << endl;
   for ( int etaSliceIndex = etaBins.min_index(); etaSliceIndex <= etaBins.max_index(); etaSliceIndex++ )
   {
     //---------- populate the ring structure for averages ----------
@@ -1909,7 +1906,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                     {
                       scatt22ForRates(cells[j],allParticlesList, theI22, 1);                    
                     }
-      
+                    /*
                     if(FPT_COMP_GZ(getLambdaFromRates( 1,1, cells[j].rates)))
                     {
                       lambdaSpecific1 += getLambdaFromRates( 1,1, cells[j].rates);
@@ -1925,6 +1922,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                       lambdaSpecific3 += getLambdaFromRates( 1,3, cells[j].rates);
                       count_for_average_lambda3++;    
                     } 
+                    cout << "Scatter " << lambdaSpecific1/count_for_average_lambda1 << "\t" << lambdaSpecific2/count_for_average_lambda2 << "\t" << lambdaSpecific3/count_for_average_lambda3 << endl;
+                    */
                     scatt23_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
                   }
                 }             
@@ -4105,11 +4104,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
   unsigned int _F1 = std::min( static_cast<unsigned int>( F1 ), static_cast<unsigned int>( F2 ) );
   unsigned int _F2 = std::max( static_cast<unsigned int>( F1 ), static_cast<unsigned int>( F2 ) );
   
-  //Get the Rates for the mean free path
-  _cells.rates.clearSpecific();
-  
-  
-  
+
   //This s-cutoff can be adjusted!
   s_cutoff_for_pqcd = 1.1*lambda2; //1.1*LambdaQCD^2=1.1*0.2*0.2=0.044
   s = (particles_atTimeNow[iscat].Mom + particles_atTimeNow[jscat].Mom).M2();
@@ -4128,8 +4123,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     //Compute MFP
     lambda = getLambdaFromRates( _F1,_F2, _cells.rates);      
     lambda_scaled = lambda * sqrt( s ) / 0.197;// lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
-    
-    
+
     xt = particles_atTimeNow[iscat].Pos.Perp();
     ringIndex = rings.getIndex( xt );
     double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
@@ -4223,16 +4217,16 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     
     if ( FPT_COMP_G(probab23, 3.0) )
     {
-      cout << "P23 photons=" << probab23 << ">1" << endl;
+      cout << "P23 photons=" << probab23 << ">3" << endl;
       again = true;
       dt = 0.5 * dt;
     }else if ( FPT_COMP_G(probab23, 1.0) )
     {
-      cout << "P23 photons=" << probab23 << ">1" << endl;
+      //cout << "P23 photons=" << probab23 << ">1" << endl;
       again = true;
-      cout << "dt (old) = " << dt << endl;
+      //cout << "dt (old) = " << dt << endl;
       dt = 0.5 / ( probab23 / dt );
-      cout << "dt (new) = " << dt << endl;
+      //cout << "dt (new) = " << dt << endl;
       return;
     }
     
@@ -4276,15 +4270,15 @@ void offlineHeavyIonCollision::NumbersInCell( std::vector< int >& ThisCell, doub
 
 void offlineHeavyIonCollision::scatt22ForRates(  cellContainer& _cells,std::vector< int >& _allParticlesList,  const interpolation22& theI22, const int _NumberOfCellsAveraged)
 {
- 
   int iscat, jscat;
-  
-  
+   
   list<int>::const_iterator iIt;
   list<int>::const_iterator jIt;
  
   scattering22 scatt22_object( &theI22 );
  
+  _cells.rates.clearSpecific();
+  
   for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
   {
     iscat = _allParticlesList[i];    
