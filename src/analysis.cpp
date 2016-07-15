@@ -2535,9 +2535,9 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   
   if(_flavTypeToComputeFor==photon)
   {
-    v2pt_binnumber = 20;   
+    v2pt_binnumber = 8;   
     _pt_min_v2 = 0.1;
-    _pt_max_v2 = 8.0;
+    _pt_max_v2 = 5.0;
     d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
   }
   else
