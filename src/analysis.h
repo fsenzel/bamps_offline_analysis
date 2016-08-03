@@ -37,7 +37,7 @@ using std::fstream;
 class config;
 
 enum jetTrackerCollType {initial_jet, final_jet, c2to2, c2to3, c3to2, production};
-enum anaType {numbOfPartcles, dEtdy, ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets, photonPtDist,cellV2DistributionHeader};
+enum anaType {numbOfPartcles, dEtdy, ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets, photonPtDist, cellV2DistributionHeader, dileptondRdMDist, dileptondRdPDist,dileptondRdMTimeDist};
 enum v2Type {v2jets, v2background};
 
 
@@ -206,6 +206,9 @@ public:
   void cellV2Distribution(const double cellV2ofThisCell, const unsigned int weight);
   /** @brief Print out the cellV2-distribution. */
   void printCellV2Distribution( const double nexttime, unsigned int timestepCount);
+  /** @brief Generate the distributions for dileptons. */
+  void computeAndPrintDileptonSpectra(string name, const double _outputTime );
+  
   
   void setSeed( uint32_t _s ) { seed = _s; }
   uint32_t getSeed( ) const { return seed; }
@@ -287,6 +290,7 @@ private:
   bool studyBackground;
   bool studyScatteredMediumParticles;
   bool studyPhotons;
+  bool studyDileptons;
   bool studyNumberOfBackgroundQuarks;
   bool studySpatialPhotons;
   bool studyTempCustom;

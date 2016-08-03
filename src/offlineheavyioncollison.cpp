@@ -149,6 +149,7 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
   nGet23Errors = 0;
   nGet32Errors = 0;
   totalPhotonNumber = 0;
+  totalDileptonNumber = 0;
 }
 
 
@@ -244,6 +245,7 @@ void offlineHeavyIonCollision::mainFramework()
 {
   
   totalPhotonNumber = 0;
+  totalDileptonNumber = 0;
   theConfig->v2average_debug = 0;
   double dt_cascade = 0;
   double dt_backup = 0;
@@ -658,6 +660,7 @@ void offlineHeavyIonCollision::mainFramework()
     
     cout << "==========================" << endl;
     cout << "Total Number of Photons = " << totalPhotonNumber << endl;
+    cout << "Total Number of Dilepton Pairs = " << totalDileptonNumber << endl;
     // List particle numbers for all flavors
     cout << "==========================" << endl;
     cout << "Added particles:" << endl;
@@ -1853,12 +1856,19 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             {
                 if( theConfig->doScattering_22_photons())
                 {
+                  cout << "ph" << endl;
                   scatt22_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
                 }
+                
+                if( theConfig->doScattering_22_dileptons())
+                {
+                  scatt22_amongBackgroundParticles_dileptons( cells[j], allParticlesList, scaleFactor, again, nexttime );
+                }        
+                
                 if( theConfig->doScattering_23_photons())
                 {
+                  cout << "ph23" << endl;
                   cells[j].rates.clearSpecific();
-
                   
                   if (theConfig->getOutputScheme()==203 )                  
                   {     
@@ -1928,6 +1938,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                   }
                 }             
                 
+
                 tempPhotons = totalPhotonNumber - tempPhotons;
                 
                 theAnalysis->cellV2Distribution(  computeBackgroundv2OfCell(allParticlesList), tempPhotons  ); 
@@ -2079,7 +2090,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
       outfile.close();
     }
   }
-  cout << "Total photons " << totalPhotonNumber << endl;
+  cout << "Total # of photons " << totalPhotonNumber << endl;
+  cout << "Total # of dileptons " << totalDileptonNumber << endl;
 }
 
 
@@ -2439,18 +2451,8 @@ double offlineHeavyIonCollision::computeBackgroundv2OfCell( std::vector< int >& 
 
 void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime )
 {
-  int iscat, jscat, typ;
-  double s, cs22, Vrel,temp1,temp2,temp3;
-  double M1, M2;
-  double probab22;
-  double md2g_wo_as, md2q_wo_as,s_cutoff_for_pqcd;
-  int initialStateIndex = -1;
-  FLAVOR_TYPE F1here, F2here;
-  double temperature;
-
+  int iscat, jscat;
   unsigned int m1, m2;
-  list<int>::const_iterator iIt;
-  list<int>::const_iterator jIt;
 
   scattering22 scatt22_object( &theI22 );
   
@@ -2537,6 +2539,105 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellCon
   }
 }
 
+
+/**
+* Performs the 2->2 dilepton production for all particles in a given computational cell
+*
+* @param[in] cellMembers list with all particles in the cell
+* @param[in] dt size of time step
+* @param[in] time current time
+* @param[in] factor scale factor = ngluon / (ngluon - n32) needed to correct rates in #scatt23 and #scatt22 after #scatt32
+* @param[in] aa Reference to the analysis object, used for output operations and analyis.
+*/
+void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_dileptons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime )
+{  
+  int iscat, jscat;
+  unsigned int m1, m2;
+  
+  scattering22 scatt22_object( &theI22 );
+  
+  const int N = _allParticlesList.size();
+  //this can be adjusted!
+  const int consideredPairs = N;     //number of pairs to be considered (on the average)
+  // The cross section needs to be scaled since only a certain number "consideredPairs" of all pairs
+  // is taken for simulation. The scale factor depends on the inital state (gg->X has a different number of pairs than gq->X etc.)
+  double scaleForSelectedPairs = 0;
+  const int allPairs = binomial ( N, 2 ); 
+
+  if ( allPairs >= 50 )
+  {   //only a certain number consideredPairs of all pairs will be considered  
+    for ( int i = 0; i < consideredPairs; i++ )
+    {
+      do
+      {
+        m1 = int ( _allParticlesList.size() * ran2() );
+        if ( m1 == _allParticlesList.size() ) 
+        {
+          m1 = _allParticlesList.size() - 1;
+        }
+        iscat = _allParticlesList[m1];       
+      }
+      while ( particles_atTimeNow[iscat].dead );
+      do
+      {
+        m2 = int ( _allParticlesList.size() * ran2() );
+        if ( m2 == _allParticlesList.size() ) 
+        {
+          m2 = _allParticlesList.size() - 1;
+        }
+        jscat = _allParticlesList[m2]; 
+      }
+      while ( jscat == iscat || particles_atTimeNow[jscat].dead );
+      
+      if(theConfig->getRestrictParentPTForPhotons())
+      {
+        if(parentParticlesAllowed(iscat,jscat))
+        {
+          scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
+          scatt22_amongBackgroundParticles_dileptons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);    
+        }else
+        {
+          continue;
+        }
+      }else
+      {
+        scaleForSelectedPairs =  static_cast<double> ( allPairs ) / static_cast<double> ( consideredPairs );
+        scatt22_amongBackgroundParticles_dileptons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);         
+      }
+    }                                                    
+  }
+  else
+  {
+    for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) - 1; i++ )
+    {
+      iscat = _allParticlesList[i];    
+      for ( unsigned int j = i+1; j < _allParticlesList.size(); j++ )
+      {              
+        jscat = _allParticlesList[j]; 
+        scaleForSelectedPairs=1.0;  
+        if(particles_atTimeNow[iscat].dead || particles_atTimeNow[jscat].dead)
+        {
+          continue;
+        }else
+        {
+          if(theConfig->getRestrictParentPTForPhotons())
+          {
+            if(parentParticlesAllowed(iscat,jscat))
+            {
+              scatt22_amongBackgroundParticles_dileptons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);    
+            }else
+            {
+              continue;
+            }
+          }else
+          {
+            scatt22_amongBackgroundParticles_dileptons_utility_1(scatt22_object, iscat, jscat, nexttime,  scaleForSelectedPairs, again);         
+          }
+        } 
+      }
+    }
+  }
+}
 
 /**
  * Performs the inelastic photonproduction.
@@ -2641,6 +2742,8 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
     }
   }
 }
+
+
 
 
 void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, const double scaleFactor, bool& again, const double nexttime )
@@ -3711,7 +3814,7 @@ bool offlineHeavyIonCollision::parentParticlesAllowed(const int iscat,const int 
 }
 
 
-//std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesList,
+
 void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_1( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime, double scaleForSelectedPairs, bool & again )
 {
   FLAVOR_TYPE F1, F2;
@@ -3876,7 +3979,6 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
   }
 }
 
-//std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesList,
 void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_2( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime)
 {
   FLAVOR_TYPE F1, F2;
@@ -3925,7 +4027,9 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
   scatt22_obj.getMomentaAndMasses22onlyPhotons( F1, F2, M1, M2, t_hat, typ ); 
 
   // translate momentum transfer t_hat into actual momenta of outgoing particles
-  VectorEPxPyPz P1new, P2new;
+  VectorEPxPyPz P1new = temp_particle_iscat.Mom; //will be overwritten anyway
+  VectorEPxPyPz P2new = temp_particle_jscat.Mom; //will be overwritten anyway
+
   VectorTXYZ Pos1new = temp_particle_iscat.Pos;
   VectorTXYZ Pos2new = temp_particle_jscat.Pos;
   
@@ -4021,6 +4125,191 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     temp_particle_produced_photon2.production_mechanism = mechanism;
     noninteractingParticles.push_back(temp_particle_produced_photon2);
   }
+}
+
+void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_dileptons_utility_1( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime, double scaleForSelectedPairs, bool & again )
+{
+  FLAVOR_TYPE F1, F2;
+  double Tmax, TT;
+  double M1, M2;
+  double t_hat, s_cutoff_for_pqcd,s,xt ;
+  double Vrel,md2g_wo_as,md2q_wo_as,cs22,probab22,md2_wo_as_gluon_use,md2_wo_as_quark_use;
+  int ringIndex;
+  double temperature = 0.0;
+  
+  ParticleOffline temp_particle_iscat = particles_atTimeNow[iscat];
+  ParticleOffline temp_particle_jscat = particles_atTimeNow[jscat];
+  
+
+  F1 = particles_atTimeNow[iscat].FLAVOR;
+  M1 = particles_atTimeNow[iscat].m;  
+  
+  F2 = particles_atTimeNow[jscat].FLAVOR;
+  M2 = particles_atTimeNow[jscat].m;
+
+  unsigned int _F1 = std::min( static_cast<unsigned int>( F1), static_cast<unsigned int>( F2 ) );
+  unsigned int _F2 = std::max( static_cast<unsigned int>( F1), static_cast<unsigned int>( F2 ) );
+        
+  s = (particles_atTimeNow[iscat].Mom + particles_atTimeNow[jscat].Mom).M2();
+
+  s_cutoff_for_pqcd = 0.0;
+   
+  if( FPT_COMP_G(s, s_cutoff_for_pqcd) )// if s > s_cutoff_for_pqcd...
+  {
+    Vrel = VelRel( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom, M1, M2 );
+
+    //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, it will be multiplied in the scattering routines
+    md2g_wo_as = ( particles_atTimeNow[iscat].md2g + particles_atTimeNow[jscat].md2g ) / 2.0;
+    md2q_wo_as = ( particles_atTimeNow[iscat].md2q + particles_atTimeNow[jscat].md2q ) / 2.0;
+    
+    int initialStateIndex = -1;
+    
+    //Compute LRF temperature, encoded in md2g
+    xt = particles_atTimeNow[iscat].Pos.Perp();
+    ringIndex = rings.getIndex( xt );
+    double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
+    temperature = effectiveTemperatureFromRings;//Doesn't do anything here.
+    
+    double Nf=3.0;
+    double LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) );
+    double LRF_md2q_wo_as = 1.0/9.0 * LRF_md2g_wo_as ;
+    
+    //WARNING: Decide, which Debye mass should be used. Either LRF_md2g_wo_as or md2g_wo_as
+    if (theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScale2piT)
+    {
+      md2_wo_as_gluon_use  = md2g_wo_as;
+      md2_wo_as_quark_use = md2q_wo_as;           
+    }else if (theConfig->getDebyeModePhotons()==LatticeDebye || theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScaleMD2)  
+    {
+      md2_wo_as_gluon_use  = LRF_md2g_wo_as;
+      md2_wo_as_quark_use  = LRF_md2q_wo_as;           
+    }else 
+    {
+      md2_wo_as_gluon_use  = md2g_wo_as;
+      md2_wo_as_quark_use = md2q_wo_as;    
+    }
+    
+
+    scatt22_obj.setParameter( particles_atTimeNow[iscat].Mom, particles_atTimeNow[jscat].Mom,
+                                F1, F2, M1, M2, s, md2_wo_as_gluon_use , md2_wo_as_quark_use,
+                                theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), theConfig->isConstantCrossSecGQ(),
+                                theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light(), theConfig->getkFactorEMProcesses22(),
+                                theConfig->getInfraredCutOffEMProcesses(),theConfig->getKappa22Photons(),theConfig->getDebyeModePhotons(),theConfig->getVertexModePhotons(),
+                                temperature, theConfig->getTdJpsi(), theConfig->isConstantCrossSecJpsi(), theConfig->getConstantCrossSecValueJpsi() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+  
+    switch ( theConfig->getCrossSectionMethod() )
+    {
+      case 0:  // PQCD cross sections
+        cs22 = scatt22_obj.getXSection22onlyDileptons ( initialStateIndex );
+        break;
+      case 1:  // const cross section
+        cs22 = theConfig->getInputCrossSectionValue() * 0.1 / ( pow ( 0.197, 2.0 ) );
+        break;
+      default
+          :
+        string errMsg = "Error in method of cross section";
+        throw eHIC_error ( errMsg );
+    }
+    // 1/ GeV^2
+    //100 mb = 10 fm^2 = 100 * 2.58 1/GeV^2
+    
+    probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt * scaleForSelectedPairs  / ( dv * testpartcl );
+     
+
+    if ( FPT_COMP_G(probab22, 2.0) )
+    {
+      cout << "P23 dileptons=" << probab22 << ">1" << endl;
+      again = true;
+      dt = 0.5 * dt;
+    }else if ( FPT_COMP_G(probab22, 1.0) )
+    {
+      cout << "P23 dileptons=" << probab22 << ">1" << endl;
+      again = true;
+      cout << "dt (old) = " << dt << endl;
+      dt = 0.5 / ( probab22 / dt );
+      cout << "dt (new) = " << dt << endl;
+      return;
+    }
+  
+    if ( ran2() < probab22 )
+    {
+      scatt22_amongBackgroundParticles_dileptons_utility_2( scatt22_obj, iscat, jscat, nexttime );
+    }  
+  }else
+  {
+    probab22 = -1.0;
+    cs22 = 0.0; //1/GeV^2 
+  }
+}
+
+void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_dileptons_utility_2( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime)
+{
+  FLAVOR_TYPE F1, F2;
+  double Tmax, TT;
+  double M1, M2;
+  double t_hat;
+  ELASTIC_MODE_PHOTONS mechanism;
+  
+  ParticleOffline temp_particle_iscat = particles_atTimeNow[iscat];
+  ParticleOffline temp_particle_jscat = particles_atTimeNow[jscat];
+  
+
+  F1 = particles_atTimeNow[iscat].FLAVOR;
+  M1 = particles_atTimeNow[iscat].m;  
+  
+  F2 = particles_atTimeNow[jscat].FLAVOR;
+  M2 = particles_atTimeNow[jscat].m;
+
+  unsigned int F1_ = std::min(static_cast<unsigned int>(F1), static_cast<unsigned int>(F2));
+  unsigned int F2_ = std::max(static_cast<unsigned int>(F1), static_cast<unsigned int>(F2));
+  
+  
+  Tmax = std::max( particles_atTimeNow[iscat].Pos.T(), particles_atTimeNow[jscat].Pos.T() );
+  TT = ( nexttime - Tmax ) * ran2() + Tmax;
+  temp_particle_iscat.Propagate( TT, particles_atTimeNow[iscat].X_traveled );
+  temp_particle_jscat.Propagate( TT, particles_atTimeNow[jscat].X_traveled );
+
+  // at this point scattering take place, therefore set properties of last scattering point
+  temp_particle_iscat.lastInt = particles_atTimeNow[iscat].Pos;
+  temp_particle_jscat.lastInt = particles_atTimeNow[jscat].Pos;
+
+  // determine type of scattering, momentum transfer t_hat, new flavor and new masses
+  int typ;
+  switch ( theConfig->getCrossSectionMethod() )
+  {
+    case 0:  // PQCD cross sections
+      scatt22_obj.getMomentaAndMasses22onlyDileptons ( F1, F2, M1, M2, t_hat, typ );
+      break;
+    default
+        :
+      string errMsg = "Error in method of cross section for dileptons.";
+      throw eHIC_error ( errMsg );
+  }
+  
+  if ( F1 == lepton && F2 == lepton  )
+  {
+    // translate momentum transfer t_hat into actual momenta of outgoing particles
+    VectorEPxPyPz P1new = temp_particle_iscat.Mom; //will be overwritten anyway
+    VectorEPxPyPz P2new = temp_particle_jscat.Mom; //will be overwritten anyway
+    VectorTXYZ Pos1new = temp_particle_iscat.Pos;
+    VectorTXYZ Pos2new = temp_particle_jscat.Pos;
+    
+    scatt22_obj.setNewMomenta22( P1new, P2new, Pos1new, Pos2new, t_hat );
+    
+    //Get invariant Mass and Momentum
+    ParticleOffline temp_particle_produced_dilepton_pair;
+    temp_particle_produced_dilepton_pair.FLAVOR = dilepton;
+    temp_particle_produced_dilepton_pair.m = sqrt(  ( P1new + P2new ).M2()  );
+    temp_particle_produced_dilepton_pair.Mom = P1new + P2new;
+    temp_particle_produced_dilepton_pair.dead = false;
+    temp_particle_produced_dilepton_pair.cell_id = -1;
+    temp_particle_produced_dilepton_pair.unique_id = Particle::unique_id_counter;
+    temp_particle_produced_dilepton_pair.production_time = nexttime;
+    ++Particle::unique_id_counter;
+    dileptons.push_back ( temp_particle_produced_dilepton_pair );
+    
+    totalDileptonNumber++;
+  }   
 }
 
 int offlineHeavyIonCollision::getSpecificScatteringType(int _F1, int _F2)

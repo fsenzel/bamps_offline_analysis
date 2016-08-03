@@ -212,6 +212,25 @@ analysis::analysis( config* const c ):
     tstep[14] = infinity;
     nTimeSteps = 15;
   } 
+  else if (studyDileptons)
+  {
+    tstep[0] = 0.2;
+    tstep[1] = 0.4;
+    tstep[2] = 0.6;
+    tstep[3] = 0.8;
+    tstep[4] = 1.0;
+    tstep[5] = 2.0;
+    tstep[6] = 3.0;
+    tstep[7] = 4.0;
+    tstep[8] = 5.0;
+    tstep[9] = 6.0;
+    tstep[10] = 7.0;
+    tstep[11] = 8.0;
+    tstep[12] = 9.0;
+    tstep[13] = 10.0;
+    tstep[14] = infinity;
+    nTimeSteps = 15;
+  } 
   else if (studyEtSpectra)
   {
       tstep[0] =1.;      //fm/c
@@ -789,10 +808,12 @@ analysis::analysis( config* const c ):
   }
   showerParticlesInEvent.resize( static_cast<int>( theConfig->getNumberOfParticlesToAdd() / 2 ) );
   
+  //PhotonEnergyBins configuration, to avoid unneccessary errors.   
+  PhotondNOverTwoPiptdydptBin.setMinMaxN( 0.0, 3.0, 100 );
+  cellV2.setMinMaxN(-1.0,1.0,20);
+  cellV2Weighted.setMinMaxN(-1.0,1.0,20);
   if( studyPhotons )
   { 
-    
-    
     //PhotonEnergyBins configuration   
     PhotondNOverTwoPiptdydptBin.setMinMaxN( 0.0, 3.0, 100 );
     cellV2.setMinMaxN(-1.0,1.0,20);
@@ -863,6 +884,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyTempAndVelocity = false;
   studyTempCustom = false;
   studyMFP = false; //study the specific mean free path
+  studyDileptons = false;
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -1101,7 +1123,16 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       studyBackground = true;
       studyPhotons=true;
-      break;      
+      break;    
+      
+    case dileptonStudies:     
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.5 );//rapidityRange[0] // RHIC
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.7 );//1                 // LHC
+      rapidityRanges.push_back(yRange);
+      studyDileptons=true;
+      break;    
       
     default:
       break;
@@ -2444,18 +2475,105 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   
   if( studyPhotons )
   {
-    cout << "studyPhotons " << noninteractingParticles.size() <<  endl;
+    cout << "analyse Photons. Size of Photon vector: " << noninteractingParticles.size() <<  endl;
     //if(theConfig->v2_bigger > theConfig->v2_smaller) cout << "bigger! " << theConfig->v2_bigger - theConfig->v2_smaller << endl;
     //if(theConfig->v2_bigger < theConfig->v2_smaller) cout << "smaller! " << -theConfig->v2_bigger + theConfig->v2_smaller << endl; 
-    cout << "# Number of colliding pairs with average positive v2: " << theConfig->countPositiveV2 << endl;
-    cout << "# Number of colliding pairs with average negative v2: " << theConfig->countNegativeV2 << endl;     
+    //cout << "# Number of colliding pairs with average positive v2: " << theConfig->countPositiveV2 << endl;
+    //cout << "# Number of colliding pairs with average negative v2: " << theConfig->countNegativeV2 << endl;     
     theV2RAA.setPtBinProperties( 0.0, 3.0, 50, 0.0, 3.0, 50 );
     theV2RAA.computeFor( photon, noninteractingParticles, noninteractingParticles.size(), "LO", _outputTime, v2background );
     //theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     //theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
   }
   
+  if( studyDileptons )
+  {
+    cout << "analyse Dileptons. Size of Dilepton pair vector: " << dileptons.size() <<  endl;
+    computeAndPrintDileptonSpectra(name, _outputTime );
+  }
+
 }
+
+void analysis::computeAndPrintDileptonSpectra(string name, const double _outputTime )
+{
+  binningInRanges DileptonInvMassSeveralPT;
+  binningInRanges DileptonPTSeveralInvMass;  
+  binningInRanges DileptonInvMassSeveralTimes;
+  
+  double pGEV, invMassGeV, productionTimeFm;
+  
+  DileptonInvMassSeveralPT.setNumberRanges(5);
+  DileptonInvMassSeveralPT.setMinMaxN(0.0, 4.0, 50);
+  DileptonInvMassSeveralPT.setRangevalues(0,0.0,10000.0);//in pt full inclusive spectrum
+  DileptonInvMassSeveralPT.setRangevalues(1,0.0,1.0);
+  DileptonInvMassSeveralPT.setRangevalues(2,1.0,2.0);
+  DileptonInvMassSeveralPT.setRangevalues(3,2.0,10.0);
+  DileptonInvMassSeveralPT.setRangevalues(4,0.0,3.0);
+  
+  DileptonInvMassSeveralTimes.setNumberRanges(5);//in pt full inclusive spectrum
+  DileptonInvMassSeveralTimes.setMinMaxN(0.0, 4.0, 50);
+  DileptonInvMassSeveralTimes.setRangevalues(0,0.5,10.0); // Timeslots 0.5-10fm
+  DileptonInvMassSeveralTimes.setRangevalues(1,1.0,10.0); // Timeslots 1-10fm
+  DileptonInvMassSeveralTimes.setRangevalues(2,2.0,10.0); // Timeslots 2-10fm
+  DileptonInvMassSeveralTimes.setRangevalues(3,3.0,10.0); // Timeslots 3-10fm
+  DileptonInvMassSeveralTimes.setRangevalues(4,0.0,10.0); // Full inclusive
+
+  
+  
+  DileptonPTSeveralInvMass.setNumberRanges(5);
+  DileptonPTSeveralInvMass.setMinMaxN(0.0, 4.0, 50);
+  DileptonPTSeveralInvMass.setRangevalues(0,0.0,10000.0);//full inclusive spectrum
+  DileptonPTSeveralInvMass.setRangevalues(1,0.0,1.0);
+  DileptonPTSeveralInvMass.setRangevalues(2,1.0,2.0);
+  DileptonPTSeveralInvMass.setRangevalues(3,2.0,10.0);
+  DileptonPTSeveralInvMass.setRangevalues(4,0.0,3.0);
+  
+  
+  
+  for ( unsigned int j = 0; j < dileptons.size(); j++ )
+  {
+    pGEV = sqrt(dileptons[j].Mom.vec2());
+    invMassGeV = dileptons[j].m;
+    productionTimeFm = dileptons[j].production_time;
+    
+    DileptonInvMassSeveralPT.add(pGEV,invMassGeV);
+    DileptonInvMassSeveralTimes.add(productionTimeFm,invMassGeV);
+    DileptonPTSeveralInvMass.add(invMassGeV,pGEV);
+  }
+  
+  string filename_dRdMTimeslots = filename_prefix + "_" + "dilepton" + "_dR_dM_Time" + name;  
+  fstream file3( filename_dRdMTimeslots, ios::app | ios::out );
+  //print header if file is empty
+  file3.seekp( 0, ios::end );
+  long size3 = file3.tellp();
+  file3.seekp( 0, ios::beg );
+  if ( size3 == 0 )
+    printHeader( file3, dileptondRdMTimeDist, _outputTime );
+  DileptonInvMassSeveralTimes.print(file3);
+  
+  string filename_dRdM = filename_prefix + "_" + "dilepton" + "_dR_dM_" + name;  
+  fstream file( filename_dRdM, ios::app | ios::out );
+  //print header if file is empty
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if ( size == 0 )
+    printHeader( file, dileptondRdMDist, _outputTime );
+  DileptonPTSeveralInvMass.print(file);
+  
+  string filename_dRdP = filename_prefix + "_" + "dilepton" + "_dR_dP_" + name;    
+  fstream file2( filename_dRdP, ios::app | ios::out );
+  //print header if file is empty
+  file2.seekp( 0, ios::end );
+  long size2 = file2.tellp();
+  file2.seekp( 0, ios::beg );
+  if ( size2 == 0 )
+    printHeader( file2, dileptondRdPDist, _outputTime );
+  DileptonInvMassSeveralPT.print(file2);
+
+}         
+          
+          
 
 
 
@@ -2484,7 +2602,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   
   double _pt_min, _pt_max;
 
-  string filename_v2, filename_v2_summed, filename_v2_tot, filename_yield, filename_pt_angleDependence, type;
+  string filename_v2, filename_v2_summed, filename_v2_tot, filename_yield, filename_pt_angleDependence, type, filename_dRdM, filename_dRdP;
   
   type = Particle::getName( _flavTypeToComputeFor );
   
@@ -2553,6 +2671,9 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   int ptBinsNmbCompton[eta_bins][n_bins+1];
   int ptBinsNmbAnnihilation[eta_bins][n_bins+1];
   
+  int ptBinsNmbDileptonsdRdM[eta_bins][n_bins+1];
+  int ptBinsNmbDileptonsdRdP[eta_bins][n_bins+1];
+  
   int ptBinsNmbInitialCutOff[eta_bins][n_bins+1];  
   int ptBinsInnerRegion[n_bins+1];
   
@@ -2565,6 +2686,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       ptBinsNmbCompton[i][j] = 0.0;
       ptBinsNmbAnnihilation[i][j] = 0.0;
       ptBinsNmbInitialCutOff[i][j] = 0.0;
+      ptBinsNmbDileptonsdRdM[i][j] = 0.0;
+      ptBinsNmbDileptonsdRdP[i][j] = 0.0;
     }
   }
   for ( int j = 0;j < v2pt_binnumber + 1;j++ )
@@ -2729,9 +2852,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
             if(_particles[i].production_mechanism == OnlyAnnihilation)
             {
               ptBinsNmbAnnihilation[yRangeIndex][dummy]++;
-            }            
-            
-          }
+            }                       
+          }          
         }
       }
     }
@@ -2776,6 +2898,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   filename_v2_summed = filename_prefix + "_" + type + "_" + additionalNameTag + "_v2_pt_summed_" + name;
   filename_v2_tot = filename_prefix + "_" + type + "_" + additionalNameTag + "_v2_tot_" + name;
   filename_yield = filename_prefix + "_" + type + "_" + additionalNameTag + "_yield_pt_" + name;
+
   filename_pt_angleDependence = filename_prefix + "_" + type + "_" + additionalNameTag + "_pt_angular_dependence_" + name;
 
   fstream print_v2_summed( filename_v2_summed.c_str(), ios::out | ios::trunc );
@@ -3888,6 +4011,15 @@ void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
   case photonPtDist:
     f << "#spectrum of produced photons - ";
     break;
+  case dileptondRdMDist:
+    f << "#spectrum of produced dileptons dR/dM - ";
+    break;    
+  case dileptondRdPDist:
+    f << "#spectrum of produced dileptons dR/dP - ";
+    break;    
+  case dileptondRdMTimeDist:
+    f << "#spectrum of produced dileptons dR/dM produced in different time slots ";
+    break;     
   default:
     f << "#undefined ";
   }

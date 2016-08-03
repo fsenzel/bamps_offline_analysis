@@ -105,7 +105,7 @@ private:
      * @brief Total Number of produced photons
      *
      */
-    int totalPhotonNumber;
+    int totalPhotonNumber,totalDileptonNumber;
     int numberB, numberA;
     double averageS_smallv2;
     double averageS_Bigv2;
@@ -174,8 +174,9 @@ private:
 
     void scatt22_amongAddedParticles( cellContainer& _cellAdded, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
     double computeBackgroundv2OfCell(  std::vector< int >& allParticlesList );
-    void scatt22_amongBackgroundParticles_photons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
-    void scatt23_amongBackgroundParticles_photons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+    void scatt22_amongBackgroundParticles_photons  ( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+    void scatt22_amongBackgroundParticles_dileptons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+    void scatt23_amongBackgroundParticles_photons  ( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
         
     void scatt32_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
                                             cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
@@ -189,6 +190,9 @@ private:
     void scatt22_amongBackgroundParticles_photons_utility_1( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime, double scaleForSelectedPairs, bool & again  );
     void scatt22_amongBackgroundParticles_photons_utility_2( scattering22& scatt22_obj, const int iscat, const int jscat, const double nexttime );
 
+    void scatt22_amongBackgroundParticles_dileptons_utility_1( scattering22& scatt22_obj,  const int iscat, const int jscat, const double nexttime, double scaleForSelectedPairs, bool & again  );
+    void scatt22_amongBackgroundParticles_dileptons_utility_2( scattering22& scatt22_obj, const int iscat, const int jscat, const double nexttime );
+    
     void scatt23_amongBackgroundParticles_photons_utility_1(cellContainer& _cells, scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime, const double scaleForSelectedPairs, bool & again );
     void scatt23_amongBackgroundParticles_photons_utility_2(scattering23& scatt23_obj, const int iscat, const int jscat, const double nexttime );
 

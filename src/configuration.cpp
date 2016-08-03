@@ -44,6 +44,7 @@ std::vector<ParticleOffline> ns_casc::addedParticlesCopy;
 std::vector<ParticleOffline> ns_casc::addedPartcl_electron;
 std::vector<ParticleOffline> ns_casc::scatteredMediumParticles;
 std::vector<ParticleOffline> ns_casc::noninteractingParticles;
+std::vector<ParticleOffline> ns_casc::dileptons;
 
 
 double dt = 0.1;

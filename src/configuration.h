@@ -69,7 +69,8 @@ cms_jpsi = 151,
 background_jets = 161,
 central_densities = 171,
 photons = 40,
-photons_plus_background = 41
+photons_plus_background = 41,
+dileptonStudies = 42
 };
 
 
@@ -92,7 +93,7 @@ namespace ns_casc
   extern std::vector<ParticleOffline> addedPartcl_electron;
   extern std::vector<ParticleOffline> scatteredMediumParticles;
   extern std::vector<ParticleOffline> noninteractingParticles; //e.g. photons :-)
-
+  extern std::vector<ParticleOffline> dileptons; //pairs.
 }
 //--------------------------------------------------------//
 
