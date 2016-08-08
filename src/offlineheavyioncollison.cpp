@@ -4305,6 +4305,10 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_dileptons_utilit
     temp_particle_produced_dilepton_pair.cell_id = -1;
     temp_particle_produced_dilepton_pair.unique_id = Particle::unique_id_counter;
     temp_particle_produced_dilepton_pair.production_time = nexttime;
+    temp_particle_produced_dilepton_pair.dilepton_pt_min = std::min(P1new.Pt(),P2new.Pt());
+    temp_particle_produced_dilepton_pair.dilepton_pt_max = std::max(P1new.Pt(),P2new.Pt());
+    temp_particle_produced_dilepton_pair.dilepton_y_min  = std::min(P1new.Rapidity(),P2new.Rapidity());
+    temp_particle_produced_dilepton_pair.dilepton_y_max  = std::max(P1new.Rapidity(),P2new.Rapidity());    
     ++Particle::unique_id_counter;
     dileptons.push_back ( temp_particle_produced_dilepton_pair );
     

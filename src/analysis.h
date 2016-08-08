@@ -37,7 +37,7 @@ using std::fstream;
 class config;
 
 enum jetTrackerCollType {initial_jet, final_jet, c2to2, c2to3, c3to2, production};
-enum anaType {numbOfPartcles, dEtdy, ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets, photonPtDist, cellV2DistributionHeader, dileptondRdMDist, dileptondRdPDist,dileptondRdMTimeDist};
+enum anaType {numbOfPartcles, dEtdy, ptSpectrum, ptSpectrumSoft, rapidityDistribution, quarkNumbers, all, initial, final, jets, photonPtDist, cellV2DistributionHeader, dileptondRdMDist, dileptondRdPDist,dileptondRdMTimeDist,dileptondNdMCuts};
 enum v2Type {v2jets, v2background};
 
 

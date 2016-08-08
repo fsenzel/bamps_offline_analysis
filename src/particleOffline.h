@@ -46,6 +46,10 @@ public:
     rate_added_32( 0.0 ),
     collision_tag(false),
     production_time(0.0),
+    dilepton_pt_min(0.0),
+    dilepton_pt_max(0.0),
+    dilepton_y_min(0.0),
+    dilepton_y_max(0.0),
     production_mechanism(ComptonPlusAnnihilation)
   {};
     
@@ -65,6 +69,10 @@ public:
     rate_added_32( 0.0 ),
     collision_tag(false),
     production_time(0.0),
+    dilepton_pt_min(0.0),
+    dilepton_pt_max(0.0),
+    dilepton_y_min(0.0),
+    dilepton_y_max(0.0),
     production_mechanism(ComptonPlusAnnihilation)
   {};
     
@@ -80,8 +88,20 @@ public:
   /** @brief Flag for discerning (background) particles that have already produced a photon */
   bool collision_tag;  
   
-  /** @brief Producing time of the photon. This may prove useful in discriminating the building up of v2. */
+  /** @brief Producing time of the photon/dilepton. This may prove useful in discriminating the building up of v2. */
   double production_time;   
+  
+  /** @brief Minimal pt of each of the two dielptons. */
+  double dilepton_pt_min;    
+  
+  /** @brief Minimal pt of each of the two dielptons. */
+  double dilepton_pt_max;    
+  
+  /** @brief Minimal pt of each of the two dielptons. */
+  double dilepton_y_min;     
+  
+  /** @brief Minimal pt of each of the two dielptons. */
+  double dilepton_y_max;  
   
   /** @brief Production mechanism for this photon.*/
   ELASTIC_MODE_PHOTONS production_mechanism;

@@ -2499,6 +2499,7 @@ void analysis::computeAndPrintDileptonSpectra(string name, const double _outputT
   binningInRanges DileptonInvMassSeveralPT;
   binningInRanges DileptonPTSeveralInvMass;  
   binningInRanges DileptonInvMassSeveralTimes;
+  binningInRanges DileptonInvMassCuts;
   
   double pGEV, invMassGeV, productionTimeFm;
   
@@ -2518,8 +2519,6 @@ void analysis::computeAndPrintDileptonSpectra(string name, const double _outputT
   DileptonInvMassSeveralTimes.setRangevalues(3,3.0,10.0); // Timeslots 3-10fm
   DileptonInvMassSeveralTimes.setRangevalues(4,0.0,10.0); // Full inclusive
 
-  
-  
   DileptonPTSeveralInvMass.setNumberRanges(5);
   DileptonPTSeveralInvMass.setMinMaxN(0.0, 4.0, 50);
   DileptonPTSeveralInvMass.setRangevalues(0,0.0,10000.0);//full inclusive spectrum
@@ -2528,6 +2527,9 @@ void analysis::computeAndPrintDileptonSpectra(string name, const double _outputT
   DileptonPTSeveralInvMass.setRangevalues(3,2.0,10.0);
   DileptonPTSeveralInvMass.setRangevalues(4,0.0,3.0);
   
+  DileptonInvMassCuts.setNumberRanges(1);
+  DileptonInvMassCuts.setMinMaxN(0.0, 4.0, 50);
+  DileptonInvMassCuts.setRangevalues(0,0.2,100.0); // PHENIX Run 10 acceptance
   
   
   for ( unsigned int j = 0; j < dileptons.size(); j++ )
@@ -2539,6 +2541,15 @@ void analysis::computeAndPrintDileptonSpectra(string name, const double _outputT
     DileptonInvMassSeveralPT.add(pGEV,invMassGeV);
     DileptonInvMassSeveralTimes.add(productionTimeFm,invMassGeV);
     DileptonPTSeveralInvMass.add(invMassGeV,pGEV);
+    
+    //Experimental Cuts
+    // y-cut
+    double SingleElectronYCut = 0.35; 
+    if (abs(dileptons[j].dilepton_y_min)<SingleElectronYCut && abs(dileptons[j].dilepton_y_max)<SingleElectronYCut )
+    {
+      DileptonInvMassCuts.add(pGEV,invMassGeV);
+    }
+ 
   }
   
   string filename_dRdMTimeslots = filename_prefix + "_" + "dilepton" + "_dR_dM_Time" + name;  
@@ -2559,8 +2570,8 @@ void analysis::computeAndPrintDileptonSpectra(string name, const double _outputT
   file.seekp( 0, ios::beg );
   if ( size == 0 )
     printHeader( file, dileptondRdMDist, _outputTime );
-  DileptonPTSeveralInvMass.print(file);
-  
+  DileptonInvMassSeveralPT.print(file);
+
   string filename_dRdP = filename_prefix + "_" + "dilepton" + "_dR_dP_" + name;    
   fstream file2( filename_dRdP, ios::app | ios::out );
   //print header if file is empty
@@ -2569,7 +2580,17 @@ void analysis::computeAndPrintDileptonSpectra(string name, const double _outputT
   file2.seekp( 0, ios::beg );
   if ( size2 == 0 )
     printHeader( file2, dileptondRdPDist, _outputTime );
-  DileptonInvMassSeveralPT.print(file2);
+  DileptonPTSeveralInvMass.print(file2);
+  
+  string filename_dNdMCuts = filename_prefix + "_" + "dileptonCuts" + "_dN_dM_" + name;    
+  fstream file4( filename_dNdMCuts, ios::app | ios::out );
+  //print header if file is empty
+  file4.seekp( 0, ios::end );
+  long size4 = file4.tellp();
+  file4.seekp( 0, ios::beg );
+  if ( size4 == 0 )
+    printHeader( file4, dileptondNdMCuts, _outputTime );
+  DileptonInvMassCuts.print(file4);
 
 }         
           
@@ -4019,7 +4040,9 @@ void analysis::printHeader( fstream & f, const anaType mode, const time_t end )
     break;    
   case dileptondRdMTimeDist:
     f << "#spectrum of produced dileptons dR/dM produced in different time slots ";
-    break;     
+    break;  
+  case dileptondNdMCuts:
+    f << "#Invariant Mass Yield with experimental cuts applied.";
   default:
     f << "#undefined ";
   }
