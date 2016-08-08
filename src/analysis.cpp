@@ -2547,7 +2547,7 @@ void analysis::computeAndPrintDileptonSpectra(string name, const double _outputT
     double SingleElectronYCut = 0.35; 
     if (abs(dileptons[j].dilepton_y_min)<SingleElectronYCut && abs(dileptons[j].dilepton_y_max)<SingleElectronYCut )
     {
-      DileptonInvMassCuts.add(pGEV,invMassGeV);
+      DileptonInvMassCuts.add(dileptons[j].dilepton_pt_min,invMassGeV);
     }
  
   }
