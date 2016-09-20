@@ -39,7 +39,6 @@ SET( SOURCES_lib_common
   coordinateBins.cpp
   initialmodel.cpp
   initialmodel_cgc.cpp
-  mfpforheavyioncollision.cpp
   offlineoutput.cpp
   particle.cpp
   pdfinterface.cpp
