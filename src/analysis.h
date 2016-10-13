@@ -246,7 +246,7 @@ private:
 
 public:
 
-  double tstep[120];
+  double tstep[1000];
   double tstep_movie[500];
   
   analysisRingStructure rings;
@@ -294,6 +294,7 @@ private:
   bool studyNumberOfBackgroundQuarks;
   bool studySpatialPhotons;
   bool studyTempCustom;
+  bool studyThermalisation;
   bool studyMFP;
  
   
@@ -357,6 +358,7 @@ private:
   
   binning PhotondNOverTwoPiptdydptBin;
   binning cellV2,cellV2Weighted;
+  binning partonEnergies,quarkEnergies,gluonEnergies;
   
   double jetTracking_PT;  
   
@@ -373,9 +375,11 @@ private:
   void addNeighborCells( const int cell_id, const int neighborCell_id );
   void writeTempInTube( const int step  );
   void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity, double & fugacityGluons, double & fugacityQuarks, double & densityGluons, double & densityQuarks  );
+  void calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy, double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ );  
   void print_dndy(const string subfix );
   void writePhotonSpaceProfile( const int step  );
   void writeTempCustom( const int step  );
+  void writeCustomTube( const int step  );
   
   bool v2output;
   bool v2outputIntermediateSteps;

@@ -54,7 +54,7 @@ studySpecificMFP = 203,
 studyOnlyEtSpectra = 205,
 studyNumberOfParticles = 206,
 SpatialPhotons = 207,
-
+thermalization = 208,
 // heavy quarks:
 phenix_hq_electrons = 101,
 alice_hq_electrons = 111,

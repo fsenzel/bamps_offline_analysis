@@ -324,6 +324,7 @@ void offlineHeavyIonCollision::mainFramework()
   }
 
   theAnalysis->initialOutput();
+  
   if ( theConfig->doOutput_movieOutputJets() )
   {
     theAnalysis->movieOutput( 0, jumpMovieSteps );
@@ -373,6 +374,7 @@ void offlineHeavyIonCollision::mainFramework()
   {
     cout << "ONLY MEDIUM EVOLUTION" << endl;
   }
+  
   do
   {
     // remove init tag from particles after their formation
@@ -407,7 +409,8 @@ void offlineHeavyIonCollision::mainFramework()
       // evolution of the medium to this time
       double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
       
-    }else
+    }
+    else
     {
       // evolution of the medium to present time
       double dt_cascade_from_data = evolveMedium( simulationTime, endOfDataFiles );
@@ -444,29 +447,30 @@ void offlineHeavyIonCollision::mainFramework()
       theAnalysis->movieOutputMedium( nn_ana_movie - 1, jumpMovieSteps );
       doMovieStepMedium = false;
     }
-
-    //------------ make copies ---------------
-    particles_atTimeNowCopy = particles_atTimeNow;
-    addedParticlesCopy = addedParticles;
-    cellsCopy = cells;
-    cellsAddedCopy = cellsAdded;
-    edgeCellCopy = edgeCell;
-    edgeCellAddedCopy = edgeCellAdded;
-    //--------------------------------------
-
-    ncoll_backup = ncoll;
-    ncoll22_backup = ncoll22;
-    ncoll23_backup = ncoll23;
-    ncoll32_backup = ncoll32;
-    ncolle_backup = ncolle;
-    charmAnnihil_backup = ns_heavy_quarks::charmAnnihil;
-    jpsicreation_backup = ns_heavy_quarks::jpsicreation;
-    jpsi_dissociation_from_temperature_backup = ns_heavy_quarks::jpsi_dissociation_from_temperature;
-    jpsi_dissociation_backup = ns_heavy_quarks::jpsi_dissociation;
-    //--------------------------
-
+  
+  
     if (!onlyMediumEvolution)
     {
+      //------------ make copies ---------------
+      particles_atTimeNowCopy = particles_atTimeNow;
+      addedParticlesCopy = addedParticles;
+      cellsCopy = cells;
+      cellsAddedCopy = cellsAdded;
+      edgeCellCopy = edgeCell;
+      edgeCellAddedCopy = edgeCellAdded;
+      //--------------------------------------
+
+      ncoll_backup = ncoll;
+      ncoll22_backup = ncoll22;
+      ncoll23_backup = ncoll23;
+      ncoll32_backup = ncoll32;
+      ncolle_backup = ncolle;
+      charmAnnihil_backup = ns_heavy_quarks::charmAnnihil;
+      jpsicreation_backup = ns_heavy_quarks::jpsicreation;
+      jpsi_dissociation_from_temperature_backup = ns_heavy_quarks::jpsi_dissociation_from_temperature;
+      jpsi_dissociation_backup = ns_heavy_quarks::jpsi_dissociation;
+      //--------------------------
+
       nexttime = simulationTime + dt;
 
       
@@ -1856,7 +1860,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             {
                 if( theConfig->doScattering_22_photons())
                 {
-                  cout << "ph" << endl;
                   scatt22_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
                 }
                 
@@ -1867,7 +1870,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                 
                 if( theConfig->doScattering_23_photons())
                 {
-                  cout << "ph23" << endl;
                   cells[j].rates.clearSpecific();
                   
                   if (theConfig->getOutputScheme()==203 )                  
@@ -4606,8 +4608,6 @@ void offlineHeavyIonCollision::scatt22ForRatesUtility(scattering22& scatt22_obj,
   NumbersInCell(_allParticlesList,ng,nu,nub,nd,ndb,ns,nsb);  
   
   double AverageQuarkNumber = (nu+nd+ns+nub+ndb+nsb)/6.;
-
-  double AverageQuarkNumberMinusOne = 0;
   double SumOfQuarkNumber = nu+nd+ns+nub+ndb+nsb;
   averageQuarkNumber += SumOfQuarkNumber;
   countForAverageaverageQuarkNumber++;

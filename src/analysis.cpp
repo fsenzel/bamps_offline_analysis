@@ -62,6 +62,7 @@ analysis::analysis( config* const c ):
    
   // to create the tsteps use such a bash script:
   // for (( I=50; $I <= 80; I++ )); do   J=$(echo "scale=1; ($I+1)/10" | bc); echo "tstep[$I]=$J;" ; done
+  //for (( I=0; $I <= 800; I++ )); do   J=$(echo "scale=2; ($I+15)/100" | bc); echo "tstep[$I]=$J;" ; done
   
     
   if( studyJpsi ) // jpsi evolution: more timesteps
@@ -501,6 +502,812 @@ analysis::analysis( config* const c ):
     tstep[81]=infinity;
     nTimeSteps = 82;
   }
+  else if(studyThermalisation) 
+  {     
+    tstep[0]=.15;
+    tstep[1]=.16;
+    tstep[2]=.17;
+    tstep[3]=.18;
+    tstep[4]=.19;
+    tstep[5]=.20;
+    tstep[6]=.21;
+    tstep[7]=.22;
+    tstep[8]=.23;
+    tstep[9]=.24;
+    tstep[10]=.25;
+    tstep[11]=.26;
+    tstep[12]=.27;
+    tstep[13]=.28;
+    tstep[14]=.29;
+    tstep[15]=.30;
+    tstep[16]=.31;
+    tstep[17]=.32;
+    tstep[18]=.33;
+    tstep[19]=.34;
+    tstep[20]=.35;
+    tstep[21]=.36;
+    tstep[22]=.37;
+    tstep[23]=.38;
+    tstep[24]=.39;
+    tstep[25]=.40;
+    tstep[26]=.41;
+    tstep[27]=.42;
+    tstep[28]=.43;
+    tstep[29]=.44;
+    tstep[30]=.45;
+    tstep[31]=.46;
+    tstep[32]=.47;
+    tstep[33]=.48;
+    tstep[34]=.49;
+    tstep[35]=.50;
+    tstep[36]=.51;
+    tstep[37]=.52;
+    tstep[38]=.53;
+    tstep[39]=.54;
+    tstep[40]=.55;
+    tstep[41]=.56;
+    tstep[42]=.57;
+    tstep[43]=.58;
+    tstep[44]=.59;
+    tstep[45]=.60;
+    tstep[46]=.61;
+    tstep[47]=.62;
+    tstep[48]=.63;
+    tstep[49]=.64;
+    tstep[50]=.65;
+    tstep[51]=.66;
+    tstep[52]=.67;
+    tstep[53]=.68;
+    tstep[54]=.69;
+    tstep[55]=.70;
+    tstep[56]=.71;
+    tstep[57]=.72;
+    tstep[58]=.73;
+    tstep[59]=.74;
+    tstep[60]=.75;
+    tstep[61]=.76;
+    tstep[62]=.77;
+    tstep[63]=.78;
+    tstep[64]=.79;
+    tstep[65]=.80;
+    tstep[66]=.81;
+    tstep[67]=.82;
+    tstep[68]=.83;
+    tstep[69]=.84;
+    tstep[70]=.85;
+    tstep[71]=.86;
+    tstep[72]=.87;
+    tstep[73]=.88;
+    tstep[74]=.89;
+    tstep[75]=.90;
+    tstep[76]=.91;
+    tstep[77]=.92;
+    tstep[78]=.93;
+    tstep[79]=.94;
+    tstep[80]=.95;
+    tstep[81]=.96;
+    tstep[82]=.97;
+    tstep[83]=.98;
+    tstep[84]=.99;
+    tstep[85]=1.00;
+    tstep[86]=1.01;
+    tstep[87]=1.02;
+    tstep[88]=1.03;
+    tstep[89]=1.04;
+    tstep[90]=1.05;
+    tstep[91]=1.06;
+    tstep[92]=1.07;
+    tstep[93]=1.08;
+    tstep[94]=1.09;
+    tstep[95]=1.10;
+    tstep[96]=1.11;
+    tstep[97]=1.12;
+    tstep[98]=1.13;
+    tstep[99]=1.14;
+    tstep[100]=1.15;
+    tstep[101]=1.16;
+    tstep[102]=1.17;
+    tstep[103]=1.18;
+    tstep[104]=1.19;
+    tstep[105]=1.20;
+    tstep[106]=1.21;
+    tstep[107]=1.22;
+    tstep[108]=1.23;
+    tstep[109]=1.24;
+    tstep[110]=1.25;
+    tstep[111]=1.26;
+    tstep[112]=1.27;
+    tstep[113]=1.28;
+    tstep[114]=1.29;
+    tstep[115]=1.30;
+    tstep[116]=1.31;
+    tstep[117]=1.32;
+    tstep[118]=1.33;
+    tstep[119]=1.34;
+    tstep[120]=1.35;
+    tstep[121]=1.36;
+    tstep[122]=1.37;
+    tstep[123]=1.38;
+    tstep[124]=1.39;
+    tstep[125]=1.40;
+    tstep[126]=1.41;
+    tstep[127]=1.42;
+    tstep[128]=1.43;
+    tstep[129]=1.44;
+    tstep[130]=1.45;
+    tstep[131]=1.46;
+    tstep[132]=1.47;
+    tstep[133]=1.48;
+    tstep[134]=1.49;
+    tstep[135]=1.50;
+    tstep[136]=1.51;
+    tstep[137]=1.52;
+    tstep[138]=1.53;
+    tstep[139]=1.54;
+    tstep[140]=1.55;
+    tstep[141]=1.56;
+    tstep[142]=1.57;
+    tstep[143]=1.58;
+    tstep[144]=1.59;
+    tstep[145]=1.60;
+    tstep[146]=1.61;
+    tstep[147]=1.62;
+    tstep[148]=1.63;
+    tstep[149]=1.64;
+    tstep[150]=1.65;
+    tstep[151]=1.66;
+    tstep[152]=1.67;
+    tstep[153]=1.68;
+    tstep[154]=1.69;
+    tstep[155]=1.70;
+    tstep[156]=1.71;
+    tstep[157]=1.72;
+    tstep[158]=1.73;
+    tstep[159]=1.74;
+    tstep[160]=1.75;
+    tstep[161]=1.76;
+    tstep[162]=1.77;
+    tstep[163]=1.78;
+    tstep[164]=1.79;
+    tstep[165]=1.80;
+    tstep[166]=1.81;
+    tstep[167]=1.82;
+    tstep[168]=1.83;
+    tstep[169]=1.84;
+    tstep[170]=1.85;
+    tstep[171]=1.86;
+    tstep[172]=1.87;
+    tstep[173]=1.88;
+    tstep[174]=1.89;
+    tstep[175]=1.90;
+    tstep[176]=1.91;
+    tstep[177]=1.92;
+    tstep[178]=1.93;
+    tstep[179]=1.94;
+    tstep[180]=1.95;
+    tstep[181]=1.96;
+    tstep[182]=1.97;
+    tstep[183]=1.98;
+    tstep[184]=1.99;
+    tstep[185]=2.00;
+    tstep[186]=2.01;
+    tstep[187]=2.02;
+    tstep[188]=2.03;
+    tstep[189]=2.04;
+    tstep[190]=2.05;
+    tstep[191]=2.06;
+    tstep[192]=2.07;
+    tstep[193]=2.08;
+    tstep[194]=2.09;
+    tstep[195]=2.10;
+    tstep[196]=2.11;
+    tstep[197]=2.12;
+    tstep[198]=2.13;
+    tstep[199]=2.14;
+    tstep[200]=2.15;
+    tstep[201]=2.16;
+    tstep[202]=2.17;
+    tstep[203]=2.18;
+    tstep[204]=2.19;
+    tstep[205]=2.20;
+    tstep[206]=2.21;
+    tstep[207]=2.22;
+    tstep[208]=2.23;
+    tstep[209]=2.24;
+    tstep[210]=2.25;
+    tstep[211]=2.26;
+    tstep[212]=2.27;
+    tstep[213]=2.28;
+    tstep[214]=2.29;
+    tstep[215]=2.30;
+    tstep[216]=2.31;
+    tstep[217]=2.32;
+    tstep[218]=2.33;
+    tstep[219]=2.34;
+    tstep[220]=2.35;
+    tstep[221]=2.36;
+    tstep[222]=2.37;
+    tstep[223]=2.38;
+    tstep[224]=2.39;
+    tstep[225]=2.40;
+    tstep[226]=2.41;
+    tstep[227]=2.42;
+    tstep[228]=2.43;
+    tstep[229]=2.44;
+    tstep[230]=2.45;
+    tstep[231]=2.46;
+    tstep[232]=2.47;
+    tstep[233]=2.48;
+    tstep[234]=2.49;
+    tstep[235]=2.50;
+    tstep[236]=2.51;
+    tstep[237]=2.52;
+    tstep[238]=2.53;
+    tstep[239]=2.54;
+    tstep[240]=2.55;
+    tstep[241]=2.56;
+    tstep[242]=2.57;
+    tstep[243]=2.58;
+    tstep[244]=2.59;
+    tstep[245]=2.60;
+    tstep[246]=2.61;
+    tstep[247]=2.62;
+    tstep[248]=2.63;
+    tstep[249]=2.64;
+    tstep[250]=2.65;
+    tstep[251]=2.66;
+    tstep[252]=2.67;
+    tstep[253]=2.68;
+    tstep[254]=2.69;
+    tstep[255]=2.70;
+    tstep[256]=2.71;
+    tstep[257]=2.72;
+    tstep[258]=2.73;
+    tstep[259]=2.74;
+    tstep[260]=2.75;
+    tstep[261]=2.76;
+    tstep[262]=2.77;
+    tstep[263]=2.78;
+    tstep[264]=2.79;
+    tstep[265]=2.80;
+    tstep[266]=2.81;
+    tstep[267]=2.82;
+    tstep[268]=2.83;
+    tstep[269]=2.84;
+    tstep[270]=2.85;
+    tstep[271]=2.86;
+    tstep[272]=2.87;
+    tstep[273]=2.88;
+    tstep[274]=2.89;
+    tstep[275]=2.90;
+    tstep[276]=2.91;
+    tstep[277]=2.92;
+    tstep[278]=2.93;
+    tstep[279]=2.94;
+    tstep[280]=2.95;
+    tstep[281]=2.96;
+    tstep[282]=2.97;
+    tstep[283]=2.98;
+    tstep[284]=2.99;
+    tstep[285]=3.00;
+    tstep[286]=3.01;
+    tstep[287]=3.02;
+    tstep[288]=3.03;
+    tstep[289]=3.04;
+    tstep[290]=3.05;
+    tstep[291]=3.06;
+    tstep[292]=3.07;
+    tstep[293]=3.08;
+    tstep[294]=3.09;
+    tstep[295]=3.10;
+    tstep[296]=3.11;
+    tstep[297]=3.12;
+    tstep[298]=3.13;
+    tstep[299]=3.14;
+    tstep[300]=3.15;
+    tstep[301]=3.16;
+    tstep[302]=3.17;
+    tstep[303]=3.18;
+    tstep[304]=3.19;
+    tstep[305]=3.20;
+    tstep[306]=3.21;
+    tstep[307]=3.22;
+    tstep[308]=3.23;
+    tstep[309]=3.24;
+    tstep[310]=3.25;
+    tstep[311]=3.26;
+    tstep[312]=3.27;
+    tstep[313]=3.28;
+    tstep[314]=3.29;
+    tstep[315]=3.30;
+    tstep[316]=3.31;
+    tstep[317]=3.32;
+    tstep[318]=3.33;
+    tstep[319]=3.34;
+    tstep[320]=3.35;
+    tstep[321]=3.36;
+    tstep[322]=3.37;
+    tstep[323]=3.38;
+    tstep[324]=3.39;
+    tstep[325]=3.40;
+    tstep[326]=3.41;
+    tstep[327]=3.42;
+    tstep[328]=3.43;
+    tstep[329]=3.44;
+    tstep[330]=3.45;
+    tstep[331]=3.46;
+    tstep[332]=3.47;
+    tstep[333]=3.48;
+    tstep[334]=3.49;
+    tstep[335]=3.50;
+    tstep[336]=3.51;
+    tstep[337]=3.52;
+    tstep[338]=3.53;
+    tstep[339]=3.54;
+    tstep[340]=3.55;
+    tstep[341]=3.56;
+    tstep[342]=3.57;
+    tstep[343]=3.58;
+    tstep[344]=3.59;
+    tstep[345]=3.60;
+    tstep[346]=3.61;
+    tstep[347]=3.62;
+    tstep[348]=3.63;
+    tstep[349]=3.64;
+    tstep[350]=3.65;
+    tstep[351]=3.66;
+    tstep[352]=3.67;
+    tstep[353]=3.68;
+    tstep[354]=3.69;
+    tstep[355]=3.70;
+    tstep[356]=3.71;
+    tstep[357]=3.72;
+    tstep[358]=3.73;
+    tstep[359]=3.74;
+    tstep[360]=3.75;
+    tstep[361]=3.76;
+    tstep[362]=3.77;
+    tstep[363]=3.78;
+    tstep[364]=3.79;
+    tstep[365]=3.80;
+    tstep[366]=3.81;
+    tstep[367]=3.82;
+    tstep[368]=3.83;
+    tstep[369]=3.84;
+    tstep[370]=3.85;
+    tstep[371]=3.86;
+    tstep[372]=3.87;
+    tstep[373]=3.88;
+    tstep[374]=3.89;
+    tstep[375]=3.90;
+    tstep[376]=3.91;
+    tstep[377]=3.92;
+    tstep[378]=3.93;
+    tstep[379]=3.94;
+    tstep[380]=3.95;
+    tstep[381]=3.96;
+    tstep[382]=3.97;
+    tstep[383]=3.98;
+    tstep[384]=3.99;
+    tstep[385]=4.00;
+    tstep[386]=4.01;
+    tstep[387]=4.02;
+    tstep[388]=4.03;
+    tstep[389]=4.04;
+    tstep[390]=4.05;
+    tstep[391]=4.06;
+    tstep[392]=4.07;
+    tstep[393]=4.08;
+    tstep[394]=4.09;
+    tstep[395]=4.10;
+    tstep[396]=4.11;
+    tstep[397]=4.12;
+    tstep[398]=4.13;
+    tstep[399]=4.14;
+    tstep[400]=4.15;
+    tstep[401]=4.16;
+    tstep[402]=4.17;
+    tstep[403]=4.18;
+    tstep[404]=4.19;
+    tstep[405]=4.20;
+    tstep[406]=4.21;
+    tstep[407]=4.22;
+    tstep[408]=4.23;
+    tstep[409]=4.24;
+    tstep[410]=4.25;
+    tstep[411]=4.26;
+    tstep[412]=4.27;
+    tstep[413]=4.28;
+    tstep[414]=4.29;
+    tstep[415]=4.30;
+    tstep[416]=4.31;
+    tstep[417]=4.32;
+    tstep[418]=4.33;
+    tstep[419]=4.34;
+    tstep[420]=4.35;
+    tstep[421]=4.36;
+    tstep[422]=4.37;
+    tstep[423]=4.38;
+    tstep[424]=4.39;
+    tstep[425]=4.40;
+    tstep[426]=4.41;
+    tstep[427]=4.42;
+    tstep[428]=4.43;
+    tstep[429]=4.44;
+    tstep[430]=4.45;
+    tstep[431]=4.46;
+    tstep[432]=4.47;
+    tstep[433]=4.48;
+    tstep[434]=4.49;
+    tstep[435]=4.50;
+    tstep[436]=4.51;
+    tstep[437]=4.52;
+    tstep[438]=4.53;
+    tstep[439]=4.54;
+    tstep[440]=4.55;
+    tstep[441]=4.56;
+    tstep[442]=4.57;
+    tstep[443]=4.58;
+    tstep[444]=4.59;
+    tstep[445]=4.60;
+    tstep[446]=4.61;
+    tstep[447]=4.62;
+    tstep[448]=4.63;
+    tstep[449]=4.64;
+    tstep[450]=4.65;
+    tstep[451]=4.66;
+    tstep[452]=4.67;
+    tstep[453]=4.68;
+    tstep[454]=4.69;
+    tstep[455]=4.70;
+    tstep[456]=4.71;
+    tstep[457]=4.72;
+    tstep[458]=4.73;
+    tstep[459]=4.74;
+    tstep[460]=4.75;
+    tstep[461]=4.76;
+    tstep[462]=4.77;
+    tstep[463]=4.78;
+    tstep[464]=4.79;
+    tstep[465]=4.80;
+    tstep[466]=4.81;
+    tstep[467]=4.82;
+    tstep[468]=4.83;
+    tstep[469]=4.84;
+    tstep[470]=4.85;
+    tstep[471]=4.86;
+    tstep[472]=4.87;
+    tstep[473]=4.88;
+    tstep[474]=4.89;
+    tstep[475]=4.90;
+    tstep[476]=4.91;
+    tstep[477]=4.92;
+    tstep[478]=4.93;
+    tstep[479]=4.94;
+    tstep[480]=4.95;
+    tstep[481]=4.96;
+    tstep[482]=4.97;
+    tstep[483]=4.98;
+    tstep[484]=4.99;
+    tstep[485]=5.00;
+    tstep[486]=5.01;
+    tstep[487]=5.02;
+    tstep[488]=5.03;
+    tstep[489]=5.04;
+    tstep[490]=5.05;
+    tstep[491]=5.06;
+    tstep[492]=5.07;
+    tstep[493]=5.08;
+    tstep[494]=5.09;
+    tstep[495]=5.10;
+    tstep[496]=5.11;
+    tstep[497]=5.12;
+    tstep[498]=5.13;
+    tstep[499]=5.14;
+    tstep[500]=5.15;
+    tstep[501]=5.16;
+    tstep[502]=5.17;
+    tstep[503]=5.18;
+    tstep[504]=5.19;
+    tstep[505]=5.20;
+    tstep[506]=5.21;
+    tstep[507]=5.22;
+    tstep[508]=5.23;
+    tstep[509]=5.24;
+    tstep[510]=5.25;
+    tstep[511]=5.26;
+    tstep[512]=5.27;
+    tstep[513]=5.28;
+    tstep[514]=5.29;
+    tstep[515]=5.30;
+    tstep[516]=5.31;
+    tstep[517]=5.32;
+    tstep[518]=5.33;
+    tstep[519]=5.34;
+    tstep[520]=5.35;
+    tstep[521]=5.36;
+    tstep[522]=5.37;
+    tstep[523]=5.38;
+    tstep[524]=5.39;
+    tstep[525]=5.40;
+    tstep[526]=5.41;
+    tstep[527]=5.42;
+    tstep[528]=5.43;
+    tstep[529]=5.44;
+    tstep[530]=5.45;
+    tstep[531]=5.46;
+    tstep[532]=5.47;
+    tstep[533]=5.48;
+    tstep[534]=5.49;
+    tstep[535]=5.50;
+    tstep[536]=5.51;
+    tstep[537]=5.52;
+    tstep[538]=5.53;
+    tstep[539]=5.54;
+    tstep[540]=5.55;
+    tstep[541]=5.56;
+    tstep[542]=5.57;
+    tstep[543]=5.58;
+    tstep[544]=5.59;
+    tstep[545]=5.60;
+    tstep[546]=5.61;
+    tstep[547]=5.62;
+    tstep[548]=5.63;
+    tstep[549]=5.64;
+    tstep[550]=5.65;
+    tstep[551]=5.66;
+    tstep[552]=5.67;
+    tstep[553]=5.68;
+    tstep[554]=5.69;
+    tstep[555]=5.70;
+    tstep[556]=5.71;
+    tstep[557]=5.72;
+    tstep[558]=5.73;
+    tstep[559]=5.74;
+    tstep[560]=5.75;
+    tstep[561]=5.76;
+    tstep[562]=5.77;
+    tstep[563]=5.78;
+    tstep[564]=5.79;
+    tstep[565]=5.80;
+    tstep[566]=5.81;
+    tstep[567]=5.82;
+    tstep[568]=5.83;
+    tstep[569]=5.84;
+    tstep[570]=5.85;
+    tstep[571]=5.86;
+    tstep[572]=5.87;
+    tstep[573]=5.88;
+    tstep[574]=5.89;
+    tstep[575]=5.90;
+    tstep[576]=5.91;
+    tstep[577]=5.92;
+    tstep[578]=5.93;
+    tstep[579]=5.94;
+    tstep[580]=5.95;
+    tstep[581]=5.96;
+    tstep[582]=5.97;
+    tstep[583]=5.98;
+    tstep[584]=5.99;
+    tstep[585]=6.00;
+    tstep[586]=6.01;
+    tstep[587]=6.02;
+    tstep[588]=6.03;
+    tstep[589]=6.04;
+    tstep[590]=6.05;
+    tstep[591]=6.06;
+    tstep[592]=6.07;
+    tstep[593]=6.08;
+    tstep[594]=6.09;
+    tstep[595]=6.10;
+    tstep[596]=6.11;
+    tstep[597]=6.12;
+    tstep[598]=6.13;
+    tstep[599]=6.14;
+    tstep[600]=6.15;
+    tstep[601]=6.16;
+    tstep[602]=6.17;
+    tstep[603]=6.18;
+    tstep[604]=6.19;
+    tstep[605]=6.20;
+    tstep[606]=6.21;
+    tstep[607]=6.22;
+    tstep[608]=6.23;
+    tstep[609]=6.24;
+    tstep[610]=6.25;
+    tstep[611]=6.26;
+    tstep[612]=6.27;
+    tstep[613]=6.28;
+    tstep[614]=6.29;
+    tstep[615]=6.30;
+    tstep[616]=6.31;
+    tstep[617]=6.32;
+    tstep[618]=6.33;
+    tstep[619]=6.34;
+    tstep[620]=6.35;
+    tstep[621]=6.36;
+    tstep[622]=6.37;
+    tstep[623]=6.38;
+    tstep[624]=6.39;
+    tstep[625]=6.40;
+    tstep[626]=6.41;
+    tstep[627]=6.42;
+    tstep[628]=6.43;
+    tstep[629]=6.44;
+    tstep[630]=6.45;
+    tstep[631]=6.46;
+    tstep[632]=6.47;
+    tstep[633]=6.48;
+    tstep[634]=6.49;
+    tstep[635]=6.50;
+    tstep[636]=6.51;
+    tstep[637]=6.52;
+    tstep[638]=6.53;
+    tstep[639]=6.54;
+    tstep[640]=6.55;
+    tstep[641]=6.56;
+    tstep[642]=6.57;
+    tstep[643]=6.58;
+    tstep[644]=6.59;
+    tstep[645]=6.60;
+    tstep[646]=6.61;
+    tstep[647]=6.62;
+    tstep[648]=6.63;
+    tstep[649]=6.64;
+    tstep[650]=6.65;
+    tstep[651]=6.66;
+    tstep[652]=6.67;
+    tstep[653]=6.68;
+    tstep[654]=6.69;
+    tstep[655]=6.70;
+    tstep[656]=6.71;
+    tstep[657]=6.72;
+    tstep[658]=6.73;
+    tstep[659]=6.74;
+    tstep[660]=6.75;
+    tstep[661]=6.76;
+    tstep[662]=6.77;
+    tstep[663]=6.78;
+    tstep[664]=6.79;
+    tstep[665]=6.80;
+    tstep[666]=6.81;
+    tstep[667]=6.82;
+    tstep[668]=6.83;
+    tstep[669]=6.84;
+    tstep[670]=6.85;
+    tstep[671]=6.86;
+    tstep[672]=6.87;
+    tstep[673]=6.88;
+    tstep[674]=6.89;
+    tstep[675]=6.90;
+    tstep[676]=6.91;
+    tstep[677]=6.92;
+    tstep[678]=6.93;
+    tstep[679]=6.94;
+    tstep[680]=6.95;
+    tstep[681]=6.96;
+    tstep[682]=6.97;
+    tstep[683]=6.98;
+    tstep[684]=6.99;
+    tstep[685]=7.00;
+    tstep[686]=7.01;
+    tstep[687]=7.02;
+    tstep[688]=7.03;
+    tstep[689]=7.04;
+    tstep[690]=7.05;
+    tstep[691]=7.06;
+    tstep[692]=7.07;
+    tstep[693]=7.08;
+    tstep[694]=7.09;
+    tstep[695]=7.10;
+    tstep[696]=7.11;
+    tstep[697]=7.12;
+    tstep[698]=7.13;
+    tstep[699]=7.14;
+    tstep[700]=7.15;
+    tstep[701]=7.16;
+    tstep[702]=7.17;
+    tstep[703]=7.18;
+    tstep[704]=7.19;
+    tstep[705]=7.20;
+    tstep[706]=7.21;
+    tstep[707]=7.22;
+    tstep[708]=7.23;
+    tstep[709]=7.24;
+    tstep[710]=7.25;
+    tstep[711]=7.26;
+    tstep[712]=7.27;
+    tstep[713]=7.28;
+    tstep[714]=7.29;
+    tstep[715]=7.30;
+    tstep[716]=7.31;
+    tstep[717]=7.32;
+    tstep[718]=7.33;
+    tstep[719]=7.34;
+    tstep[720]=7.35;
+    tstep[721]=7.36;
+    tstep[722]=7.37;
+    tstep[723]=7.38;
+    tstep[724]=7.39;
+    tstep[725]=7.40;
+    tstep[726]=7.41;
+    tstep[727]=7.42;
+    tstep[728]=7.43;
+    tstep[729]=7.44;
+    tstep[730]=7.45;
+    tstep[731]=7.46;
+    tstep[732]=7.47;
+    tstep[733]=7.48;
+    tstep[734]=7.49;
+    tstep[735]=7.50;
+    tstep[736]=7.51;
+    tstep[737]=7.52;
+    tstep[738]=7.53;
+    tstep[739]=7.54;
+    tstep[740]=7.55;
+    tstep[741]=7.56;
+    tstep[742]=7.57;
+    tstep[743]=7.58;
+    tstep[744]=7.59;
+    tstep[745]=7.60;
+    tstep[746]=7.61;
+    tstep[747]=7.62;
+    tstep[748]=7.63;
+    tstep[749]=7.64;
+    tstep[750]=7.65;
+    tstep[751]=7.66;
+    tstep[752]=7.67;
+    tstep[753]=7.68;
+    tstep[754]=7.69;
+    tstep[755]=7.70;
+    tstep[756]=7.71;
+    tstep[757]=7.72;
+    tstep[758]=7.73;
+    tstep[759]=7.74;
+    tstep[760]=7.75;
+    tstep[761]=7.76;
+    tstep[762]=7.77;
+    tstep[763]=7.78;
+    tstep[764]=7.79;
+    tstep[765]=7.80;
+    tstep[766]=7.81;
+    tstep[767]=7.82;
+    tstep[768]=7.83;
+    tstep[769]=7.84;
+    tstep[770]=7.85;
+    tstep[771]=7.86;
+    tstep[772]=7.87;
+    tstep[773]=7.88;
+    tstep[774]=7.89;
+    tstep[775]=7.90;
+    tstep[776]=7.91;
+    tstep[777]=7.92;
+    tstep[778]=7.93;
+    tstep[779]=7.94;
+    tstep[780]=7.95;
+    tstep[781]=7.96;
+    tstep[782]=7.97;
+    tstep[783]=7.98;
+    tstep[784]=7.99;
+    tstep[785]=8.00;
+    tstep[786]=8.01;
+    tstep[787]=8.02;
+    tstep[788]=8.03;
+    tstep[789]=8.04;
+    tstep[790]=8.05;
+    tstep[791]=8.06;
+    tstep[792]=8.07;
+    tstep[793]=8.08;
+    tstep[794]=8.09;
+    tstep[795]=8.10;
+    tstep[796]=8.11;
+    tstep[797]=8.12;
+    tstep[798]=8.13;
+    tstep[799]=8.14;
+    tstep[800]=8.15;
+    tstep[801]=infinity;
+    nTimeSteps = 802;
+  }
   else
   {
     tstep[0] = 0.1;      //fm/c
@@ -812,6 +1619,7 @@ analysis::analysis( config* const c ):
   PhotondNOverTwoPiptdydptBin.setMinMaxN( 0.0, 3.0, 100 );
   cellV2.setMinMaxN(-1.0,1.0,20);
   cellV2Weighted.setMinMaxN(-1.0,1.0,20);
+  
   if( studyPhotons )
   { 
     //PhotonEnergyBins configuration   
@@ -844,7 +1652,14 @@ analysis::analysis( config* const c ):
     //---- initialisation of PT-binning ----
     
   }
-
+  if(studyThermalisation)
+  {
+    cout << "Thermalization analysis" << endl;
+        //PhotonEnergyBins configuration   
+    partonEnergies.setMinMaxN( 0.0, 3.0, 100 );
+    quarkEnergies.setMinMaxN( 0.0, 3.0, 100 );
+    gluonEnergies.setMinMaxN( 0.0, 3.0, 100 );
+  }
 }
 
 
@@ -885,6 +1700,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyTempCustom = false;
   studyMFP = false; //study the specific mean free path
   studyDileptons = false;
+  studyThermalisation = false;
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -923,6 +1739,9 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       break; 
     case temperatureCustom:
       studyTempCustom = true;
+      break;
+    case thermalization:
+      studyThermalisation = true;
       break;
     case temperature_velocity_cells:
       studyTempAndVelocity = true;
@@ -1491,8 +2310,7 @@ void analysis::photonSpectrumOutput()
 void analysis::initialOutput()
 {
   if ( v2output )
-    //HACK
-    //computeV2RAA( "initial", 0  );
+    computeV2RAA( "initial", 0  );
 
   if ( studyJpsi ) // to consider charm annihaltion is just useful if added particles can scatter
   { 
@@ -1509,6 +2327,19 @@ void analysis::initialOutput()
   
   if ( studyParticleOutput )
     particleOutput( 0 );
+  
+  if (studyTempCustom) //Moritz
+  {
+    writeTempCustom(0);   
+    writeTempInTube(0);
+    writeCustomTube(0);
+  }    
+  
+  if(studyThermalisation)
+  {
+    cout << "Thermalisation analysis initial timestep " << endl;
+    writeCustomTube(0);
+  }
   
   //if ( studyPhotons ){ do nothing because no initial photons there :-)}
   
@@ -1558,7 +2389,14 @@ void analysis::intermediateOutput( const int nn )
   {
     writeTempCustom(nn+1);   
     writeTempInTube(nn+1);
+    writeCustomTube(nn+1);
   }  
+  
+  if(studyThermalisation)
+  {
+    cout << "Thermalisation analysis at analysis timestep " << nn << " at time " <<  tstep[nn] << endl;
+    writeCustomTube(nn);
+  }
   
 //   if ( charmTestJet )
 //    analyseCharmTestJetEvolution( nn + 1 );
@@ -4699,6 +5537,169 @@ void analysis::writeTempInTube( const int step  )
 
 }
 
+void analysis::writeCustomTube(const int step)
+{
+  const string sep = "  ";
+
+  double totEnergy, EnergyG, EnergyQ, totalPT,IsoX,IsoY,IsoZ;
+  int NumberG, NumberQ, totNumber ;
+  int n_jpsi;
+  double dr, dz, deta;
+
+  string filename = filename_prefix + "_EnergiesInTube" + ".dat";
+  string filename2 = filename_prefix + "_thermalization" + ".dat";
+  //filename = filename + "_spatial";
+  
+  fstream printTempInTube( filename.c_str(), ios::out | ios::app  );
+  fstream printThermalization( filename2.c_str(), ios::out | ios::app  );
+
+  double time;
+  if ( step == 0 )
+    time = 0.0;
+  else if ( step == nTimeSteps )
+    return;
+  else
+    time = tstep[step];
+
+  if ( step == 0 )
+  {
+    // file header
+    //printTempInTube << "#temperature" << endl;
+    printTempInTube << "# time\tNumberQuarks\tNumberGluons\tNumberTotal\tEnergyQuarks\tEnergyGluons\tEnergyTotal\tmeanEnergy\tmeanEnergyQuarks\tmeanEnergyGluons" << endl;
+    return;
+  }
+
+  //printTempInTube.width( 10 );
+  printTempInTube << time ;
+  printTempInTube<< "\t";
+  printThermalization << time ;
+  printThermalization << "\t";
+
+  dr = 1.5; //fm
+  deta = 0.5; // spacetime rapidty interval
+  dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
+
+//   cout << "deta=" << deta << "   dz=" << dz << endl;
+
+  cout << "time in alaysis=" << time << endl;
+  calculateTubeCustom( time, dr, dz, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ );
+  cout << "calculated" << endl;
+  printTempInTube << NumberQ;
+  printTempInTube << "\t";
+  printTempInTube << NumberG;
+  printTempInTube << "\t";
+  printTempInTube << totNumber;
+  printTempInTube << "\t";
+  printTempInTube << EnergyQ;
+  printTempInTube << "\t";
+  printTempInTube << EnergyG;
+  printTempInTube << "\t";
+  printTempInTube << totEnergy;
+  printTempInTube << "\t";
+  printTempInTube << totEnergy/totNumber;  
+  printTempInTube << "\t";
+  printTempInTube << EnergyQ/NumberQ;  
+  printTempInTube << "\t";
+  printTempInTube << EnergyG/NumberG;  
+  printTempInTube << "\t";
+  printTempInTube << totalPT/totNumber;   
+  printTempInTube << endl;
+
+  printThermalization << IsoX;
+  printThermalization << "\t";
+  printThermalization << IsoY;
+  printThermalization << "\t";  
+  printThermalization << IsoZ;
+  printThermalization << "\t";  
+  
+  double precision=0.1;
+  if( (((1.-precision)<IsoX*3.)&&(IsoX*3.<(1.+precision)))&&(((1.-precision)<IsoY*3.)&&(IsoY*3.<(1.+precision)))&&(((1.-precision)<IsoZ*3.)&&(IsoZ*3.<(1.+precision))) )
+  {
+    printThermalization << "1";
+  }
+  else
+  {
+    printThermalization << "0";
+  }
+  printThermalization << endl;
+  
+  stringstream ss;
+  ss << time;
+  
+  string filename3 = filename_prefix + "_partonSpectrum_" + ss.str();
+  fstream printPartonSpectrum( filename3.c_str(), ios::out | ios::trunc  );
+  partonEnergies.print(printPartonSpectrum);
+  
+  string filename4 = filename_prefix + "_gluonSpectrum_" + ss.str();
+  fstream printGluonSpectrum( filename4.c_str(), ios::out | ios::trunc  );
+  gluonEnergies.print(printGluonSpectrum);  
+  
+  string filename5 = filename_prefix + "_quarkSpectrum_" + ss.str();
+  fstream printQuarkSpectrum( filename5.c_str(), ios::out | ios::trunc );
+  quarkEnergies.print(printQuarkSpectrum);  
+  
+}
+
+void analysis::calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy,double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ )
+{
+ int cell_id;
+  double pr, XT;
+  
+  const int minNmbTemp = 30; // minimum number of particles to calculate temperature from
+
+  // total length in z direction
+  const double zlength = dz*2.0;
+
+  // volume
+  dv = M_PI * pow( radius , 2.0 ) * zlength; // fm^3
+
+  totalNumber=0; // number of all particles in cell
+  totalNumberGluons = 0;
+  totalNumberQuarks = 0;
+  totalEnergy =0.;
+  totalEnergyQuarks =0.;
+  totalEnergyGluons =0.;
+  totalPT=0.;
+  double totIsoX=0.;
+  double totIsoY=0.;
+  double totIsoZ=0.;
+  
+  //FPT_COMP_LE( particles_atTimeNow[i].Pos.T(), time ) 
+  //&& ( fabs( particles_atTimeNow[i].Mom.Rapidity() ) < 0.5 )
+  // sum over all particles
+  // && ( fabs( particles_atTimeNow[i].Mom.Rapidity() ) < 0.1 ) 
+  for ( int i = 0; i < particles_atTimeNow.size(); i++ )
+  {
+    if( (  particles_atTimeNow[i].FLAVOR < 7 )) // only gluons and light quarks
+    {
+      if (( particles_atTimeNow[i].Pos.Perp2() < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Pos.Z() ) < dz ))
+      {
+        totIsoX += pow(particles_atTimeNow[i].Mom.Px()/particles_atTimeNow[i].Mom.E(),2.0);
+        totIsoY += pow(particles_atTimeNow[i].Mom.Py()/particles_atTimeNow[i].Mom.E(),2.0);
+        totIsoZ += pow(particles_atTimeNow[i].Mom.Pz()/particles_atTimeNow[i].Mom.E(),2.0);
+        ++totalNumber;
+        totalEnergy += particles_atTimeNow[i].Mom.E();
+        totalPT += particles_atTimeNow[i].Mom.Pt();
+        partonEnergies.add(particles_atTimeNow[i].Mom.E());
+        if( particles_atTimeNow[i].FLAVOR == gluon )
+        {
+          totalEnergyGluons += particles_atTimeNow[i].Mom.E();
+          totalNumberGluons++;
+          gluonEnergies.add(particles_atTimeNow[i].Mom.E());
+        }
+        else
+        {
+          totalEnergyQuarks += particles_atTimeNow[i].Mom.E();
+          totalNumberQuarks++;
+          quarkEnergies.add(particles_atTimeNow[i].Mom.E());
+        }
+      }
+    }
+  }
+  IsoX = totIsoX/totalNumber;
+  IsoY = totIsoY/totalNumber;
+  IsoZ = totIsoZ/totalNumber;
+}
 
 
 // writes temperature and velocity of all specified cells in a file, used by Alex Meistrenko as input
