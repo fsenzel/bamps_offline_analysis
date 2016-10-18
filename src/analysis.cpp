@@ -1655,10 +1655,16 @@ analysis::analysis( config* const c ):
   if(studyThermalisation)
   {
     cout << "Thermalization analysis" << endl;
+    
+    radiusAnalysisTube = theConfig->getAnalysisTubeRadius();
+    dEtaAnalysisTube = theConfig->getAnalysisTubedEta();
+    
+    cout << "Analysis in Tube: r= " << radiusAnalysisTube << "   dEta = +- " << dEtaAnalysisTube << endl;
+    
         //PhotonEnergyBins configuration   
-    partonEnergies.setMinMaxN( 0.0, 3.0, 100 );
-    quarkEnergies.setMinMaxN( 0.0, 3.0, 100 );
-    gluonEnergies.setMinMaxN( 0.0, 3.0, 100 );
+    partonEnergies.setMinMaxN( 0.0, 3.0, 20 );
+    quarkEnergies.setMinMaxN( 0.0, 3.0, 20 );
+    gluonEnergies.setMinMaxN( 0.0, 3.0, 20 );
   }
 }
 
@@ -2394,7 +2400,7 @@ void analysis::intermediateOutput( const int nn )
   
   if(studyThermalisation)
   {
-    cout << "Thermalisation analysis at analysis timestep " << nn << " at time " <<  tstep[nn] << endl;
+    //cout << "Thermalisation analysis at analysis timestep " << nn << " at time " <<  tstep[nn] << endl;
     writeCustomTube(nn);
   }
   
@@ -5545,7 +5551,8 @@ void analysis::writeCustomTube(const int step)
   int NumberG, NumberQ, totNumber ;
   int n_jpsi;
   double dr, dz, deta;
-
+  double v2=0.;
+  
   string filename = filename_prefix + "_EnergiesInTube" + ".dat";
   string filename2 = filename_prefix + "_thermalization" + ".dat";
   //filename = filename + "_spatial";
@@ -5575,15 +5582,15 @@ void analysis::writeCustomTube(const int step)
   printThermalization << time ;
   printThermalization << "\t";
 
-  dr = 1.5; //fm
-  deta = 0.5; // spacetime rapidty interval
+  dr = radiusAnalysisTube; //fm
+  deta = dEtaAnalysisTube; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
 
 //   cout << "deta=" << deta << "   dz=" << dz << endl;
 
-  cout << "time in alaysis=" << time << endl;
-  calculateTubeCustom( time, dr, dz, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ );
-  cout << "calculated" << endl;
+  //cout << "time in alaysis=" << time << endl;
+  calculateTubeCustom( time, dr, dz, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, v2 );
+
   printTempInTube << NumberQ;
   printTempInTube << "\t";
   printTempInTube << NumberG;
@@ -5611,6 +5618,8 @@ void analysis::writeCustomTube(const int step)
   printThermalization << "\t";  
   printThermalization << IsoZ;
   printThermalization << "\t";  
+  printThermalization << v2;
+  printThermalization << "\t"; 
   
   double precision=0.1;
   if( (((1.-precision)<IsoX*3.)&&(IsoX*3.<(1.+precision)))&&(((1.-precision)<IsoY*3.)&&(IsoY*3.<(1.+precision)))&&(((1.-precision)<IsoZ*3.)&&(IsoZ*3.<(1.+precision))) )
@@ -5638,11 +5647,13 @@ void analysis::writeCustomTube(const int step)
   fstream printQuarkSpectrum( filename5.c_str(), ios::out | ios::trunc );
   quarkEnergies.print(printQuarkSpectrum);  
   
+  cout << "Medium Analyse in Custom Tube done for time " << time << endl;
+  
 }
 
-void analysis::calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy,double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ )
+void analysis::calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy,double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ, double& v2 )
 {
- int cell_id;
+  int cell_id;
   double pr, XT;
   
   const int minNmbTemp = 30; // minimum number of particles to calculate temperature from
@@ -5660,6 +5671,7 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
   totalEnergyQuarks =0.;
   totalEnergyGluons =0.;
   totalPT=0.;
+  v2=0.;
   double totIsoX=0.;
   double totIsoY=0.;
   double totIsoZ=0.;
@@ -5681,6 +5693,7 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
         totalEnergy += particles_atTimeNow[i].Mom.E();
         totalPT += particles_atTimeNow[i].Mom.Pt();
         partonEnergies.add(particles_atTimeNow[i].Mom.E());
+        v2 += particles_atTimeNow[i].Mom.FlowV2();
         if( particles_atTimeNow[i].FLAVOR == gluon )
         {
           totalEnergyGluons += particles_atTimeNow[i].Mom.E();
@@ -5699,6 +5712,7 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
   IsoX = totIsoX/totalNumber;
   IsoY = totIsoY/totalNumber;
   IsoZ = totIsoZ/totalNumber;
+  v2 /= totalNumber;
 }
 
 

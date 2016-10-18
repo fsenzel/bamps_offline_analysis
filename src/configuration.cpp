@@ -98,6 +98,8 @@ config::config() :
     outputSwitch_photons( false ),
     outputSwitch_QCDparticles( true ),
     outputScheme(no_output),
+    analysisTubeRadius( 1.5 ),
+    analysisTubedEta( 0.5 ),
 // ---- heavy quark options ----
     couplingRunningHeavyQuarksInput(false),
     hadronization_hq(false),
@@ -352,6 +354,8 @@ void config::initializeProgramOptions()
     ("output.QCDparticles", po::value<bool>( &outputSwitch_QCDparticles )->default_value( outputSwitch_QCDparticles ), "whether output concerning QCD particles (gluons, quarks, etc.) is written out")
     ("output.outputScheme", po::value<int>()->default_value( static_cast<int>(outputScheme) ), "output scheme id which configures the analysis routines and decides which output is written. The integer for the desired output scheme is given in the OUTPUT_SCHEME enum in configuration.h.")
     ("output.scatteredMedium", po::value<bool>( &outputSwitch_scatteredMediumParticlesOutput )->default_value( outputSwitch_scatteredMediumParticlesOutput ), "write scattered medium particles output")
+    ("output.radiusAnalysisTube", po::value<double>( &analysisTubeRadius )->default_value( analysisTubeRadius ), "Radius in fm of the central tube for medium analysis.")
+    ("output.dEtaAnalysisTube", po::value<double>( &analysisTubedEta )->default_value( analysisTubedEta ), "dEta for the central tube for medium analysis.")
     ;
 
     // Add heavy quark options

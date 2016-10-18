@@ -244,6 +244,12 @@ class config : public configBase
   
   /** @brief Interface for config::outputScheme */
   OUTPUT_SCHEME getOutputScheme() const {return  outputScheme;}
+  
+  /** @brief Interface to analysis geometry */
+  double getAnalysisTubeRadius() const {return analysisTubeRadius;}
+  double getAnalysisTubedEta() const {return analysisTubedEta;}
+  
+  
   /** ------------------------------- */
   
   /** -------- heavy quark options ------- */ 
@@ -765,6 +771,10 @@ class config : public configBase
   double sqrtS;   
   /** @brief Impact parameter in fm */
   double impact;  
+  /** @brief Radius of the central tube for medium analysis 208 */
+  double analysisTubeRadius;
+  /** @brief  dEta of the central tube for medium analysis 208. Tube length 2*dEta. */
+  double analysisTubedEta;
   /** ----------------------------------------------- */
 };
 
