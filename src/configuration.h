@@ -322,6 +322,9 @@ class config : public configBase
   /** @brief Interface for config::analysisPhotonsPTCut */
   double getAnalysisPhotonsPTCut() const {return analysisPhotonsPTCut;}
   
+  /** @brief Interface for config::analysisPhotonsNBinsV2 */
+  int getAnalysisPhotonsNBinsV2() const {return analysisPhotonsNBinsV2;}
+  
   /** @brief Interface for minAllowedParentPT for Photonproduction */
   double getMinAllowedParentPT() const {return minAllowedParentPT;}
   
@@ -334,6 +337,9 @@ class config : public configBase
   /** @brief Interface for mfpCellAveraging */  
   bool getMfpCellAveraging() const {return mfpCellAveraging;}   
  
+  /** @brief Interface for config::usedExternalField */
+  double getUsedExternalField() const {return usedExternalField;}
+   
 //   /** @brief Interface for config::interpolationBorder */
 //   double getMFPInterpolationBorder() const {return interpolationBorder;}
   /** ------------------------------------ */
@@ -657,6 +663,9 @@ class config : public configBase
   /** @brief Only photons produced higher than this value in GeV will be counted in the [v_2] analysis. */
   double analysisPhotonsPTCut;
   
+  /** @brief Number of bins for the [v_2-pt] analysis. Pt from 0.1 to 5 GeV. */
+  int analysisPhotonsNBinsV2;
+  
   /** @brief Restrict the parent particles PT for photonproduction. The particle with the highest pt will be compared to this limit. */
   double minAllowedParentPT;
   
@@ -668,6 +677,9 @@ class config : public configBase
   
   /** @brief If there should be averaging over 3 cells to compute the mean free path. */
   bool mfpCellAveraging;
+  
+  /** @brief Used external magnetic field given as eB/mpi^2.*/
+  double usedExternalField;
   
   // heavy quark output
   /** @brief Whether correlation analysis of heavy quark pairs is done */

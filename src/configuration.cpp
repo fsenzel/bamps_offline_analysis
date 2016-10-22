@@ -130,7 +130,9 @@ config::config() :
     restrictParentPTForPhotonproduction(false),
     minAllowedParentPT( 0.0 ),
     maxAllowedParentPT( 100000.0 ),
+    analysisPhotonsNBinsV2(8),
     mfpCellAveraging( false ),
+    usedExternalField( 0.0),
 //  interpolationBorder(50),
 // ---- offline reconstruction options ----
     pathdirOfflineData("offline_data"),
@@ -394,9 +396,9 @@ void config::initializeProgramOptions()
     ("misc.minAllowedParentPT", po::value<double>( &minAllowedParentPT )->default_value( minAllowedParentPT ), "in GeV. Highest PT of the two parents must be greater than this parameter." )     
     ("misc.maxAllowedParentPT", po::value<double>( &maxAllowedParentPT )->default_value( maxAllowedParentPT ), "in GeV. Highest PT of the two parents must be smaller than this parameter." )
     ("misc.mfpCellAveraging", po::value<bool>( &mfpCellAveraging )->default_value( mfpCellAveraging ), "If the specific mean free path-calculation for 23-photonproduction should be averaged over 5 cells." )
-
-    
-    ;
+    ("misc.analysisPhotonsNBinsV2", po::value<int>( &analysisPhotonsNBinsV2 )->default_value( analysisPhotonsNBinsV2 ), "Number of Bins for the V2-Pt Analysis.")
+    ("misc.usedExternalField", po::value<double>( &usedExternalField )->default_value( usedExternalField ), "Externel Bfield used for online runs. Given as eB/mpi^2." )
+;
 
 
     // Group offline reconstruction options

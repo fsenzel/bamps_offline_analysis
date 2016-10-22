@@ -196,6 +196,29 @@ analysis::analysis( config* const c ):
   }
   else if (studyPhotons)
   {
+    tstep[0]=.15;
+    tstep[1]=.2;
+    tstep[2]=.3;
+    tstep[3]=.4;
+    tstep[4]=.5;
+    tstep[5]=.6;
+    tstep[6]=.7;
+    tstep[7]=.8;
+    tstep[8]=.9;
+    tstep[9]=1.0;
+    tstep[10] = 2.0;
+    tstep[11] = 3.0;
+    tstep[12] = 4.0;
+    tstep[13] = 5.0;
+    tstep[14] = 6.0;
+    tstep[15] = 7.0;
+    tstep[16] = 8.0;
+    tstep[17] = 9.0;
+    tstep[18] = 10.0;
+    tstep[19] = infinity;
+    nTimeSteps = 20;
+
+    /* Paper 2016
     tstep[0] = 0.2;
     tstep[1] = 0.4;
     tstep[2] = 0.6;
@@ -211,7 +234,7 @@ analysis::analysis( config* const c ):
     tstep[12] = 9.0;
     tstep[13] = 10.0;
     tstep[14] = infinity;
-    nTimeSteps = 15;
+    nTimeSteps = 15;*/
   } 
   else if (studyDileptons)
   {
@@ -503,8 +526,91 @@ analysis::analysis( config* const c ):
     nTimeSteps = 82;
   }
   else if(studyThermalisation) 
-  {     
+  { 
     tstep[0]=.15;
+    tstep[1]=.2;
+    tstep[2]=.3;
+    tstep[3]=.4;
+    tstep[4]=.5;
+    tstep[5]=.6;
+    tstep[6]=.7;
+    tstep[7]=.8;
+    tstep[8]=.9;
+    tstep[9]=1.0;
+    tstep[10]=1.1;
+    tstep[11]=1.2;
+    tstep[12]=1.3;
+    tstep[13]=1.4;
+    tstep[14]=1.5;
+    tstep[15]=1.6;
+    tstep[16]=1.7;
+    tstep[17]=1.8;
+    tstep[18]=1.9;
+    tstep[19]=2.0;
+    tstep[20]=2.1;
+    tstep[21]=2.2;
+    tstep[22]=2.3;
+    tstep[23]=2.4;
+    tstep[24]=2.5;
+    tstep[25]=2.6;
+    tstep[26]=2.7;
+    tstep[27]=2.8;
+    tstep[28]=2.9;
+    tstep[29]=3.0;
+    tstep[30]=3.1;
+    tstep[31]=3.2;
+    tstep[32]=3.3;
+    tstep[33]=3.4;
+    tstep[34]=3.5;
+    tstep[35]=3.6;
+    tstep[36]=3.7;
+    tstep[37]=3.8;
+    tstep[38]=3.9;
+    tstep[39]=4.0;
+    tstep[40]=4.1;
+    tstep[41]=4.2;
+    tstep[42]=4.3;
+    tstep[43]=4.4;
+    tstep[44]=4.5;
+    tstep[45]=4.6;
+    tstep[46]=4.7;
+    tstep[47]=4.8;
+    tstep[48]=4.9;
+    tstep[49]=5.0;
+    tstep[50]=5.1;
+    tstep[51]=5.2;
+    tstep[52]=5.3;
+    tstep[53]=5.4;
+    tstep[54]=5.5;
+    tstep[55]=5.6;
+    tstep[56]=5.7;
+    tstep[57]=5.8;
+    tstep[58]=5.9;
+    tstep[59]=6.0;
+    tstep[60]=6.1;
+    tstep[61]=6.2;
+    tstep[62]=6.3;
+    tstep[63]=6.4;
+    tstep[64]=6.5;
+    tstep[65]=6.6;
+    tstep[66]=6.7;
+    tstep[67]=6.8;
+    tstep[68]=6.9;
+    tstep[69]=7.0;
+    tstep[70]=7.1;
+    tstep[71]=7.2;
+    tstep[72]=7.3;
+    tstep[73]=7.4;
+    tstep[74]=7.5;
+    tstep[75]=7.6;
+    tstep[76]=7.7;
+    tstep[77]=7.8;
+    tstep[78]=7.9;
+    tstep[79]=8.0;
+    tstep[80]=8.1;
+    tstep[81]=infinity;
+    nTimeSteps = 82;    
+    /*tstep[0]=.15;
     tstep[1]=.16;
     tstep[2]=.17;
     tstep[3]=.18;
@@ -1306,7 +1412,7 @@ analysis::analysis( config* const c ):
     tstep[799]=8.14;
     tstep[800]=8.15;
     tstep[801]=infinity;
-    nTimeSteps = 802;
+    nTimeSteps = 802;*/
   }
   else
   {
@@ -3464,7 +3570,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   double sinAlpha, alpha;
   int dummy, flavor, n_bins;
   int alphaIndex;
-  
+  int numberOfPhotonV2PtBins = theConfig->getAnalysisPhotonsNBinsV2();
   double _pt_min, _pt_max;
 
   string filename_v2, filename_v2_summed, filename_v2_tot, filename_yield, filename_pt_angleDependence, type, filename_dRdM, filename_dRdP;
@@ -3518,7 +3624,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   
   if(_flavTypeToComputeFor==photon)
   {
-    v2pt_binnumber = 8;   
+    v2pt_binnumber = numberOfPhotonV2PtBins; //Paper 2016: 8  
     _pt_min_v2 = 0.1;
     _pt_max_v2 = 5.0;
     d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
@@ -5551,7 +5657,8 @@ void analysis::writeCustomTube(const int step)
   int NumberG, NumberQ, totNumber ;
   int n_jpsi;
   double dr, dz, deta;
-  double v2=0.;
+  double v2 = 0.0;
+  double rLarmor = 0.0;
   
   string filename = filename_prefix + "_EnergiesInTube" + ".dat";
   string filename2 = filename_prefix + "_thermalization" + ".dat";
@@ -5589,7 +5696,7 @@ void analysis::writeCustomTube(const int step)
 //   cout << "deta=" << deta << "   dz=" << dz << endl;
 
   //cout << "time in alaysis=" << time << endl;
-  calculateTubeCustom( time, dr, dz, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, v2 );
+  calculateTubeCustom( time, dr, dz, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, v2, rLarmor );
 
   printTempInTube << NumberQ;
   printTempInTube << "\t";
@@ -5620,6 +5727,7 @@ void analysis::writeCustomTube(const int step)
   printThermalization << "\t";  
   printThermalization << v2;
   printThermalization << "\t"; 
+  printThermalization << rLarmor;
   
   double precision=0.1;
   if( (((1.-precision)<IsoX*3.)&&(IsoX*3.<(1.+precision)))&&(((1.-precision)<IsoY*3.)&&(IsoY*3.<(1.+precision)))&&(((1.-precision)<IsoZ*3.)&&(IsoZ*3.<(1.+precision))) )
@@ -5651,7 +5759,7 @@ void analysis::writeCustomTube(const int step)
   
 }
 
-void analysis::calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy,double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ, double& v2 )
+void analysis::calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy,double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ, double& v2, double& rLarmor )
 {
   int cell_id;
   double pr, XT;
@@ -5675,14 +5783,14 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
   double totIsoX=0.;
   double totIsoY=0.;
   double totIsoZ=0.;
-  
-  //FPT_COMP_LE( particles_atTimeNow[i].Pos.T(), time ) 
+  rLarmor = 0.0;
+  //
   //&& ( fabs( particles_atTimeNow[i].Mom.Rapidity() ) < 0.5 )
   // sum over all particles
   // && ( fabs( particles_atTimeNow[i].Mom.Rapidity() ) < 0.1 ) 
   for ( int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    if( (  particles_atTimeNow[i].FLAVOR < 7 )) // only gluons and light quarks
+    if( (  particles_atTimeNow[i].FLAVOR < 7 ) && FPT_COMP_LE( particles_atTimeNow[i].Pos.T(), time ) ) // only gluons and light quarks
     {
       if (( particles_atTimeNow[i].Pos.Perp2() < pow( radius, 2.0 ) )  && ( fabs( particles_atTimeNow[i].Pos.Z() ) < dz ))
       {
@@ -5694,6 +5802,7 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
         totalPT += particles_atTimeNow[i].Mom.Pt();
         partonEnergies.add(particles_atTimeNow[i].Mom.E());
         v2 += particles_atTimeNow[i].Mom.FlowV2();
+        rLarmor +=  0.197*sqrt(pow(particles_atTimeNow[i].Mom.Pz(),2.0)+pow(particles_atTimeNow[i].Mom.Px(),2.0))/(theConfig->getUsedExternalField()*pow(0.14,2.0));
         if( particles_atTimeNow[i].FLAVOR == gluon )
         {
           totalEnergyGluons += particles_atTimeNow[i].Mom.E();
@@ -5713,6 +5822,7 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
   IsoY = totIsoY/totalNumber;
   IsoZ = totIsoZ/totalNumber;
   v2 /= totalNumber;
+  rLarmor/=totalNumber;
 }
 
 
