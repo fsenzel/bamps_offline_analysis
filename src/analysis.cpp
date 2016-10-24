@@ -5658,7 +5658,15 @@ void analysis::writeCustomTube(const int step)
   int n_jpsi;
   double dr, dz, deta;
   double v2 = 0.0;
+  double v2g,v2q;
+  double v2_a,v2_b,v2_c;
+  double v2g_a,v2g_b,v2g_c;
+  double v2q_a,v2q_b,v2q_c;
   double rLarmor = 0.0;
+  double rLarmor_a,rLarmor_b,rLarmor_c;
+  double IsoX_a,IsoY_a,IsoZ_a;
+  double IsoX_b,IsoY_b,IsoZ_b; 
+  double IsoX_c,IsoY_c,IsoZ_c;
   
   string filename = filename_prefix + "_EnergiesInTube" + ".dat";
   string filename2 = filename_prefix + "_thermalization" + ".dat";
@@ -5679,6 +5687,8 @@ void analysis::writeCustomTube(const int step)
   {
     // file header
     //printTempInTube << "#temperature" << endl;
+    printThermalization << "#[TIME-1,  #IsoX-2,  #IsoY-3,  #IsoZ-4,  #v2Parton-5,  #v2Gluon-6,  #v2Quark-7,  #rLarmor-8] #x #[Input, #r1.5+eta0.5, #r100+eta0.5, #r100+eta20]" << endl;
+
     printTempInTube << "# time\tNumberQuarks\tNumberGluons\tNumberTotal\tEnergyQuarks\tEnergyGluons\tEnergyTotal\tmeanEnergy\tmeanEnergyQuarks\tmeanEnergyGluons" << endl;
     return;
   }
@@ -5692,12 +5702,23 @@ void analysis::writeCustomTube(const int step)
   dr = radiusAnalysisTube; //fm
   deta = dEtaAnalysisTube; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
-
+  double dzFull = time * ( exp( 2.0 * 20 ) - 1.0 ) / ( exp( 2.0 * 20 ) + 1.0 ); //translated to spatial coordinate z 
+  double dzMid = time * ( exp( 2.0 * 0.5 ) - 1.0 ) / ( exp( 2.0 * 0.5 ) + 1.0 ); //translated to spatial coordinate z 
+  
+  
+  
 //   cout << "deta=" << deta << "   dz=" << dz << endl;
 
   //cout << "time in alaysis=" << time << endl;
-  calculateTubeCustom( time, dr, dz, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, v2, rLarmor );
-
+  calculateTubeCustom( time, dr, dz, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, v2, v2g, v2q, rLarmor );
+  
+  calculateTubeCustom( time, 1.5, dzMid, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX_a, IsoY_a, IsoZ_a, v2_a, v2g_a, v2q_a, rLarmor_a );
+  
+  calculateTubeCustom( time, 100, dzMid, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX_b, IsoY_b, IsoZ_b, v2_b, v2g_b, v2q_b, rLarmor_b );
+  
+  calculateTubeCustom( time, 100, dzFull, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX_c, IsoY_c, IsoZ_c, v2_c, v2g_c, v2q_c, rLarmor_c );
+  
+  
   printTempInTube << NumberQ;
   printTempInTube << "\t";
   printTempInTube << NumberG;
@@ -5727,9 +5748,56 @@ void analysis::writeCustomTube(const int step)
   printThermalization << "\t";  
   printThermalization << v2;
   printThermalization << "\t"; 
+  printThermalization << v2g;
+  printThermalization << "\t";  
+  printThermalization << v2q;
+  printThermalization << "\t";  
   printThermalization << rLarmor;
+  printThermalization << "\t";
+  printThermalization << IsoX_a;
+  printThermalization << "\t";
+  printThermalization << IsoY_a;
+  printThermalization << "\t";  
+  printThermalization << IsoZ_a;
+  printThermalization << "\t";  
+  printThermalization << v2_a;
+  printThermalization << "\t"; 
+  printThermalization << v2g_a;
+  printThermalization << "\t";  
+  printThermalization << v2q_a;
+  printThermalization << "\t";  
+  printThermalization << rLarmor_a;
+  printThermalization << "\t"; 
+  printThermalization << IsoX_b;
+  printThermalization << "\t";
+  printThermalization << IsoY_b;
+  printThermalization << "\t";  
+  printThermalization << IsoZ_b;
+  printThermalization << "\t";  
+  printThermalization << v2_b;
+  printThermalization << "\t"; 
+  printThermalization << v2g_b;
+  printThermalization << "\t";  
+  printThermalization << v2q_b;
+  printThermalization << "\t";  
+  printThermalization << rLarmor_b;  
+  printThermalization << "\t";
+  printThermalization << IsoX_c;
+  printThermalization << "\t";
+  printThermalization << IsoY_c;
+  printThermalization << "\t";  
+  printThermalization << IsoZ_c;
+  printThermalization << "\t";  
+  printThermalization << v2_c;
+  printThermalization << "\t"; 
+  printThermalization << v2g_c;
+  printThermalization << "\t";  
+  printThermalization << v2q_c;
+  printThermalization << "\t";  
+  printThermalization << rLarmor_c;  
+  printThermalization << endl;
   
-  double precision=0.1;
+/*  double precision=0.1;
   if( (((1.-precision)<IsoX*3.)&&(IsoX*3.<(1.+precision)))&&(((1.-precision)<IsoY*3.)&&(IsoY*3.<(1.+precision)))&&(((1.-precision)<IsoZ*3.)&&(IsoZ*3.<(1.+precision))) )
   {
     printThermalization << "1";
@@ -5739,7 +5807,7 @@ void analysis::writeCustomTube(const int step)
     printThermalization << "0";
   }
   printThermalization << endl;
-  
+*/  
   stringstream ss;
   ss << time;
   
@@ -5759,7 +5827,7 @@ void analysis::writeCustomTube(const int step)
   
 }
 
-void analysis::calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy,double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ, double& v2, double& rLarmor )
+void analysis::calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy,double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ, double& v2,double& v2g,double& v2q, double& rLarmor )
 {
   int cell_id;
   double pr, XT;
@@ -5780,6 +5848,8 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
   totalEnergyGluons =0.;
   totalPT=0.;
   v2=0.;
+  v2g=0.;
+  v2q=0.;
   double totIsoX=0.;
   double totIsoY=0.;
   double totIsoZ=0.;
@@ -5808,12 +5878,14 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
           totalEnergyGluons += particles_atTimeNow[i].Mom.E();
           totalNumberGluons++;
           gluonEnergies.add(particles_atTimeNow[i].Mom.E());
+          v2g+= particles_atTimeNow[i].Mom.FlowV2();
         }
         else
         {
           totalEnergyQuarks += particles_atTimeNow[i].Mom.E();
           totalNumberQuarks++;
           quarkEnergies.add(particles_atTimeNow[i].Mom.E());
+          v2q +=  particles_atTimeNow[i].Mom.FlowV2();
         }
       }
     }
@@ -5821,7 +5893,9 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
   IsoX = totIsoX/totalNumber;
   IsoY = totIsoY/totalNumber;
   IsoZ = totIsoZ/totalNumber;
-  v2 /= totalNumber;
+  v2  /= totalNumber;
+  v2g /= totalNumberGluons;
+  v2q /= totalNumberQuarks;
   rLarmor/=totalNumber;
 }
 
