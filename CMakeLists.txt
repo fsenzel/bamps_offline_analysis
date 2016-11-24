@@ -119,12 +119,6 @@ ELSE()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
 ENDIF()
 
-######### Handle doxygen files via CMake, adds custom target, use as "make doxygen" #########
-IF( NOT DISABLE_BUILD_EXTRAS )
-  INCLUDE(ConfigureDoxygenTarget.cmake)
-ENDIF( NOT DISABLE_BUILD_EXTRAS )
-  
-
 ######### Set include and link directories #########
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${Cuba_INCLUDE_DIRS})
