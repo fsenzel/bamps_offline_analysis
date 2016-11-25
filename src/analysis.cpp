@@ -3477,10 +3477,10 @@ void analysis::computeAndPrintDileptonSpectra(string name, const double _outputT
   DileptonPTSeveralInvMass.setRangevalues(3,2.0,10.0);
   DileptonPTSeveralInvMass.setRangevalues(4,0.0,3.0);
   
-  DileptonInvMassCuts.setNumberRanges(1);
+  DileptonInvMassCuts.setNumberRanges(2);
   DileptonInvMassCuts.setMinMaxN(0.0, 4.0, 50);
-  DileptonInvMassCuts.setRangevalues(0,0.2,100.0); // PHENIX Run 10 acceptance
-  
+  DileptonInvMassCuts.setRangevalues(0,0.2,1000.0); // PHENIX Run 10 acceptance
+  DileptonInvMassCuts.setRangevalues(1,0.0,1000.0); // PHENIX Run 10 acceptance
   
   for ( unsigned int j = 0; j < dileptons.size(); j++ )
   {

@@ -4751,7 +4751,8 @@ void offlineHeavyIonCollision::scatt22ForRatesUtility(scattering22& scatt22_obj,
       double FlavorAverage = 1./3.;
       _cells.rates.addSpecific(scatteringType,FlavorAverage*probab22/dt/(specificQuarkNumberFactor) , pow( 0.197, 2.0 ) * cs22 * Vrel/ ( dv * testpartcl ) );  
     }
-    else if (scatteringType == 2)//qqbar' -> qqbar'= qq' -> qq'
+    //This process would not be included in the AMY scattering
+    /*else if (scatteringType == 2)//qqbar' -> qqbar'= qq' -> qq'
     {
       cs22 = scatt22_obj.getXSection22Specific ( 228 );
       probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt   / ( dv * testpartcl );
@@ -4776,20 +4777,20 @@ void offlineHeavyIonCollision::scatt22ForRatesUtility(scattering22& scatt22_obj,
         case 6:  // up quark
           specificQuarkNumberFactor = (ns+nsb)/2.0;
           break;
-        /* Mapped according to:
-        * 0 = g (gluon)
-        * 1 = u (up)
-        * 2 = ub (anti-up)
-        * 3 = d (down)
-        * 4 = db (anti-down)
-        * 5 = s (strange)
-        * 6 = sb (anti-strange)
-        */        
-      }         
+        // Mapped according to:
+        // 0 = g (gluon)
+        // 1 = u (up)
+        // 2 = ub (anti-up)
+        // 3 = d (down)
+        // 4 = db (anti-down)
+        // 5 = s (strange)
+        // 6 = sb (anti-strange)
+        //        
+      }        
       double FlavorAverage = 1./6.;
       _cells.rates.addSpecific(scatteringType,FlavorAverage*probab22/dt/(specificQuarkNumberFactor) , pow( 0.197, 2.0 ) * cs22 * Vrel/ ( dv * testpartcl ) );    
 
-    }  
+    }*/   
   }
 }
 
