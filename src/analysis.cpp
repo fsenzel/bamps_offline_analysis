@@ -1813,6 +1813,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyMFP = false; //study the specific mean free path
   studyDileptons = false;
   studyThermalisation = false;
+  studyPartons = false;
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -2064,11 +2065,23 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       studyDileptons=true;
       break;    
+    
+    case only_background:
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.35 );//rapidityRange[0] // RHIC
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );//1                 // LHC
+      rapidityRanges.push_back(yRange);
+      studyPartons=true;
+      break;      
       
     default:
       break;
   } 
 }
+
+
+
 
 
 
@@ -3422,7 +3435,14 @@ void analysis::computeV2RAA( string name, const double _outputTime )
       theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     }
   }
-  
+  if ( studyPartons )
+  {
+    cout << "Analyse partons." << endl;
+    theV2RAA.setPtBinProperties( 0.0, 6.0, 70, 0.0, 6.0, 70 );
+    theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+    theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+    theV2RAA.computeFor( allFlavors, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
+  }
   if( studyPhotons )
   {
     cout << "analyse Photons. Size of Photon vector: " << noninteractingParticles.size() <<  endl;
@@ -3430,7 +3450,7 @@ void analysis::computeV2RAA( string name, const double _outputTime )
     //if(theConfig->v2_bigger < theConfig->v2_smaller) cout << "smaller! " << -theConfig->v2_bigger + theConfig->v2_smaller << endl; 
     //cout << "# Number of colliding pairs with average positive v2: " << theConfig->countPositiveV2 << endl;
     //cout << "# Number of colliding pairs with average negative v2: " << theConfig->countNegativeV2 << endl;     
-    theV2RAA.setPtBinProperties( 0.0, 3.0, 50, 0.0, 3.0, 50 );
+    theV2RAA.setPtBinProperties( 0.0, 6.0, 70, 0.0, 6.0, 70 );
     theV2RAA.computeFor( photon, noninteractingParticles, noninteractingParticles.size(), "LO", _outputTime, v2background );
     //theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     //theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
@@ -3626,7 +3646,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   {
     v2pt_binnumber = numberOfPhotonV2PtBins; //Paper 2016: 8  
     _pt_min_v2 = 0.1;
-    _pt_max_v2 = 5.0;
+    _pt_max_v2 = 6.0;
     d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
   }
   else
@@ -3761,6 +3781,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( static_cast<FLAVOR_TYPE>( flavor ) );
     
     if( ( _flavTypeToComputeFor == flavor ) || 
+          ( _flavTypeToComputeFor == allFlavors ) ||
           ( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) ||
           ( _flavTypeToComputeFor == genFlavor ) ||
           ( _flavTypeToComputeFor == charm && ( flavor == anti_charm ) ) ||
@@ -5653,7 +5674,7 @@ void analysis::writeCustomTube(const int step)
 {
   const string sep = "  ";
 
-  double totEnergy, EnergyG, EnergyQ, totalPT,IsoX,IsoY,IsoZ;
+  double totEnergy, EnergyG, EnergyQ, totalPT;
   int NumberG, NumberQ, totNumber ;
   int n_jpsi;
   double dr, dz, deta;
@@ -5662,11 +5683,15 @@ void analysis::writeCustomTube(const int step)
   double v2_a,v2_b,v2_c;
   double v2g_a,v2g_b,v2g_c;
   double v2q_a,v2q_b,v2q_c;
-  double rLarmor = 0.0;
-  double rLarmor_a,rLarmor_b,rLarmor_c;
-  double IsoX_a,IsoY_a,IsoZ_a;
-  double IsoX_b,IsoY_b,IsoZ_b; 
-  double IsoX_c,IsoY_c,IsoZ_c;
+
+  double rLarmor,rLarmor_a,rLarmor_b,rLarmor_c;
+  double rLarmorg,rLarmorg_a,rLarmorg_b,rLarmorg_c;
+  double rLarmorq,rLarmorq_a,rLarmorq_b,rLarmorq_c;
+
+  double IsoX,IsoY,IsoZ;
+  double IsoXg,IsoYg,IsoZg;
+  double IsoXq,IsoYq,IsoZq;
+
   
   string filename = filename_prefix + "_EnergiesInTube" + ".dat";
   string filename2 = filename_prefix + "_thermalization" + ".dat";
@@ -5687,9 +5712,9 @@ void analysis::writeCustomTube(const int step)
   {
     // file header
     //printTempInTube << "#temperature" << endl;
-    printThermalization << "#[TIME-1,  #IsoX-2,  #IsoY-3,  #IsoZ-4,  #v2Parton-5,  #v2Gluon-6,  #v2Quark-7,  #rLarmor-8] #x #[Input, #r1.5+eta0.5, #r100+eta0.5, #r100+eta20]" << endl;
+    printThermalization << "#[TIME-1\t#IsoX-2\t#IsoY-3\t#IsoZ-4\t#IsoXq-5\t#IsoYq-6\t#IsoZq-7\t#IsoXg-8\t#IsoYg-9\t#IsoZg-10\t#v2Parton-11\t#v2Quark-12\t#v2Glue-13\t#rLarmor-14\t#rLarmorq-15\t#rLarmorg-16\t]#x#[r,eta:Input,#r10+eta1,#r100+eta1,#r100+eta20]" << endl;
 
-    printTempInTube << "# time\tNumberQuarks\tNumberGluons\tNumberTotal\tEnergyQuarks\tEnergyGluons\tEnergyTotal\tmeanEnergy\tmeanEnergyQuarks\tmeanEnergyGluons" << endl;
+    printTempInTube << "#time\tNumberQuarks\tNumberGluons\tNumberTotal\tEnergyQuarks\tEnergyGluons\tEnergyTotal\tmeanEnergy\tmeanEnergyQuarks\tmeanEnergyGluons" << endl;
     return;
   }
 
@@ -5703,20 +5728,15 @@ void analysis::writeCustomTube(const int step)
   deta = dEtaAnalysisTube; // spacetime rapidty interval
   dz = time * ( exp( 2.0 * deta ) - 1.0 ) / ( exp( 2.0 * deta ) + 1.0 ); //translated to spatial coordinate z
   double dzFull = time * ( exp( 2.0 * 20 ) - 1.0 ) / ( exp( 2.0 * 20 ) + 1.0 ); //translated to spatial coordinate z 
-  double dzMid = time * ( exp( 2.0 * 0.5 ) - 1.0 ) / ( exp( 2.0 * 0.5 ) + 1.0 ); //translated to spatial coordinate z 
+  double dzMid = time * ( exp( 2.0 * 1.0 ) - 1.0 ) / ( exp( 2.0 * 1.0 ) + 1.0 ); //translated to spatial coordinate z 
   
   
   
 //   cout << "deta=" << deta << "   dz=" << dz << endl;
-
-  //cout << "time in alaysis=" << time << endl;
-  calculateTubeCustom( time, dr, dz, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, v2, v2g, v2q, rLarmor );
-  
-  calculateTubeCustom( time, 1.5, dzMid, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX_a, IsoY_a, IsoZ_a, v2_a, v2g_a, v2q_a, rLarmor_a );
-  
-  calculateTubeCustom( time, 100, dzMid, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX_b, IsoY_b, IsoZ_b, v2_b, v2g_b, v2q_b, rLarmor_b );
-  
-  calculateTubeCustom( time, 100, dzFull, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX_c, IsoY_c, IsoZ_c, v2_c, v2g_c, v2q_c, rLarmor_c );
+//   cout << "time in alaysis=" << time << endl;
+//   calculateTubeCustom( time, 10, dzMid, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX_a, IsoY_a, IsoZ_a, v2_a, v2g_a, v2q_a, rLarmor_a, rLarmorg_a, rLarmorq_a );
+//   calculateTubeCustom( time, 100, dzMid, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX_b, IsoY_b, IsoZ_b, v2_b, v2g_b, v2q_b, rLarmor_b, rLarmorg_b, rLarmorq_b );
+//   calculateTubeCustom( time, 100, dzFull, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX_c, IsoY_c, IsoZ_c, v2_c, v2g_c, v2q_c, rLarmor_c, rLarmorg_c, rLarmorq_c );
   
   
   printTempInTube << NumberQ;
@@ -5740,62 +5760,134 @@ void analysis::writeCustomTube(const int step)
   printTempInTube << totalPT/totNumber;   
   printTempInTube << endl;
 
+  calculateTubeCustom( time, dr, dz, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, IsoXq, IsoYq, IsoZq, IsoXg, IsoYg, IsoZg, v2, v2g, v2q, rLarmor, rLarmorg, rLarmorq );
   printThermalization << IsoX;
   printThermalization << "\t";
   printThermalization << IsoY;
   printThermalization << "\t";  
   printThermalization << IsoZ;
   printThermalization << "\t";  
+  printThermalization << IsoXq;
+  printThermalization << "\t";
+  printThermalization << IsoYq;
+  printThermalization << "\t";  
+  printThermalization << IsoZq;
+  printThermalization << "\t";  
+  printThermalization << IsoXg;
+  printThermalization << "\t";
+  printThermalization << IsoYg;
+  printThermalization << "\t";  
+  printThermalization << IsoZg;
+  printThermalization << "\t";  
   printThermalization << v2;
   printThermalization << "\t"; 
-  printThermalization << v2g;
-  printThermalization << "\t";  
   printThermalization << v2q;
+  printThermalization << "\t";  
+  printThermalization << v2g;
   printThermalization << "\t";  
   printThermalization << rLarmor;
   printThermalization << "\t";
-  printThermalization << IsoX_a;
+  printThermalization << rLarmorq;
   printThermalization << "\t";
-  printThermalization << IsoY_a;
-  printThermalization << "\t";  
-  printThermalization << IsoZ_a;
-  printThermalization << "\t";  
-  printThermalization << v2_a;
-  printThermalization << "\t"; 
-  printThermalization << v2g_a;
-  printThermalization << "\t";  
-  printThermalization << v2q_a;
-  printThermalization << "\t";  
-  printThermalization << rLarmor_a;
-  printThermalization << "\t"; 
-  printThermalization << IsoX_b;
+  printThermalization << rLarmorg;
   printThermalization << "\t";
-  printThermalization << IsoY_b;
-  printThermalization << "\t";  
-  printThermalization << IsoZ_b;
-  printThermalization << "\t";  
-  printThermalization << v2_b;
-  printThermalization << "\t"; 
-  printThermalization << v2g_b;
-  printThermalization << "\t";  
-  printThermalization << v2q_b;
-  printThermalization << "\t";  
-  printThermalization << rLarmor_b;  
+  
+  calculateTubeCustom( time, 10, dzMid, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, IsoXq, IsoYq, IsoZq, IsoXg, IsoYg, IsoZg, v2, v2g, v2q, rLarmor, rLarmorg, rLarmorq );
+  printThermalization << IsoX;
   printThermalization << "\t";
-  printThermalization << IsoX_c;
+  printThermalization << IsoY;
+  printThermalization << "\t";  
+  printThermalization << IsoZ;
+  printThermalization << "\t";  
+  printThermalization << IsoXq;
   printThermalization << "\t";
-  printThermalization << IsoY_c;
+  printThermalization << IsoYq;
   printThermalization << "\t";  
-  printThermalization << IsoZ_c;
+  printThermalization << IsoZq;
   printThermalization << "\t";  
-  printThermalization << v2_c;
+  printThermalization << IsoXg;
+  printThermalization << "\t";
+  printThermalization << IsoYg;
+  printThermalization << "\t";  
+  printThermalization << IsoZg;
+  printThermalization << "\t";  
+  printThermalization << v2;
   printThermalization << "\t"; 
-  printThermalization << v2g_c;
+  printThermalization << v2q;
   printThermalization << "\t";  
-  printThermalization << v2q_c;
+  printThermalization << v2g;
+  printThermalization << "\t"; 
+  printThermalization << rLarmor;
+  printThermalization << "\t";
+  printThermalization << rLarmorq;
+  printThermalization << "\t";
+  printThermalization << rLarmorg;
+  printThermalization << "\t";
+
+  calculateTubeCustom( time, 100, dzMid, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, IsoXq, IsoYq, IsoZq, IsoXg, IsoYg, IsoZg, v2, v2g, v2q, rLarmor, rLarmorg, rLarmorq );
+  printThermalization << IsoX;
+  printThermalization << "\t";
+  printThermalization << IsoY;
   printThermalization << "\t";  
-  printThermalization << rLarmor_c;  
-  printThermalization << endl;
+  printThermalization << IsoZ;
+  printThermalization << "\t";  
+  printThermalization << IsoXq;
+  printThermalization << "\t";
+  printThermalization << IsoYq;
+  printThermalization << "\t";  
+  printThermalization << IsoZq;
+  printThermalization << "\t";  
+  printThermalization << IsoXg;
+  printThermalization << "\t";
+  printThermalization << IsoYg;
+  printThermalization << "\t";  
+  printThermalization << IsoZg;
+  printThermalization << "\t";  
+  printThermalization << v2;
+  printThermalization << "\t"; 
+  printThermalization << v2q;
+  printThermalization << "\t";  
+  printThermalization << v2g;
+  printThermalization << "\t"; 
+  printThermalization << rLarmor;
+  printThermalization << "\t";
+  printThermalization << rLarmorq;
+  printThermalization << "\t";
+  printThermalization << rLarmorg;
+  printThermalization << "\t";
+ 
+  calculateTubeCustom( time, 100, dzFull, totEnergy, EnergyG, EnergyQ, NumberG, NumberQ, totNumber, totalPT, IsoX, IsoY, IsoZ, IsoXq, IsoYq, IsoZq, IsoXg, IsoYg, IsoZg, v2, v2g, v2q, rLarmor, rLarmorg, rLarmorq );
+  printThermalization << IsoX;
+  printThermalization << "\t";
+  printThermalization << IsoY;
+  printThermalization << "\t";  
+  printThermalization << IsoZ;
+  printThermalization << "\t";  
+  printThermalization << IsoXq;
+  printThermalization << "\t";
+  printThermalization << IsoYq;
+  printThermalization << "\t";  
+  printThermalization << IsoZq;
+  printThermalization << "\t";  
+  printThermalization << IsoXg;
+  printThermalization << "\t";
+  printThermalization << IsoYg;
+  printThermalization << "\t";  
+  printThermalization << IsoZg;
+  printThermalization << "\t";  
+  printThermalization << v2;
+  printThermalization << "\t"; 
+  printThermalization << v2q;
+  printThermalization << "\t";  
+  printThermalization << v2g;
+  printThermalization << "\t";
+  printThermalization << rLarmor;
+  printThermalization << "\t";
+  printThermalization << rLarmorq;
+  printThermalization << "\t";
+  printThermalization << rLarmorg;
+  printThermalization << "\t";
+  printThermalization << endl; 
   
 /*  double precision=0.1;
   if( (((1.-precision)<IsoX*3.)&&(IsoX*3.<(1.+precision)))&&(((1.-precision)<IsoY*3.)&&(IsoY*3.<(1.+precision)))&&(((1.-precision)<IsoZ*3.)&&(IsoZ*3.<(1.+precision))) )
@@ -5808,6 +5900,7 @@ void analysis::writeCustomTube(const int step)
   }
   printThermalization << endl;
 */  
+
   stringstream ss;
   ss << time;
   
@@ -5827,7 +5920,7 @@ void analysis::writeCustomTube(const int step)
   
 }
 
-void analysis::calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy,double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ, double& v2,double& v2g,double& v2q, double& rLarmor )
+void analysis::calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy,double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ,double& IsoXq, double& IsoYq, double& IsoZq,double& IsoXg, double& IsoYg, double& IsoZg, double& v2,double& v2g,double& v2q, double& rLarmor, double& rLarmorg , double& rLarmorq  )
 {
   int cell_id;
   double pr, XT;
@@ -5853,7 +5946,18 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
   double totIsoX=0.;
   double totIsoY=0.;
   double totIsoZ=0.;
-  rLarmor = 0.0;
+  rLarmorg = 0.0;
+  rLarmorq = 0.0;  
+  rLarmor = 0.0;  
+  IsoX = 0.;
+  IsoY = 0.;
+  IsoZ = 0.;
+  IsoXg = 0.;
+  IsoYg = 0.;
+  IsoZg = 0.;
+  IsoXq = 0.;
+  IsoYq = 0.;
+  IsoZq = 0.;  
   //
   //&& ( fabs( particles_atTimeNow[i].Mom.Rapidity() ) < 0.5 )
   // sum over all particles
@@ -5875,6 +5979,10 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
         rLarmor +=  0.197*sqrt(pow(particles_atTimeNow[i].Mom.Pz(),2.0)+pow(particles_atTimeNow[i].Mom.Px(),2.0))/(theConfig->getUsedExternalField()*pow(0.14,2.0));
         if( particles_atTimeNow[i].FLAVOR == gluon )
         {
+          IsoXg += pow(particles_atTimeNow[i].Mom.Px()/particles_atTimeNow[i].Mom.E(),2.0);
+          IsoYg += pow(particles_atTimeNow[i].Mom.Py()/particles_atTimeNow[i].Mom.E(),2.0);
+          IsoZg += pow(particles_atTimeNow[i].Mom.Pz()/particles_atTimeNow[i].Mom.E(),2.0);
+          rLarmorg +=  0.197*sqrt(pow(particles_atTimeNow[i].Mom.Pz(),2.0)+pow(particles_atTimeNow[i].Mom.Px(),2.0))/(theConfig->getUsedExternalField()*pow(0.14,2.0));
           totalEnergyGluons += particles_atTimeNow[i].Mom.E();
           totalNumberGluons++;
           gluonEnergies.add(particles_atTimeNow[i].Mom.E());
@@ -5882,6 +5990,10 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
         }
         else
         {
+          IsoXq += pow(particles_atTimeNow[i].Mom.Px()/particles_atTimeNow[i].Mom.E(),2.0);
+          IsoYq += pow(particles_atTimeNow[i].Mom.Py()/particles_atTimeNow[i].Mom.E(),2.0);
+          IsoZq += pow(particles_atTimeNow[i].Mom.Pz()/particles_atTimeNow[i].Mom.E(),2.0);
+          rLarmorq +=  0.197*sqrt(pow(particles_atTimeNow[i].Mom.Pz(),2.0)+pow(particles_atTimeNow[i].Mom.Px(),2.0))/(theConfig->getUsedExternalField()*pow(0.14,2.0));
           totalEnergyQuarks += particles_atTimeNow[i].Mom.E();
           totalNumberQuarks++;
           quarkEnergies.add(particles_atTimeNow[i].Mom.E());
@@ -5893,10 +6005,18 @@ void analysis::calculateTubeCustom(const double time, const double radius, const
   IsoX = totIsoX/totalNumber;
   IsoY = totIsoY/totalNumber;
   IsoZ = totIsoZ/totalNumber;
+  IsoXg /= totalNumberGluons;
+  IsoYg /= totalNumberGluons;
+  IsoZg /= totalNumberGluons;
+  IsoXq /= totalNumberQuarks;
+  IsoYq /= totalNumberQuarks;
+  IsoZq /= totalNumberQuarks;
   v2  /= totalNumber;
   v2g /= totalNumberGluons;
   v2q /= totalNumberQuarks;
-  rLarmor/=totalNumber;
+  rLarmor  /= totalNumber;
+  rLarmorg /= totalNumberGluons;
+  rLarmorq /= totalNumberQuarks;
 }
 
 

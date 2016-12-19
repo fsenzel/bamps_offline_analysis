@@ -4790,7 +4790,7 @@ void offlineHeavyIonCollision::scatt22ForRatesUtility(scattering22& scatt22_obj,
       double FlavorAverage = 1./6.;
       _cells.rates.addSpecific(scatteringType,FlavorAverage*probab22/dt/(specificQuarkNumberFactor) , pow( 0.197, 2.0 ) * cs22 * Vrel/ ( dv * testpartcl ) );    
 
-    }*/   
+    }*/ 
   }
 }
 

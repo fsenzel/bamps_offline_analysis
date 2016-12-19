@@ -288,6 +288,7 @@ private:
   bool studyJets;
   bool studyCentralDensity;
   bool studyBackground;
+  bool studyPartons;
   bool studyScatteredMediumParticles;
   bool studyPhotons;
   bool studyDileptons;
@@ -376,7 +377,7 @@ private:
   void addNeighborCells( const int cell_id, const int neighborCell_id );
   void writeTempInTube( const int step  );
   void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity, double & fugacityGluons, double & fugacityQuarks, double & densityGluons, double & densityQuarks  );
-  void calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy, double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ, double& v2, double& v2g,  double& v2q,  double& rLarmor );  
+  void calculateTubeCustom(const double time, const double radius, const double dz, double& totalEnergy, double& totalEnergyGluons,double& totalEnergyQuarks, int & totalNumberGluons, int & totalNumberQuarks, int & totalNumber, double & totalPT, double& IsoX, double& IsoY, double& IsoZ,double& IsoXq, double& IsoYq, double& IsoZq,double& IsoXg, double& IsoYg, double& IsoZg, double& v2, double& v2g,  double& v2q,  double& rLarmor,  double& rLarmorg ,  double& rLarmorq  );  
   void print_dndy(const string subfix );
   void writePhotonSpaceProfile( const int step  );
   void writeTempCustom( const int step  );
