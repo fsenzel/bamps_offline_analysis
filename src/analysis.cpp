@@ -525,7 +525,7 @@ analysis::analysis( config* const c ):
     tstep[81]=infinity;
     nTimeSteps = 82;
   }
-  else if(studyThermalisation) 
+  else if(studyThermalisation||studyPartons) 
   { 
     tstep[0]=.15;
     tstep[1]=.2;
@@ -2072,6 +2072,8 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 0.5 );//1                 // LHC
       rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );//1                 // LHC
+      rapidityRanges.push_back(yRange);
       studyPartons=true;
       break;      
       
@@ -2466,6 +2468,11 @@ void analysis::initialOutput()
     writeCustomTube(0);
   }
   
+  if(studyPartons)
+  {
+    computeV2RAA( "initial", 0  );    
+  }
+  
   //if ( studyPhotons ){ do nothing because no initial photons there :-)}
   
   
@@ -2493,7 +2500,10 @@ void analysis::intermediateOutput( const int nn )
   {
     saveNumberOfMediumParticles(nn);
   }
-  
+  if(studyPartons)
+  {
+     computeV2RAA( name, tstep[nn] );    
+  }
   
   if ( v2output && v2outputIntermediateSteps )
     computeV2RAA( name, tstep[nn] );
@@ -2574,6 +2584,9 @@ void analysis::finalOutput( const double _stoptime )
   if ( v2output )
     computeV2RAA( "final", _stoptime );
 
+  if ( studyPartons )
+    computeV2RAA( "final", _stoptime );  
+  
   if ( particleCorrelationsOutput )
   {
     onePartclCorrelations();
@@ -3438,7 +3451,7 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   if ( studyPartons )
   {
     cout << "Analyse partons." << endl;
-    theV2RAA.setPtBinProperties( 0.0, 6.0, 70, 0.0, 6.0, 70 );
+    theV2RAA.setPtBinProperties( 0.0, 6.0, 8, 0.0, 6.0, 8 );
     theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     theV2RAA.computeFor( allFlavors, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
