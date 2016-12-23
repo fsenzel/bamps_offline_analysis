@@ -3451,7 +3451,7 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   if ( studyPartons )
   {
     cout << "Analyse partons." << endl;
-    theV2RAA.setPtBinProperties( 0.0, 6.0, 8, 0.0, 6.0, 8 );
+    theV2RAA.setPtBinProperties( 0.0, 6.0, 50, 0.0, 6.0, 50 );
     theV2RAA.computeFor( light_quark, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     theV2RAA.computeFor( gluon, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
     theV2RAA.computeFor( allFlavors, particles_atTimeNow, particles_atTimeNow.size(), "background", _outputTime, v2background );
@@ -3648,13 +3648,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     v2sumPtCutOff[j] = 0.0;
     NmbInRangePtCutOff[j] = 0;       
   }
-
-  int v2pt_binnumber;
-  v2pt_binnumber = 10;   
-  _pt_min_v2 = 0.1;
-  _pt_max_v2 = 3.;
-  d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
-  
+  //TODO: v2 bins setting in clean fashion
+  int v2pt_binnumber; 
   if(_flavTypeToComputeFor==photon)
   {
     v2pt_binnumber = numberOfPhotonV2PtBins; //Paper 2016: 8  
@@ -3664,8 +3659,12 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   }
   else
   {
-    v2pt_binnumber =n_bins;
+    v2pt_binnumber =15;  
+    _pt_min_v2 = 0.1;
+    _pt_max_v2 = 7.0;
+    d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
   }
+  
   double ptBinsV2[eta_bins][v2pt_binnumber+1];
   double ptBinsV2InitialCutOff[eta_bins][v2pt_binnumber+1];  
   int ptBinsNmbV2[eta_bins][v2pt_binnumber+1];
