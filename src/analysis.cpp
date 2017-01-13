@@ -1650,7 +1650,10 @@ void analysis::computeV2RAA( string name, const double _outputTime )
 {
   v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
   
-  const double pt_min_v2RAA = theConfig->getMinimumPT();
+  double pt_min_v2RAA = theConfig->getMinimumPT();
+  if ( theConfig->getInitialStateType() == pythiaShowerInitialState )
+    pt_min_v2RAA = theConfig->getPtCutoff();
+  
   double pt_max_v2RAA, nbins_v2RAA;
   if( pt_min_v2RAA < 35 )
   {

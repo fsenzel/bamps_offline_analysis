@@ -21,6 +21,7 @@
 #include "initialmodel_pythiashower.h"
 #include "random.h"
 #include "particle.h"
+#include <binning.h>
 #include "FPT_compare.h"
 
 using namespace std;
@@ -137,6 +138,8 @@ void initialModel_PYTHIAShower::populateParticleVector( std::vector< Particle >&
     }
     case pythiaShower:
     {
+      binningLog gluonBinning( filename_prefix + "_unshowered_gluons.dat", 30.0, 55.0, 25 );
+      binningLog quarkBinning( filename_prefix + "_unshowered_quarks.dat", 30.0, 55.0, 25 );
       string filename = filename_prefix + "_" + "unshoweredParticles";
       fstream file( filename.c_str(), ios::out | ios::trunc );
       string sep = "\t";
@@ -166,9 +169,19 @@ void initialModel_PYTHIAShower::populateParticleVector( std::vector< Particle >&
           file << n << sep << initialPartons[i].Mom.Px() << sep << initialPartons[i].Mom.Py() << sep << initialPartons[i].Mom.Pz() << sep << initialPartons[i].Mom.E() 
           << sep << tempParticles[0].Pos.X() << sep << tempParticles[0].Pos.Y() << sep << tempParticles[0].Pos.Z() << sep << tempParticles[0].Pos.T()
           << sep << initialPartons[i].FLAVOR << endl;
+          
+          if ( abs( initialPartons[i].Mom.Pseudorapidity(0.0) ) < 0.8 )
+          {
+            if ( initialPartons[i].FLAVOR == gluon )
+              gluonBinning.add( initialPartons[i].Mom.Pt() );
+            else
+              quarkBinning.add( initialPartons[i].Mom.Pt() );
+          }
         }
       }
       file.close();
+      gluonBinning.print();
+      quarkBinning.print();
       break;
     }
     case fixedParton:

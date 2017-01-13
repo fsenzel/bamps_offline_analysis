@@ -2714,7 +2714,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       addedParticles.push_back( tempParticle );
       newIndex = addedParticles.size() - 1;
 
-      addedParticles[newIndex].Propagate( nexttime );
+      addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );
 //   }
   }
   
