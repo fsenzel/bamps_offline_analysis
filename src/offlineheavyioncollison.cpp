@@ -401,8 +401,7 @@ void offlineHeavyIonCollision::mainFramework()
         simulationTime = time_ana;
 
       if(simulationTime > stoptime)
-      {
-        
+      {        
         break;
       }
       
@@ -476,6 +475,7 @@ void offlineHeavyIonCollision::mainFramework()
       
       if( nexttime >= theAnalysis->tstep_movie[nn_ana_movie] || nexttime >= theAnalysis->tstep[nn_ana] )
       {
+        
         dt_backup = dt;
         
         if( nexttime >= theAnalysis->tstep[nn_ana] )  // ask if it is time for analysis
@@ -494,9 +494,7 @@ void offlineHeavyIonCollision::mainFramework()
           {
             cout << "** movie: " << nexttime << endl;
           }
-        }
-        
-        
+        }               
         if ( doAnalysisStep && doMovieStep )
         {
           if( !FPT_COMP_E( theAnalysis->tstep[nn_ana], theAnalysis->tstep_movie[nn_ana_movie] ) )
@@ -505,6 +503,7 @@ void offlineHeavyIonCollision::mainFramework()
             throw eHIC_error( errMsg );
           }
         }      
+            
       }
     
 
@@ -627,7 +626,7 @@ void offlineHeavyIonCollision::mainFramework()
       }
     }
   }
-    while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
+  while ( simulationTime < stoptime && !endOfDataFiles );//fm/c
 
 
 

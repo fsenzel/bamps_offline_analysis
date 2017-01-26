@@ -196,6 +196,7 @@ public:
   void collectEtData( const int step );
   void collectEtDataInitial();
   void printEtDistribution(const int step);
+  void printPxPyPzDistribution(const int step);
   
   void saveNumberOfMediumParticles( const int step );
   void printNumberOfMediumParticles();
@@ -208,7 +209,8 @@ public:
   void printCellV2Distribution( const double nexttime, unsigned int timestepCount);
   /** @brief Generate the distributions for dileptons. */
   void computeAndPrintDileptonSpectra(string name, const double _outputTime );
-  
+  /** @brief Generate px,py,pz histograms */
+  void PxPyPzDistributionQuarks( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step );
   
   void setSeed( uint32_t _s ) { seed = _s; }
   uint32_t getSeed( ) const { return seed; }
@@ -297,6 +299,7 @@ private:
   bool studyTempCustom;
   bool studyThermalisation;
   bool studyMFP;
+  bool studyPxPyPz;
  
   
   void writePartclMovie( const int step ) const;
@@ -326,10 +329,15 @@ private:
   
   std::vector<double> *yBins_gluon, *yBins_up, *yBins_down, *yBins_strange, *yBins_anti_up, *yBins_anti_down, *yBins_anti_strange;
   std::vector<double> *transverseEnergyGluons, *transverseEnergyQuarks, *transverseEnergyAntiQuarks;
+  std::vector<std::vector<double>> *pxDistro, *pyDistro, *pzDistro;
+  
   std::vector<double> yBinLabels;
   double minY, maxY, binWidthY;
   int numberBinsY;  
 
+  
+  double minP,maxP,binWidthP,numberBinsP;
+  
   std::vector<int> NumberOfQuarks,NumberOfAntiquarks,NumberOfGluons;
   
   
@@ -360,6 +368,7 @@ private:
   binning PhotondNOverTwoPiptdydptBin;
   binning cellV2,cellV2Weighted;
   binning partonEnergies,quarkEnergies,gluonEnergies;
+  
   
   double jetTracking_PT;  
   

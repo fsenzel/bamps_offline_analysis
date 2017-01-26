@@ -525,7 +525,7 @@ analysis::analysis( config* const c ):
     tstep[81]=infinity;
     nTimeSteps = 82;
   }
-  else if(studyThermalisation||studyPartons) 
+  else if(studyThermalisation||studyPartons||studyPxPyPz) 
   { 
     tstep[0]=.15;
     tstep[1]=.2;
@@ -1772,6 +1772,41 @@ analysis::analysis( config* const c ):
     quarkEnergies.setMinMaxN( 0.0, 3.0, 20 );
     gluonEnergies.setMinMaxN( 0.0, 3.0, 20 );
   }
+
+  if(studyPxPyPz)
+  {
+    minP=0.1;
+    maxP=20;
+    binWidthP=0.5;
+    
+    numberBinsP = int(( maxP - minP + 0.00001 ) / binWidthP );
+    //------ initialisation of transverse energy binning ------
+    //------ use the same bins as for rapidity binning ------
+    pxDistro = new vector<std::vector<double>>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    pyDistro = new vector<std::vector<double>>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    pzDistro = new vector<std::vector<double>>[nTimeSteps+2];          //+2 because of initial and final timesteps
+    
+    std::vector<double> rapidities;
+    for ( int k = 0; k <= rapidityRanges.size(); k++ )
+    {    
+      rapidities.push_back( 0 );
+    }
+    
+    for ( int j = 0; j < nTimeSteps + 2; j++ )          //+2 because of initial and final timesteps
+    {
+      for ( int i = 0; i <= numberBinsP; i++ )
+      {
+        pxDistro[j].push_back( rapidities );
+        pyDistro[j].push_back( rapidities );
+        pzDistro[j].push_back( rapidities );
+      }
+//       cout << pxDistro[j][3][2] << endl;
+//       exit(0);
+    }
+    //--------------------------------------------------    
+  }
+  
+  
 }
 
 
@@ -1814,6 +1849,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyDileptons = false;
   studyThermalisation = false;
   studyPartons = false;
+  studyPxPyPz = false;
   
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -2074,9 +2110,26 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 1.0 );//1                 // LHC
       rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );//1                 // LHC
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 5.0 );//1                 // LHC
+      rapidityRanges.push_back(yRange);
       studyPartons=true;
       break;      
-      
+     case only_pxpypz:
+      studyPxPyPz=true;
+      rapidityRanges.clear();
+      yRange.reset( 0, 0.35 );//rapidityRange[0] // RHIC
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.5 );//rapidityRange[0] // RHIC
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 1.0 );//1                 // LHC
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 2.0 );//1                 // LHC
+      rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 5.0 );//1                 // LHC
+      rapidityRanges.push_back(yRange);
+      break;        
     default:
       break;
   } 
@@ -2227,13 +2280,66 @@ void analysis::printEtDistribution(const int step )
  
  file.close();
  
- 
- 
-  
-  
 }
 
+void analysis::printPxPyPzDistribution(const int step )
+{
+  string filename,timename;
+  stringstream ss,sst;
 
+  cout << "Print dN/dpx dN/pdy dN/dpz" << endl;
+  
+  if ( step == 0 )
+  {
+    timename = "initial";
+  }
+  else if ( step == nTimeSteps + 1 )
+  { 
+    timename = "final";
+  }
+  else
+  {
+    ss << step;
+    timename = "timestep_" + ss.str();
+    sst << tstep[step];
+//     timename += "_time_"+sst.str() + "fm";
+  }
+
+  //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+  filename = filename_prefix + "_dNdpxyz" + "_" + timename + ".dat";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
+
+  //---- print header if file is empty ----
+  time_t end;
+  time( &end );
+
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if ( size == 0 )
+    printHeader( file, dEtdy, end );
+  
+  file << "#p[GeV]\t#dN/px/dy\t#dN/dpy/dy\t#dN/dpz/dy" << endl;
+  for ( int i = 0; i <= numberBinsP; i++ )
+  {      
+    file <<  minP + (  (i*binWidthP )  +  (  (i+1)*binWidthP ) )/2.;
+    file << "\t";
+      for ( int yRangeIndex = 0; yRangeIndex < rapidityRanges.size(); yRangeIndex++ )
+      {
+
+        file <<   pxDistro[step][i][yRangeIndex]/binWidthP;
+        file << "\t";
+        file <<   pyDistro[step][i][yRangeIndex]/binWidthP;
+        file << "\t";
+        file <<   pzDistro[step][i][yRangeIndex]/binWidthP; 
+        file << "\t";
+      }
+    file << endl;
+  }
+ 
+ file.close();
+ 
+}
 
 
 
@@ -2277,6 +2383,97 @@ void analysis::PtDistributionPhotons( const double PTofThisSinglePhoton, const d
     }
   }  
 }
+
+
+/** Bin the Pt distribution for photons with two methods. For double-checking and some tests.
+ * 
+ * @param[in] PTofThisSinglePhoton PT value [GeV] of single photon
+ * @param[in] etaOfThisSinglePhoton eta value of single photon
+ * @param[in] EofSinglePhoton E value [GeV] of single photon
+ */
+void analysis::PxPyPzDistributionQuarks( const FLAVOR_TYPE _flavTypeToComputeFor, vector<ParticleOffline>& _particles, const int n_particles, const int step )
+{
+  double px,py,pz, y;
+  vector<std::vector<double>> * _pxDistro;
+  vector<std::vector<double>> *_pyDistro;
+  vector<std::vector<double>> *_pzDistro;
+  
+  int eta_bins = rapidityRanges.size();
+  double eta;
+  
+  _pxDistro = pxDistro;
+  _pyDistro = pyDistro;
+  _pzDistro = pzDistro;
+
+  cout << "Compute px py pz spectra "<< step << endl;
+  
+  for ( int j = 0; j < n_particles; j++ )
+  {
+    px = _particles[j].Mom.Px();
+    py = _particles[j].Mom.Py();
+    pz = _particles[j].Mom.Pz();
+    y = _particles[j].Mom.Rapidity();
+    eta=y;
+    // individually check for each rapidity range whether this particle needs to be binned
+    for ( int yRangeIndex = 0; yRangeIndex < eta_bins; yRangeIndex++ )
+    {
+      if ( fabs( eta ) >= rapidityRanges[yRangeIndex].yleft && fabs( eta ) <= rapidityRanges[yRangeIndex].yright )
+      {    
+        FLAVOR_TYPE genFlavor = ParticleOffline::mapToGenericFlavorType( _particles[j].FLAVOR );
+        if ( (  genFlavor == _flavTypeToComputeFor ) ||( _flavTypeToComputeFor == light_quark && ( genFlavor == light_quark || genFlavor == anti_light_quark ) ) )
+        {
+          if ( px <= maxP && px >= minP)
+          {
+            if ( px == maxP )
+            {
+              _pxDistro[step][numberBinsP - 1][yRangeIndex] += px;
+            }
+            else
+            {
+              if ( px == minP )
+                _pxDistro[step][0][yRangeIndex] += px;
+              else
+                _pxDistro[step][int(( px - minP )/binWidthP )][yRangeIndex] += px;
+            }
+          }
+          if ( py <= maxP && py >= minP)
+          {
+            if ( py == maxP )
+            {
+              _pyDistro[step][numberBinsP - 1][yRangeIndex] += py;
+            }
+            else
+            {
+              if ( py == minP )
+                _pyDistro[step][0][yRangeIndex] += py;
+              else
+                _pyDistro[step][int(( py - minP )/binWidthP )][yRangeIndex] += py;
+            }
+          }
+          if ( pz <= maxP && pz >= minP)
+          {
+            if ( pz == maxP )
+            {
+              _pzDistro[step][numberBinsP - 1][yRangeIndex] += pz;
+            }
+            else
+            {
+              if ( pz == minP )
+                _pzDistro[step][0][yRangeIndex] += pz;
+              else
+                _pzDistro[step][int(( pz - minP )/binWidthP )][yRangeIndex] += pz;
+            }
+          }
+          //----------------------------------------------------------------
+        }
+      }
+    }
+  }
+}
+
+
+
+
 
 /** Bin the cellV2 distribution
  * 
@@ -2502,9 +2699,13 @@ void analysis::intermediateOutput( const int nn )
   }
   if(studyPartons)
   {
-     computeV2RAA( name, tstep[nn] );    
+    computeV2RAA( name, tstep[nn] );    
   }
-  
+  if(studyPxPyPz)
+  {
+    PxPyPzDistributionQuarks( light_quark, particles_atTimeNow, particles_atTimeNow.size(), nn+1 );
+    printPxPyPzDistribution(nn+1);
+  }
   if ( v2output && v2outputIntermediateSteps )
     computeV2RAA( name, tstep[nn] );
 
@@ -3659,13 +3860,14 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   }
   else
   {
-    v2pt_binnumber =15;  
+    v2pt_binnumber = 20;  
     _pt_min_v2 = 0.1;
-    _pt_max_v2 = 7.0;
+    _pt_max_v2 = 15.0;
     d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
   }
   
   double ptBinsV2[eta_bins][v2pt_binnumber+1];
+  double ptBinsV2sq[eta_bins][v2pt_binnumber+1];
   double ptBinsV2InitialCutOff[eta_bins][v2pt_binnumber+1];  
   int ptBinsNmbV2[eta_bins][v2pt_binnumber+1];
   int ptBinsNmbInitialCutOffV2[eta_bins][v2pt_binnumber+1];
@@ -3698,6 +3900,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     for ( int i = 0;i < eta_bins;i++ )
     {
       ptBinsV2[i][j] = 0.0;
+      ptBinsV2sq[i][j] = 0.0;
       ptBinsNmbV2[i][j] = 0.0;
 
       ptBinsV2InitialCutOff[i][j] = 0.0;
@@ -3777,7 +3980,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
         ParticleOffline::mapToGenericFlavorType( _flavTypeToComputeFor ) == bmeson_gen ||
         ParticleOffline::mapToGenericFlavorType( _flavTypeToComputeFor ) == jpsi
     )
-      eta = _particles[i].Mom.Rapidity();
+    
+    eta = _particles[i].Mom.Rapidity();
 
     v2 = ( pow( _particles[i].Mom.Px(), 2.0 ) - pow( _particles[i].Mom.Py(), 2.0 ) ) / pow( pt, 2.0 );
 
@@ -3832,7 +4036,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
               ptBinsV2InitialCutOff[yRangeIndex][dummy] += v2;
               ptBinsNmbInitialCutOffV2[yRangeIndex][dummy]++;
             }           
-            ptBinsV2[yRangeIndex][dummy] += v2;     
+            ptBinsV2[yRangeIndex][dummy] += v2;   
+            ptBinsV2sq[yRangeIndex][dummy] += v2*v2; 
             ptBinsNmbV2[yRangeIndex][dummy]++;
           }
           
@@ -4046,6 +4251,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     {
       print_v2_summed.width( 15 );
       print_v2_summed << ptBinsV2[i][k];
+      print_v2_summed.width( 10 );
+      print_v2_summed << ptBinsV2sq[i][k];
       print_v2_summed.width( 10 );
       print_v2_summed << ptBinsNmbV2[i][k];
       if(studyInitialCutOffEffect)
