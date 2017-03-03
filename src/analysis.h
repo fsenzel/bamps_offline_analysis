@@ -266,9 +266,8 @@ private:
   bool studyCentralDensity;
   bool studyBackground;
   bool studyScatteredMediumParticles;
-  
-  
-  
+  bool studyHQCorrelations;
+    
   void writePartclMovie( const int step ) const;
   void yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
   void transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
@@ -391,7 +390,7 @@ private:
   void writeJpsiFugacityOutput(const int step);
   void getJpsiFugacity(const double time, const double dr, const double dz, double& fugacity, int& n_charm, double& temp, double& deltaTemp);
   void jpsi_correlations();
-  void ini_charm_correlations();
+  void hq_correlations( const string subfix );
   
   interpolation_nJpsi theInterpolation_nJpsi;
 

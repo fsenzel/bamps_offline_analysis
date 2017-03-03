@@ -506,7 +506,8 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyCentralDensity = false; // density in central part of collision
   studyBackground = false; // print also properties like v2, RAA of background
   studyScatteredMediumParticles = false; // print scattered medium particles
-  
+  studyHQCorrelations = false; // angular correlations between heavy quarks
+
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
   analysisRapidityRange yRange;
@@ -708,7 +709,11 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     case central_densities:
       studyCentralDensity = true;
       break;
-      
+
+    case hq_corr:
+      studyHQCorrelations = true;
+      break;
+
     default:
       break;
   }
@@ -803,10 +808,14 @@ void analysis::initialOutput()
   if ( studyJpsi ) // to consider charm annihaltion is just useful if added particles can scatter
   { 
     jpsiEvolution( 0 );
-    ini_charm_correlations();
     writeJpsiFugacityOutput( 0 );
   }
   
+  if( studyHQCorrelations )
+  {
+    hq_correlations( "initial");
+  }
+
   if( studyTempInTube)
      writeTempInTube( 0 );
   
@@ -899,6 +908,12 @@ void analysis::finalOutput( const double _stoptime )
     scatteredMediumParticlesOutput( nTimeSteps );
     mediumParticlesOutput( nTimeSteps );
   }
+
+  if( studyHQCorrelations )
+  {
+    hq_correlations( "final" );
+  }
+
 }
 
 
@@ -1635,7 +1650,10 @@ void analysis::computeV2RAA( string name, const double _outputTime )
 {
   v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
   
-  const double pt_min_v2RAA = theConfig->getMinimumPT();
+  double pt_min_v2RAA = theConfig->getMinimumPT();
+  if ( theConfig->getInitialStateType() == pythiaShowerInitialState )
+    pt_min_v2RAA = theConfig->getPtCutoff();
+  
   double pt_max_v2RAA, nbins_v2RAA;
   if( pt_min_v2RAA < 35 )
   {
@@ -3392,18 +3410,23 @@ void analysis::jpsi_correlations()
 
 
 
-void analysis::ini_charm_correlations()
+void analysis::hq_correlations( const string subfix )
 {
   double cos_delta_phi, cos_delta_theta, eta, eta_charm, delta_eta;
   string filename;
 
-
-  filename = filename_prefix + "_phibins_deltaPhiIniCharm";
-  binning phibins_deltaPhiIniCharm(filename, 0.0, M_PI, 30);
-  filename = filename_prefix + "_phibins_deltaThetaIniCharm";
-  binning phibins_deltaThetaIniCharm(filename, 0.0, M_PI, 30);
-  filename = filename_prefix + "_etabins_detaIniCharm";
-  binning etabins_detaIniCharm(filename, 0.0, 20.0, 70);
+  filename = filename_prefix + "_phibins_deltaPhiCharm" + subfix;
+  binning phibins_deltaPhiCharm(filename, 0.0, M_PI, 30);
+  filename = filename_prefix + "_phibins_deltaThetaCharm" + subfix;
+  binning phibins_deltaThetaCharm(filename, 0.0, M_PI, 30);
+  filename = filename_prefix + "_etabins_detaCharm" + subfix;
+  binning etabins_detaCharm(filename, 0.0, 20.0, 70);
+  filename = filename_prefix + "_phibins_deltaPhiBottom" + subfix;
+  binning phibins_deltaPhiBottom(filename, 0.0, M_PI, 30);
+  filename = filename_prefix + "_phibins_deltaThetaBottom" + subfix;
+  binning phibins_deltaThetaBottom(filename, 0.0, M_PI, 30);
+  filename = filename_prefix + "_etabins_detaBottom" + subfix;
+  binning etabins_detaBottom(filename, 0.0, 20.0, 70);
 
   for ( unsigned int i = 0; i < addedParticles.size(); i++ )
   {
@@ -3416,23 +3439,47 @@ void analysis::ini_charm_correlations()
         if( addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_pp &&  ( addedParticles[j].FLAVOR == 7 || addedParticles[j].FLAVOR == 8 ) )
         {
           cos_delta_phi = CosPhi( addedParticles[i].Mom, addedParticles[j].Mom );
-          phibins_deltaPhiIniCharm.add( acos(cos_delta_phi) );
+          phibins_deltaPhiCharm.add( acos(cos_delta_phi) );
           
           cos_delta_theta = CosTheta( addedParticles[i].Mom, addedParticles[j].Mom );
-          phibins_deltaThetaIniCharm.add( acos(cos_delta_theta) );
+          phibins_deltaThetaCharm.add( acos(cos_delta_theta) );
           
           // delta eta
           eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
           delta_eta = fabs( eta - eta_charm );
-          etabins_detaIniCharm.add( delta_eta );
+          etabins_detaCharm.add( delta_eta );
+        }
+      }
+    }
+
+    if ( addedParticles[i].FLAVOR == 9 || addedParticles[i].FLAVOR == 10 )
+    {
+      eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
+
+      for ( unsigned int j = i+1; j < addedParticles.size(); j++ )
+      {
+        if( addedParticles[j].N_EVENT_pp == addedParticles[i].N_EVENT_pp &&  ( addedParticles[j].FLAVOR == 9 || addedParticles[j].FLAVOR == 10 ) )
+        {
+          cos_delta_phi = CosPhi( addedParticles[i].Mom, addedParticles[j].Mom );
+          phibins_deltaPhiBottom.add( acos(cos_delta_phi) );
+
+          cos_delta_theta = CosTheta( addedParticles[i].Mom, addedParticles[j].Mom );
+          phibins_deltaThetaBottom.add( acos(cos_delta_theta) );
+
+          // delta eta
+          eta_charm = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
+          delta_eta = fabs( eta - eta_charm );
+          etabins_detaBottom.add( delta_eta );
         }
       }
     }
   }
-  phibins_deltaPhiIniCharm.print();
-  phibins_deltaThetaIniCharm.print();
-  etabins_detaIniCharm.print();
-
+  phibins_deltaPhiCharm.print();
+  phibins_deltaThetaCharm.print();
+  etabins_detaCharm.print();
+  phibins_deltaPhiBottom.print();
+  phibins_deltaThetaBottom.print();
+  etabins_detaBottom.print();
 }
 
 

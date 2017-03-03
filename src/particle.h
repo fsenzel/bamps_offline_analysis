@@ -19,6 +19,7 @@
 
 #include "particleprototype.h"
 
+#include "allocator.h"
 #include "bampsvector.h"
 
 /**
@@ -123,5 +124,12 @@ class Particle : public ParticlePrototype
     
     int step,tstep,taustep;//fm
 };
+
+#ifdef BAMPS_DECLARE_ALLOCATOR
+BAMPS_DECLARE_ALLOCATOR(Particle);
+#else
+#warning "ALLOCATOR not defined"
+#endif
+
 
 #endif

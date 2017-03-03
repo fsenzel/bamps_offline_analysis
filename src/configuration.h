@@ -32,7 +32,7 @@
 
 
 /** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, fixedShowerInitialState, fixedPartonInitialState, pythiaShowerInitialState };
+enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, fixedShowerInitialState, fixedPartonInitialState, pythiaShowerInitialState, photonShowerInitialState, charmShowerInititalState, bottomShowerInitialState };
 
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
@@ -56,6 +56,7 @@ alice_hq_nonPromptJpsi = 115,
 phenix_jpsi = 131,
 alice_jpsi = 141,
 cms_jpsi = 151,
+hq_corr = 181,
 // jets:
 background_jets = 161,
 central_densities = 171
