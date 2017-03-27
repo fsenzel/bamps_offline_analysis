@@ -1014,6 +1014,12 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     {
       particlesEvolving[i].init = false;
     }
+    if( ( theConfig->doScattering_22_photons() || theConfig->doScattering_23_photons() ) && !(theConfig->useInitialFormationTimesForPhotonproduction()) )
+    {
+      particlesEvolving[i].init = false;
+      particlesEvolving[i].Pos.T() = evolveToTime - 1.0e-6 ;
+    }
+    
   }
 
   // duplicate partcl from cascade to partclAtTimeNow

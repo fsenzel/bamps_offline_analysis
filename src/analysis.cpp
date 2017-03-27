@@ -3854,15 +3854,15 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   if(_flavTypeToComputeFor==photon)
   {
     v2pt_binnumber = numberOfPhotonV2PtBins; //Paper 2016: 8  
-    _pt_min_v2 = 0.1;
-    _pt_max_v2 = 6.0;
+    _pt_min_v2 = 0.005;
+    _pt_max_v2 = 0.6;
     d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
   }
   else
   {
     v2pt_binnumber = 20;  
-    _pt_min_v2 = 0.005;
-    _pt_max_v2 = 0.6;
+    _pt_min_v2 = 0.1;
+    _pt_max_v2 = 6;
     d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
   }
   
