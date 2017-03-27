@@ -336,6 +336,9 @@ class config : public configBase
   /** @brief Interface for restrictParentPTForPhotonproduction for Photonproduction */  
   bool getRestrictParentPTForPhotons() const {return restrictParentPTForPhotonproduction;} 
   
+  /** @brief Interface to the flag if formation times should be used for photonproduction. */
+  bool useInitialFormationTimesForPhotonproduction() const {return useFormationTimesForPhotonproduction;}
+  
   /** @brief Interface for mfpCellAveraging */  
   bool getMfpCellAveraging() const {return mfpCellAveraging;}   
  
@@ -679,6 +682,9 @@ class config : public configBase
   
   /** @brief If there should be averaging over 3 cells to compute the mean free path. */
   bool mfpCellAveraging;
+
+  /** @brief If scattering among offline particles to photons should use the initial formation time veto. */
+  bool useFormationTimesForPhotonproduction;
   
   /** @brief Used external magnetic field given as eB/mpi^2.*/
   double usedExternalField;

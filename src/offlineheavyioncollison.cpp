@@ -367,7 +367,11 @@ void offlineHeavyIonCollision::mainFramework()
   int n_dt = 0;
   double dt_sum = 0.0;
   int n_again = 0;
-
+  
+  if(!theConfig->useInitialFormationTimesForPhotonproduction())
+  {
+    cout << "No formation times for photon scattering" << endl;
+  }
 
   cout << "Maximum Run Time set to " << stoptime << endl;
   if(onlyMediumEvolution)
@@ -1052,7 +1056,7 @@ void offlineHeavyIonCollision::cell_ID( double _time )
 
   for ( unsigned int i = 0; i < particles_atTimeNow.size(); i++ )
   {
-    if ( particles_atTimeNow[i].Pos.T() < _time )
+    if ( particles_atTimeNow[i].Pos.T() < _time || !(theConfig->useInitialFormationTimesForPhotonproduction()) )
     {
       NinAct++;
       particles_atTimeNow[i].init = false;
