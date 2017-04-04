@@ -1,10 +1,15 @@
 #ifndef HADRONIZATION_HQ_H
 #define HADRONIZATION_HQ_H
 
+#include <iostream>
+#include <math.h>
+#include "particleOffline.h"
+#include "random.h"
+
 class hadronization_hq
 {
   public:
-    void heavyQuarkFragmentation();
+    std::vector<ParticleOffline> heavyQuarkFragmentation( std::vector<ParticleOffline> particlesToHadronize );
 
   private:
     double getFragmentationZ(const int flav);

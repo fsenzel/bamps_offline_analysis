@@ -280,13 +280,13 @@ void offlineHeavyIonCollision::mainFramework()
   if( theConfig->isHadronizationHQ() )
   {
     hadronization_hq ppHadronization_hq;
-    ppHadronization_hq.heavyQuarkFragmentation();
+    addedParticlesCopy = ppHadronization_hq.heavyQuarkFragmentation( addedParticles );
   }
   if( theConfig->isMesonDecay() )
   {
 #ifdef Pythia_FOUND
     mesonDecay ppMesonDecay( theConfig->getNumberElectronStat(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
-    ppMesonDecay.decayToElectronsPythia();
+    addedPartcl_electron = ppMesonDecay.decayToElectronsPythia( addedParticlesCopy );
 #else
     string errMsg( "Could not perform decay of heavy mesons to electron because PYTHIA was not found." );
     throw eHIC_error( errMsg );
@@ -542,13 +542,13 @@ void offlineHeavyIonCollision::mainFramework()
   if( theConfig->isHadronizationHQ() )
   {
     hadronization_hq theHadronization_hq;
-    theHadronization_hq.heavyQuarkFragmentation();
+    addedParticlesCopy = theHadronization_hq.heavyQuarkFragmentation( addedParticles );
   }
   if( theConfig->isMesonDecay() )
   {
 #ifdef Pythia_FOUND
     mesonDecay theMesonDecay( theConfig->getNumberElectronStat(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
-    theMesonDecay.decayToElectronsPythia();
+    addedPartcl_electron = theMesonDecay.decayToElectronsPythia( addedParticlesCopy );
 #else
     string errMsg( "Could not perform decay of heavy mesons to electron because PYTHIA was not found." );
     throw eHIC_error( errMsg );

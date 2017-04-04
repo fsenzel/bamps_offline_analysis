@@ -1,16 +1,23 @@
 #ifndef MESONDECAY_H
 #define MESONDECAY_H
 
+#include <iostream>
+#include <math.h>
+#include <iomanip>
 #include <stdexcept>
 #include <string>
+
 #include "Pythia8/Pythia.h"
+
+#include "particleOffline.h"
+#include "configBAMPS.h"
 
 class mesonDecay
 {
   public:
     mesonDecay( const int numberElectronStat_arg, const bool muonsInsteadOfElectrons_arg = false, const bool nonPromptJpsiInsteadOfElectrons_arg = false );
     void decayToElectronsToyModel();
-    void decayToElectronsPythia();
+    std::vector<ParticleOffline> decayToElectronsPythia( std::vector<ParticleOffline> hadronsToDecay );
 
   private:
     void mesonToElectronToyModel(double P[4], int & F);
