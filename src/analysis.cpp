@@ -2685,6 +2685,7 @@ void analysis::intermediateOutput( const int nn )
   ss << tstep[nn];
   name = ss.str() + "fm";
 
+  
  if( studyEtSpectra)
   { 
     cout << "Analyse Et Spectra at analysis timestep " << nn << " at time " <<  tstep[nn] << endl;
@@ -2699,7 +2700,7 @@ void analysis::intermediateOutput( const int nn )
   }
   if(studyPartons)
   {
-    computeV2RAA( name, tstep[nn] );    
+    //computeV2RAA( name, tstep[nn] );    
   }
   if(studyPxPyPz)
   {
@@ -2744,7 +2745,6 @@ void analysis::intermediateOutput( const int nn )
   {
     writePhotonSpaceProfile(nn+1);   
   }
-  
 }
 
 
@@ -3659,7 +3659,7 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   }
   if( studyPhotons )
   {
-    cout << "analyse Photons. Size of Photon vector: " << noninteractingParticles.size() <<  endl;
+    cout << "Analyse Photons. Size of Photon vector: " << noninteractingParticles.size() <<  endl;
     //if(theConfig->v2_bigger > theConfig->v2_smaller) cout << "bigger! " << theConfig->v2_bigger - theConfig->v2_smaller << endl;
     //if(theConfig->v2_bigger < theConfig->v2_smaller) cout << "smaller! " << -theConfig->v2_bigger + theConfig->v2_smaller << endl; 
     //cout << "# Number of colliding pairs with average positive v2: " << theConfig->countPositiveV2 << endl;
@@ -3824,7 +3824,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     _pt_min = pt_min;
   }
   
-  // avoid problem with binning pt logaritmitically: cannot deal with pt = 0
+  // avoid problem with binning pt logarithmically: cannot deal with pt = 0
   if( _pt_min < 0.1 )
     _pt_min = 0.1;
   
@@ -3854,8 +3854,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   if(_flavTypeToComputeFor==photon)
   {
     v2pt_binnumber = numberOfPhotonV2PtBins; //Paper 2016: 8  
-    _pt_min_v2 = 0.005;
-    _pt_max_v2 = 0.6;
+    _pt_min_v2 = 0.03;
+    _pt_max_v2 = 0.2;
     d_ln_pt_v2 = ( log( _pt_max_v2 ) - log( _pt_min_v2 ) ) / v2pt_binnumber;
   }
   else
@@ -3947,7 +3947,8 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
  
   PhotonNumberVsAngleBin.print(print_angle_distribution);
   
-    
+  double v2avg=0.;
+  int v2avgN=0;  
   // compute v2 and bin it into pt bins
   for ( int i = 0; i < n_particles; i++ )
   {
@@ -4040,7 +4041,12 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
             ptBinsV2sq[yRangeIndex][dummy] += v2*v2; 
             ptBinsNmbV2[yRangeIndex][dummy]++;
           }
-          
+          //online_evaluation
+          if(pt<0.1 && yRangeIndex==1)
+          {
+            v2avg+=v2;
+            v2avgN++;
+          }
           
           // Yield
           if ( pt <= _pt_max && pt > _pt_min )
@@ -4067,8 +4073,12 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       }
     }
   }
-
-  cout << "binning done" << endl;
+  
+//   cout << "Photon v2= " << 100*v2avg/v2avgN << " % of N= " << v2avgN << endl; 
+//   cout << "BINNED VALUES: " << endl;  
+//   for(int binN=0;binN<v2pt_binnumber + 1;binN++) 
+//     cout << exp( double( binN ) * d_ln_pt_v2 + log( _pt_min_v2 ) + d_ln_pt_v2 / 2.0 )<< "\t" << ptBinsV2[1][binN]/ptBinsNmbV2[1][binN] << "\n";
+  
   
   int binMax = 0;
   int binMin = n_particles;

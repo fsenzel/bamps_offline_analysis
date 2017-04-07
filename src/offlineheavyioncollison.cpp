@@ -516,6 +516,46 @@ void offlineHeavyIonCollision::mainFramework()
       deadParticleList.clear();
       scattering( nexttime, again);
       
+//       {
+//         double v2avg=0.;
+//         int v2avgN=0;
+//         double v2,pt,eta;
+//         for(int i=0; i< particles_atTimeNow.size(); i++)
+//         {
+//           pt = particles_atTimeNow[i].Mom.Pt();
+//           // for most particle species we are interested in the pseudorapidity (for massless particle it does not matter anyhow)
+//           eta = particles_atTimeNow[i].Mom.Rapidity();
+//           v2 = ( pow( particles_atTimeNow[i].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[i].Mom.Py(), 2.0 ) ) / pow( pt, 2.0 );
+//           if(pt<0.1 && -0.5 < eta && 0.5 > eta )
+//           {
+//             v2avg+=v2;
+//             v2avgN++;
+//           }
+//         }
+//         cout << "Parton v2= " << 100*v2avg/v2avgN << " % N = " << v2avgN  << endl; 
+//       }
+//       {
+//         double v2avg=0.;
+//         int v2avgN=0;
+//         double v2,pt,eta;
+//         
+//         for(int i=0; i< noninteractingParticles.size(); i++)
+//         {
+//           pt = noninteractingParticles[i].Mom.Pt();
+//           // for most particle species we are interested in the pseudorapidity (for massless particle it does not matter anyhow)
+//           eta = noninteractingParticles[i].Mom.Rapidity();
+//           v2 = ( pow( noninteractingParticles[i].Mom.Px(), 2.0 ) - pow( noninteractingParticles[i].Mom.Py(), 2.0 ) ) / pow( pt, 2.0 );
+//           if(pt<0.1 && -0.5 < eta && 0.5 > eta )
+//           {
+//             v2avg+=v2;
+//             v2avgN++;
+//           }
+//         }
+//         if(v2avgN>0)
+//         cout << "Photon v2= " << 100*v2avg/v2avgN << " %  of N=" << v2avgN << endl;       
+//       }
+      
+      
       //theAnalysis->printCellV2Distribution(nexttime, simpleTimestepcount);
       //simpleTimestepcount++; 
       // if time step is too large -> collide again with smaller time step
@@ -613,6 +653,25 @@ void offlineHeavyIonCollision::mainFramework()
       deadParticleList.clear();
     
       scattering( simulationTime, again );*/
+      {
+        double v2avg=0.;
+        int v2avgN=0;
+        double v2,pt,eta;
+        for(int i=0; i< particles_atTimeNow.size(); i++)
+        {
+          pt = particles_atTimeNow[i].Mom.Pt();
+          // for most particle species we are interested in the pseudorapidity (for massless particle it does not matter anyhow)
+          eta = particles_atTimeNow[i].Mom.Rapidity();
+          v2 = ( pow( particles_atTimeNow[i].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[i].Mom.Py(), 2.0 ) ) / pow( pt, 2.0 );
+          if(pt<0.1 && -0.5 < eta && 0.5 > eta )
+          {
+            v2avg+=v2;
+            v2avgN++;
+          }
+        }
+        cout << "Parton v2= " << 100*v2avg/v2avgN << " % N = " << v2avgN  << endl; 
+      }
+      
       
       if ( FPT_COMP_E( simulationTime, theAnalysis->tstep[nn_ana] ) ) // ask if it is time for analysis
       {
@@ -1335,9 +1394,15 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   
   int centralEtaIndex = static_cast<int>( etaBins.size() ) / 2;
   
+  //v2 of partons in this routine:    
+  double v2avg=0.;
+  int v2avgN=0;
+  
+  
   // go through cells
   for ( int etaSliceIndex = etaBins.min_index(); etaSliceIndex <= etaBins.max_index(); etaSliceIndex++ )
   {
+    //cout << "Eta slice: " << etaSliceIndex << endl;
     //---------- populate the ring structure for averages ----------
     dz = simulationTime * ( tanh( etaBins[etaSliceIndex].right ) - tanh( etaBins[etaSliceIndex].left ) );
     
@@ -1391,13 +1456,14 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
       theAnalysis->centralRingsCopyFromCascade = rings;
     }
     //---------- populate the ring structure for averages ----------
-    
+
     // scatterings in cell or not?
     //For each eta-slice, the cells have the same volume.
     dv = dx * dy * dz;
     //Loop through cells
     for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
     { 
+      
       /*if ( !( cells[j].empty()) )
       { 
         cells[j].resetStoredValues();
@@ -1867,9 +1933,23 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             unsigned int tempPhotons = totalPhotonNumber;
             if( theConfig->isScatt_amongBackgroundParticles() )
             {
-                if( theConfig->doScattering_22_photons())
-                {
+                if( theConfig->doScattering_22_photons() && nexttime >0.2)
+                { 
                   scatt22_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
+//                   for ( int i = 0; i < static_cast<int>( allParticlesList.size() ) - 1; i++ )
+//                   {
+//                     int iscat = allParticlesList[i]; 
+//                     double v2,pt,eta;  
+//                     pt = particles_atTimeNow[iscat].Mom.Pt();
+//                     // for most particle species we are interested in the pseudorapidity (for massless particle it does not matter anyhow)
+//                     eta = particles_atTimeNow[iscat].Mom.Rapidity();
+//                     v2 = ( pow( particles_atTimeNow[iscat].Mom.Px(), 2.0 ) - pow( particles_atTimeNow[iscat].Mom.Py(), 2.0 ) ) / pow( pt, 2.0 );
+//                     if(pt<0.1 && -0.5 < eta && 0.5 > eta )
+//                     {
+//                       v2avg+=v2;
+//                       v2avgN++;
+//                     }
+//                   }
                 }
                 
                 if( theConfig->doScattering_22_dileptons())
@@ -2077,7 +2157,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
     }
     
   }
-  
+  //cout << "Scattering Parton v2= " << 100*v2avg/v2avgN << " % N = " << v2avgN  << endl; 
   formGeomCopy.clear();
   
   // J/psi dissociation: if temperature in cell is higher than Td = 2 Tc, decay J/psi to two charm quarks
@@ -2474,8 +2554,8 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons( cellCon
   // is taken for simulation. The scale factor depends on the inital state (gg->X has a different number of pairs than gq->X etc.)
   double scaleForSelectedPairs = 0;
   const int allPairs = binomial ( N, 2 );
-
-  if ( allPairs >= 50 )
+  
+  if ( allPairs >= 5000 )
   {   //only a certain number consideredPairs of all pairs will be considered  
     for ( int i = 0; i < consideredPairs; i++ )
     {
@@ -3860,7 +3940,11 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     else   // Debye-screened 22 photonproduction
     {
       //Same lower cutoff as used for tables.
-      s_cutoff_for_pqcd =  0.1;//( 1.1 * ns_casc::lambda2 ) ;
+      //WARNING
+      s_cutoff_for_pqcd =  0.0001;//0.01;//( 1.1 * ns_casc::lambda2 ) ;
+      //For very low pT effects, this cutoff must be set to a small number. This number however, must be inline with the value of the matrix element at the smallest
+      //s which could happen. In the routine get_mandelstam_t() the matrix element is checked to be greater than 10e-15. For values of s smaller than 
+      //10e-5 it is about 10e-15. So 10e-4 as lower s cutoff should be fine.
     }
 
   }
@@ -3957,12 +4041,12 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
 
     if ( FPT_COMP_G(probab22, 2.0) )
     {
-      cout << "P23 photons=" << probab22 << ">1" << endl;
+      cout << "P22 photons=" << probab22 << ">1" << endl;
       again = true;
       dt = 0.5 * dt;
     }else if ( FPT_COMP_G(probab22, 1.0) )
     {
-      cout << "P23 photons=" << probab22 << ">1" << endl;
+      cout << "P22 photons=" << probab22 << ">1" << endl;
       again = true;
       cout << "dt (old) = " << dt << endl;
       dt = 0.5 / ( probab22 / dt );
@@ -4035,6 +4119,7 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
 
   // determine type of scattering, momentum transfer t_hat, new flavor and new masses
   int typ;
+  
   scatt22_obj.getMomentaAndMasses22onlyPhotons( F1, F2, M1, M2, t_hat, typ ); 
 
   // translate momentum transfer t_hat into actual momenta of outgoing particles
@@ -4043,6 +4128,12 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
 
   VectorTXYZ Pos1new = temp_particle_iscat.Pos;
   VectorTXYZ Pos2new = temp_particle_jscat.Pos;
+  
+  //HACK 
+  //t_hat=0.;
+  
+  
+  
   
   scatt22_obj.setNewMomenta22( P1new, P2new, Pos1new, Pos2new, t_hat );
   
