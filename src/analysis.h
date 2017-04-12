@@ -224,7 +224,7 @@ public:
            const int _nColl23, 
            const int _nColl32 );
   void volumeMidrap(const int ) const;
-  
+
 private:
   config * const theConfig ;
 
@@ -247,8 +247,8 @@ private:
   time_t start;
   
   string filename_prefix;
-  
-  
+
+
   OUTPUT_SCHEME outputScheme;
   
   void handle_output_studies( OUTPUT_SCHEME _outputScheme );
@@ -275,9 +275,9 @@ private:
   void ptSoftDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
   void particleOutput( const int step );
   void jetTrackerOutput();
-  
-  
-  
+
+
+
   void printHeader( fstream & f, const anaType mode, const time_t end );
   
   void computeV2RAA( string, const double _outputTime );
@@ -285,15 +285,15 @@ private:
   void printPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor);
   void printSoftPtSpectra( const FLAVOR_TYPE _flavTypeToComputeFor );
   void printYDistribution();
-  
-  
+
+
   int nTimeSteps;
   int nTimeSteps_movie;
   
   std::vector< std::vector<jetTrackerSingleEvent> > jetTracker;
   std::vector< std::vector<jetTrackerSingleEvent> > jetTracker_copy;
-  
-  
+
+
   std::vector<double> *yBins_gluon, *yBins_up, *yBins_down, *yBins_strange, *yBins_anti_up, *yBins_anti_down, *yBins_anti_strange;
   std::vector<double> *transverseEnergyGluons, *transverseEnergyQuarks, *transverseEnergyAntiQuarks;
   std::vector<double> yBinLabels;
@@ -427,7 +427,15 @@ private:
 class v2RAA
 {
 public:
-  v2RAA( config * const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg, const double pt_min_arg = 5.0, const double pt_max_arg = 40.0, const int n_g_arg = 35, const double pt_min_background_arg = 0.0, const double pt_max_background_arg = 5.0, const int n_g_background_arg = 25 );
+  v2RAA( string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg,
+         const double Naddedevents_arg = 1.0, const double Ntest_arg = 1.0,
+         const double pt_min_arg = 5.0, const double pt_max_arg = 40.0, const int n_g_arg = 35,
+         const double pt_min_background_arg = 0.0, const double pt_max_background_arg = 5.0, const int n_g_background_arg = 25,
+         const OUTPUT_SCHEME outputScheme_arg = no_output, const bool studyNonPromptJpsiInsteadOfElectrons_arg = false,
+         const double numberElectronStat_arg = 0, const double JPsiTestParticles_arg = 0 );
+  v2RAA( config * const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg,
+         const double pt_min_arg = 5.0, const double pt_max_arg = 40.0, const int n_g_arg = 35,
+         const double pt_min_background_arg = 0.0, const double pt_max_background_arg = 5.0, const int n_g_background_arg = 25 );
   
   void setPtBinProperties( const double pt_min_arg, const double pt_max_arg, const int n_g_arg, const double pt_min_background_arg = 0.0, const double pt_max_background_arg = 5.0, const int n_g_background_arg = 25 )
   {
@@ -443,9 +451,7 @@ public:
 
 private:
   
-  config * const theConfig ;
-  
-  double pt_min,pt_max;  
+  double pt_min,pt_max;
   int n_c,n_b,n_g,eta_bins; 
   
   double pt_min_background, pt_max_background;
@@ -454,8 +460,14 @@ private:
   string name,filename_prefix;
   
   std::vector<analysisRapidityRange> rapidityRanges;
-  
 
+  double Ntest;
+  double Nevents;
+
+  OUTPUT_SCHEME outputScheme;
+  bool studyNonPromptJpsiInsteadOfElectrons;
+  double numberElectronStat;
+  double JPsiTestParticles;
 };
 
 

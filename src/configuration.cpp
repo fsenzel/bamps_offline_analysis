@@ -83,6 +83,7 @@ config::config() :
  cgcParticleFile("-"),
  mcatnloParticleFile("-"),
  P0(1.4),
+ initialPartonFlavor(light_parton),
 // ---- output options ----
  outputSwitch_progressLog( true ),
  outputSwitch_detailedParticleOutput(false),
@@ -271,7 +272,20 @@ void config::processProgramOptions()
       throw eConfig_error( errMsg );
     }
   }
-  
+
+  if ( vm.count("initial_state.parton_flavor") )
+  {
+    if ( vm["initial_state.parton_flavor"].as<int>() < 1000 && vm["initial_state.parton_flavor"].as<int>() >= 0 )
+    {
+      initialPartonFlavor = static_cast<FLAVOR_TYPE >( vm["initial_state.parton_flavor"].as<int>() );
+    }
+    else
+    {
+      string errMsg = "parameter \"initial_state.type\" out of range";
+      throw eConfig_error( errMsg );
+    }
+  }
+
   if ( vm.count("output.outputScheme") )
   {
     outputScheme = static_cast<OUTPUT_SCHEME>( vm["output.outputScheme"].as<int>() );
@@ -318,12 +332,11 @@ void config::initializeProgramOptions()
   ("initial_state.LHAPDFgrid", po::value<bool>( &LHAPDFuseGrid )->default_value( LHAPDFuseGrid ), "whether a grid version of the LHAPDF set should be used")
   ("initial_state.nuclearPDF", po::value<bool>( &nuclearPDFs )->default_value( nuclearPDFs ), "whether to use nuclear PDFs (only available together with LHAPDF and mini-jets)")
   ("initial_state.nuclearPDFname", po::value<string>( &nuclearPDFdatasetName )->default_value( nuclearPDFdatasetName ), "name of the nPDF dataset to use (EPS09, EPS09LO, EPS09NLO, EPS08, EKS98)")
-  ("initial_state.minijet_P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for minijet initial conditions")
+  ("initial_state.P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for spectrum of initial conditions")
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
   ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
-  ("initial_state.initialPartonPt", po::value<double>( &initialPartonPt )->default_value( initialPartonPt ), "parton pt of fixed initial parton pt")
-  ("initial_state.initialPartonFlavor", po::value<int>( &initialPartonFlavor )->default_value( initialPartonFlavor ), "flavor of fixed initial parton pt ( 0 = gg, 1 = u u-bar, 2 = g u )")
+  ("initial_state.parton_flavor", po::value<int>()->default_value( static_cast<int>( initialPartonFlavor ) ), "flavor of fixed initial parton pt ( 0 = gg, 1 = u u-bar, 2 = g u )")
   ;
   
   // Add some options related to the program output  

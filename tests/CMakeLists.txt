@@ -34,6 +34,8 @@ endmacro(bamps_add_test)
 ENABLE_TESTING()
 
 bamps_add_test(21_pythiashower)
+bamps_add_test(22_hqshower)
+bamps_add_test(23_mcatnlo_analysis)
 
 ######### Copy additional files #########
 

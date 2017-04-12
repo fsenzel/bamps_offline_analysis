@@ -68,22 +68,22 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
       initialmodel = new initialModel_Jpsi( *configObject, _wsParameter );
       break;
     case fixedShowerInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixedShower, configObject->getInitialPartonPt(), static_cast<FLAVOR_TYPE>( configObject->getInitialPartonFlavor() ) );
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixedShower, minijet_P0 );
       break;
     case fixedPartonInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixedParton, configObject->getInitialPartonPt(), static_cast<FLAVOR_TYPE>( configObject->getInitialPartonFlavor() ) );
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixedParton, minijet_P0 );
       break;
-    case pythiaShowerInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, pythiaShower, minijet_P0 );
+    case inclusiveShowerInitialState:
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, inclusiveShower, minijet_P0 );
       break;
     case photonShowerInitialState:
       initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, photonShower, minijet_P0 );
       break;
     case charmShowerInititalState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, heavyQuarkShower, minijet_P0, charm );
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, charmQuarkShower, minijet_P0 );
       break;
     case bottomShowerInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, heavyQuarkShower, minijet_P0, bottom );
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, bottomQuarkShower, minijet_P0 );
       break;
     default:
       std::string errMsg = "Model for sampling the initial state not implemented yet!";

@@ -29,10 +29,8 @@
 #include "particleOffline.h"
 #include "offlineoutput.h"
 #include "interpolation_iniJpsi.h"
+#include "initialmodel.h"
 
-
-/** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, fixedShowerInitialState, fixedPartonInitialState, pythiaShowerInitialState, photonShowerInitialState, charmShowerInititalState, bottomShowerInitialState };
 
 /** @brief Enumeration type for PDF sources */
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
@@ -185,11 +183,8 @@ class config : public configBase
   /** @brief Interface for config::P0 */
   double getPtCutoff() const { return P0; }
   
-  /** @brief Interface for config::initialPartonPt */
-  double getInitialPartonPt() const { return initialPartonPt; };
-  
   /** @brief Interface for config::initialPartonFlavor */
-  int getInitialPartonFlavor() const { return initialPartonFlavor; };
+  FLAVOR_TYPE getInitialPartonFlavor() const { return initialPartonFlavor; };
 
   /** ------------------------------- */
 
@@ -476,14 +471,11 @@ class config : public configBase
    */
   string mcatnloParticleFile;
   
-  /** @brief Lower PT-cutoff [GeV] used for minijet initial conditions */
+  /** @brief Lower PT-cutoff [GeV] used for spectrum of initial conditions */
   double P0;  
   
-  /** @brief Transverse momentum of initial parton pair */
-  double initialPartonPt;
-
   /** @brief Flavor of initial parton pair */
-  int initialPartonFlavor;
+  FLAVOR_TYPE initialPartonFlavor;
   
   /** ------------------------------- */
   
