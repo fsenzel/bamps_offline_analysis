@@ -1651,7 +1651,7 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
   
   double pt_min_v2RAA = theConfig->getMinimumPT();
-  if ( theConfig->getInitialStateType() == inclusiveShowerInitialState  )
+  if ( theConfig->getInitialStateType() == inclusivePythiaShowerInitialState || theConfig->getInitialStateType() == exclusivePythiaShowerInitialState )
     pt_min_v2RAA = theConfig->getPtCutoff();
   
   double pt_max_v2RAA, nbins_v2RAA;

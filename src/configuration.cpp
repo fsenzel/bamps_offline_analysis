@@ -325,7 +325,7 @@ void config::initializeProgramOptions()
   
   // Group some options related to the initial state
   initial_state_options.add_options()
-  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo, 4 = onlyJpsi, 5 = fixed shower, 6 = fixed parton, 7 = PYTHIA parton shower, 8 = PYTHIA photon shower )")
+  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo, 4 = onlyJpsi, 5 = fixed parton, 6 = fixed shower, 7 = inclusive PYTHIA shower spectra, 8 = exclusive PYTHIA shower spectra (needs 'initial_state.parton_flavor' to be set)")
   ("initial_state.PDFsource", po::value<unsigned short int>()->default_value( static_cast<unsigned short int>(PDFsource) ), "which source to use for the PDFs ( 0 = built-in GRV, 1 = PDFs from LHAPDF )")
   ("initial_state.LHAPDFset", po::value<string>( &LHAPDFdatasetName )->default_value( LHAPDFdatasetName ), "name of the LHAPDF data set that should be used")
   ("initial_state.LHAPDFmember", po::value<unsigned short int>( &LHAPDFmember )->default_value( LHAPDFmember ), "which member of the LHAPDF set should be used")
@@ -336,7 +336,7 @@ void config::initializeProgramOptions()
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
   ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
-  ("initial_state.parton_flavor", po::value<int>()->default_value( static_cast<int>( initialPartonFlavor ) ), "flavor of fixed initial parton pt ( 0 = gg, 1 = u u-bar, 2 = g u )")
+  ("initial_state.parton_flavor", po::value<int>()->default_value( static_cast<int>( initialPartonFlavor ) ), "flavor of fixed initial parton ( fixed initial states: 0 = gg, 1 = u u-bar, 2 = g u; spectra initial states: BAMPS particle flavor )")
   ;
   
   // Add some options related to the program output  
@@ -476,7 +476,13 @@ void config::checkOptionsForSanity()
     throw eConfig_error( errMsg );
   }
 
-  if ( ( initialStateType == charmShowerInititalState || initialStateType == bottomShowerInitialState )  && N_heavy_flavors_input == 0 )
+  if ( initialStateType == exclusivePythiaShowerInitialState && initialPartonFlavor == light_parton )
+  {
+    string errMsg = "Exclusive shower spectrum requested, but no specific initial parton flavor is set.";
+    throw eConfig_error( errMsg );
+  }
+
+  if ( ( initialPartonFlavor == charm || initialPartonFlavor == bottom || initialPartonFlavor == anti_charm || initialPartonFlavor == anti_bottom )  && N_heavy_flavors_input == 0 )
   {
     string errMsg = "Heavy quark shower initial state, but number of heavy flavors is set to 0.";
     throw eConfig_error( errMsg );

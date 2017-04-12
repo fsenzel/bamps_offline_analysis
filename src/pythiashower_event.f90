@@ -12,8 +12,7 @@
 !...Double precision and integer declarations.
       IMPLICIT DOUBLE PRECISION(A-H, O-Z)
       IMPLICIT INTEGER(I-N)
-      INTEGER PYK,PYCHGE,PYCOMP,COUNTER
-      character*1 tab
+      INTEGER PYK,PYCHGE,PYCOMP
 !...EXTERNAL statement links PYDATA on most machines.
       EXTERNAL PYDATA
 
@@ -53,28 +52,32 @@
 
 !.. set processes depending on requested shower type
       SELECT CASE ( SHOWER_TYPE )
-        !.. inclusive pQCD processes
+!.. inclusive pQCD processes
         CASE( 2 )
           MSEL=1
-
-        !.. only pQCD processes with photons
+!.. exclusive pQCD processes
         CASE ( 3 )
-          MSEL=0
-          MSUB(14)=1 ! f_i + fbar_i -> g + gamma
-          MSUB(29)=1 ! f_i + g -> f_i + gamma
-          MSUB(115)=1 ! g + g -> g + gamma
-!         MSUB(114)=1 ! g + g -> gamma + gamma
-!         MSUB(18)=1 ! f_i + fbar_i -> gamma + gamma
-
+          SELECT CASE( ABS(FLAVOR) )
+        !.. only pQCD processes with photons
+            CASE( 22 )
+              MSEL=0
+              MSUB(14)=1 ! f_i + fbar_i -> g + gamma
+              MSUB(29)=1 ! f_i + g -> f_i + gamma
+              MSUB(115)=1 ! g + g -> g + gamma
+!             MSUB(114)=1 ! g + g -> gamma + gamma
+!             MSUB(18)=1 ! f_i + fbar_i -> gamma + gamma
         !.. only heavy quark pQCD proceses ( without gluon splitting )
-        CASE ( 4, 5 )
-	      MSEL = shower_type
-!         MSUB(81)=1 ! f_i + fbar_i -> Q_k + Qbar_k
-!         MSUB(82)=1 ! g + g -> Q_k + Qbar_k
-!         MSUB(83)=1 ! q_i + f_j -> Q_k + f_l
-!         MSUB(84)=1 ! g + gamma -> Q_k + Qbar_k
-!         MSUB(85)=1 ! gamma + gamma -> F_k + Fbar_k
-
+            CASE( ABS(4), ABS(5) )
+              MSEL = FLAVOR
+!             MSUB(81)=1 ! f_i + fbar_i -> Q_k + Qbar_k
+!             MSUB(82)=1 ! g + g -> Q_k + Qbar_k
+!             MSUB(83)=1 ! q_i + f_j -> Q_k + f_l
+!             MSUB(84)=1 ! g + gamma -> Q_k + Qbar_k
+!             MSUB(85)=1 ! gamma + gamma -> F_k + Fbar_k
+            CASE DEFAULT
+              WRITE(*,*) "Unknown initial parton flavor in exclusive parton showers. Unrecoverable error!"
+              CALL ABORT
+          END SELECT
         CASE DEFAULT
           WRITE( *, * ) 'Unknown shower type in PYTHIA fortran code.'
           CALL ABORT
@@ -118,7 +121,7 @@
 
 !.. reject inappropriate events
       IF( TOP_FOUND ) GOTO 400 ! event has top quark -> reject
-      SELECT CASE( SHOWER_TYPE )
+      SELECT CASE( ABS(SHOWER_TYPE) )
         CASE( 2 )
           IF( FLAVOR .EQ. 101 .AND. ( CHARM_FOUND .OR. BOTTOM_FOUND ) ) THEN
             GOTO 400 ! heavy quark was found in light parton shower
@@ -128,11 +131,16 @@
             GOTO 400 ! bottom is needed but not found
           END IF
         CASE( 3 )
-          IF( CHARM_FOUND .OR. BOTTOM_FOUND .OR. TOP_FOUND ) GOTO 400 ! heavy quark was found in photon shower
-        CASE( 4 )
-          IF( .NOT. CHARM_FOUND ) GOTO 400 ! no charm in charm shower was found
-        CASE( 5 )
-          IF( .NOT. BOTTOM_FOUND ) GOTO 400 ! no bottom in bottom shower was found
+          IF( FLAVOR .EQ. 22 .AND. ( CHARM_FOUND .OR. BOTTOM_FOUND .OR. TOP_FOUND ) ) THEN
+            GOTO 400 ! heavy quark was found in photon shower
+          ELSE IF( FLAVOR .EQ. 4 .AND. .NOT. CHARM_FOUND ) THEN
+            GOTO 400 ! no charm in charm shower was found
+          ELSE IF( FLAVOR .EQ. 5 .AND. .NOT. BOTTOM_FOUND ) THEN
+            GOTO 400 ! no bottom in bottom shower was found
+          ELSE
+            WRITE(*,*) "Unknown initial parton flavor in exclusive parton showers. Unrecoverable error!"
+            CALL ABORT
+          END IF
       END SELECT
 
 !.. save particles

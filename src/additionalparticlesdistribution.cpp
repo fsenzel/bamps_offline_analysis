@@ -67,23 +67,17 @@ void additionalParticlesDistribution::populateParticleVector( std::vector< Parti
     case onlyJpsiInitialState:
       initialmodel = new initialModel_Jpsi( *configObject, _wsParameter );
       break;
-    case fixedShowerInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixedShower, minijet_P0 );
-      break;
     case fixedPartonInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixedParton, minijet_P0 );
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixed_parton, minijet_P0 );
       break;
-    case inclusiveShowerInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, inclusiveShower, minijet_P0 );
+    case fixedPythiaShowerInitialState:
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, fixed_shower, minijet_P0 );
       break;
-    case photonShowerInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, photonShower, minijet_P0 );
+    case inclusivePythiaShowerInitialState:
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, inclusive_shower_spectra, minijet_P0 );
       break;
-    case charmShowerInititalState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, charmQuarkShower, minijet_P0 );
-      break;
-    case bottomShowerInitialState:
-      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, bottomQuarkShower, minijet_P0 );
+    case exclusivePythiaShowerInitialState:
+      initialmodel = new initialModel_PYTHIAShower( *configObject, _wsParameter, exclusive_shower_spectra, minijet_P0 );
       break;
     default:
       std::string errMsg = "Model for sampling the initial state not implemented yet!";

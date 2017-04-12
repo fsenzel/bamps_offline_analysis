@@ -14,17 +14,17 @@ C   (based on sample file of Q-PYTHIA by N. Armesto, L. Cunqueiro and
 C    C. A. Salgado, Eur. Phys. J. C63 (2009) 679 [arXiv:0907.1014 [hep-ph]].) 
 
       SUBROUTINE FIXEDSHOWEREVENT(px,py,pz,flav1,flav2,seed)
-
-C...Double precision and integer declarations.
+!...Double precision and integer declarations.
       IMPLICIT DOUBLE PRECISION(A-H, O-Z)
+      IMPLICIT INTEGER(I-N)
       INTEGER PYK,PYCHGE,PYCOMP
-C...EXTERNAL statement links PYDATA on most machines.
+!...EXTERNAL statement links PYDATA on most machines.
       EXTERNAL PYDATA
 
-C...Commonblocks.
+!...Commonblocks.
       LOGICAL ACCEP
+      DOUBLE PRECISION PA(8,50)
       DOUBLE PRECISION ejet
-      DOUBLE PRECISION PA(6,100)
       INTEGER flav1,flav2
       DOUBLE PRECISION px,py,pz
       INTEGER(kind=8) seed
@@ -32,19 +32,21 @@ C...Commonblocks.
       COMMON/PYJETS/N,NPAD,K(4000,5),P(4000,5),V(4000,5)
       COMMON/PYDAT1/MSTU(200),PARU(200),MSTJ(200),PARJ(200)
       COMMON/PYDAT2/KCHG(500,4),PMAS(500,4),PARF(2000),VCKM(4,4)
+      COMMON/PYDAT3/MDCY(500,3),MDME(8000,2),BRAT(8000),KFDP(8000,5)
       COMMON/PYSUBS/MSEL,MSELPD,MSUB(500),KFIN(2,-40:40),CKIN(200)
       COMMON/PYPARS/MSTP(200),PARP(200),MSTI(200),PARI(200)
-      COMMON/PYDATR/MRPY(6),RRPY(100)
+      COMMON/PYDATR/MRPY(6)
       COMMON/BAMPS/PA
 
-      DO 100 Iqq=1,6,1
+!.. initialize particle vector
+      DO 100 Iqq=1,8,1
         DO 200 Jqq=1,100,1 
           PA(Iqq,Jqq) = 0.D0
   200   CONTINUE
   100 CONTINUE
 
-C... set seed in PYTHIA
-      MRPY(1)=seed
+!.. set seed in PYTHIA
+      MRPY(1)=SEED
 
 c   switches (default refers to PYTHIA-6.4.18 defaults).
 c

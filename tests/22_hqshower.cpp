@@ -17,8 +17,8 @@
 
 using namespace std;
 
-const double NaddedEvents = 10000;
-const SHOWER_TYPE shower_type = inclusiveShower;
+const double NaddedEvents = 1000000;
+const SHOWER_TYPE shower_type = inclusive_shower_spectra;
 const FLAVOR_TYPE initial_parton_flavor = bottom;
 const string filename_prefix = "output/inclusiveBottomQuarkShower";
 const double A = 207;

@@ -17,7 +17,7 @@
 #include "configuration.h"
 #include "particle.h"
 
-enum SHOWER_TYPE { fixedShower, fixedParton, inclusiveShower = 2, photonShower = 3, charmQuarkShower = 4, bottomQuarkShower = 5 };
+enum SHOWER_TYPE { fixed_parton = 0, fixed_shower = 1, inclusive_shower_spectra = 2, exclusive_shower_spectra = 3 };
 
 class initialModel_PYTHIAShower : public initialModelWS
 {

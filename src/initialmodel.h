@@ -23,7 +23,15 @@
 #include "vegas.h"
 
 /** @brief Enumeration type for possible initial state models */
-enum INITIAL_STATE_TYPE { miniJetsInitialState, pythiaInitialState, cgcInitialState, mcatnloInitialState, onlyJpsiInitialState, fixedShowerInitialState, fixedPartonInitialState, inclusiveShowerInitialState, photonShowerInitialState, charmShowerInititalState, bottomShowerInitialState };
+enum INITIAL_STATE_TYPE { miniJetsInitialState = 0,
+                          pythiaInitialState = 1,
+                          cgcInitialState = 2,
+                          mcatnloInitialState = 3,
+                          onlyJpsiInitialState = 4,
+                          fixedPartonInitialState = 5,
+                          fixedPythiaShowerInitialState = 6,
+                          inclusivePythiaShowerInitialState = 7,
+                          exclusivePythiaShowerInitialState = 8 };
 
 typedef boost::shared_ptr<ranGen_Distr> tPointerToRanGen;
 

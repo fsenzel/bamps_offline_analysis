@@ -45,6 +45,12 @@ initialModel_PYTHIAShower::initialModel_PYTHIAShower( const config& _config, Woo
   ptCutOff( _ptCutOff ),
   initial_parton_flavor( _config.getInitialPartonFlavor() )
 {
+  if( shower_type == exclusive_shower_spectra && initial_parton_flavor == light_parton )
+  {
+    string errMsg = "Exclusive shower spectrum requested, but no specific initial parton flavor is set.";
+    throw ePYTHIAShower_error( errMsg );
+  }
+
   impactParameter = _config.getImpactParameter();
   sqrtS_perNN = _config.getSqrtS();
   if (!WoodSaxonParameter.Calculate( A, impactParameter, sqrtS_perNN))
@@ -76,6 +82,12 @@ initialModel_PYTHIAShower::initialModel_PYTHIAShower( WoodSaxon& _WoodSaxonParam
         ptCutOff( _ptCutOff ),
         initial_parton_flavor( _initialPartonFlavor )
 {
+  if( shower_type == exclusive_shower_spectra && initial_parton_flavor == light_parton )
+  {
+    string errMsg = "Exclusive shower spectrum requested, but no specific initial parton flavor is set.";
+    throw ePYTHIAShower_error( errMsg );
+  }
+
   impactParameter = _impactParameter;
   sqrtS_perNN = _sqrtS_perNN;
   if (!WoodSaxonParameter.Calculate( A, impactParameter, sqrtS_perNN))
@@ -114,7 +126,7 @@ void initialModel_PYTHIAShower::populateParticleVector( std::vector< Particle >&
     vector< Particle > tempParticles, initialPartonPair;
     initialPartonPair.resize( 2 );
 
-    if( shower_type == fixedShower || shower_type == fixedParton )
+    if( shower_type == fixed_shower || shower_type == fixed_parton )
     {
       initialPartonPair[0].Mom = VectorEPxPyPz( ptCutOff, ptCutOff, 0.0, 0.0 );
       initialPartonPair[1].Mom = VectorEPxPyPz( ptCutOff, -ptCutOff, 0.0, 0.0 );
@@ -138,11 +150,11 @@ void initialModel_PYTHIAShower::populateParticleVector( std::vector< Particle >&
       }
     }
 
-    if( shower_type != fixedParton )
+    if( shower_type != fixed_parton )
     {
       getShowerEvent( tempParticles, initialPartonPair );
     }
-    else if( shower_type == fixedParton )
+    else if( shower_type == fixed_parton )
     {
       tempParticles = initialPartonPair;
     }
@@ -192,8 +204,8 @@ void initialModel_PYTHIAShower::getShowerEvent( vector< Particle >& _particles, 
 
 //  set heavy quark masses for HQ shower
   if( ( initial_parton_flavor == charm || initial_parton_flavor == anti_charm ||
-    initial_parton_flavor == bottom || initial_parton_flavor == anti_bottom ||
-    shower_type == charmQuarkShower || shower_type == bottomQuarkShower ) && ( Particle::Mcharm != 1.3 || Particle::Mbottom != 4.6 ) )
+    initial_parton_flavor == bottom || initial_parton_flavor == anti_bottom || initial_parton_flavor == allFlavors )
+      && ( Particle::Mcharm != 1.3 || Particle::Mbottom != 4.6 ) )
   {
     string errMsg = "Heavy quark masses are not set to standard values (Mcharm=1.3 GeV, Mbottom=4.6 GeV) in shower routines. Unrecoverable error!";
     throw ePYTHIAShower_error( errMsg );
@@ -201,7 +213,7 @@ void initialModel_PYTHIAShower::getShowerEvent( vector< Particle >& _particles, 
   int shower_type_int = static_cast<int>( shower_type );
   int initial_parton_flavor_int = mapToBAMPSflavor( initial_parton_flavor );
 
-  if( shower_type == fixedShower )
+  if( shower_type == fixed_shower )
   {
     int flavorA = mapToBAMPSflavor( _initial_parton_pair[0].FLAVOR );
     int flavorB = mapToBAMPSflavor( _initial_parton_pair[1].FLAVOR );
@@ -231,7 +243,7 @@ void initialModel_PYTHIAShower::getShowerEvent( vector< Particle >& _particles, 
     index++;
   }
 
-  if( shower_type == fixedShower )
+  if( shower_type == fixed_shower )
   {
     double sumE = 0.0;
     for( int i = 0; i < tempParticles.size(); i++ )
