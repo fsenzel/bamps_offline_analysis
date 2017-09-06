@@ -137,9 +137,6 @@
             GOTO 400 ! no charm in charm shower was found
           ELSE IF( FLAVOR .EQ. 5 .AND. .NOT. BOTTOM_FOUND ) THEN
             GOTO 400 ! no bottom in bottom shower was found
-          ELSE
-            WRITE(*,*) "Unknown initial parton flavor in exclusive parton showers. Unrecoverable error!"
-            CALL ABORT
           END IF
       END SELECT
 
