@@ -21,11 +21,13 @@
 #include "analysis.h"
 #include "cellcontainer.h"
 #include "configuration.h"
+#include "interpolation12.h"
 #include "interpolation22.h"
 #include "interpolation23.h"
 #include "mfp_data.h"
 #include "offlineoutput.h"
 #include "ringstructure.h"
+#include "emission12.h"
 #include "scattering22.h"
 #include "scattering23.h"
 #include "scattering32.h"
@@ -77,6 +79,9 @@ private:
   
   /** @brief  interpolation22 object that provides access to tabulated values for the cross section of all 2->2 processes with running coupling */
   interpolation22 theI22;
+
+  /** @brief  interpolation22 object that provides access to tabulated values for the differential and total rate of all 1->2 processes */
+  interpolation12 theI12;
 
   //---- parameters that are copied from the config object for convenience ----
   /** @brief Runtime to simulate [in fm/c] */
@@ -151,6 +156,7 @@ private:
 
   void scatterEdgeParticles( std::list< int >& _offlineParticleList, std::list< int >& _addedParticleList, const double nexttime );
 
+  void emission12_offlineParticles( std::vector< int >& _allParticlesListAdded, bool& again, const double nexttime );
 
   void scatt2223_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
                                      cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
@@ -162,6 +168,7 @@ private:
                                    cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
                                    int& n32, bool& again, const double nexttime );
 
+  int emission12_offlineParticles_utility( emission12& emission12_obj, const int jscat, bool& again, const double nexttime );
   int scatt32_offlineWithAddedParticles_utility( scattering32& scatt32_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, const int iscat, const int jscat, const int kscat, int& n32, const double nexttime  );
   int scatt23_offlineWithAddedParticles_utility( scattering23& scatt23_obj, cellContainer& _cell, int iscat, const int jscat, bool& again, const double nexttime );
   void scatt22_offlineWithAddedParticles_utility( scattering22& scatt22_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, const int iscat, const int jscat, int& typ, const double nexttime );

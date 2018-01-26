@@ -98,6 +98,9 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
     theMFP( _config ),
     theAnalysis( _analysis )
 {  
+  // if( theConfig->doScattering_12() )
+  //   theI12.configure();
+
   // load 2->2 cross section interpolation data
   if( theConfig->doScattering_22() )
     theI22.configure( theConfig->isCouplingRunning(), Particle::N_light_flavor, Particle::N_heavy_flavor, Particle::Mcharm, Particle::Mbottom, theConfig->getMaxRunningCoupling(), theConfig->getfixedCouplingValue() );
@@ -1510,6 +1513,15 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             }
 
             int n32 = 0;
+
+            if( theConfig->doScattering_12() )
+            {
+              emission12_offlineParticles( allParticlesListAdded, again, nexttime );
+              if( again && false )
+              {
+                return;
+              }
+            }
             
             if( theConfig->isScatt_offlineWithAddedParticles() && theConfig->doScattering_32() )
             {
@@ -1986,6 +1998,68 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
   }
 }
 
+void offlineHeavyIonCollision::emission12_offlineParticles( std::vector< int >& _allParticlesListAdded, bool& again, const double nexttime )
+{
+  int jscat;
+  double xt;
+  int ringIndex;
+  FLAVOR_TYPE F1, F2;
+
+  emission12 emission12_object( &theI12 );
+
+  double pt_addedParticle = 0;
+
+  for ( int j = 0; j < static_cast<int>( _allParticlesListAdded.size() ); j++ )
+  {
+    jscat = _allParticlesListAdded[j];
+    
+    pt_addedParticle = addedParticles[jscat].Mom.Perp();
+    
+    if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead )
+    {
+      continue; // jump to next particle in the list
+    }
+    
+    F1 = addedParticles[jscat].FLAVOR;
+    xt = ( addedParticles[jscat].Pos.Perp() ) / 2;
+    ringIndex = rings.getIndex( xt );
+
+    const double T = addedParticles[jscat].temperature;
+        
+    if( theConfig->doScattering_22() )
+    {
+      emission12_object.setParameter( addedParticles[jscat].Mom, F1, T );
+          
+      const double rate12 = emission12_object.getIntegratedRate();
+          
+      const double probab12 = rate12 * dt;
+
+      if ( probab12 > 1.0 )
+      {
+        cout << "P12=" << probab12 << ">1" << endl;
+        again = true;
+        cout << "dt (old) = " << dt << endl;
+        dt = 0.5 / ( probab12 / dt );
+        cout << "dt (new) = " << dt << endl;
+        return;
+      }
+            
+      if ( ran2() < probab12 )
+      {
+        double pt_jscat = addedParticles[jscat].Mom.Perp();
+        double pt_nmb;
+
+        // int jetEventIndex = -1;
+        // if( pt_jscat > theAnalysis->getJetTracking_PT() )
+        // {
+        //   jetEventIndex = theAnalysis->addJetEvent_in( iscat, -1, jscat, c2to3, cs23, _cell.index, lambda_scaled / sqrt( s ) );
+        // }
+
+        int newIndex = emission12_offlineParticles_utility( emission12_object, jscat, again, nexttime );
+      }
+    }
+  }
+}
 
 
 
@@ -2898,6 +2972,78 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
 }
 
 
+int offlineHeavyIonCollision::emission12_offlineParticles_utility( emission12& emission12_object, const int jscat, bool& again, const double nexttime )
+{
+  FLAVOR_TYPE F1, F2;
+  int newIndex = -1;
+  
+  F1 = addedParticles[jscat].FLAVOR;
+
+  const double t = addedParticles[jscat].Pos.T();
+  const double tt = ( nexttime - t ) * ran2() + t;
+
+  addedParticles[jscat].Propagate( tt, addedParticles[jscat].X_traveled );
+
+  // at this point scattering take place, therefore set properties of
+  // last scattering point
+  addedParticles[jscat].lastInt = addedParticles[jscat].Pos;
+
+  const double omega = emission12_object.getMomenta12();
+        
+  if( omega > 0.0 )
+  {
+    FLAVOR_TYPE F2;
+    VectorEPxPyPz P1new, P2new;
+
+    emission12_object.setNewMomenta12( P1new, P2new, F1, F2, omega );
+ 
+    addedParticles[jscat].FLAVOR = F1;
+    addedParticles[jscat].Mom = P1new;
+
+    ParticleOffline tempParticle;
+    tempParticle.FLAVOR = F2;
+    tempParticle.Mom = P2new;
+    tempParticle.Pos = addedParticles[jscat].Pos;
+    tempParticle.PosInit = tempParticle.lastInt = tempParticle.Pos;
+    tempParticle.MomInit = tempParticle.Mom;
+    tempParticle.MomInit.E() = -tempParticle.MomInit.E(); // negative to indicate creation via 2->3 process
+
+    tempParticle.m = 0.0;
+    tempParticle.md2g = addedParticles[jscat].md2g;
+    tempParticle.md2q = addedParticles[jscat].md2q;
+    tempParticle.temperature = addedParticles[jscat].temperature;
+    tempParticle.edge = false;
+    tempParticle.dead = false;
+    tempParticle.free = false;
+    tempParticle.cell_id = -1;
+    tempParticle.coll_id = ncoll;
+    tempParticle.collisionTime = infinity;
+    tempParticle.collisionPartner = -1;
+    tempParticle.initially_produced = false;
+    tempParticle.init = false;
+    tempParticle.X_traveled = 0.0;
+    tempParticle.T_creation = tempParticle.Pos.T();
+    tempParticle.unique_id = ParticleOffline::unique_id_counter_added;
+    --ParticleOffline::unique_id_counter_added;
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+
+    addedParticles.push_back( tempParticle );
+    newIndex = addedParticles.size() - 1;
+
+    addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );          
+  }
+  else if( omega < 0.0 )
+  {
+    VectorEPxPyPz P1new;
+    emission12_object.setNewMomenta21( P1new, F1, omega );
+
+    addedParticles[jscat].FLAVOR = F1;
+    addedParticles[jscat].Mom = P1new;
+  }
+
+  return newIndex;
+}
 
 void offlineHeavyIonCollision::scatt22_amongAddedParticles_utility( scattering22& scatt22_obj, std::list< int >& _cellMembersAdded, std::vector< int >& _allParticlesListAdded, const int iscat, const int jscat, int& typ, const double nexttime )
 {
