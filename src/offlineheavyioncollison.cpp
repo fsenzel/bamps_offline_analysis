@@ -2047,19 +2047,28 @@ void offlineHeavyIonCollision::emission12_offlineParticles( std::vector< int >& 
       const double rate12 = emission12_object.getIntegratedRate();
           
       const double probab12 = rate12 * dt;
+      int N12 = static_cast<int>( probab12 );
 
       if ( probab12 > 1.0 )
+        cout << "probab12=" << probab12 << " >1" << endl;
+
+      if( ran2() < (probab12 - static_cast<double>( N12 ) ) )
+        N12++;
+
+      for( int i12 = 0; i12 < N12; i12++ )
       {
-        cout << "P12=" << probab12 << ">1" << endl;
-        again = true;
-        cout << "dt (old) = " << dt << endl;
-        dt = 0.5 / ( probab12 / dt );
-        cout << "dt (new) = " << dt << endl;
-        return;
-      }
+      // if ( probab12 > 1.0 )
+      // {
+      //   cout << "P12=" << probab12 << ">1" << endl;
+      //   again = true;
+      //   cout << "dt (old) = " << dt << endl;
+      //   dt = 0.5 / ( probab12 / dt );
+      //   cout << "dt (new) = " << dt << endl;
+      //   return;
+      // }
             
-      if ( ran2() < probab12 )
-      {
+      // if ( ran2() < probab12 )
+      // {
         double pt_jscat = addedParticles[jscat].Mom.Perp();
         double pt_nmb;
 
