@@ -43,7 +43,8 @@ public:
     lastInt( ),    
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
-    rate_added_32( 0.0 )
+    rate_added_32( 0.0 ),
+    v_cell( VectorTXYZ( 1.0, 0.0, 0.0, 0.0 ) )
   {};
     
   ParticleOffline( const Particle& _particle ) : 
@@ -59,7 +60,8 @@ public:
     lastInt( ),    
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
-    rate_added_32( 0.0 )
+    rate_added_32( 0.0 ),
+    v_cell( VectorTXYZ( 1.0, 0.0, 0.0, 0.0 ) )
   {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
@@ -97,6 +99,8 @@ public:
   VectorTXYZ lastInt;
     
   double rate, ratev;
+
+  VectorTXYZ v_cell;
 
   /** @brief vector which holds information in which event this medium particle is already in added particles list */
   std::vector< bool > isAlreadyInAddedParticles;
