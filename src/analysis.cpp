@@ -4482,7 +4482,7 @@ void analysis::printJpsiEvolution()
 }
 
 
-void analysis::registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles, const int _nMediumParticles, const int _nColl, const int _nColl22, const int _nColl23, const int _nColl32 )
+void analysis::registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles, const int _nMediumParticles, const int _nColl, const int _nColl22, const int _nColl23, const int _nColl32, const int _nEmiss12 )
 {
   if( progressLogFile.good() )
   {
@@ -4494,7 +4494,8 @@ void analysis::registerProgressInformationForOutput( const double _time, const d
     progressLogFile << _nColl << sep;
     progressLogFile << _nColl22 << sep;
     progressLogFile << _nColl23 << sep;
-    progressLogFile << _nColl32 << endl;
+    progressLogFile << _nColl32 << sep;
+    progressLogFile << _nEmiss12 << endl;
   }
   else
   {

@@ -64,7 +64,7 @@ namespace
   list<int> deadParticleList;
   coordinateEtaBins etaBins;
 
-  long ncoll, ncoll32, ncoll23, ncoll22, ncolle;
+  long ncoll, ncoll32, ncoll23, ncoll22, ncolle, nemiss12;
 
   double randomShiftEta, randomShiftX, randomShiftY;
   //  bool dodo1;
@@ -231,6 +231,7 @@ void offlineHeavyIonCollision::mainFramework()
   int ncoll23_backup = 0;
   int ncoll32_backup = 0;
   int ncolle_backup = 0;
+  int nemiss12_backup = 0;
   int charmAnnihil_backup = 0;
   int jpsicreation_backup = 0;
   int jpsi_dissociation_from_temperature_backup = 0;
@@ -394,6 +395,7 @@ void offlineHeavyIonCollision::mainFramework()
     ncoll23_backup = ncoll23;
     ncoll32_backup = ncoll32;
     ncolle_backup = ncolle;
+    nemiss12_backup = nemiss12;
     charmAnnihil_backup = ns_heavy_quarks::charmAnnihil;
     jpsicreation_backup = ns_heavy_quarks::jpsicreation;
     jpsi_dissociation_from_temperature_backup = ns_heavy_quarks::jpsi_dissociation_from_temperature;
@@ -468,6 +470,7 @@ void offlineHeavyIonCollision::mainFramework()
       ncoll23 = ncoll23_backup;
       ncoll32 = ncoll32_backup;
       ncolle = ncolle_backup;
+      nemiss12 = nemiss12_backup;
       ns_heavy_quarks::charmAnnihil = charmAnnihil_backup;
       ns_heavy_quarks::jpsicreation = jpsicreation_backup;
       ns_heavy_quarks::jpsi_dissociation_from_temperature = jpsi_dissociation_from_temperature_backup;
@@ -486,7 +489,7 @@ void offlineHeavyIonCollision::mainFramework()
     removeDeadParticles();
     if( theConfig->doOutput_progressLog() )
     {
-      theAnalysis->registerProgressInformationForOutput( simulationTime, dt, addedParticles.size(), particles_atTimeNow.size(), ncoll, ncoll22, ncoll23, ncoll32 );
+      theAnalysis->registerProgressInformationForOutput( simulationTime, dt, addedParticles.size(), particles_atTimeNow.size(), ncoll, ncoll22, ncoll23, ncoll32, nemiss12 );
     }
     
     if ( doAnalysisStep )
@@ -2049,9 +2052,9 @@ void offlineHeavyIonCollision::emission12_offlineParticles( std::vector< int >& 
       const double probab12 = rate12 * dt;
       int N12 = static_cast<int>( probab12 );
 
-      if ( probab12 > 1.0 )
-        cout << "probab12=" << probab12 << " >1" << endl;
-
+//      if ( probab12 > 1.0 )
+//        cout << "probab12=" << probab12 << " >1" << endl;
+            
       if( ran2() < (probab12 - static_cast<double>( N12 ) ) )
         N12++;
 
@@ -2997,6 +3000,8 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
 
 int offlineHeavyIonCollision::emission12_offlineParticles_utility( emission12& emission12_object, const int jscat, bool& again, const double nexttime )
 {
+  nemiss12++;
+
   FLAVOR_TYPE F1, F2;
   int newIndex = -1;
   

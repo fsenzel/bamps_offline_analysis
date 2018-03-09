@@ -222,7 +222,8 @@ public:
            const int _nColl, 
            const int _nColl22,
            const int _nColl23, 
-           const int _nColl32 );
+           const int _nColl32,
+           const int _nEmiss12 );
   void volumeMidrap(const int ) const;
 
 private:
