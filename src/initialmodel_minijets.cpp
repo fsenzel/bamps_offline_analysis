@@ -29,7 +29,7 @@ using namespace ns_casc;
 
 
 initialModel_minijets::initialModel_minijets( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT, const int _nToGenerate ) :
-  initialModelWS(_config) ,
+  initialModelWS( _config.getA(), _config.getAatomic(), _config.getB(), _config.getBatomic() ) ,
   nParticlesToGenerate( 0 ),
   nTestparticles( _config.getTestparticles() ),
   nEventsToGenerate( _config.getNaddedEvents() )

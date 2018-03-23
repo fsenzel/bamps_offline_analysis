@@ -21,13 +21,14 @@
 #include "initialmodel_pythiashower.h"
 #include "random.h"
 #include "particle.h"
+#include <binning.h>
 #include "FPT_compare.h"
 
 using namespace std;
 
 extern "C" {
   void fixedshowerevent_( const double* px, const double* py, const double* pz, int* pythiaFlavor1, int* pythiaFlavor2, uint32_t* seed );
-  void pythiashowerevent_( const double* ptMin, uint32_t* seed );
+  void pythiashowerevent_( const int* shower_type, const int* initialPartonFlavor, const double* sqrtS_perNN, const double* ptMin, const uint32_t* seed );
   struct
   {
     double pa[100][7];
@@ -35,16 +36,23 @@ extern "C" {
 }
 
 
-initialModel_PYTHIAShower::initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT ) :
-  initialModelWS(_config),
+initialModel_PYTHIAShower::initialModel_PYTHIAShower( const config& _config, WoodSaxon& _WoodSaxonParameter, const SHOWER_TYPE _shower_type, const double _ptCutOff ):
+  initialModelWS( _config.getA(), _config.getAatomic(), _config.getB(), _config.getBatomic() ),
   nEventsToGenerate( _config.getNaddedEvents() ),
   seed( _config.getSeed() ),
   filename_prefix( _config.getStandardOutputDirectoryName() + "/" + _config.getJobName() ),
-  shower_type( pythiaShower )
+  shower_type( _shower_type ),
+  ptCutOff( _ptCutOff ),
+  initial_parton_flavor( _config.getInitialPartonFlavor() )
 {
+  if( shower_type == exclusive_shower_spectra && initial_parton_flavor == light_parton )
+  {
+    string errMsg = "Exclusive shower spectrum requested, but no specific initial parton flavor is set.";
+    throw ePYTHIAShower_error( errMsg );
+  }
+
   impactParameter = _config.getImpactParameter();
   sqrtS_perNN = _config.getSqrtS();
-  P0 = _minimumPT;
   if (!WoodSaxonParameter.Calculate( A, impactParameter, sqrtS_perNN))
   {
     std::string errMsg = "Impact parameter b too large. b > 2 R_A0";
@@ -61,17 +69,27 @@ initialModel_PYTHIAShower::initialModel_PYTHIAShower( const config& _config, Woo
 }
 
 
-initialModel_PYTHIAShower::initialModel_PYTHIAShower(const config& _config, WoodSaxon& _WoodSaxonParameter, const double _initialPartonPt, const int _initialPartonFlavor, const SHOWER_TYPE _shower_type ):
-  initialModelWS(_config),
-  nEventsToGenerate( _config.getNaddedEvents() ),
-  seed( _config.getSeed() ),
-  filename_prefix( _config.getStandardOutputDirectoryName() + "/" + _config.getJobName() ),
-  initialPartonPt( _initialPartonPt ),
-  initialPartonFlavor( _initialPartonFlavor ),
-  shower_type( _shower_type )  
+initialModel_PYTHIAShower::initialModel_PYTHIAShower( WoodSaxon& _WoodSaxonParameter, const SHOWER_TYPE _shower_type,
+                                                      const int _Nevents, const uint32_t _seed, const string _filename_prefix,
+                                                      const double _A, const double _Aatomic, const double _B, const double _Batomic,
+                                                      const double _sqrtS_perNN, const double _impactParameter,
+                                                      const double _ptCutOff, const FLAVOR_TYPE _initialPartonFlavor ):
+        initialModelWS( _A, _Aatomic, _B, _Batomic ),
+        nEventsToGenerate( _Nevents ),
+        seed( _seed ),
+        filename_prefix( _filename_prefix ),
+        shower_type( _shower_type ),
+        ptCutOff( _ptCutOff ),
+        initial_parton_flavor( _initialPartonFlavor )
 {
-  impactParameter = _config.getImpactParameter();
-  sqrtS_perNN = _config.getSqrtS();
+  if( shower_type == exclusive_shower_spectra && initial_parton_flavor == light_parton )
+  {
+    string errMsg = "Exclusive shower spectrum requested, but no specific initial parton flavor is set.";
+    throw ePYTHIAShower_error( errMsg );
+  }
+
+  impactParameter = _impactParameter;
+  sqrtS_perNN = _sqrtS_perNN;
   if (!WoodSaxonParameter.Calculate( A, impactParameter, sqrtS_perNN))
   {
     std::string errMsg = "Impact parameter b too large. b > 2 R_A0";
@@ -85,337 +103,171 @@ initialModel_PYTHIAShower::initialModel_PYTHIAShower(const config& _config, Wood
   generateTimeDistributionWS(Tab);
   cout << "++++  Tab = " << Tab << "1/mb" << endl;
   cout << "==================================================================" << endl;
-
 }
 
 
-void initialModel_PYTHIAShower::populateParticleVector( std::vector< Particle >& _particles )
+void initialModel_PYTHIAShower::populateParticleVector( std::vector<Particle>& _particles )
 {
-  switch( shower_type )
+  vector<Particle> dummy_initial_partons;
+  populateParticleVector( _particles, dummy_initial_partons );
+}
+
+void initialModel_PYTHIAShower::populateParticleVector( std::vector< Particle >& _particles, std::vector< Particle >& _initial_partons )
+{
+  string filename = filename_prefix + "_" + "unshoweredParticles";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
+  string sep = "\t";
+
+  file << "#event" << sep << "px" << sep << "py" << sep << "pz" << sep << "E" << sep << "x"
+       << sep << "y" << sep << "z" << sep << "t" << endl;
+
+  for ( int n = 0; n < nEventsToGenerate; n++ )
   {
-    case fixedShower:
+    vector< Particle > tempParticles, initialPartonPair;
+    initialPartonPair.resize( 2 );
+
+    if( shower_type == fixed_shower || shower_type == fixed_parton )
     {
-      vector<Particle> tempParticles;
+      initialPartonPair[0].Mom = VectorEPxPyPz( ptCutOff, ptCutOff, 0.0, 0.0 );
+      initialPartonPair[1].Mom = VectorEPxPyPz( ptCutOff, -ptCutOff, 0.0, 0.0 );
 
-      string filename = filename_prefix + "_" + "unshoweredParticles";
-      fstream file( filename.c_str(), ios::out | ios::trunc );
-      string sep = "\t";
-
-      file << "#event" << sep << "px" << sep << "py" << sep << "pz" << sep << "E" << sep << "x"
-           << sep << "y" << sep << "z" << sep << "t" << endl;
-
-      for( int n = 0; n < nEventsToGenerate; n++ )
-      {
-        vector<Particle> particleShower;
-        double px = initialPartonPt;
-        double py = 0.0;
-        double pz = 0.0;
-        
-        FLAVOR_TYPE flavorA, flavorB;
-        switch( initialPartonFlavor )
-        {
-          case 0:
-            flavorA = gluon;
-            flavorB = gluon;
-            break;
-          case 1:
-            flavorA = up;
-            flavorB = anti_up;
-            break;
-          case 2:
-            flavorA = gluon;
-            flavorB = up;
-            break;
-          default:
-            throw ePYTHIAShower_error( "Unknown initial parton flavor. Unrecoverable error!");
-        }
-      
-        particleShower = getFixedShowerEvent( px, py, pz, flavorA, flavorB );
-
-        sample_TXYZ_singleParticle( particleShower[0] );
- 
-        for( int j = 0; j < particleShower.size(); j++ )
-        {
-          particleShower[j].N_EVENT_pp = n;
-          particleShower[j].N_EVENT_AA = n;
-          particleShower[j].Pos.X() = particleShower[0].Pos.X();
-          particleShower[j].Pos.Y() = particleShower[0].Pos.Y();
-          particleShower[j].Pos.Z() = particleShower[0].Pos.Z();
-          particleShower[j].Pos.T() = particleShower[0].Pos.T();
-
-          particleShower[j].init = true;
-
-          tempParticles.push_back( particleShower[j] );
-        }
-        
-        file << n << sep << initialPartonPt << sep << 0.0 << sep << 0.0 << sep << initialPartonPt
-          << sep << particleShower[0].Pos.X() << sep << particleShower[0].Pos.Y() << sep << particleShower[0].Pos.Z() << sep << particleShower[0].Pos.T()
-          << sep << flavorA << endl;
-        file << n << sep << -initialPartonPt << sep << 0.0 << sep << 0.0 << sep << initialPartonPt
-          << sep << particleShower[0].Pos.X() << sep << particleShower[0].Pos.Y() << sep << particleShower[0].Pos.Z() << sep << particleShower[0].Pos.T()
-          << sep << flavorB << endl;
-
-      }
-      _particles.clear();
-      _particles = tempParticles;
-      break;
-    }
-    case pythiaShower:
-    {
-      string filename = filename_prefix + "_" + "unshoweredParticles";
-      fstream file( filename.c_str(), ios::out | ios::trunc );
-      string sep = "\t";
-
-      file << "#event" << sep << "px" << sep << "py" << sep << "pz" << sep << "E" << sep << "x"
-           << sep << "y" << sep << "z" << sep << "t" << endl;
-
-      for ( int n = 0; n < nEventsToGenerate; n++ )
-      {
-        vector< Particle > tempParticles, initialPartons;
-        getPythiaShowerEvent( tempParticles, initialPartons );
-      
-        sample_TXYZ_singleParticle( tempParticles[0] );
-        for ( int i = 0; i < tempParticles.size(); i++ )
-        {
-          tempParticles[i].Pos.T() = tempParticles[0].Pos.T();
-          tempParticles[i].Pos.X() = tempParticles[0].Pos.X();
-          tempParticles[i].Pos.Y() = tempParticles[0].Pos.Y();
-          tempParticles[i].Pos.Z() = tempParticles[0].Pos.Z();
-          tempParticles[i].N_EVENT_pp = n;
-          tempParticles[i].N_EVENT_AA = n;
-          _particles.push_back( tempParticles[i] );
-        }
-      
-        for( int i = 0; i < initialPartons.size(); i++ )
-        {
-          file << n << sep << initialPartons[i].Mom.Px() << sep << initialPartons[i].Mom.Py() << sep << initialPartons[i].Mom.Pz() << sep << initialPartons[i].Mom.E() 
-          << sep << tempParticles[0].Pos.X() << sep << tempParticles[0].Pos.Y() << sep << tempParticles[0].Pos.Z() << sep << tempParticles[0].Pos.T()
-          << sep << initialPartons[i].FLAVOR << endl;
-        }
-      }
-      file.close();
-      break;
-    }
-    case fixedParton:
-    {
-      vector<Particle> tempParticles;
-
-      string filename = filename_prefix + "_" + "unshoweredParticles";
-      fstream file( filename.c_str(), ios::out | ios::trunc );
-      string sep = "\t";
-
-      file << "#event" << sep << "px" << sep << "py" << sep << "pz" << sep << "E" << sep << "x"
-           << sep << "y" << sep << "z" << sep << "t" << endl;
-
-      Particle initialPartonA, initialPartonB;
-        
-      sample_TXYZ_singleParticle( initialPartonA );
-      initialPartonB = initialPartonA;
-      initialPartonA.Mom.E() = initialPartonB.Mom.E() = initialPartonPt;
-      initialPartonA.Mom.Px() = initialPartonPt;
-      initialPartonB.Mom.Px() = -initialPartonPt;
-      initialPartonA.Mom.Py() = initialPartonB.Mom.Py() = 0.0;
-      initialPartonA.Mom.Pz() = initialPartonB.Mom.Pz() = 0.0;
-      
-      FLAVOR_TYPE flavorA, flavorB;
-      switch( initialPartonFlavor )
+      switch ( initial_parton_flavor )
       {
         case 0:
-          initialPartonA.FLAVOR = gluon;
-          initialPartonB.FLAVOR = gluon;
+          initialPartonPair[0].FLAVOR = gluon;
+          initialPartonPair[1].FLAVOR = gluon;
           break;
         case 1:
-          initialPartonA.FLAVOR = up;
-          initialPartonB.FLAVOR = anti_up;
+          initialPartonPair[0].FLAVOR = up;
+          initialPartonPair[1].FLAVOR = anti_up;
           break;
         case 2:
-          initialPartonA.FLAVOR = gluon;
-          initialPartonB.FLAVOR = up;
+          initialPartonPair[0].FLAVOR = gluon;
+          initialPartonPair[1].FLAVOR = up;
           break;
         default:
-          throw ePYTHIAShower_error( "Unknown initial parton flavor. Unrecoverable error!");
+          throw ePYTHIAShower_error( "Unknown initial parton flavor. Unrecoverable error!" );
       }
-      
-      for( int n = 0; n < nEventsToGenerate; n++ )
-      {
-        initialPartonA.N_EVENT_pp = initialPartonB.N_EVENT_pp = n;
-        initialPartonA.N_EVENT_AA = initialPartonB.N_EVENT_AA = n;
-
-        initialPartonA.init = initialPartonB.init = true;
-
-        tempParticles.push_back( initialPartonA );
-        tempParticles.push_back( initialPartonB );
-        
-        file << n << sep << initialPartonPt << sep << 0.0 << sep << 0.0 << sep << initialPartonPt
-          << sep << initialPartonA.Pos.X() << sep << initialPartonA.Pos.Y() << sep << initialPartonA.Pos.Z() << sep << initialPartonA.Pos.T()
-          << sep << flavorA << endl;
-        file << n << sep << -initialPartonPt << sep << 0.0 << sep << 0.0 << sep << initialPartonPt
-          << sep << initialPartonB.Pos.X() << sep << initialPartonB.Pos.Y() << sep << initialPartonB.Pos.Z() << sep << initialPartonB.Pos.T()
-          << sep << flavorB << endl;
-      }
-
-      _particles.clear();
-      _particles = tempParticles;
-      break;
     }
-    default:
-      throw ePYTHIAShower_error( "Unknow initial shower type. Unrecoverable error!" );
-  }
-}
 
-vector< Particle > initialModel_PYTHIAShower::getFixedShowerEvent(const double _px, const double _py, const double _pz, const FLAVOR_TYPE _flavorA, const FLAVOR_TYPE _flavorB)
-{
-
-// PYTHIA seed has max value 9E8
-  while( seed > 900000000 )
-    seed -= 900000000;
-
-  vector<Particle> particlesToAdd;
-  int flavor1, flavor2;
-
-  switch( _flavorA )
-  {
-  case down:
-    flavor1 = 1;
-    break;
-  case anti_down:
-    flavor1 = -1;
-    break;
-  case up:
-    flavor1 = 2;
-    break;
-  case anti_up:
-    flavor1 = -2;
-    break;
-  case strange:
-    flavor1 = 3;
-    break;
-  case anti_strange:
-    flavor1 = -3;
-    break;
-  case gluon:
-    flavor1 = 21;
-    break;
-  default:
-    cout << "Unknown flavor type...." << endl;
-  }
-
-  switch( _flavorB )
-  {
-  case down:
-    flavor2 = 1;
-    break;
-  case anti_down:
-    flavor2 = -1;
-    break;
-  case up:
-    flavor2 = 2;
-    break;
-  case anti_up:
-    flavor2 = -2;
-    break;
-  case strange:
-    flavor2 = 3;
-    break;
-  case anti_strange:
-    flavor2 = -3;
-    break;
-  case gluon:
-    flavor2 = 21;
-    break;
-  default:
-    cout << "Unknown flavor type...." << endl;
-  }
-
-  int attempt = 0;
-  do
-  {
-    particlesToAdd.clear();
-
-    fixedshowerevent_( &_px, &_py, &_pz, &flavor1, &flavor2, &seed );
-
-    int index = 0;
-    while( bamps_.pa[index][0] != 0 )
+    if( shower_type != fixed_parton )
     {
-      Particle tempParticle;
-      tempParticle.FLAVOR = mapToPYTHIAflavor( bamps_.pa[index][0] );
-      tempParticle.Mom.Px() = bamps_.pa[index][2];
-      tempParticle.Mom.Py() = bamps_.pa[index][3];
-      tempParticle.Mom.Pz() = bamps_.pa[index][4];
-      tempParticle.Mom.E() = sqrt( tempParticle.Mom.Px() * tempParticle.Mom.Px() + tempParticle.Mom.Py() * tempParticle.Mom.Py() + tempParticle.Mom.Pz() * tempParticle.Mom.Pz() );
-      tempParticle.m = 0.0;
-      particlesToAdd.push_back( tempParticle );
-      index++;
+      getShowerEvent( tempParticles, initialPartonPair );
+    }
+    else if( shower_type == fixed_parton )
+    {
+      tempParticles = initialPartonPair;
+    }
+    else
+    {
+      string errMsg = "Unknown shower type. Unrecoverable error!";
+      throw ePYTHIAShower_error( errMsg );
     }
 
-    attempt++;
-  }
-  while( particlesToAdd.size() == 0 );
+    sample_TXYZ_singleParticle( tempParticles[0] );
+    for ( int i = 0; i < tempParticles.size(); i++ )
+    {
+      tempParticles[i].Pos = tempParticles[0].Pos;
+      tempParticles[i].N_EVENT_pp = n;
+      tempParticles[i].N_EVENT_AA = n;
+      tempParticles[i].init = true;
 
-  if( attempt > 10 )
-    cout << attempt << " Attempts needed to get an allowed shower." << endl;
+      _particles.push_back( tempParticles[i] );
+    }
 
-  double sumE = 0.0;
-  double E1 = sqrt( _px * _px + _py * _py + _pz * _pz );
-  double E2 = sqrt( _px * _px + _py * _py + _pz * _pz );
-  for( int i = 0; i < particlesToAdd.size(); i++ )
-  {
-    sumE += particlesToAdd[i].Mom.E();
-  }
-  if( FPT_COMP_GE( abs( sumE - ( E1 + E2 ) ) / sumE, 0.05 ) )
-  {
-    stringstream errMsg;
-    errMsg << "Total energy of shower particles differs from energy of shower-initiating partons more than 5%:\t"
-           << sumE << "\t" << E1 + E2 << "Unrecoverable error!" << endl;
-    throw ePYTHIAShower_error( errMsg.str() );
-  }
+    for( int i = 0; i < initialPartonPair.size(); i++ )
+    {
+      initialPartonPair[i].Pos = tempParticles[0].Pos;
+      initialPartonPair[i].N_EVENT_pp = n;
+      initialPartonPair[i].N_EVENT_AA = n;
 
-  return particlesToAdd;
+      file << n << sep << initialPartonPair[i].Mom.Px() << sep << initialPartonPair[i].Mom.Py() << sep << initialPartonPair[i].Mom.Pz() << sep << initialPartonPair[i].Mom.E()
+           << sep << initialPartonPair[i].Pos.X() << sep << initialPartonPair[i].Pos.Y() << sep << initialPartonPair[i].Pos.Z() << sep << initialPartonPair[i].Pos.T()
+           << sep << initialPartonPair[i].FLAVOR << endl;
+
+      _initial_partons.push_back( initialPartonPair[i] );
+    }
+  }
+  file.close();
 }
 
-void initialModel_PYTHIAShower::getPythiaShowerEvent( vector< Particle >& _particles, vector< Particle >& _initialPartons )
+void initialModel_PYTHIAShower::getShowerEvent( vector< Particle >& _particles, vector< Particle >& _initial_parton_pair )
 {
   _particles.clear();
-  vector< Particle > tempParticles;  
-  
+  vector< Particle > tempParticles;
+
   // PYTHIA seed has max value 9E8
   while( seed > 900000000 )
     seed -= 900000000;
 
-  int attempt = 0;
-  do
-  {
-    tempParticles.clear();
-    
-    pythiashowerevent_( &P0, &seed );
+  int index_firstparton = 6;
 
-    int index = 0;
-    while( bamps_.pa[index][0] != 0.0 )
-    {
-      Particle tempParticle;
-      tempParticle.FLAVOR = mapToPYTHIAflavor( bamps_.pa[index][0] );
-      tempParticle.Mom.Px() = bamps_.pa[index][2];
-      tempParticle.Mom.Py() = bamps_.pa[index][3];
-      tempParticle.Mom.Pz() = bamps_.pa[index][4];
-      tempParticle.Mom.E() = sqrt( tempParticle.Mom.Px() * tempParticle.Mom.Px() + tempParticle.Mom.Py() * tempParticle.Mom.Py() + tempParticle.Mom.Pz() * tempParticle.Mom.Pz() );
-      tempParticle.m = 0.0;
-      tempParticles.push_back( tempParticle );
-      index++;
-    }
-    attempt++;
+//  set heavy quark masses for HQ shower
+  if( ( initial_parton_flavor == charm || initial_parton_flavor == anti_charm ||
+    initial_parton_flavor == bottom || initial_parton_flavor == anti_bottom || initial_parton_flavor == allFlavors )
+      && ( Particle::Mcharm != 1.3 || Particle::Mbottom != 4.6 ) )
+  {
+    string errMsg = "Heavy quark masses are not set to standard values (Mcharm=1.3 GeV, Mbottom=4.6 GeV) in shower routines. Unrecoverable error!";
+    throw ePYTHIAShower_error( errMsg );
   }
-  while( tempParticles.size() == 0 );
+  int shower_type_int = static_cast<int>( shower_type );
+  int initial_parton_flavor_int = mapToBAMPSflavor( initial_parton_flavor );
 
-  if( attempt > 10 )
-    throw ePYTHIAShower_error( "Too many Attempts needed to get an allowed PYTHIA event." );
-
-  _initialPartons.clear();
-  _initialPartons.push_back( tempParticles[6] );
-  _initialPartons.push_back( tempParticles[7] );
-  
-  for ( int i = 8; i < tempParticles.size(); i++ )
+  if( shower_type == fixed_shower )
   {
-    if ( tempParticles[i].FLAVOR != allFlavors )
+    int flavorA = mapToBAMPSflavor( _initial_parton_pair[0].FLAVOR );
+    int flavorB = mapToBAMPSflavor( _initial_parton_pair[1].FLAVOR );
+    double px = _initial_parton_pair[0].Mom.Px();
+    double py = _initial_parton_pair[0].Mom.Py();
+    double pz = _initial_parton_pair[0].Mom.Pz();
+    fixedshowerevent_( &px, &py, &pz, &flavorA, &flavorB, &seed );
+    index_firstparton = -2;
+  }
+  else
+  {
+    pythiashowerevent_( &shower_type_int, &initial_parton_flavor_int, &sqrtS_perNN, &ptCutOff, &seed );
+  }
+
+  int index = 0;
+  while( bamps_.pa[index][0] != 0.0 )
+  {
+    Particle tempParticle;
+    tempParticle.FLAVOR = mapToPYTHIAflavor( bamps_.pa[index][0] );
+    tempParticle.m = Particle::getMass( tempParticle.FLAVOR );
+    tempParticle.Mom.Px() = bamps_.pa[index][2];
+    tempParticle.Mom.Py() = bamps_.pa[index][3];
+    tempParticle.Mom.Pz() = bamps_.pa[index][4];
+    tempParticle.Mom.E() = sqrt( tempParticle.Mom.vec2() + pow( tempParticle.m, 2.0 ) );
+
+    tempParticles.push_back( tempParticle );
+    index++;
+  }
+
+  if( shower_type == fixed_shower )
+  {
+    double sumE = 0.0;
+    for( int i = 0; i < tempParticles.size(); i++ )
+    {
+      sumE += tempParticles[i].Mom.E();
+    }
+    if( FPT_COMP_GE( abs( sumE - ( _initial_parton_pair[0].Mom.E() + _initial_parton_pair[1].Mom.E() ) ) / sumE, 0.05 ) )
+    {
+      stringstream errMsg;
+      errMsg << "Total energy of shower particles differs from energy of shower-initiating partons more than 5%:\t"
+             << sumE << "\t" << _initial_parton_pair[0].Mom.E() + _initial_parton_pair[1].Mom.E() << "Unrecoverable error!" << endl;
+      throw ePYTHIAShower_error( errMsg.str() );
+    }
+  }
+  else
+  {
+    _initial_parton_pair.clear();
+    _initial_parton_pair.push_back( tempParticles[index_firstparton] );
+    _initial_parton_pair.push_back( tempParticles[index_firstparton + 1] );
+  }
+
+  for ( int i = index_firstparton + 2; i < tempParticles.size(); i++ )
+  {
+    if( tempParticles[i].FLAVOR != allFlavors && tempParticles[i].FLAVOR != photon )
       _particles.push_back( tempParticles[i] );
   }
 }

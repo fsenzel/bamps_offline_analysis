@@ -83,6 +83,7 @@ config::config() :
  cgcParticleFile("-"),
  mcatnloParticleFile("-"),
  P0(1.4),
+ initialPartonFlavor(light_parton),
 // ---- output options ----
  outputSwitch_progressLog( true ),
  outputSwitch_detailedParticleOutput(false),
@@ -223,7 +224,7 @@ void config::processProgramOptions()
   // some special conversions from integer type values to enum values
   if ( vm.count("initial_state.type") )
   {
-    if ( vm["initial_state.type"].as<int>() < 8 && vm["initial_state.type"].as<int>() >= 0 )
+    if ( vm["initial_state.type"].as<int>() < 11 && vm["initial_state.type"].as<int>() >= 0 )
     {
       initialStateType = static_cast<INITIAL_STATE_TYPE>( vm["initial_state.type"].as<int>() );
     }
@@ -272,7 +273,20 @@ void config::processProgramOptions()
       throw eConfig_error( errMsg );
     }
   }
-  
+
+  if ( vm.count("initial_state.parton_flavor") )
+  {
+    if ( vm["initial_state.parton_flavor"].as<int>() < 1000 && vm["initial_state.parton_flavor"].as<int>() >= 0 )
+    {
+      initialPartonFlavor = static_cast<FLAVOR_TYPE >( vm["initial_state.parton_flavor"].as<int>() );
+    }
+    else
+    {
+      string errMsg = "parameter \"initial_state.type\" out of range";
+      throw eConfig_error( errMsg );
+    }
+  }
+
   if ( vm.count("output.outputScheme") )
   {
     outputScheme = static_cast<OUTPUT_SCHEME>( vm["output.outputScheme"].as<int>() );
@@ -312,19 +326,18 @@ void config::initializeProgramOptions()
   
   // Group some options related to the initial state
   initial_state_options.add_options()
-  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo, 4 = onlyJpsi)")
+  ("initial_state.type", po::value<int>()->default_value( static_cast<int>(initialStateType) ), "initial state type (0 = mini-jets, 1 = pythia, 2 = cgc, 3 = mcatnlo, 4 = onlyJpsi, 5 = fixed parton, 6 = fixed shower, 7 = inclusive PYTHIA shower spectra, 8 = exclusive PYTHIA shower spectra (needs 'initial_state.parton_flavor' to be set)")
   ("initial_state.PDFsource", po::value<unsigned short int>()->default_value( static_cast<unsigned short int>(PDFsource) ), "which source to use for the PDFs ( 0 = built-in GRV, 1 = PDFs from LHAPDF )")
   ("initial_state.LHAPDFset", po::value<string>( &LHAPDFdatasetName )->default_value( LHAPDFdatasetName ), "name of the LHAPDF data set that should be used")
   ("initial_state.LHAPDFmember", po::value<unsigned short int>( &LHAPDFmember )->default_value( LHAPDFmember ), "which member of the LHAPDF set should be used")
   ("initial_state.LHAPDFgrid", po::value<bool>( &LHAPDFuseGrid )->default_value( LHAPDFuseGrid ), "whether a grid version of the LHAPDF set should be used")
   ("initial_state.nuclearPDF", po::value<bool>( &nuclearPDFs )->default_value( nuclearPDFs ), "whether to use nuclear PDFs (only available together with LHAPDF and mini-jets)")
   ("initial_state.nuclearPDFname", po::value<string>( &nuclearPDFdatasetName )->default_value( nuclearPDFdatasetName ), "name of the nPDF dataset to use (EPS09, EPS09LO, EPS09NLO, EPS08, EKS98)")
-  ("initial_state.minijet_P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for minijet initial conditions")
+  ("initial_state.P0", po::value<double>( &P0 )->default_value( P0 ), "lower pT cutoff for spectrum of initial conditions")
   ("initial_state.pythia_file", po::value<string>( &pythiaParticleFile )->default_value( pythiaParticleFile ), "input file providing pythia particle information, needed when initial_state.type = 1")
   ("initial_state.cgc_file", po::value<string>( &cgcParticleFile )->default_value( cgcParticleFile ), "input file providing cgc particle information, needed when initial_state.type = 2")
   ("initial_state.mcatnlo_file", po::value<string>( &mcatnloParticleFile )->default_value( mcatnloParticleFile ), "input file providing MC@NLO particle information, needed when initial_state.type = 3")
-  ("initial_state.initialPartonPt", po::value<double>( &initialPartonPt )->default_value( initialPartonPt ), "parton pt of fixed initial parton pt")
-  ("initial_state.initialPartonFlavor", po::value<int>( &initialPartonFlavor )->default_value( initialPartonFlavor ), "flavor of fixed initial parton pt ( 0 = gg, 1 = u u-bar, 2 = g u )")
+  ("initial_state.parton_flavor", po::value<int>()->default_value( static_cast<int>( initialPartonFlavor ) ), "flavor of fixed initial parton ( fixed initial states: 0 = gg, 1 = u u-bar, 2 = g u; spectra initial states: BAMPS particle flavor )")
   ;
   
   // Add some options related to the program output  
@@ -396,6 +409,8 @@ void config::groupProgramOptions()
 {
   configBase::groupProgramOptions(); // first add the options already contained in the base class
   
+  command_line_options.add(offline_options);
+  
   // Add some groups that are meant to be provided via a configuration file
   config_file_options.add(initial_state_options).add(offline_options);
   
@@ -460,6 +475,18 @@ void config::checkOptionsForSanity()
   if ( scatt_furtherOfflineParticles && !jet_tagged )
   {
     string errMsg = "If recoiled particles are further evolved, jets must be tagged.";
+    throw eConfig_error( errMsg );
+  }
+
+  if ( initialStateType == exclusivePythiaShowerInitialState && initialPartonFlavor == light_parton )
+  {
+    string errMsg = "Exclusive shower spectrum requested, but no specific initial parton flavor is set.";
+    throw eConfig_error( errMsg );
+  }
+
+  if ( ( initialPartonFlavor == charm || initialPartonFlavor == bottom || initialPartonFlavor == anti_charm || initialPartonFlavor == anti_bottom )  && N_heavy_flavors_input == 0 )
+  {
+    string errMsg = "Heavy quark shower initial state, but number of heavy flavors is set to 0.";
     throw eConfig_error( errMsg );
   }
 }

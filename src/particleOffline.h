@@ -142,6 +142,13 @@ public:
 private:
 };
 
+#ifdef BAMPS_DECLARE_ALLOCATOR
+BAMPS_DECLARE_ALLOCATOR(ParticleOffline);
+#else
+#warning "ALLOCATOR not defined"
+#endif
+
+
 /**
  * @brief Provides basic properties of a particle, used for electrons from heavy flavor decays.
  * @author Oliver Fochler

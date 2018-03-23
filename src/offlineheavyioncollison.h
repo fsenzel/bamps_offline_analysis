@@ -23,7 +23,7 @@
 #include "configuration.h"
 #include "interpolation22.h"
 #include "interpolation23.h"
-#include "mfpforheavyioncollision.h"
+#include "mfp_data.h"
 #include "offlineoutput.h"
 #include "ringstructure.h"
 #include "scattering22.h"

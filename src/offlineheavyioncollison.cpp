@@ -280,13 +280,13 @@ void offlineHeavyIonCollision::mainFramework()
   if( theConfig->isHadronizationHQ() )
   {
     hadronization_hq ppHadronization_hq;
-    ppHadronization_hq.heavyQuarkFragmentation();
+    addedParticlesCopy = ppHadronization_hq.heavyQuarkFragmentation( addedParticles );
   }
   if( theConfig->isMesonDecay() )
   {
 #ifdef Pythia_FOUND
     mesonDecay ppMesonDecay( theConfig->getNumberElectronStat(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
-    ppMesonDecay.decayToElectronsPythia();
+    addedPartcl_electron = ppMesonDecay.decayToElectronsPythia( addedParticlesCopy );
 #else
     string errMsg( "Could not perform decay of heavy mesons to electron because PYTHIA was not found." );
     throw eHIC_error( errMsg );
@@ -542,13 +542,13 @@ void offlineHeavyIonCollision::mainFramework()
   if( theConfig->isHadronizationHQ() )
   {
     hadronization_hq theHadronization_hq;
-    theHadronization_hq.heavyQuarkFragmentation();
+    addedParticlesCopy = theHadronization_hq.heavyQuarkFragmentation( addedParticles );
   }
   if( theConfig->isMesonDecay() )
   {
 #ifdef Pythia_FOUND
     mesonDecay theMesonDecay( theConfig->getNumberElectronStat(), theConfig->isMuonsInsteadOfElectrons(), theConfig->isStudyNonPromptJpsiInsteadOfElectrons() );
-    theMesonDecay.decayToElectronsPythia();
+    addedPartcl_electron = theMesonDecay.decayToElectronsPythia( addedParticlesCopy );
 #else
     string errMsg( "Could not perform decay of heavy mesons to electron because PYTHIA was not found." );
     throw eHIC_error( errMsg );
@@ -2637,10 +2637,6 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
                                particles_atTimeNow[iscat].Pos, addedParticles[jscat].Pos,
                                pt1, pt3, y, phi, pz1 );
 
-  P1new(0) = sqrt( P1new.vec2() );
-  P2new(0) = sqrt( P2new.vec2() );
-  P3new(0) = sqrt( P3new.vec2() );
-
   double pt_out1 = P1new.Perp();
   double pt_out2 = P2new.Perp();
 
@@ -2718,7 +2714,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       addedParticles.push_back( tempParticle );
       newIndex = addedParticles.size() - 1;
 
-      addedParticles[newIndex].Propagate( nexttime );
+      addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );
 //   }
   }
   
@@ -3083,6 +3079,7 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
 
   VectorEPxPyPz P1new, P2new;
   scatt32_obj.setNewMomenta32( P1new, P2new, u, phi );
+// Attention: Has to be modified after implementing heavy-quark 3->2 processes.
   P1new.E() = sqrt( P1new.vec2() );
   P2new.E() = sqrt( P2new.vec2() );
 

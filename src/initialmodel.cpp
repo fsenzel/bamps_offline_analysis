@@ -24,11 +24,11 @@ void initialModel::setUniqueID( std::vector<Particle>& _particles )
 }
 
 
-initialModelWS::initialModelWS( const config& _config ) :
-  A( _config.getA() ),
-  Aatomic( _config.getAatomic() ),
-  B( _config.getB() ),
-  Batomic( _config.getBatomic() )
+initialModelWS::initialModelWS( const double _A, const double _Aatomic, const double _B, const double _Batomic ) :
+  A( _A ),
+  Aatomic( _Aatomic ),
+  B( _B ),
+  Batomic( _Batomic )
 {
 }
 

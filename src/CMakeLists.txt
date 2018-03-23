@@ -16,7 +16,7 @@ SET( SOURCES_lib
   initialmodel_pythiashower.cpp
   interpolation_iniJpsi.cpp
   interpolation_nJpsi.cpp
-  offlineheavyioncollison.cpp 
+  offlineheavyioncollison.cpp
   offlineoutput.cpp
   particleOffline.cpp
   pythia6425.f
@@ -37,7 +37,6 @@ SET( SOURCES_lib_common
   coordinateBins.cpp
   initialmodel.cpp
   initialmodel_cgc.cpp
-  mfpforheavyioncollision.cpp
   offlineoutput.cpp
   particle.cpp
   pdfinterface.cpp

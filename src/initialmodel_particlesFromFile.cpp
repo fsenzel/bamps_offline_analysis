@@ -33,7 +33,7 @@ using namespace ns_casc;
 */
 initialModel_ParticlesFromFile::initialModel_ParticlesFromFile( const string _filename_particleFile, const config& _config, WoodSaxon& _WoodSaxonParameter, const double _minimumPT, const int _nToGenerate ) :
   filename_particleFile(_filename_particleFile),
-  initialModelWS(_config) ,
+  initialModelWS( _config.getA(), _config.getAatomic(), _config.getB(), _config.getBatomic() ) ,
   numberOfParticlesToGenerate ( 0 ),
   numberOfTestparticles ( _config.getTestparticles() ),
   minimumPT( _minimumPT ),
