@@ -102,6 +102,9 @@ public:
 
     double lambdaScaled;
     std::vector<double> SpecificMFP;
+    
+    VectorXYZ boostLRFvelocity;
+    
 private:
 
 };

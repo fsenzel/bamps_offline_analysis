@@ -33,6 +33,7 @@
 #include "hadronization_hq.h"
 #include "lorentz.h"
 
+
 #include "configBAMPS.h"
 #ifdef Pythia_FOUND
 #include "mesonDecay.h"
@@ -140,6 +141,11 @@ offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offli
   {
     theMFP.loadData(); 
   }
+  
+  if(theConfig->doScattering_AMY23_photons())
+  {
+    AMY.configure(0.05);
+  }  
   //if( theConfig->doScattering_23_photons() )
   //{
   //  theI23_photons.configure(false,theConfig->I23onlineIntegrationPhotonsIsSet(), 1, 0.0, 0, "", "", 0, theConfig->get23FudgeFactorLpm(), theConfig->getInterpolation23Mode(), 0, normal_photons);
@@ -1073,7 +1079,7 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
     {
       particlesEvolving[i].init = false;
     }
-    if( ( theConfig->doScattering_22_photons() || theConfig->doScattering_23_photons() ) && !(theConfig->useInitialFormationTimesForPhotonproduction()) )
+    if( (theConfig->doScattering_AMY23_photons() || theConfig->doScattering_22_photons() || theConfig->doScattering_23_photons() ) && !(theConfig->useInitialFormationTimesForPhotonproduction()) )
     {
       particlesEvolving[i].init = false;
       particlesEvolving[i].Pos.T() = evolveToTime - 1.0e-6 ;
@@ -1100,6 +1106,18 @@ double offlineHeavyIonCollision::evolveMedium( const double evolveToTime, bool& 
 }
 
 
+// void offlineHeavyIonCollision::computeVelocityOfCells(int cell_index)
+// {
+//   list<int>::iterator iIt;
+//   VectorEPxPyPz sumofMomentaIncell;
+//   VectorXYZ boostbetaVector;
+//   for ( iIt = cells[cell_index].particleList.begin(); iIt != cells[cell_index].particleList.end(); iIt++ )
+//   {
+//     int id = *iIt;
+//     sumofMomentaIncell += particles_atTimeNow[id].Mom;
+//   }
+//   cells[cell_index].boostLRFvelocity = sumofMomentaIncell.NormalizeToE();
+// }
 
 
 void offlineHeavyIonCollision::cell_ID( double _time )
@@ -1398,6 +1416,12 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   double v2avg=0.;
   int v2avgN=0;
   
+  double Tepsilonthreep=0.;
+  double TAMY=0.;
+  int numberTotalForTemp=0;
+  
+  
+  
   
   // go through cells
   for ( int etaSliceIndex = etaBins.min_index(); etaSliceIndex <= etaBins.max_index(); etaSliceIndex++ )
@@ -1528,9 +1552,13 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         int numberInThisCell=0;
         for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
         {
+          
+          
+          
           int id = *iIt;
           xt = particles_atTimeNow[id].Pos.Perp();
           numberInThisCell++;
+         
           
           nc = rings.getIndexPure( xt );
           
@@ -1554,6 +1582,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
           {
             free = false;
           }
+          
+          
         }
         //cout << "Number of Particles in This Cell = " << numberInThisCell << endl;
         
@@ -1774,8 +1804,18 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               particles_atTimeNow[id].md2g = rings[nc].getAveraged_md2g();
               particles_atTimeNow[id].md2q = rings[nc].getAveraged_md2q();
               particles_atTimeNow[id].temperature = rings[nc].getEffectiveTemperature();
+              particles_atTimeNow[id].temperatureAMY = rings[nc].getEffectiveTemperatureFirstOverZerothMoment();
+              
+              
               if(etaSliceIndex == centralEtaIndex)
               {
+                            
+                //TEST
+                Tepsilonthreep+=rings[nc].getEffectiveTemperature();
+                TAMY+=rings[nc].getEffectiveTemperatureFirstOverZerothMoment();
+                numberTotalForTemp+=1.;
+                //
+                
                 //cout<< "Gamma: "<< rings[nc].getGamma() << "\t" << "sqrt(Debye-Mass^2*pi/8/(Nc+Nf)): "<< sqrt(particles_atTimeNow[id].md2g*M_PI/8.0/(Particle::N_light_flavor + Ncolor))<<"   vs Teff= " << particles_atTimeNow[id].temperature<< "\t" << particles_atTimeNow[id].temperature / sqrt(particles_atTimeNow[id].md2g*M_PI/8.0/(Particle::N_light_flavor + Ncolor))<< endl;
               }
 
@@ -1933,7 +1973,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             unsigned int tempPhotons = totalPhotonNumber;
             if( theConfig->isScatt_amongBackgroundParticles() )
             {
-                if( theConfig->doScattering_22_photons() && nexttime >0.2)
+                if( theConfig->doScattering_22_photons())// && nexttime >0.2
                 { 
                   scatt22_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
 //                   for ( int i = 0; i < static_cast<int>( allParticlesList.size() ) - 1; i++ )
@@ -1956,6 +1996,11 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                 {
                   scatt22_amongBackgroundParticles_dileptons( cells[j], allParticlesList, scaleFactor, again, nexttime );
                 }        
+                
+                if( theConfig->doScattering_AMY23_photons() )
+                {
+                  scatt23_amongBackgroundParticles_AMYphotons(cells[j], allParticlesList, scaleFactor, again, nexttime);
+                }
                 
                 if( theConfig->doScattering_23_photons())
                 {
@@ -2157,7 +2202,17 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
     }
     
   }
+
+  
+  
+  
   //cout << "Scattering Parton v2= " << 100*v2avg/v2avgN << " % N = " << v2avgN  << endl; 
+
+  cout << "T1= " << Tepsilonthreep/numberTotalForTemp << " T2= " << TAMY/numberTotalForTemp  << endl;
+  
+  
+  
+  
   formGeomCopy.clear();
   
   // J/psi dissociation: if temperature in cell is higher than Td = 2 Tc, decay J/psi to two charm quarks
@@ -2181,8 +2236,13 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
       outfile.close();
     }
   }
+  
+//TEST  
   cout << "Total # of photons " << totalPhotonNumber << endl;
   cout << "Total # of dileptons " << totalDileptonNumber << endl;
+
+  
+  
 }
 
 
@@ -2828,6 +2888,108 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
         }else
         {          
           scatt23_amongBackgroundParticles_photons_utility_1( _cells, scatt23_object, iscat, jscat, nexttime, scaleForSelectedPairs, again);        
+        }
+      }
+    }
+  }
+}
+
+
+
+
+/**
+ * Performs the inelastic photonproduction using the AMY class.
+ * 
+ * @param[in] _cells
+ * @param[in] _allParticlesList
+ * @param[in] scaleFactor
+ * @param[in] again
+ * @param[in] nexttime
+ * 
+ * 
+ */
+void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime )
+{
+  int iscat;
+  FLAVOR_TYPE F1;
+  double thisEOverT,temperature,TotRateGeV,probab,photonEnergyAMY,photonEnergyAMYLAB;
+  VectorEPxPyPz newPhoton,newPhotonLRF;
+  ParticleOffline temp_particle_produced_photon1;
+  
+  if(_allParticlesList.size()>1)
+  {
+    VectorEPxPyPz sumofMomentaIncell;
+    VectorXYZ boostbetaVector;
+    for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) ; i++ )
+    {
+      iscat = _allParticlesList[i]; 
+      sumofMomentaIncell += particles_atTimeNow[iscat].Mom;
+    }
+    boostbetaVector =  sumofMomentaIncell.NormalizeToE();
+ 
+    lorentz LorentzBoost;
+    LorentzBoost.setBeta( boostbetaVector );
+    VectorEPxPyPz momentumLRF;
+    double timestepBoosted = dt * LorentzBoost.gammaVal();
+    
+    for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) ; i++ )
+    {
+    
+      iscat = _allParticlesList[i];   
+      F1 = particles_atTimeNow[iscat].FLAVOR;
+      temperature = particles_atTimeNow[iscat].temperatureAMY; //GeV
+      LorentzBoost.boost(particles_atTimeNow[iscat].Mom,momentumLRF);
+      thisEOverT =  momentumLRF.E()/temperature;
+      if( AMY.isInMomentumRange(thisEOverT,1.))
+      {
+        TotRateGeV = temperature * AMY.GetTotalRateOverT(thisEOverT, ParticlePrototype::getElectricCharge(ParticlePrototype::getParticleAntiparticleType( F1 )) );
+        probab = timestepBoosted/0.197 * TotRateGeV *theConfig->getkFactorEMprocesses23();
+
+        int countHowManyPhotonsDefinitively=0;
+        while (FPT_COMP_G(probab,1.0))
+        {
+          probab-=1.0;
+          countHowManyPhotonsDefinitively++;
+        }
+        for(int k=1;k<=countHowManyPhotonsDefinitively;k++)
+        {
+          photonEnergyAMY=AMY.sampleMomentumK_METRO(thisEOverT)*temperature;
+          newPhotonLRF = momentumLRF;
+          newPhotonLRF.NormalizeToE();
+          newPhotonLRF = newPhotonLRF * photonEnergyAMY;
+          LorentzBoost.boostInv(newPhotonLRF,newPhoton);
+
+          totalPhotonNumber++;
+          theAnalysis->PtDistributionPhotons(newPhoton.Pt(), newPhoton.Rapidity(), newPhoton.E());
+          temp_particle_produced_photon1.Mom = newPhoton;
+          temp_particle_produced_photon1.m = 0.0;
+          temp_particle_produced_photon1.initially_produced = false;
+          temp_particle_produced_photon1.FLAVOR = photon;
+          temp_particle_produced_photon1.production_time = nexttime;
+          noninteractingParticles.push_back(temp_particle_produced_photon1);
+        
+        }
+        //get probabilistic photon if probab < 1
+        if (FPT_COMP_L(probab,1.0))
+        {
+          if(ran2()<probab)
+          {
+            photonEnergyAMY=AMY.sampleMomentumK_METRO(thisEOverT)*temperature;
+            newPhotonLRF = momentumLRF;
+            newPhotonLRF.NormalizeToE();
+            newPhotonLRF = newPhotonLRF * photonEnergyAMY;
+            LorentzBoost.boostInv(newPhotonLRF,newPhoton);
+
+            totalPhotonNumber++;
+            theAnalysis->PtDistributionPhotons(newPhoton.Pt(), newPhoton.Rapidity(), newPhoton.E());
+            temp_particle_produced_photon1.Mom = newPhoton;
+            temp_particle_produced_photon1.m = 0.0;
+            temp_particle_produced_photon1.initially_produced = false;
+            temp_particle_produced_photon1.FLAVOR = photon;
+            temp_particle_produced_photon1.production_time = nexttime;
+            noninteractingParticles.push_back(temp_particle_produced_photon1);
+
+          }
         }
       }
     }
@@ -4522,6 +4684,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     xt = particles_atTimeNow[iscat].Pos.Perp();
     ringIndex = rings.getIndex( xt );
     double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
+    
     if(effectiveTemperatureFromRings>2.5)
     {
       effectiveTemperatureFromRings = 2.5;
@@ -4636,6 +4799,8 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     cs22 = 0.0; //1/GeV^2
   }
 }
+
+
 
 void offlineHeavyIonCollision::NumbersInCell( std::vector< int >& ThisCell, double & NumberGluonsInCell, double & NumberUpsInCell, double & NumberAntiupsInCell, double & NumberDownsInCell, double & NumberAntisdownsInCell, double &NumberStrangesInCell, double & NumberAntiStrangesInCell )
 { 

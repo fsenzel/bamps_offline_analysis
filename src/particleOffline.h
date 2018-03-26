@@ -33,6 +33,7 @@ public:
   ParticleOffline() : 
     Particle(), 
     temperature(0), 
+    temperatureAMY(0), 
     initially_produced( true ), 
     jpsi_dissociation_number( -1 ),
     lambda_added( -1 ), lambda_added_old( -1 ), rate_added( -1 ),
@@ -56,6 +57,7 @@ public:
   ParticleOffline( const Particle& _particle ) : 
     Particle( _particle ), 
     temperature(0), 
+    temperatureAMY(0),
     initially_produced( true ), 
     jpsi_dissociation_number( -1 ),
     lambda_added( -1 ), lambda_added_old( -1 ), rate_added( -1 ),
@@ -79,8 +81,11 @@ public:
   /** @brief counter for unique particle IDs of added particles (static) */
   static long int unique_id_counter_added;
 
-  /** @brief Temperature of the surrounding medium, needed for J/psi melting */
+  /** @brief Temperature of the surrounding medium, needed for J/psi melting. Uses second over first moment of distrribution, e/(3p) */
   double temperature;
+  
+  /** @brief Temperature of the surrounding medium, corresponds to correct AMY $T_\star$. Effectively First over Zeroth moment. */
+  double temperatureAMY;
     
   /** @brief Whether the particle was initially produced or later in a secondary process */
   bool initially_produced;

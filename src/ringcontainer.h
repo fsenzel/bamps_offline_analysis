@@ -105,6 +105,7 @@ public:
 
     double getEnergyDensity() const;
     double getEffectiveTemperature() const;
+    double getEffectiveTemperatureFirstOverZerothMoment();
 
     double transformEnergyToComovingFrame( VectorEPxPyPz & P ) const;
 
@@ -125,6 +126,8 @@ public:
 
     double md2g;
     double md2q;
+    
+    double TStarGEV;
 
     double v_x;
     double v_y;

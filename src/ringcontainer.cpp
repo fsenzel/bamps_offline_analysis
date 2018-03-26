@@ -361,7 +361,11 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
         md2g = pow( 0.197, 3 ) * 16 * M_PI / (volume/gamma) * ( ns_casc::Ncolor * invEg + Particle::N_light_flavor * invEq );
         md2q = pow( 0.197, 3 ) * 2 * M_PI / (volume/gamma) * 8.0 / 3.0 * ( invEg + invEq );
 
+        //all w/o alpha_s
+        //md2g = 16 * pi * int (d^3p/(2pi)^3/E) (n_c f_g + n_f f_q)
+        //     = 16 * M_PI * 1/(V*gamma) ( ns_casc::Ncolor * invEg + Particle::N_light_flavor * invEq )
         
+       
                      
         particleDensity = numberOfParticles / ( _Ntest * volume * gamma );
         gluonDensity = numberOfGluons / ( _Ntest * volume * gamma );
@@ -372,12 +376,27 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
                           + ( 2 * getAveraged_v_r() * getAveraged_v_z() * pr_pz_over_E ) ) * pow( gamma, 2 ) / ( _Ntest * volume );                //GeV/fm^3
                           
         //cout << "Quark fugacity " <<  quarkDensity/(12/pow(M_PI,2.0)*pow((energyDensity / (3 * particleDensity)),3.0))  << endl;                                        
-        //cout << "sqrt(Debye-Mass^2*pi/8/(Nc+Nf)): "<< sqrt(md2g*M_PI/8.0/(Particle::N_light_flavor + ns_casc::Ncolor)) << "\t"<< (energyDensity / (3 * particleDensity)) << "\t" << endl;                  
-                          
+        //std::cout << "sqrt(Debye-Mass^2*pi/8/(Nc+Nf)): "<< sqrt(md2g*M_PI/8.0/(Particle::N_light_flavor + ns_casc::Ncolor)) << "\t"<< (energyDensity / (3 * particleDensity)) << "\t" << sqrt(md2g*M_PI/8.0/(Particle::N_light_flavor + ns_casc::Ncolor)) / ( (energyDensity / (3 * particleDensity)) ) << "\t" << particleDensity/md2g << std::endl;                  
+ 
+        //Obtain the effective temperature like in AMY, https://arxiv.org/abs/hep-ph/0209353v3, Eq. (1.7) and (1.6) and (A9)
+        double IGluon =     0.5 *  ( gluonDensity / gG ) * pow( 0.197, 3 );   //GeV^3
+        double IQuark =     0.5 *  ( quarkDensity / ( ns_casc::Ncolor * Particle::N_light_flavor * 2 ) ) * pow( 0.197, 3 ); //GeV^3
+            
+        double JGluon =     pow( 0.197, 3 )/ (volume/gamma) * invEg; //GeV^2
+        double JQuark =     pow( 0.197, 3 )/ (volume/gamma) * invEq; //GeV^2
+        
+        TStarGEV =   (IGluon + IQuark)/(JGluon + JQuark); 
+
+        //std::cout << "Temp/GeV = " << TStarGEV <<  std::endl;
+        
     }
 }
 
-
+/**
+ * @brief Calculate effective temperature by e/3n = (second over first moment of f)
+ * 
+ * 
+ */
 double ringContainer::getEffectiveTemperature() const
 {
     if ( !averagesPrepared )
@@ -389,6 +408,20 @@ double ringContainer::getEffectiveTemperature() const
     return energyDensity / (3 * particleDensity);
 }
 
+
+/**
+ * @brief Calculate effective temperature by n/mD^2 = (first over zeroth moment of f)
+ * 
+ * 
+ */
+double ringContainer::getEffectiveTemperatureFirstOverZerothMoment()
+{
+  //This corresponds to https://arxiv.org/abs/hep-ph/0209353v3, Eq. (1.7) and (1.6) and (A9)
+  // AMY_mathcal_I = in equil. similar to n     ~ T^3
+  // AMY_mathcal_J = in equil. similar to md^2  ~ T^2
+  
+  return TStarGEV;
+}
 
 
 

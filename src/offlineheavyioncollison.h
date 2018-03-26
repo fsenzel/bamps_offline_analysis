@@ -30,6 +30,7 @@
 #include "scattering23.h"
 #include "scattering32.h"
 #include "woodsaxon.h"
+#include "AMY.h"
 
 
 class offlineHeavyIonCollision
@@ -78,6 +79,9 @@ private:
 
     /** @brief  interpolation22 object that provides access to tabulated values for the cross section of all 2->2 processes with running coupling */
     interpolation22 theI22;
+    
+    /** @brief AMY class that encapsulates the AMY tables for radiative photon emission. */
+    AMYclass AMY;
 
     //---- parameters that are copied from the config object for convenience ----
     /** @brief Runtime to simulate [in fm/c] */
@@ -163,6 +167,8 @@ private:
 
     void cell_ID( double time );
 
+//     void computeVelocityOfCells(int cell_index);
+    
     void scattering( const double nexttime, bool& again );
 
     void scatterEdgeParticles( std::list< int >& _offlineParticleList, std::list< int >& _addedParticleList, const double nexttime );
@@ -177,7 +183,10 @@ private:
     void scatt22_amongBackgroundParticles_photons  ( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
     void scatt22_amongBackgroundParticles_dileptons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
     void scatt23_amongBackgroundParticles_photons  ( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+    void scatt23_amongBackgroundParticles_AMYphotons  ( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
         
+    void getEnergyOverTinLocalRestFrame( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+    
     void scatt32_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
                                             cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
                                             int& n32, bool& again, const double nexttime );
