@@ -344,7 +344,7 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
     if ( numberOfParticles > 0 )
     {
         double gG = 2 * ( pow( ns_casc::Ncolor, 2 ) - 1 );
-        double gQ = 2.0 * ns_casc::Ncolor * Particle::N_light_flavor;
+        double gQ = 2.0 * ns_casc::Ncolor * Particle::N_light_flavor; 
 
         double invEg = inverseE_gluons / ( gG * _Ntest );
         double invEq;
@@ -366,7 +366,7 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
         //     = 16 * M_PI * 1/(V*gamma) ( ns_casc::Ncolor * invEg + Particle::N_light_flavor * invEq )
         
        
-                     
+        // Boost-Gamma factor correct?
         particleDensity = numberOfParticles / ( _Ntest * volume * gamma );
         gluonDensity = numberOfGluons / ( _Ntest * volume * gamma );
         quarkDensity = numberOfQuarks / ( _Ntest * volume * gamma );
@@ -378,12 +378,13 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
         //cout << "Quark fugacity " <<  quarkDensity/(12/pow(M_PI,2.0)*pow((energyDensity / (3 * particleDensity)),3.0))  << endl;                                        
         //std::cout << "sqrt(Debye-Mass^2*pi/8/(Nc+Nf)): "<< sqrt(md2g*M_PI/8.0/(Particle::N_light_flavor + ns_casc::Ncolor)) << "\t"<< (energyDensity / (3 * particleDensity)) << "\t" << sqrt(md2g*M_PI/8.0/(Particle::N_light_flavor + ns_casc::Ncolor)) / ( (energyDensity / (3 * particleDensity)) ) << "\t" << particleDensity/md2g << std::endl;                  
  
-        //Obtain the effective temperature like in AMY, https://arxiv.org/abs/hep-ph/0209353v3, Eq. (1.7) and (1.6) and (A9)
-        double IGluon =     0.5 *  ( gluonDensity / gG ) * pow( 0.197, 3 );   //GeV^3
-        double IQuark =     0.5 *  ( quarkDensity / ( ns_casc::Ncolor * Particle::N_light_flavor * 2 ) ) * pow( 0.197, 3 ); //GeV^3
+        // Obtain the effective temperature like in AMY, https://arxiv.org/abs/hep-ph/0209353v3, Eq. (1.7) and (1.6) and (A9)
+        // Boost-Gamma factor canceled out
+        double IGluon =     0.5 *  ( (numberOfGluons / ( _Ntest * volume) )  /  gG ) * pow( 0.197, 3 );   //GeV^3
+        double IQuark =     0.5 *  ( (numberOfQuarks / ( _Ntest * volume) )  / ( ns_casc::Ncolor * Particle::N_light_flavor * 2 * 2 ) ) * pow( 0.197, 3 ); //GeV^3
             
-        double JGluon =     pow( 0.197, 3 )/ (volume/gamma) * invEg; //GeV^2
-        double JQuark =     pow( 0.197, 3 )/ (volume/gamma) * invEq; //GeV^2
+        double JGluon =     pow( 0.197, 3 )/ (volume) * invEg; //GeV^2
+        double JQuark =     pow( 0.197, 3 )/ (volume) * invEq; //GeV^2
         
         TStarGEV =   (IGluon + IQuark)/(JGluon + JQuark); 
 

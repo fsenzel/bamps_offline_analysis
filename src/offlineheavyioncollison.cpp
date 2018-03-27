@@ -2916,7 +2916,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
   VectorEPxPyPz newPhoton,newPhotonLRF;
   ParticleOffline temp_particle_produced_photon1;
   
-  if(_allParticlesList.size()>1)
+  if(_allParticlesList.size()>5)
   {
     VectorEPxPyPz sumofMomentaIncell;
     VectorXYZ boostbetaVector;
