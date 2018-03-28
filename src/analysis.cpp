@@ -3115,7 +3115,9 @@ void analysis::printCentralDensities(const double _time)
     centralDensitiesOutputFile << sep << centralRingsCopyFromCascade[i].getEnergyDensity() << sep 
     << centralRingsCopyFromCascade[i].getGluonDensity() << sep << centralRingsCopyFromCascade[i].getQuarkDensity() << sep
     << centralRingsCopyFromCascade[i].getEffectiveTemperature() << sep << centralRingsCopyFromCascade[i].getAveraged_md2g() << sep 
-    << centralRingsCopyFromCascade[i].getAveraged_md2q(); 
+    << centralRingsCopyFromCascade[i].getAveraged_md2q() << sep << centralRingsCopyFromCascade[i].getEffectiveTemperatureAMY() << sep
+    << centralRingsCopyFromCascade[i].getEffectiveTemperatureByDebyeMass();
+    ; 
   }
   centralDensitiesOutputFile << endl;
 

@@ -32,7 +32,7 @@ ringContainer::ringContainer() :
   pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ),
   gamma( 0 ), energyDensity( 0 ), particleDensity( 0 ), 
   gluonDensity( 0 ), quarkDensity( 0 ), volume( 0 ),
-  numberOfCollectedRateObjects( 0 )
+  numberOfCollectedRateObjects( 0 ), Tstar_AMY( 0.0 )
 {
   rates.normalizeRates();
 }
@@ -53,7 +53,7 @@ ringContainer::ringContainer( const double _minR, const double _maxR ) :
   pr2_over_E( 0 ), pz2_over_E( 0 ), pr_pz_over_E( 0 ),
   gamma( 0 ), energyDensity( 0 ), particleDensity( 0 ), 
   gluonDensity( 0 ), quarkDensity( 0 ), volume( 0 ),
-  numberOfCollectedRateObjects( 0 )
+  numberOfCollectedRateObjects( 0 ), Tstar_AMY( 0.0 )
 {
   rates.normalizeRates();
 }
@@ -83,7 +83,7 @@ void ringContainer::clear()
   pr2_over_E = 0;
   pz2_over_E = 0;
   pr_pz_over_E = 0;
-
+  Tstar_AMY = 0.0;
   rates.clear();
   rates.normalizeRates();
   numberOfCollectedRateObjects = 0;
@@ -110,7 +110,7 @@ void ringContainer::addParticle( const Particle& _particle )
 
 
   double xt = _particle.Pos.Perp();
-  double oneE = 1 / _particle.Mom.E();
+  double oneE = 1.0 / _particle.Mom.E();
 
 
   E += _particle.Mom.E();
@@ -365,6 +365,14 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
     energyDensity = ( E - ( 2 * getAveraged_v_r() * p_r ) - ( 2 * getAveraged_v_z() * p_z )
                       + ( pow( getAveraged_v_r(), 2 ) * pr2_over_E ) + ( pow( getAveraged_v_z(), 2 ) * pz2_over_E )
                       + ( 2 * getAveraged_v_r() * getAveraged_v_z() * pr_pz_over_E ) ) * pow( gamma, 2 ) / ( _Ntest * volume );                //GeV/fm^3
+
+    // T* as calculated in JHEP 0301 (2003) 030, eqs. (1.6), (1.7)
+    const double Cf = ( 4.0 / 3.0 );
+    const double Ca = 3.0;
+    const double I = 0.5 * ( Cf * numberOfQuarks + Ca * numberOfGluons ); // unitless
+    const double J = Cf * inverseE_quarks + Ca * inverseE_gluons; // 1 / GeV
+    
+    Tstar_AMY = I / J;
   }
 }
 
@@ -380,7 +388,27 @@ double ringContainer::getEffectiveTemperature() const
   return energyDensity / (3 * particleDensity);
 }
 
+double ringContainer::getEffectiveTemperatureAMY() const
+{
+  if ( !averagesPrepared )
+  {
+    std::string errMsg = "ringContainer: averaged quantity requested without prior call to prepareAverages()";
+    throw eRingContainer_error( errMsg );
+  }
+  
+  return Tstar_AMY;
+}
 
+double ringContainer::getEffectiveTemperatureByDebyeMass() const
+{
+  if ( !averagesPrepared )
+  {
+    std::string errMsg = "ringContainer: averaged quantity requested without prior call to prepareAverages()";
+    throw eRingContainer_error( errMsg );
+  }
+  
+  return sqrt( md2g * M_PI / ( 8.0 * ( ns_casc::Ncolor + Particle::N_light_flavor ) ) );
+}
 
 
 double ringContainer::transformEnergyToComovingFrame(VectorEPxPyPz & P) const

@@ -68,7 +68,15 @@ public:
   double getQuarkDensity() const;
   
   double getEnergyDensity() const;
+  
+  // temperature by calculating via energy density (ratio of 2nd over 1st moment of distribution function)
   double getEffectiveTemperature() const;
+  
+  // temperature as calulated in JHEP 0301 (2003) 030 (ratio of 1st over 0th moment of distribution function)
+  double getEffectiveTemperatureAMY() const;
+  
+  // temperature calculated by sqrt of Debye mass (sqrt of 0th moment of distribution function)
+  double getEffectiveTemperatureByDebyeMass() const;
   
   double transformEnergyToComovingFrame( VectorEPxPyPz & P ) const;
   
@@ -110,6 +118,8 @@ public:
   double particleDensity;
   double gluonDensity;
   double quarkDensity;
+  
+  double Tstar_AMY;
   
   double volume;
 
