@@ -1331,14 +1331,14 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             vector<int> nAntiLightQuarksAdded( Particle::N_light_flavor, 0 );
             
         //------------------------- calculate flow of this cell --------------------
-            VectorEPxPyPz p_cell = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
-            list<int>::const_iterator iIt;
-            for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
-            {
-              id = *iIt;
-              p_cell += particles_atTimeNow[id].Mom;
-            }
-            const VectorEPxPyPz v_cell = p_cell.NormalizeToE();
+            // VectorEPxPyPz p_cell = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+            // list<int>::const_iterator iIt;
+            // for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+            // {
+            //   id = *iIt;
+            //   p_cell += particles_atTimeNow[id].Mom;
+            // }
+            // const VectorEPxPyPz v_cell = (cells[j].particleList.size() >= 5)? p_cell.NormalizeToE() : VectorEPxPyPz( 1.0, 0.0, 0.0, 0.0 );
 
             for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
             {
@@ -1397,7 +1397,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               particles_atTimeNow[id].md2g = rings[nc].getAveraged_md2g();
               particles_atTimeNow[id].md2q = rings[nc].getAveraged_md2q();
               particles_atTimeNow[id].temperature = rings[nc].getEffectiveTemperature();
-              particles_atTimeNow[id].v_cell = v_cell;
 
               if ( particles_atTimeNow[id].FLAVOR == gluon )
               {
@@ -1472,7 +1471,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               addedParticles[id].md2g = rings[nc].getAveraged_md2g();
               addedParticles[id].md2q = rings[nc].getAveraged_md2q();
               addedParticles[id].temperature = rings[nc].getEffectiveTemperature();
-              addedParticles[id].v_cell = v_cell;
+              addedParticles[id].temperatureAMY = rings[nc].getEffectiveTemperatureAMY();
+              addedParticles[id].v_cell = rings[nc].getAveraged_v();
               
               if ( addedParticles[id].FLAVOR == gluon )
               {
@@ -2031,7 +2031,7 @@ void offlineHeavyIonCollision::emission12_offlineParticles( std::vector< int >& 
     
     pt_addedParticle = addedParticles[jscat].Mom.Perp();
     
-    if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead )
+    if( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead )
     {
       continue; // jump to next particle in the list
     }
@@ -2040,49 +2040,44 @@ void offlineHeavyIonCollision::emission12_offlineParticles( std::vector< int >& 
     xt = ( addedParticles[jscat].Pos.Perp() ) / 2;
     ringIndex = rings.getIndex( xt );
 
-    const double T = addedParticles[jscat].temperature;
+    const double T = addedParticles[jscat].temperatureAMY;
     const VectorTXYZ v_cell = addedParticles[jscat].v_cell;
         
-    if( theConfig->doScattering_22() )
+    emission12_object.setParameter( addedParticles[jscat].Mom, F1, T, v_cell );
+        
+    const double rate12 = emission12_object.getIntegratedRate(); // rate in lab-frame
+    
+    const double probab12 = rate12 * dt;
+
+    // int N12 = static_cast<int>( probab12 );
+         
+    // if( ran2() < (probab12 - static_cast<double>( N12 ) ) )
+    //   N12++;
+
+    // for( int i12 = 0; i12 < N12; i12++ )
+    // {
+    if ( probab12 > 1.0 )
     {
-      emission12_object.setParameter( addedParticles[jscat].Mom, F1, T, v_cell );
+      cout << "P12=" << probab12 << ">1" << endl;
+      again = true;
+      cout << "dt (old) = " << dt << endl;
+      dt = 0.5 / ( probab12 / dt );
+      cout << "dt (new) = " << dt << endl;
+      return;
+    }
           
-      const double rate12 = emission12_object.getIntegratedRate();
-          
-      const double probab12 = rate12 * dt;
-      int N12 = static_cast<int>( probab12 );
+    if ( ran2() < probab12 )
+    {
+      // double pt_jscat = addedParticles[jscat].Mom.Perp();
+      // double pt_nmb;
 
-//      if ( probab12 > 1.0 )
-//        cout << "probab12=" << probab12 << " >1" << endl;
-            
-      if( ran2() < (probab12 - static_cast<double>( N12 ) ) )
-        N12++;
-
-      for( int i12 = 0; i12 < N12; i12++ )
-      {
-      // if ( probab12 > 1.0 )
+      // int jetEventIndex = -1;
+      // if( pt_jscat > theAnalysis->getJetTracking_PT() )
       // {
-      //   cout << "P12=" << probab12 << ">1" << endl;
-      //   again = true;
-      //   cout << "dt (old) = " << dt << endl;
-      //   dt = 0.5 / ( probab12 / dt );
-      //   cout << "dt (new) = " << dt << endl;
-      //   return;
+      //   jetEventIndex = theAnalysis->addJetEvent_in( iscat, -1, jscat, c2to3, cs23, _cell.index, lambda_scaled / sqrt( s ) );
       // }
-            
-      // if ( ran2() < probab12 )
-      // {
-        double pt_jscat = addedParticles[jscat].Mom.Perp();
-        double pt_nmb;
 
-        // int jetEventIndex = -1;
-        // if( pt_jscat > theAnalysis->getJetTracking_PT() )
-        // {
-        //   jetEventIndex = theAnalysis->addJetEvent_in( iscat, -1, jscat, c2to3, cs23, _cell.index, lambda_scaled / sqrt( s ) );
-        // }
-
-        int newIndex = emission12_offlineParticles_utility( emission12_object, jscat, again, nexttime );
-      }
+      int newIndex = emission12_offlineParticles_utility( emission12_object, jscat, again, nexttime );
     }
   }
 }
@@ -3006,6 +3001,7 @@ int offlineHeavyIonCollision::emission12_offlineParticles_utility( emission12& e
   int newIndex = -1;
   
   F1 = addedParticles[jscat].FLAVOR;
+  F2 = allFlavors;
 
   const double t = addedParticles[jscat].Pos.T();
   const double tt = ( nexttime - t ) * ran2() + t;
@@ -3017,18 +3013,17 @@ int offlineHeavyIonCollision::emission12_offlineParticles_utility( emission12& e
   addedParticles[jscat].lastInt = addedParticles[jscat].Pos;
 
   int process_type;
-  const double omega = emission12_object.getMomenta12( process_type );
+  const double sampled_k = emission12_object.getMomenta12( process_type );
         
-  if( omega > 0.0 )
-  {
-    FLAVOR_TYPE F2;
-    VectorEPxPyPz P1new, P2new;
+  VectorEPxPyPz P1new, P2new;
 
-    emission12_object.setNewMomenta12( process_type, omega, P1new, P2new, F1, F2 );
+  P2new = emission12_object.setNewMomenta12( process_type, sampled_k, P1new, F1, F2 );
  
-    addedParticles[jscat].FLAVOR = F1;
-    addedParticles[jscat].Mom = P1new;
+  addedParticles[jscat].FLAVOR = F1;
+  addedParticles[jscat].Mom = P1new;
 
+  if( F2 != allFlavors )
+  {
     ParticleOffline tempParticle;
     tempParticle.FLAVOR = F2;
     tempParticle.Mom = P2new;
@@ -3061,14 +3056,6 @@ int offlineHeavyIonCollision::emission12_offlineParticles_utility( emission12& e
     newIndex = addedParticles.size() - 1;
 
     addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );          
-  }
-  else if( omega < 0.0 )
-  {
-    VectorEPxPyPz P1new;
-    emission12_object.setNewMomenta21( process_type, omega, P1new, F1 );
-
-    addedParticles[jscat].FLAVOR = F1;
-    addedParticles[jscat].Mom = P1new;
   }
 
   return newIndex;

@@ -40,12 +40,12 @@ public:
   double getAveraged_v_r() const { if ( numberOfParticles > 0 ) return ( v_r / numberOfParticles ); else return 0; } 
   double getGamma() const;
 
-  VectorXYZ getAveraged_v() const
+  VectorTXYZ getAveraged_v() const
   {
     if ( numberOfParticles > 0 )
-      return VectorXYZ(v_x,v_y,v_z) * (1./ numberOfParticles);
+      return VectorTXYZ(numberOfParticles,v_x,v_y,v_z) * (1./numberOfParticles);
     else
-      return VectorXYZ(0,0,0);
+      return VectorTXYZ(1.0,0.0,0.0,0.0);
   }
 
 

@@ -32,7 +32,7 @@ public:
   /** @brief Provide standard constructor (for completeness) */
   ParticleOffline() : 
     Particle(), 
-    temperature(0), 
+    temperature(0), temperatureAMY(0), 
     initially_produced( true ), 
     jpsi_dissociation_number( -1 ),
     lambda_added( -1 ), lambda_added_old( -1 ), rate_added( -1 ),
@@ -49,7 +49,7 @@ public:
     
   ParticleOffline( const Particle& _particle ) : 
     Particle( _particle ), 
-    temperature(0), 
+    temperature(0), temperatureAMY(0), 
     initially_produced( true ), 
     jpsi_dissociation_number( -1 ),
     lambda_added( -1 ), lambda_added_old( -1 ), rate_added( -1 ),
@@ -69,6 +69,9 @@ public:
 
   /** @brief Temperature of the surrounding medium, needed for J/psi melting */
   double temperature;
+  
+  /** @brief Temperature of the surrounding medium, needed for 1->2 AMY emissions */
+  double temperatureAMY;
     
   /** @brief Whether the particle was initially produced or later in a secondary process */
   bool initially_produced;
