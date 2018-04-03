@@ -78,6 +78,9 @@ namespace
   int n23_collected_quark;
   double lambdaJet_gluon;
   double lambdaJet_quark;
+  
+  double lambdaT400,countLambdaatT400;
+  
 }
 
 namespace ns_heavy_quarks
@@ -267,7 +270,10 @@ void offlineHeavyIonCollision::mainFramework()
   int jpsi_dissociation_backup = 0;
   bool onlyMediumEvolution=theConfig->isOnlyMediumEvolution();
   
-  
+  //TEST
+//   lambdaT400=0;
+//   countLambdaatT400=0;
+  //
   
   list<int> edgeCellCopy, edgeCellAddedCopy;
 
@@ -346,7 +352,6 @@ void offlineHeavyIonCollision::mainFramework()
   //TEST
   //theAnalysis->printCellV2Distribution(nexttime, simpleTimestepcount);
   //simpleTimestepcount++;
-  
   
   simulationTime = theConfig->getTimefirst(); //fm/c
 
@@ -721,6 +726,11 @@ void offlineHeavyIonCollision::mainFramework()
   cout << "Do final output: " << endl;
   theAnalysis->finalOutput( stoptime );
   //theAnalysis->addJetEvents_final();
+  
+  //TEST
+  //cout << "lambda/fm = " << lambdaT400/countLambdaatT400  << endl;  
+  //
+  
   
   if(!onlyMediumEvolution)
   {
@@ -2938,11 +2948,16 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
       iscat = _allParticlesList[i];   
       F1 = particles_atTimeNow[iscat].FLAVOR;
       temperature = particles_atTimeNow[iscat].temperatureAMY; //GeV
+      if(std::isnan(temperature) || std::isinf(temperature) || FPT_COMP_E( temperature, 0.0 ) || FPT_COMP_LE( temperature, 160.0 ))
+      {
+        continue;
+      }
+      
       LorentzBoost.boost(particles_atTimeNow[iscat].Mom,momentumLRF);
       thisEOverT =  momentumLRF.E()/temperature;
       if( AMY.isInMomentumRange(thisEOverT,1.))
       {
-        TotRateGeV = temperature * AMY.GetTotalRateOverT(thisEOverT, ParticlePrototype::getElectricCharge(ParticlePrototype::getParticleAntiparticleType( F1 )) );
+        TotRateGeV = temperature * AMY.GetTotalRateOverT(thisEOverT, ParticlePrototype::getElectricCharge(ParticlePrototype::getParticleAntiparticleType( F1 )) )/testpartcl;
         probab = timestepBoosted/0.197 * TotRateGeV *theConfig->getkFactorEMprocesses23();
 
         int countHowManyPhotonsDefinitively=0;
@@ -4711,8 +4726,13 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
     }*/  
     
           
+//     if(lambda>0 && rings[ringIndex].getEffectiveTemperature()<0.41 && rings[ringIndex].getEffectiveTemperature()>0.39)
+//     {
+//       lambdaT400+=lambda;
+//       countLambdaatT400+=1;
+//     }
+    
     /*TEST
-    cout << "lambda = " << lambda << endl;  
     cout << "1/ns = " << 1.0/(rings[ringIndex].getGluonDensity()*1.0) << endl;
     cout << "E = " <<  particles_atTimeNow[iscat].Mom.E() << endl;
     cout << "T= : " << rings[ringIndex].getEffectiveTemperature() << endl;
