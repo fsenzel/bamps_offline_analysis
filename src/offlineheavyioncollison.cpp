@@ -2948,9 +2948,9 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
       iscat = _allParticlesList[i];   
       F1 = particles_atTimeNow[iscat].FLAVOR;
       temperature = particles_atTimeNow[iscat].temperatureAMY; //GeV
-      if(std::isnan(temperature) || std::isinf(temperature) || FPT_COMP_E( temperature, 0.0 ) || FPT_COMP_LE( temperature, 160.0 ))
+      if(std::isnan(temperature) || std::isinf(temperature) || FPT_COMP_E( temperature, 0.0 ) || FPT_COMP_LE( temperature, 0.160 ))
       {
-        continue;
+        continue;       
       }
       
       LorentzBoost.boost(particles_atTimeNow[iscat].Mom,momentumLRF);
@@ -2973,7 +2973,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
           newPhotonLRF.NormalizeToE();
           newPhotonLRF = newPhotonLRF * photonEnergyAMY;
           LorentzBoost.boostInv(newPhotonLRF,newPhoton);
-
+          
           totalPhotonNumber++;
           theAnalysis->PtDistributionPhotons(newPhoton.Pt(), newPhoton.Rapidity(), newPhoton.E());
           temp_particle_produced_photon1.Mom = newPhoton;
