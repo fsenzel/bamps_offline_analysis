@@ -119,6 +119,7 @@ config::config() :
  mfpAddedRangeVariation( 100.0 ),
  fixed_mfp_added( 1.0 ),
 //  interpolationBorder(50),
+ tau_min( -1.0 ),
  // ---- offline reconstruction options ----
  pathdirOfflineData("offline_data"),
  originalName("default"),
@@ -299,6 +300,11 @@ void config::processProgramOptions()
     cout << "Only heavy quarks are switched on. Therefore, set jet_tagged = true." << endl; 
     jet_tagged = true;
   }
+
+  if( !( vm["misc.tau_min"].defaulted() || vm["misc.tau_min"].empty() ) )
+  {
+    cout << "Added particles are only allowed to scatter/radiate after tau = " << tau_min << " fm/c" << endl;
+  }
 }
 
 
@@ -382,6 +388,7 @@ void config::initializeProgramOptions()
   ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "treatment for the mean free path of added particles ( 0 = computeMfpLastTimestep, 1 = computeMfpIteration, 2 = computeMfpInterpolation, 3 = fixedMfp, 4 = thermalMfpGluon)")
   ("misc.fixed_mfp_added", po::value<double>( &fixed_mfp_added )->default_value( fixed_mfp_added ), "Mean free path of added particles set by hand. Does not depend on energy of particle" )
   ("misc.mfpAddedRangeVariation", po::value<double>( &mfpAddedRangeVariation )->default_value( mfpAddedRangeVariation ), "Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be" )
+  ("misc.tau_min", po::value<double>( &tau_min )->default_value( tau_min ), "Proper time after which added particles are allowed to scatter/radiate" )
   ;
 
   

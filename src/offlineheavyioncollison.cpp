@@ -1720,12 +1720,12 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
     rate_added_sum = 0;
 
     pt_addedParticle = addedParticles[jscat].Mom.Perp();
-    
-    if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead )
+    const double tau = sqrt( addedParticles[jscat].Pos.T() * addedParticles[jscat].Pos.T() - addedParticles[jscat].Pos.Z() * addedParticles[jscat].Pos.Z() );
+
+    if( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead || tau < theConfig->getTauMin() )
     {
       continue; // jump to next particle in the list
     }
-    
     
     if( theConfig->doScattering_23() )
     {
@@ -2030,8 +2030,9 @@ void offlineHeavyIonCollision::emission12_offlineParticles( std::vector< int >& 
     jscat = _allParticlesListAdded[j];
     
     pt_addedParticle = addedParticles[jscat].Mom.Perp();
-    
-    if( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead )
+    const double tau = sqrt( addedParticles[jscat].Pos.T() * addedParticles[jscat].Pos.T() - addedParticles[jscat].Pos.Z() * addedParticles[jscat].Pos.Z() );
+
+    if( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead || tau < theConfig->getTauMin() )
     {
       continue; // jump to next particle in the list
     }

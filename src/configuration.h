@@ -283,6 +283,10 @@ class config : public configBase
   
 //   /** @brief Interface for config::interpolationBorder */
 //   double getMFPInterpolationBorder() const {return interpolationBorder;}
+//   
+  /** @brief Interface for config::tau_min */
+  double getTauMin() const { return tau_min; }
+
   /** ------------------------------------ */
   
   /** -------- offline reconstruction options ------- */ 
@@ -610,6 +614,10 @@ class config : public configBase
   
   /** @brief Whether timesteps are repeated in cases where the probability has been > 1 */
   bool switch_repeatTimesteps;
+
+  /** @brief Proper time after which partons are allowed to scatter / radiate */
+  double tau_min;
+
   /** ------------------------------- */
 
   /** -------- offline reconstruction options ------- */ 
