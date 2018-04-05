@@ -2948,7 +2948,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
       iscat = _allParticlesList[i];   
       F1 = particles_atTimeNow[iscat].FLAVOR;
       temperature = particles_atTimeNow[iscat].temperatureAMY; //GeV
-      if(std::isnan(temperature) || std::isinf(temperature) || FPT_COMP_E( temperature, 0.0 ) || FPT_COMP_LE( temperature, 0.160 ))
+      if(std::isnan(temperature) || std::isinf(temperature) || FPT_COMP_E( temperature, 0.0 ))
       {
         continue;       
       }
