@@ -2926,7 +2926,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
   VectorEPxPyPz newPhoton,newPhotonLRF;
   ParticleOffline temp_particle_produced_photon1;
   
-  if(_allParticlesList.size()>5)
+  if(_allParticlesList.size()>2)
   {
     VectorEPxPyPz sumofMomentaIncell;
     VectorXYZ boostbetaVector;
@@ -2944,7 +2944,10 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
     
     for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) ; i++ )
     {
-    
+      if(std::isnan(LorentzBoost.gammaVal()) || std::isinf(LorentzBoost.gammaVal()))
+      {
+        continue;       
+      }
       iscat = _allParticlesList[i];   
       F1 = particles_atTimeNow[iscat].FLAVOR;
       temperature = particles_atTimeNow[iscat].temperatureAMY; //GeV
