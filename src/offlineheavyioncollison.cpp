@@ -2935,8 +2935,12 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
       iscat = _allParticlesList[i]; 
       sumofMomentaIncell += particles_atTimeNow[iscat].Mom;
     }
-    boostbetaVector =  sumofMomentaIncell.NormalizeToE();
- 
+    
+    //HACK
+    //boostbetaVector =  sumofMomentaIncell.NormalizeToE();
+    boostbetaVector.SetTXYZ(0,0,0,0);
+    
+    
     lorentz LorentzBoost;
     LorentzBoost.setBeta( boostbetaVector );
     VectorEPxPyPz momentumLRF;
