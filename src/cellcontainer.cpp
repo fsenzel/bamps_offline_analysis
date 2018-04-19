@@ -30,7 +30,13 @@ cellContainer::cellContainer() :
   md2q_scaled_23( 0 ),
   sigma_22( 0 ),
   sigma_23( 0 ),
-  lambdaScaled( 0 )
+  lambdaScaled( 0 ),
+  numberOfParticles( 0.0 ),
+  numberOfGluons( 0.0 ),
+  numberOfQuarks( 0.0 ),
+  inverseE_gluons( 0.0 ),
+  inverseE_quarks( 0.0 ),
+  p_cell( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
 {
   particleList.clear();
 }
@@ -55,6 +61,13 @@ void cellContainer::clear()
   md2g_scaled_23 = 0;
   md2q_scaled_23 = 0;
   lambdaScaled = 0;
+  numberOfParticles = 0.0;
+  numberOfGluons = 0.0;
+  numberOfQuarks = 0.0;
+  inverseE_gluons = 0.0;
+  inverseE_quarks = 0.0;
+  p_cell = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+
   averagesPrepared = false;
 }
 
@@ -73,6 +86,13 @@ void cellContainer::resetStoredValues()
   md2g_scaled_23 = 0;
   md2q_scaled_23 = 0;
   lambdaScaled = 0;
+  numberOfParticles = 0.0;
+  numberOfGluons = 0.0;
+  numberOfQuarks = 0.0;
+  inverseE_gluons = 0.0;
+  inverseE_quarks = 0.0;
+  p_cell = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+
   rates.clear();
   averagesPrepared = false;
 }
@@ -168,7 +188,39 @@ void cellContainer::writeAveragesToParticle( Particle& _particle ) const
   
 }
 
+double cellContainer::getTemperatureAMY() const
+{
+  const double numberOfParticles = numberOfGluons + numberOfQuarks;
 
+  if( numberOfParticles >= 15.0 )
+  {
+    // T* as calculated in JHEP 0301 (2003) 030, eqs. (1.6), (1.7)
+    const double Cf = ( 4.0 / 3.0 );
+    const double Ca = 3.0;
+    const double I = 0.5 * ( Cf * numberOfQuarks + Ca * numberOfGluons ); // unitless
+    const double J = Cf * inverseE_quarks + Ca * inverseE_gluons; // 1 / GeV
+   
+    return( I / J );
+  }
+  else
+  {
+    return 0.0;
+  }
+}
+
+VectorEPxPyPz cellContainer::getBoostLRF()
+{
+  const double numberOfParticles = numberOfGluons + numberOfQuarks;
+
+  if( numberOfParticles >= 15.0 )
+  {
+    return( p_cell.NormalizeToE() );
+  }
+  else
+  {
+    return( VectorEPxPyPz( 1.0, 0.0, 0.0, 0.0 ) );
+  }
+}
 
 
 

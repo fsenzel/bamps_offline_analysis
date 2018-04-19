@@ -68,7 +68,8 @@ public:
   void setCoordinates( const int _index, const double _dx, const int _nx, const double _sizeX, const double _dy, const int _ny, const double _sizeY );
   void prepareAverages();
   void writeAveragesToParticle( Particle& _particle ) const;
-
+  double getTemperatureAMY() const;
+  VectorEPxPyPz getBoostLRF();
 
   double volume;
   int index;
@@ -92,6 +93,16 @@ public:
   double sigma_23;
 
   double lambdaScaled;
+
+//  AMY
+//  Attention: These quantities can be stem from different neigbouring cells.
+//  
+  double numberOfParticles;
+  double numberOfGluons;
+  double numberOfQuarks;
+  double inverseE_gluons;
+  double inverseE_quarks;
+  VectorEPxPyPz p_cell;
 
 private:
 

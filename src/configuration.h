@@ -287,6 +287,9 @@ class config : public configBase
   /** @brief Interface for config::tau_min */
   double getTauMin() const { return tau_min; }
 
+  /** @brief Interface for config::minNumberForTemperature */
+  double getMinNumberForTemperature() const { return minNumberForTemperature; }
+
   /** ------------------------------------ */
   
   /** -------- offline reconstruction options ------- */ 
@@ -618,6 +621,9 @@ class config : public configBase
   /** @brief Proper time after which partons are allowed to scatter / radiate */
   double tau_min;
 
+  /** @brief Minimum number necessary for calculating temperature */
+  double minNumberForTemperature;
+  
   /** ------------------------------- */
 
   /** -------- offline reconstruction options ------- */ 

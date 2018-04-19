@@ -1263,8 +1263,202 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
           {
             free = false;
           }
+
+          ++cells[j].numberOfParticles;
+          cells[j].p_cell += particles_atTimeNow[id].Mom;
+
+          if ( particles_atTimeNow[id].FLAVOR == gluon )
+          {
+            cells[j].inverseE_gluons += 1.0 / particles_atTimeNow[id].Mom.E();
+            ++cells[j].numberOfGluons;
+          }
+          else
+          {
+            cells[j].inverseE_quarks += 1.0 / particles_atTimeNow[id].Mom.E();
+            ++cells[j].numberOfQuarks;
+          }
         }
         
+        // check whether enough particles are in the cell or also neigbouring cells should also be considered
+        if( cells[j].numberOfParticles > 2.0 && cells[j].numberOfParticles < theConfig->getMinNumberForTemperature() )
+        {
+          int neighbouring_id;
+          
+          neighbouring_id = j - 1;
+          if( neighbouring_id >= IXY * etaSliceIndex && neighbouring_id < IXY * ( etaSliceIndex + 1 ) )
+          {
+            for ( iIt = cells[neighbouring_id].particleList.begin(); iIt != cells[neighbouring_id].particleList.end(); iIt++ )
+            {
+              int id = *iIt;
+              ++cells[j].numberOfParticles;
+              cells[j].p_cell += particles_atTimeNow[id].Mom;
+
+              if ( particles_atTimeNow[id].FLAVOR == gluon )
+              {
+                cells[j].inverseE_gluons += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfGluons;
+              }
+              else
+              {
+                cells[j].inverseE_quarks += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfQuarks;
+              }
+            }
+          }
+          neighbouring_id = j + 1;
+          if( neighbouring_id >= IXY * etaSliceIndex && neighbouring_id < IXY * ( etaSliceIndex + 1 ) )
+          {
+            for ( iIt = cells[neighbouring_id].particleList.begin(); iIt != cells[neighbouring_id].particleList.end(); iIt++ )
+            {
+              int id = *iIt;
+              ++cells[j].numberOfParticles;
+              cells[j].p_cell += particles_atTimeNow[id].Mom;
+
+              if ( particles_atTimeNow[id].FLAVOR == gluon )
+              {
+                cells[j].inverseE_gluons += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfGluons;
+              }
+              else
+              {
+                cells[j].inverseE_quarks += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfQuarks;
+              }
+            }
+          }
+
+          neighbouring_id = j - IX;
+          if( neighbouring_id >= IXY * etaSliceIndex && neighbouring_id < IXY * ( etaSliceIndex + 1 ) )
+          {
+            for ( iIt = cells[neighbouring_id].particleList.begin(); iIt != cells[neighbouring_id].particleList.end(); iIt++ )
+            {
+              int id = *iIt;
+              ++cells[j].numberOfParticles;
+              cells[j].p_cell += particles_atTimeNow[id].Mom;
+
+              if ( particles_atTimeNow[id].FLAVOR == gluon )
+              {
+                cells[j].inverseE_gluons += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfGluons;
+              }
+              else
+              {
+                cells[j].inverseE_quarks += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfQuarks;
+              }
+            }
+          }
+          neighbouring_id = j + IX;
+          if( neighbouring_id >= IXY * etaSliceIndex && neighbouring_id < IXY * ( etaSliceIndex + 1 ) )
+          {
+            for ( iIt = cells[neighbouring_id].particleList.begin(); iIt != cells[neighbouring_id].particleList.end(); iIt++ )
+            {
+              int id = *iIt;
+              ++cells[j].numberOfParticles;
+              cells[j].p_cell += particles_atTimeNow[id].Mom;
+
+              if ( particles_atTimeNow[id].FLAVOR == gluon )
+              {
+                cells[j].inverseE_gluons += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfGluons;
+              }
+              else
+              {
+                cells[j].inverseE_quarks += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfQuarks;
+              }
+            }
+          }
+
+          neighbouring_id = j - IX - 1;
+          if( neighbouring_id >= IXY * etaSliceIndex && neighbouring_id < IXY * ( etaSliceIndex + 1 ) )
+          {
+            for ( iIt = cells[neighbouring_id].particleList.begin(); iIt != cells[neighbouring_id].particleList.end(); iIt++ )
+            {
+              int id = *iIt;
+              ++cells[j].numberOfParticles;
+              cells[j].p_cell += particles_atTimeNow[id].Mom;
+
+              if ( particles_atTimeNow[id].FLAVOR == gluon )
+              {
+                cells[j].inverseE_gluons += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfGluons;
+              }
+              else
+              {
+                cells[j].inverseE_quarks += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfQuarks;
+              }
+            }
+          }
+
+          neighbouring_id = j - IX + 1;
+          if( neighbouring_id >= IXY * etaSliceIndex && neighbouring_id < IXY * ( etaSliceIndex + 1 ) )
+          {
+            for ( iIt = cells[neighbouring_id].particleList.begin(); iIt != cells[neighbouring_id].particleList.end(); iIt++ )
+            {
+              int id = *iIt;
+              ++cells[j].numberOfParticles;
+              cells[j].p_cell += particles_atTimeNow[id].Mom;
+
+              if ( particles_atTimeNow[id].FLAVOR == gluon )
+              {
+                cells[j].inverseE_gluons += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfGluons;
+              }
+              else
+              {
+                cells[j].inverseE_quarks += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfQuarks;
+              }
+            }
+          }
+
+          neighbouring_id = j + IX - 1;
+          if( neighbouring_id >= IXY * etaSliceIndex && neighbouring_id < IXY * ( etaSliceIndex + 1 ) )
+          {
+            for ( iIt = cells[neighbouring_id].particleList.begin(); iIt != cells[neighbouring_id].particleList.end(); iIt++ )
+            {
+              int id = *iIt;
+              ++cells[j].numberOfParticles;
+              cells[j].p_cell += particles_atTimeNow[id].Mom;
+
+              if ( particles_atTimeNow[id].FLAVOR == gluon )
+              {
+                cells[j].inverseE_gluons += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfGluons;
+              }
+              else
+              {
+                cells[j].inverseE_quarks += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfQuarks;
+              }
+            }
+          }
+
+          neighbouring_id = j + IX + 1;
+          if( neighbouring_id >= IXY * etaSliceIndex && neighbouring_id < IXY * ( etaSliceIndex + 1 ) )
+          {
+            for ( iIt = cells[neighbouring_id].particleList.begin(); iIt != cells[neighbouring_id].particleList.end(); iIt++ )
+            {
+              int id = *iIt;
+              ++cells[j].numberOfParticles;
+              cells[j].p_cell += particles_atTimeNow[id].Mom;
+
+              if ( particles_atTimeNow[id].FLAVOR == gluon )
+              {
+                cells[j].inverseE_gluons += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfGluons;
+              }
+              else
+              {
+                cells[j].inverseE_quarks += 1.0 / particles_atTimeNow[id].Mom.E();
+                ++cells[j].numberOfQuarks;
+              }
+            }
+          }
+        }
+
         for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
         {
           int id = *iIt;
@@ -1330,16 +1524,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             vector<int> nLightQuarksAdded( Particle::N_light_flavor , 0 );
             vector<int> nAntiLightQuarksAdded( Particle::N_light_flavor, 0 );
             
-        //------------------------- calculate flow of this cell --------------------
-            // VectorEPxPyPz p_cell = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
-            // list<int>::const_iterator iIt;
-            // for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
-            // {
-            //   id = *iIt;
-            //   p_cell += particles_atTimeNow[id].Mom;
-            // }
-            // const VectorEPxPyPz v_cell = (cells[j].particleList.size() >= 5)? p_cell.NormalizeToE() : VectorEPxPyPz( 1.0, 0.0, 0.0, 0.0 );
-
             for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
             {
               id = *iIt;
@@ -1471,8 +1655,10 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               addedParticles[id].md2g = rings[nc].getAveraged_md2g();
               addedParticles[id].md2q = rings[nc].getAveraged_md2q();
               addedParticles[id].temperature = rings[nc].getEffectiveTemperature();
-              addedParticles[id].temperatureAMY = rings[nc].getEffectiveTemperatureAMY();
-              addedParticles[id].v_cell = rings[nc].getAveraged_v();
+              
+              // temperature and boost for AMY
+              addedParticles[id].temperatureAMY = cells[j].getTemperatureAMY();
+              addedParticles[id].v_cell = cells[j].getBoostLRF();
               
               if ( addedParticles[id].FLAVOR == gluon )
               {
@@ -1579,7 +1765,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                 return;
               }
             }
-            
           }
           else  //if(nmb < cellcut)
             {
@@ -1659,13 +1844,13 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         }
       }
       else if ( !cellsAdded[j].empty() ) // belongs to:  if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
+      {
+        for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
         {
-          for ( iIt = cellsAdded[j].particleList.begin(); iIt != cellsAdded[j].particleList.end(); iIt++ )
-          {
-            int iscat = *iIt;
-            addedParticles[iscat].Propagate( nexttime );
-          }
+          int iscat = *iIt;
+          addedParticles[iscat].Propagate( nexttime );
         }
+      }
     }
   }
   
