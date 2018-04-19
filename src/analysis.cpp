@@ -507,6 +507,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
   studyBackground = false; // print also properties like v2, RAA of background
   studyScatteredMediumParticles = false; // print scattered medium particles
   studyHQCorrelations = false; // angular correlations between heavy quarks
+  studyCentralEtaCells = false; // write properties of cells in central eta slice
 
   //---- defining standard rapidity ranges ----
   // only use positiv ranges since the investigated collision systems usually are symmetric in +-y and we therefore only compare the absolute value of y
@@ -708,6 +709,7 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
     
     case central_densities:
       studyCentralDensity = true;
+      studyCentralEtaCells = true;
       break;
 
     case hq_corr:
@@ -819,6 +821,9 @@ void analysis::initialOutput()
   if( studyTempInTube)
      writeTempInTube( 0 );
   
+  if( studyCentralEtaCells )
+    printCentralEtaCells( 0 );
+
   if ( dndyOutput )
     print_dndy( "initial" );
   
@@ -855,6 +860,9 @@ void analysis::intermediateOutput( const int nn )
 //   if ( charmTestJet )
 //    analyseCharmTestJetEvolution( nn + 1 );
   
+  if( studyCentralEtaCells )
+    printCentralEtaCells( nn + 1 );
+
   if ( dndyOutput )
     print_dndy( name );
 }
@@ -901,6 +909,9 @@ void analysis::finalOutput( const double _stoptime )
   if( hadronization_hq && mesonDecay )
     analyseAngleDe();
   
+  if( studyCentralEtaCells )
+    printCentralEtaCells( nTimeSteps );
+
   if ( dndyOutput )
     print_dndy( "final" );
   if( studyScatteredMediumParticles )
@@ -4164,8 +4175,40 @@ void analysis::addNeighborCells( const int cell_id, const int neighborCell_id )
 }
 
 
+void analysis::printCentralEtaCells( const int step )
+{
+  double time;
 
+  if ( step != 0 && step != nTimeSteps )
+    time = tstep[step-1];
+  else
+    return;
 
+  string filename;
+  stringstream ss;
+  ss << time*10;
+  filename = filename_prefix + "_cellsInCentralEtaSlice_t" + ss.str() + ".dat";
+
+  fstream file( filename.c_str(), ios::out | ios::trunc  );
+
+  file << "# t = " << time << std::endl;
+
+  for ( int i = 0; i < cellsInCentralEtaIndex.size(); i++ )
+  {
+    VectorTXYZ boostLRF = cellsInCentralEtaIndex[i].getBoostLRF( theConfig->getMinNumberForTemperature() );
+    
+    file << ( cellsInCentralEtaIndex[i].corner.x_max - cellsInCentralEtaIndex[i].corner.x_min ) / 2.0 + cellsInCentralEtaIndex[i].corner.x_min << "\t";
+    file << ( cellsInCentralEtaIndex[i].corner.y_max - cellsInCentralEtaIndex[i].corner.y_min ) / 2.0 + cellsInCentralEtaIndex[i].corner.y_min << "\t";
+    file << cellsInCentralEtaIndex[i].corner.etaIndex << "\t";
+    file << cellsInCentralEtaIndex[i].numberOfGluons << "\t" << cellsInCentralEtaIndex[i].numberOfQuarks << "\t";
+    file << cellsInCentralEtaIndex[i].getTemperatureAMY( theConfig->getMinNumberForTemperature() ) << "\t";
+    file << sqrt( boostLRF.vec2() ) << "\t";
+    file << boostLRF << "\t";
+    file << endl;
+  }
+
+  file.close();
+}
 
 
 // print dndy, detdy and mean pt of gluons

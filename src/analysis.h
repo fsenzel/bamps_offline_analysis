@@ -26,6 +26,7 @@
 #include "particle.h"
 #include "ringstructure.h"
 #include "interpolation_nJpsi.h"
+#include "cellcontainer.h"
 
 using std::vector;
 using std::fstream;
@@ -237,6 +238,7 @@ public:
   analysisRingStructure rings;
   ringStructure centralRingsCopyFromCascade;
 
+  vector<cellContainer> cellsInCentralEtaIndex;
   //--------------------//
   //for jet background analysis
   void scatteredMediumParticlesOutput( const int step );
@@ -268,7 +270,8 @@ private:
   bool studyBackground;
   bool studyScatteredMediumParticles;
   bool studyHQCorrelations;
-    
+  bool studyCentralEtaCells;
+      
   void writePartclMovie( const int step ) const;
   void yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
   void transverseEnergyDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector< ParticleOffline >& _particles, const int n_particles, const int step );
@@ -340,6 +343,8 @@ private:
   void calculateTempInTube( const double time, const double radius, const double dz, double & temp, double & tempWithQuarks, double & energyDensity  );
   void print_dndy(const string subfix );
   
+  void printCentralEtaCells( const int step );
+
   bool v2output;
   bool v2outputIntermediateSteps;
   bool dndyOutput;

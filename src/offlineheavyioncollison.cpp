@@ -1279,7 +1279,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
           }
         }
         
-        // check whether enough particles are in the cell or also neigbouring cells should also be considered
+        // check whether enough particles are in the cell or also neighbouring cells should also be considered
         if( cells[j].numberOfParticles > 2.0 && cells[j].numberOfParticles < theConfig->getMinNumberForTemperature() )
         {
           int neighbouring_id;
@@ -1657,8 +1657,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               addedParticles[id].temperature = rings[nc].getEffectiveTemperature();
               
               // temperature and boost for AMY
-              addedParticles[id].temperatureAMY = cells[j].getTemperatureAMY();
-              addedParticles[id].v_cell = cells[j].getBoostLRF();
+              addedParticles[id].temperatureAMY = cells[j].getTemperatureAMY( theConfig->getMinNumberForTemperature() );
+              addedParticles[id].v_cell = cells[j].getBoostLRF( theConfig->getMinNumberForTemperature() );
               
               if ( addedParticles[id].FLAVOR == gluon )
               {
@@ -1851,6 +1851,16 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
           addedParticles[iscat].Propagate( nexttime );
         }
       }
+    }
+
+    if ( etaSliceIndex == centralEtaIndex )
+    {
+      vector<cellContainer> cellsInCentralEtaIndex;
+      for( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
+      {
+        cellsInCentralEtaIndex.push_back( cells[j] );
+      }
+      theAnalysis->cellsInCentralEtaIndex = cellsInCentralEtaIndex;
     }
   }
   

@@ -188,11 +188,11 @@ void cellContainer::writeAveragesToParticle( Particle& _particle ) const
   
 }
 
-double cellContainer::getTemperatureAMY() const
+double cellContainer::getTemperatureAMY( const double minNumberForTemperature ) const
 {
   const double numberOfParticles = numberOfGluons + numberOfQuarks;
 
-  if( numberOfParticles >= 15.0 )
+  if( numberOfParticles >= minNumberForTemperature )
   {
     // T* as calculated in JHEP 0301 (2003) 030, eqs. (1.6), (1.7)
     const double Cf = ( 4.0 / 3.0 );
@@ -208,11 +208,11 @@ double cellContainer::getTemperatureAMY() const
   }
 }
 
-VectorEPxPyPz cellContainer::getBoostLRF()
+VectorEPxPyPz cellContainer::getBoostLRF( const double minNumberForTemperature )
 {
   const double numberOfParticles = numberOfGluons + numberOfQuarks;
 
-  if( numberOfParticles >= 15.0 )
+  if( numberOfParticles >= minNumberForTemperature )
   {
     return( p_cell.NormalizeToE() );
   }
