@@ -188,40 +188,30 @@ void cellContainer::writeAveragesToParticle( Particle& _particle ) const
   
 }
 
-double cellContainer::getTemperatureAMY( const double minNumberForTemperature ) const
+void cellContainer::getCellInformationForAMY( double &T_AMY, VectorTXYZ &beta_LRF, const double minNumberForTemperature )
 {
   const double numberOfParticles = numberOfGluons + numberOfQuarks;
 
   if( numberOfParticles >= minNumberForTemperature )
   {
+    beta_LRF = p_cell.NormalizeToE();
+
+    const double gamma = 1.0 / sqrt( 1 - beta_LRF.vec2() );
+
     // T* as calculated in JHEP 0301 (2003) 030, eqs. (1.6), (1.7)
     const double Cf = ( 4.0 / 3.0 );
     const double Ca = 3.0;
-    const double I = 0.5 * ( Cf * numberOfQuarks + Ca * numberOfGluons ); // unitless
+    const double I = 0.5 * ( Cf * numberOfQuarks + Ca * numberOfGluons ) / gamma; // unitless, gamma comes from boost of volume in partice density
     const double J = Cf * inverseE_quarks + Ca * inverseE_gluons; // 1 / GeV
    
-    return( I / J );
+    T_AMY = I / J;
   }
   else
   {
-    return 0.0;
+    beta_LRF = VectorTXYZ( 1.0, 0.0, 0.0, 0.0 );
+    T_AMY = 0.0;
   }
 }
-
-VectorEPxPyPz cellContainer::getBoostLRF( const double minNumberForTemperature )
-{
-  const double numberOfParticles = numberOfGluons + numberOfQuarks;
-
-  if( numberOfParticles >= minNumberForTemperature )
-  {
-    return( p_cell.NormalizeToE() );
-  }
-  else
-  {
-    return( VectorEPxPyPz( 1.0, 0.0, 0.0, 0.0 ) );
-  }
-}
-
 
 
 cornerCoordinates::cornerCoordinates() :

@@ -4195,15 +4195,20 @@ void analysis::printCentralEtaCells( const int step )
 
   for ( int i = 0; i < cellsInCentralEtaIndex.size(); i++ )
   {
-    VectorTXYZ boostLRF = cellsInCentralEtaIndex[i].getBoostLRF( theConfig->getMinNumberForTemperature() );
+    VectorTXYZ boostLRF;
+    double T_AMY;
+
+    cellsInCentralEtaIndex[i].getCellInformationForAMY( T_AMY, boostLRF, theConfig->getMinNumberForTemperature() );
     
     file << ( cellsInCentralEtaIndex[i].corner.x_max - cellsInCentralEtaIndex[i].corner.x_min ) / 2.0 + cellsInCentralEtaIndex[i].corner.x_min << "\t";
     file << ( cellsInCentralEtaIndex[i].corner.y_max - cellsInCentralEtaIndex[i].corner.y_min ) / 2.0 + cellsInCentralEtaIndex[i].corner.y_min << "\t";
     file << cellsInCentralEtaIndex[i].corner.etaIndex << "\t";
     file << cellsInCentralEtaIndex[i].numberOfGluons << "\t" << cellsInCentralEtaIndex[i].numberOfQuarks << "\t";
-    file << cellsInCentralEtaIndex[i].getTemperatureAMY( theConfig->getMinNumberForTemperature() ) << "\t";
+    file << T_AMY << "\t";
     file << sqrt( boostLRF.vec2() ) << "\t";
-    file << boostLRF << "\t";
+    file << boostLRF.X() / sqrt( boostLRF.X2() + boostLRF.Y2() ) << "\t";
+    file << boostLRF.Y() / sqrt( boostLRF.X2() + boostLRF.Y2() ) << "\t";
+    file << sqrt( boostLRF.X2() + boostLRF.Y2() ) << "\t";
     file << endl;
   }
 

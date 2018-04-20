@@ -369,7 +369,7 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
     // T* as calculated in JHEP 0301 (2003) 030, eqs. (1.6), (1.7)
     const double Cf = ( 4.0 / 3.0 );
     const double Ca = 3.0;
-    const double I = 0.5 * ( Cf * numberOfQuarks + Ca * numberOfGluons ); // unitless
+    const double I = 0.5 * ( Cf * numberOfQuarks + Ca * numberOfGluons ) / gamma; // unitless, gamma comes from boost of volume in partice density
     const double J = Cf * inverseE_quarks + Ca * inverseE_gluons; // 1 / GeV
     
     Tstar_AMY = I / J;

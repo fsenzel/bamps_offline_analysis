@@ -68,9 +68,8 @@ public:
   void setCoordinates( const int _index, const double _dx, const int _nx, const double _sizeX, const double _dy, const int _ny, const double _sizeY );
   void prepareAverages();
   void writeAveragesToParticle( Particle& _particle ) const;
-  double getTemperatureAMY( const double minNumberForTemperature ) const;
-  VectorEPxPyPz getBoostLRF( const double minNumberForTemperature );
-
+  void getCellInformationForAMY( double &T_AMY, VectorTXYZ &beta_LRF, const double minNumberForTemperature );
+  
   double volume;
   int index;
   cornerCoordinates corner;

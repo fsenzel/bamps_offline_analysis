@@ -1657,8 +1657,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               addedParticles[id].temperature = rings[nc].getEffectiveTemperature();
               
               // temperature and boost for AMY
-              addedParticles[id].temperatureAMY = cells[j].getTemperatureAMY( theConfig->getMinNumberForTemperature() );
-              addedParticles[id].v_cell = cells[j].getBoostLRF( theConfig->getMinNumberForTemperature() );
+              cells[j].getCellInformationForAMY( addedParticles[id].temperatureAMY, addedParticles[id].v_cell, theConfig->getMinNumberForTemperature() );
               
               if ( addedParticles[id].FLAVOR == gluon )
               {
