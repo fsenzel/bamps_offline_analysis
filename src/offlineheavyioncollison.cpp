@@ -525,7 +525,11 @@ void offlineHeavyIonCollision::mainFramework()
       cell_ID( nexttime );
       // collide added particles with gluonic medium
       deadParticleList.clear();
+      
       scattering( nexttime, again);
+      
+      //analyzeIndependent(nexttime);
+      
       
 //       {
 //         double v2avg=0.;
@@ -657,6 +661,22 @@ void offlineHeavyIonCollision::mainFramework()
     }
     else
     {
+//       //TODO Temperature analysis
+//       //------------ make copies ---------------
+//       particles_atTimeNowCopy = particles_atTimeNow;
+//       addedParticlesCopy = addedParticles;
+//       cellsCopy = cells;
+//       cellsAddedCopy = cellsAdded;
+//       edgeCellCopy = edgeCell;
+//       edgeCellAddedCopy = edgeCellAdded;
+//       //--------------------------------------
+//       cell_ID( nexttime );
+//       deadParticleList.clear();
+//       analyzeIndependent(simulationTime);
+//       removeDeadParticles();
+      
+      
+      
       
       /*cell_ID( simulationTime );
 
@@ -1358,6 +1378,125 @@ void offlineHeavyIonCollision::cell_ID( double _time )
 }
 
 
+void offlineHeavyIonCollision::analyzeIndependent(const double nexttime)
+{
+  double xt;
+  
+  int nGluons = 0;
+  int nGluonsAdded = 0;
+  
+  int IXY, id, nc;
+  
+  double dz, cc, zz, eta;
+  bool free;
+  list<int> formGeomCopy;
+  vector<int> gluonList, allParticlesList, allParticlesListWithNeighbors, allParticlesListForAMY;
+  double particleListAMYVolume;
+  int nCellsAVG;
+  vector<int> gluonListAdded, allParticlesListAdded;
+  
+  IXY = IX * IY;
+  
+  //used for MFP analysis:
+  bool computeAveragedMfp = theConfig->getMfpCellAveraging();
+  int  numberOfCellsAveragedForMfp = 5;
+  double lambdaSpecific1=0.;
+  double lambdaSpecific2=0.;
+  double lambdaSpecific3=0.;
+  long int count_for_average_lambda1 = 0;
+  long int count_for_average_lambda2 = 0;
+  long int count_for_average_lambda3 = 0;
+  long int averageNumberOfParticles  = 0;
+  long int count_for_average_NumberOfParticles = 0;
+  averageQuarkNumber = 0.;
+  countForAverageaverageQuarkNumber=0;
+
+  int centralEtaIndex = static_cast<int>( etaBins.size() ) / 2;
+  
+  //v2 of partons in this routine:    
+  double v2avg=0.;
+  int v2avgN=0;
+  
+  double Tepsilonthreep=0.;
+  double TAMY=0.;
+  int numberTotalForTemp=0;
+
+  // go through cells
+  //for ( int etaSliceIndex = etaBins.min_index(); etaSliceIndex <= etaBins.max_index(); etaSliceIndex++ )
+  int etaSliceIndex=centralEtaIndex;
+  {
+    
+    
+    //cout << "Eta slice: " << etaSliceIndex << endl;
+    //---------- populate the ring structure for averages ----------
+    dz = simulationTime * ( tanh( etaBins[etaSliceIndex].right ) - tanh( etaBins[etaSliceIndex].left ) );
+    
+    rings.clear();
+    rings.setLongitudinalGeometry( etaBins[etaSliceIndex].left, etaBins[etaSliceIndex].right, simulationTime );
+    for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
+    {
+      list<int>::const_iterator iIt;
+      for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+      {
+        xt = particles_atTimeNow[( *iIt )].Pos.Perp();
+
+        // calculation of energy density & co. is only written for massless particles, only add those -> for the medium properties heavy quarks do not contribute anyhow
+        if ( !particles_atTimeNow[( *iIt )].dead && particles_atTimeNow[( *iIt )].FLAVOR <= 2 * Particle::max_N_light_flavor )
+        {
+          rings.addParticle( particles_atTimeNow[( *iIt )] );
+//           rings.addRates( particles_atTimeNow[(*iIt)] );
+        }
+      }
+    }
+
+    rings.prepareAverages( dz, testpartcl );
+
+    //---------- populate the ring structure for averages ----------
+
+    // scatterings in cell or not?
+    //For each eta-slice, the cells have the same volume.
+    dv = dx * dy * dz;
+    //Loop through cells
+//     cout << "begin" << endl;
+    for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
+    { 
+      
+      /*if ( !( cells[j].empty()) )
+      { 
+        cells[j].resetStoredValues();
+        cout << cells[j].size() << endl;
+        allParticlesListWithNeighbors.clear(); 
+        allParticlesListWithNeighbors.reserve( cells[j].size() );
+      }*/
+      
+      allParticlesListForAMY.clear();
+      if(cells[j].size()>theConfig->getNumberParticlesMinForAvg())
+      {
+        allParticlesListForAMY.reserve( cells[j].size() );
+      }else 
+      {
+        allParticlesListForAMY.reserve( round(theConfig->getNumberParticlesMinForAvg()*9*1.01) );
+      }  
+        
+//       cout << "CZ " << cells[j].size() << endl;
+      if(cells[j].size() < theConfig->getNumberParticlesMinForAvg())
+      {
+        
+        
+        collectParticlesInCellWithNeighbors(j, allParticlesListForAMY, etaSliceIndex, IX, IY, particleListAMYVolume, nCellsAVG);
+      }
+      else
+      {
+        collectParticlesInCell(j, allParticlesListForAMY, particleListAMYVolume, nCellsAVG);
+      }
+//       cout << allParticlesListForAMY.size() << endl;
+//       cout << j<<"\t" << particleListAMYVolume<<endl;
+      analyzeCentralCell( j ,allParticlesListForAMY, etaSliceIndex, IX, IY, particleListAMYVolume, nCellsAVG , nexttime);
+      
+    }
+//     cout << "end" << endl;
+  }
+}
 
 
 
@@ -1374,7 +1513,9 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   double dz, cc, zz, eta;
   bool free;
   list<int> formGeomCopy;
-  vector<int> gluonList, allParticlesList, allParticlesListWithNeighbors;
+  vector<int> gluonList, allParticlesList, allParticlesListWithNeighbors, allParticlesListForAMY;
+  double particleListAMYVolume;
+  int nCellsAVG;
   vector<int> gluonListAdded, allParticlesListAdded;
   
   again = false;
@@ -1436,6 +1577,9 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   // go through cells
   for ( int etaSliceIndex = etaBins.min_index(); etaSliceIndex <= etaBins.max_index(); etaSliceIndex++ )
   {
+//WARNING ONLY FOR TEST and analysis    
+//     if(etaSliceIndex!=centralEtaIndex)
+//       continue;
     //cout << "Eta slice: " << etaSliceIndex << endl;
     //---------- populate the ring structure for averages ----------
     dz = simulationTime * ( tanh( etaBins[etaSliceIndex].right ) - tanh( etaBins[etaSliceIndex].left ) );
@@ -1505,39 +1649,60 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         allParticlesListWithNeighbors.clear(); 
         allParticlesListWithNeighbors.reserve( cells[j].size() );
       }*/
-
+      if(cells[j].size()>theConfig->getNumberParticlesMinForAvg())
+      {
+        allParticlesListForAMY.reserve( cells[j].size() );
+      }else 
+      {
+        allParticlesListForAMY.reserve( round(theConfig->getNumberParticlesMinForAvg()*9*1.01) );
+      }  
+        
       
-      int EdgecellOfList = 0;
-      if(computeAveragedMfp==true)
-      {      
-        allParticlesListWithNeighbors.clear();  
+      if(cells[j].size() < theConfig->getNumberParticlesMinForAvg())
+      {
         
-        if( (j== IXY * (etaSliceIndex+1) - 1 ) && (!( cells[j].empty())  || !( cells[j-1].empty())  ||  !( cells[j-2].empty())  ||  !( cells[j-3].empty())  ||  !( cells[j-4].empty())))
-        { 
-          numberOfCellsAveragedForMfp = 5;
-          EdgecellOfList = 2;
-          allParticlesListWithNeighbors.reserve( round(  (cells[j-4].size()+cells[j-3].size()+cells[j-2].size() + cells[j-1].size()+cells[j].size())*1.1 ) );
-          
-        }else
-        if(  (j== IXY *  etaSliceIndex  )  && ( !( cells[j].empty()) || !( cells[j+1].empty()) || !( cells[j+2].empty()) ||  !( cells[j+3].empty())  ||  !( cells[j+4].empty())))
-        {
-          numberOfCellsAveragedForMfp = 5;
-          EdgecellOfList = 1;
-          allParticlesListWithNeighbors.reserve( round(   (cells[j].size() + cells[j+1].size()+cells[j+2].size()+cells[j+3].size()+cells[j+4].size())*1.1 ) );
-          
-        }else  
-        if( (j>IXY * etaSliceIndex) && (j< (IXY * ( etaSliceIndex + 1 ) - 1) ) && (  !( cells[j].empty())  ||  !( cells[j-1].empty())  ||  !( cells[j+1].empty())  ||  !( cells[j-2].empty()) ||  !( cells[j+2].empty()) )      )
-        {  
-          numberOfCellsAveragedForMfp = 5;
-          EdgecellOfList = 0;   
-          allParticlesListWithNeighbors.reserve( round(  (cells[j-2].size()+cells[j-1].size() + cells[j].size()+cells[j+1].size()+cells[j+2].size())*1.1  ) );
-        }else
-        {  
-          numberOfCellsAveragedForMfp = 1;         
-          allParticlesListWithNeighbors.reserve(cells[j].size());
-        }
-        
+        collectParticlesInCellWithNeighbors(j, allParticlesListForAMY, etaSliceIndex, IX, IY, particleListAMYVolume, nCellsAVG);
       }
+      else
+      {
+        collectParticlesInCell(j, allParticlesListForAMY, particleListAMYVolume, nCellsAVG);
+      }
+      
+      //TEST
+      //analyzeCentralCell( j ,allParticlesListForAMY, etaSliceIndex, IX, IY, particleListAMYVolume, nCellsAVG , nexttime);
+
+//WARNING improved Cell Selection
+//       int EdgecellOfList = 0;
+//       if(computeAveragedMfp==true)
+//       {      
+//         allParticlesListWithNeighbors.clear();  
+//         
+//         if( (j== IXY * (etaSliceIndex+1) - 1 ) && (!( cells[j].empty())  || !( cells[j-1].empty())  ||  !( cells[j-2].empty())  ||  !( cells[j-3].empty())  ||  !( cells[j-4].empty())))
+//         { 
+//           numberOfCellsAveragedForMfp = 5;
+//           EdgecellOfList = 2;
+//           allParticlesListWithNeighbors.reserve( round(  (cells[j-4].size()+cells[j-3].size()+cells[j-2].size() + cells[j-1].size()+cells[j].size())*1.1 ) );
+//           
+//         }else
+//         if(  (j== IXY *  etaSliceIndex  )  && ( !( cells[j].empty()) || !( cells[j+1].empty()) || !( cells[j+2].empty()) ||  !( cells[j+3].empty())  ||  !( cells[j+4].empty())))
+//         {
+//           numberOfCellsAveragedForMfp = 5;
+//           EdgecellOfList = 1;
+//           allParticlesListWithNeighbors.reserve( round(   (cells[j].size() + cells[j+1].size()+cells[j+2].size()+cells[j+3].size()+cells[j+4].size())*1.1 ) );
+//           
+//         }else  
+//         if( (j>IXY * etaSliceIndex) && (j< (IXY * ( etaSliceIndex + 1 ) - 1) ) && (  !( cells[j].empty())  ||  !( cells[j-1].empty())  ||  !( cells[j+1].empty())  ||  !( cells[j-2].empty()) ||  !( cells[j+2].empty()) )      )
+//         {  
+//           numberOfCellsAveragedForMfp = 5;
+//           EdgecellOfList = 0;   
+//           allParticlesListWithNeighbors.reserve( round(  (cells[j-2].size()+cells[j-1].size() + cells[j].size()+cells[j+1].size()+cells[j+2].size())*1.1  ) );
+//         }else
+//         {  
+//           numberOfCellsAveragedForMfp = 1;         
+//           allParticlesListWithNeighbors.reserve(cells[j].size());
+//         }
+//         
+//       }
       
       //WARNING! For the use without added particles.
       // if ( !( cells[j].empty() || cellsAdded[j].empty() ) )
@@ -1664,97 +1829,97 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             vector<int> nLightQuarksAdded( Particle::N_light_flavor , 0 );
             vector<int> nAntiLightQuarksAdded( Particle::N_light_flavor, 0 );
             
-            
-            if(computeAveragedMfp)
-            {
-              if(EdgecellOfList==0)
-              {
-              list<int>::const_iterator iIt;
-                for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }       
-                for ( iIt = cells[j-1].particleList.begin(); iIt != cells[j-1].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-                for ( iIt = cells[j+1].particleList.begin(); iIt != cells[j+1].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-                for ( iIt = cells[j-2].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-                for ( iIt = cells[j+2].particleList.begin(); iIt != cells[j+2].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-              }
-              if(EdgecellOfList==1)
-              {
-              list<int>::const_iterator iIt;
-                for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }       
-                for ( iIt = cells[j+1].particleList.begin(); iIt != cells[j+1].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-                for ( iIt = cells[j+2].particleList.begin(); iIt != cells[j+2].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-                for ( iIt = cells[j+3].particleList.begin(); iIt != cells[j+3].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-                for ( iIt = cells[j+4].particleList.begin(); iIt != cells[j+4].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-              }           
-              if(EdgecellOfList==2)
-              {
-              list<int>::const_iterator iIt;
-                for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }       
-                for ( iIt = cells[j-1].particleList.begin(); iIt != cells[j-1].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-                for ( iIt = cells[j-2].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-                for ( iIt = cells[j-3].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-                for ( iIt = cells[j-4].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
-                {
-                  id = *iIt;
-                  allParticlesListWithNeighbors.push_back( id );
-                }  
-              }                
-            }
+//WARNING  improved cell selection          
+//             if(computeAveragedMfp)
+//             {
+//               if(EdgecellOfList==0)
+//               {
+//               list<int>::const_iterator iIt;
+//                 for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }       
+//                 for ( iIt = cells[j-1].particleList.begin(); iIt != cells[j-1].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//                 for ( iIt = cells[j+1].particleList.begin(); iIt != cells[j+1].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//                 for ( iIt = cells[j-2].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//                 for ( iIt = cells[j+2].particleList.begin(); iIt != cells[j+2].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//               }
+//               if(EdgecellOfList==1)
+//               {
+//               list<int>::const_iterator iIt;
+//                 for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }       
+//                 for ( iIt = cells[j+1].particleList.begin(); iIt != cells[j+1].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//                 for ( iIt = cells[j+2].particleList.begin(); iIt != cells[j+2].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//                 for ( iIt = cells[j+3].particleList.begin(); iIt != cells[j+3].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//                 for ( iIt = cells[j+4].particleList.begin(); iIt != cells[j+4].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//               }           
+//               if(EdgecellOfList==2)
+//               {
+//               list<int>::const_iterator iIt;
+//                 for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }       
+//                 for ( iIt = cells[j-1].particleList.begin(); iIt != cells[j-1].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//                 for ( iIt = cells[j-2].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//                 for ( iIt = cells[j-3].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//                 for ( iIt = cells[j-4].particleList.begin(); iIt != cells[j-2].particleList.end(); iIt++ )
+//                 {
+//                   id = *iIt;
+//                   allParticlesListWithNeighbors.push_back( id );
+//                 }  
+//               }                
+//             }
             
             list<int>::const_iterator iIt;
             for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
@@ -1943,7 +2108,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                     // velocity of cell
                     VectorXYZ v_cell = rings[ringIndex].getAveraged_v();
                 
-                    // velocity of added particle in lab frame
+                    // velocity of added particle in lab framenumberOfCellsAveragedForMfp
                     VectorTXYZ v_jet = addedParticles[id].Mom * (1.0/addedParticles[id].Mom.E());
           //           double velocity_lab = sqrt( 1.0 - pow( addedParticles[id].m ,2.0) / pow( addedParticles[id].E ,2.0) );
                     
@@ -1984,8 +2149,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             if( theConfig->isScatt_amongBackgroundParticles() )
             {
                 if( theConfig->doScattering_22_photons())// && nexttime >0.2
-                { 
-                  scatt22_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
+                {                   
+                   scatt22_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
 //                   for ( int i = 0; i < static_cast<int>( allParticlesList.size() ) - 1; i++ )
 //                   {
 //                     int iscat = allParticlesList[i]; 
@@ -2009,7 +2174,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                 
                 if( theConfig->doScattering_AMY23_photons() )
                 {
-                  scatt23_amongBackgroundParticles_AMYphotons(cells[j], allParticlesList, scaleFactor, again, nexttime);
+                  scatt23_amongBackgroundParticles_AMYphotons(cells[j], allParticlesListForAMY, scaleFactor, again, nexttime, particleListAMYVolume);
                 }
                 
                 if( theConfig->doScattering_23_photons())
@@ -2055,32 +2220,36 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                     }
                   }else
                   {
-                    if(computeAveragedMfp)
+                    //WARNING improved cell selection
+                    if(nCellsAVG>0)
                     {
-                      scatt22ForRates(cells[j],allParticlesListWithNeighbors, theI22, numberOfCellsAveragedForMfp);
-                    }else
-                    {
-                      scatt22ForRates(cells[j],allParticlesList, theI22, 1);                    
+                      if(computeAveragedMfp)
+                      {
+                        scatt22ForRates(cells[j],allParticlesListForAMY, theI22, nCellsAVG);
+                      }else
+                      {
+                        scatt22ForRates(cells[j],allParticlesList, theI22, 1);                    
+                      }
+                      /*
+                      if(FPT_COMP_GZ(getLambdaFromRates( 1,1, cells[j].rates)))
+                      {
+                        lambdaSpecific1 += getLambdaFromRates( 1,1, cells[j].rates);
+                        count_for_average_lambda1++;
+                      }
+                      if(FPT_COMP_GZ(getLambdaFromRates( 1,2, cells[j].rates)))
+                      {                 
+                        lambdaSpecific2 += getLambdaFromRates( 1,2, cells[j].rates);
+                        count_for_average_lambda2++;
+                      }
+                      if(FPT_COMP_GZ(getLambdaFromRates( 1,3, cells[j].rates)))
+                      {                
+                        lambdaSpecific3 += getLambdaFromRates( 1,3, cells[j].rates);
+                        count_for_average_lambda3++;    
+                      } 
+                      cout << "Scatter " << lambdaSpecific1/count_for_average_lambda1 << "\t" << lambdaSpecific2/count_for_average_lambda2 << "\t" << lambdaSpecific3/count_for_average_lambda3 << endl;
+                      */
+                      scatt23_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
                     }
-                    /*
-                    if(FPT_COMP_GZ(getLambdaFromRates( 1,1, cells[j].rates)))
-                    {
-                      lambdaSpecific1 += getLambdaFromRates( 1,1, cells[j].rates);
-                      count_for_average_lambda1++;
-                    }
-                    if(FPT_COMP_GZ(getLambdaFromRates( 1,2, cells[j].rates)))
-                    {                 
-                      lambdaSpecific2 += getLambdaFromRates( 1,2, cells[j].rates);
-                      count_for_average_lambda2++;
-                    }
-                    if(FPT_COMP_GZ(getLambdaFromRates( 1,3, cells[j].rates)))
-                    {                
-                      lambdaSpecific3 += getLambdaFromRates( 1,3, cells[j].rates);
-                      count_for_average_lambda3++;    
-                    } 
-                    cout << "Scatter " << lambdaSpecific1/count_for_average_lambda1 << "\t" << lambdaSpecific2/count_for_average_lambda2 << "\t" << lambdaSpecific3/count_for_average_lambda3 << endl;
-                    */
-                    scatt23_amongBackgroundParticles_photons( cells[j], allParticlesList, scaleFactor, again, nexttime );
                   }
                 }             
                 
@@ -2255,8 +2424,66 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   
 }
 
+void offlineHeavyIonCollision::collectParticlesInCellWithNeighbors(int cellindex, std::vector< int >& _allParticlesListForAMY, int etaSliceIndex, int IX, int IY, double &  particleListAMYVolume, int & nCellsAVG)
+{
+  //TODO
+  list<int>::const_iterator iIt;
+  int totalNumber=0;
+  int id;
+  int IXY=IX*IY;
+  int n_z = cellindex / IXY; 
+  int n_y = (cellindex-n_z*IXY) / IX;
+  int n_x = (cellindex-n_z*IXY) - (n_y*IX);
+//   cout << "CELLINDIZES: " << cellindex<< endl;
+//   cout << "IX="<<IX << "\t IY=" << IY << "\tetaSliceIndex="<<etaSliceIndex<<endl;
+  if(n_x > 0 && n_x < (IX-1) && n_y >1 && n_y < (IY-1))
+  {
+    particleListAMYVolume=dv*9.;
+    nCellsAVG=9;
+    //cells in the middle
+    for(int loop_y=0;loop_y<=2;loop_y++)
+    {
+      for(int loop_x=0;loop_x<=2;loop_x++)
+      {
+        int n_loop_x=(n_x-1)+loop_x;
+        int n_loop_y=(n_y-1)+loop_y;
+        int CELLINDEX_LOOP= n_loop_x + IX*n_loop_y + IXY*etaSliceIndex;
+//         cout << loop_x << "\t" << loop_y<<"\t" << CELLINDEX_LOOP << endl;
+//         totalNumber+=cells[CELLINDEX_LOOP].particleList.size();
+//         cout << cells[CELLINDEX_LOOP].particleList.size() << endl;
+        for ( iIt = cells[CELLINDEX_LOOP].particleList.begin(); iIt != cells[CELLINDEX_LOOP].particleList.end(); iIt++ )
+        {
+          totalNumber++;
+          id = *iIt;
+          _allParticlesListForAMY.push_back( id );
+        }
+      }
+    }
+  }
+  else
+  {
+    nCellsAVG=0;
+    particleListAMYVolume=-1;
+  }
+  if(totalNumber<theConfig->getNumberParticlesMinForAvg())
+  {
+    nCellsAVG=0;
+    particleListAMYVolume=-1;    
+  }  
+}
 
-
+void offlineHeavyIonCollision::collectParticlesInCell(int cellindex, std::vector< int >& _allParticlesListForAMY, double &  particleListAMYVolume, int & nCellsAVG)
+{
+  list<int>::const_iterator iIt;
+  int id;
+  particleListAMYVolume=dv;
+  nCellsAVG=1;
+  for ( iIt = cells[cellindex].particleList.begin(); iIt != cells[cellindex].particleList.end(); iIt++ )
+  {
+    id = *iIt;
+    _allParticlesListForAMY.push_back( id );
+  }    
+}
 
 
 void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
@@ -2905,6 +3132,169 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
 }
 
 
+void offlineHeavyIonCollision::calculateThermodynamicAverages(vector< int >& _allParticlesListForAMY,double cellVolumeLab, double  &TStarGEV, lorentz & LorentzBoost )
+{
+  int iscat;
+  double gG = 2 * ( pow( ns_casc::Ncolor, 2 ) - 1 ); //16
+  double gQ = 2.0 * ns_casc::Ncolor * Particle::N_light_flavor; //18
+  
+  VectorEPxPyPz sumofMomentaIncell;
+  VectorXYZ boostbetaVector;
+  
+  double inverseE_gluons=0.;
+  double inverseE_quarks=0.;
+  int numberOfGluons=0;
+  int numberOfQuarks=0;
+  
+  for ( int i = 0; i < static_cast<int>( _allParticlesListForAMY.size() ) ; i++ )
+  {
+    iscat = _allParticlesListForAMY[i]; 
+    sumofMomentaIncell += particles_atTimeNow[iscat].Mom;
+    double oneOverE = 1 / particles_atTimeNow[iscat].Mom.E();
+    if (particles_atTimeNow[iscat].FLAVOR == gluon )
+    {
+        inverseE_gluons += oneOverE;
+        ++numberOfGluons;
+    }
+    else
+    {
+        inverseE_quarks += oneOverE;
+        ++numberOfQuarks;
+    }
+    
+  }
+  boostbetaVector =  sumofMomentaIncell.NormalizeToE();
+  LorentzBoost;
+  LorentzBoost.setBeta( boostbetaVector );
+  double gamma      =  LorentzBoost.gammaVal();
+  
+  double invEg = inverseE_gluons / ( gG * testpartcl );
+  double invEq;
+  if ( Particle::N_light_flavor == 0 )
+  {
+      invEq = 0;
+  }
+  else
+  {
+      invEq = inverseE_quarks / ( 2.0 * gQ * testpartcl);  //Sum 1/E *1/36/testparticles
+  }
+
+  // Obtain the effective temperature like in AMY, https://arxiv.org/abs/hep-ph/0209353v3, Eq. (1.7) and (1.6) and (A9)
+  // Boost-Gamma factor important, because n not Lorentz invariant, and we need n_LRF here, because T is defined in the LRF
+  double IGluon =     0.5 *  ( (numberOfGluons / ( testpartcl * cellVolumeLab * gamma) )  /  gG ) * pow( 0.197, 3 );   //GeV^3        ~ LRF density
+  double IQuark =     0.5 *  ( (numberOfQuarks / ( testpartcl * cellVolumeLab * gamma) )  / ( gQ * 2 ) ) * pow( 0.197, 3 ); //GeV^3   ~ LRF density
+    
+  //Calculated in LAB frame, but is a LORENTZ-INVARIANT quantitiy, therefore it's easier to calc in the LAB frame. J_LAB=J_LRF because of Lorentz invariance.
+  double JGluon =     pow( 0.197, 3 )/ (cellVolumeLab) * invEg; //GeV^2
+  double JQuark =     pow( 0.197, 3 )/ (cellVolumeLab) * invEq; //GeV^2
+  
+  TStarGEV =   (IGluon + IQuark)/(JGluon + JQuark); 
+
+}
+
+
+void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< int >& _allParticlesList, int etaSliceIndex, int IX, int IY, const double volume, int nCellsAVG, double time )
+{
+  int id;
+  int IXY=IX*IY;
+  int n_z = cellindex / IXY; 
+  int n_y = (cellindex-n_z*IXY) / IX;
+  int n_x = (cellindex-n_z*IXY) - (n_y*IX);  
+  double T_AMY=0.;
+  lorentz LorentzBoost;
+  int centralEtaIndex = static_cast<int>( etaBins.size() ) / 2;
+  string full_filename = theConfig->getStandardOutputDirectoryName() + "/" +theConfig->getJobName() + "_T_AMY_Central" +  ".dat";
+  T_AMY=0;
+  
+  
+  fstream outfile( full_filename.c_str(), ios::out | ios::app);
+  outfile.precision( 8 );
+
+//     cout << volume << "\t" << n_x << "\t" << n_y << endl;
+ 
+    if( (n_x==(IX/2+0*IX/8)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+    {
+      if(volume>0)
+      { 
+        //CALCULATE T* and Boost
+        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+        cout << "T central = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+        outfile << time << "\t" << T_AMY;
+      }else
+        outfile << time << "\t" << "#";
+    }
+
+    if( (n_x==(IX/2+1*IX/8)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+    {
+      if(volume>0)
+      { 
+        //CALCULATE T* and Boost
+        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+        cout << "T 1 = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+        outfile << "\t" << T_AMY;
+      }else
+        outfile <<  "\t" << "#";
+    } 
+
+    if( (n_x==(IX/2+2*IX/8)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+    {
+      if(volume>0)
+      { 
+        //CALCULATE T* and Boost
+        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+        cout << "T 2 = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+        outfile << "\t" << T_AMY ;
+      }else
+        outfile << "\t" << "#" ;
+    } 
+
+    if( (n_x==(IX/2+3*IX/8)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+    {
+      if(volume>0)
+      { 
+        //CALCULATE T* and Boost
+        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+        cout << "T 3 = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+        outfile << "\t" << T_AMY ;
+      }else
+        outfile << "\t" << "#" ;
+    }  
+
+    if( (n_x==(IX/2+4*IX/8-1)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+    {
+      if(volume>0)
+      { 
+        //CALCULATE T* and Boost
+        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+        cout << "T 4 = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+        outfile << "\t" << T_AMY << endl;
+      }else
+        outfile << "\t" << "#" << endl;
+    }
+//     else if( (n_x==(IX/2+IX/8)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+//     { 
+//       calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+//       cout << "T noncentral = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+//       outfile << "\t" << T_AMY ;    
+//       outfile.close();
+//     }
+//     else if( (n_x==(IX/2+2*IX/8)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+//     {  
+//       outfile <<  "\t" << T_AMY ;  outfile.close();    
+//     }
+//     else if( (n_x==(IX/2+3*IX/8)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+//     {  
+//       outfile <<  "\t" << T_AMY ;  outfile.close();    
+//     }
+//     else if( (n_x==(IX/2+4*IX/8)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+//     {  
+//       outfile <<  "\t" << T_AMY << endl;   outfile.close();   
+//     }
+    
+  
+  outfile.close();
+}
+
 
 
 /**
@@ -2918,7 +3308,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
  * 
  * 
  */
-void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime )
+void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime , const double volume)
 {
   int iscat;
   FLAVOR_TYPE F1;
@@ -2926,27 +3316,17 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
   VectorEPxPyPz newPhoton,newPhotonLRF;
   ParticleOffline temp_particle_produced_photon1;
   
-  if(_allParticlesList.size()>5)
+  lorentz LorentzBoost;
+  
+  if(volume>0)
   {
-    VectorEPxPyPz sumofMomentaIncell;
-    VectorXYZ boostbetaVector;
-    for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) ; i++ )
-    {
-      iscat = _allParticlesList[i]; 
-      sumofMomentaIncell += particles_atTimeNow[iscat].Mom;
-    }
-    
-    
-    boostbetaVector =  sumofMomentaIncell.NormalizeToE();
-    //hack would be:
-    //boostbetaVector.SetTXYZ(0,0,0,0);
-    
-    
-    lorentz LorentzBoost;
-    LorentzBoost.setBeta( boostbetaVector );
+    //CALCULATE T* and Boost
+    calculateThermodynamicAverages(_allParticlesList, volume, temperature, LorentzBoost );
     VectorEPxPyPz momentumLRF;
     double timestepBoosted = dt * LorentzBoost.gammaVal();
-    
+    //hack would be:
+    //boostbetaVector.SetTXYZ(0,0,0,0);
+  
     for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ) ; i++ )
     {
       if(std::isnan(LorentzBoost.gammaVal()) || std::isinf(LorentzBoost.gammaVal()))
@@ -2955,7 +3335,8 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
       }
       iscat = _allParticlesList[i];   
       F1 = particles_atTimeNow[iscat].FLAVOR;
-      temperature = particles_atTimeNow[iscat].temperatureAMY; //GeV
+      //From rings we would use:
+      //temperature = particles_atTimeNow[iscat].temperatureAMY; //GeV
       if(std::isnan(temperature) || std::isinf(temperature) || FPT_COMP_E( temperature, 0.0 ))
       {
         continue;       

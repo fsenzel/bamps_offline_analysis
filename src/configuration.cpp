@@ -132,6 +132,7 @@ config::config() :
     maxAllowedParentPT( 100000.0 ),
     analysisPhotonsNBinsV2(8),
     mfpCellAveraging( false ),
+    numberParticlesMinForAvg( 30 ),
     useFormationTimesForPhotonproduction( true ),
     usedExternalField( 0.0),
 //  interpolationBorder(50),

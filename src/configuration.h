@@ -341,6 +341,8 @@ class config : public configBase
   
   /** @brief Interface for mfpCellAveraging */  
   bool getMfpCellAveraging() const {return mfpCellAveraging;}   
+  
+  int getNumberParticlesMinForAvg() const {return numberParticlesMinForAvg;}
  
   /** @brief Interface for config::usedExternalField */
   double getUsedExternalField() const {return usedExternalField;}
@@ -683,6 +685,9 @@ class config : public configBase
   /** @brief If there should be averaging over 3 cells to compute the mean free path. */
   bool mfpCellAveraging;
 
+  /** @brief For T* and boost, there must be at least this number of particles in a cell. */
+  int numberParticlesMinForAvg;
+  
   /** @brief If scattering among offline particles to photons should use the initial formation time veto. */
   bool useFormationTimesForPhotonproduction;
   

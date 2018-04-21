@@ -183,7 +183,7 @@ private:
     void scatt22_amongBackgroundParticles_photons  ( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
     void scatt22_amongBackgroundParticles_dileptons( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
     void scatt23_amongBackgroundParticles_photons  ( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
-    void scatt23_amongBackgroundParticles_AMYphotons  ( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
+    void scatt23_amongBackgroundParticles_AMYphotons  ( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime , const double volume);
         
     void getEnergyOverTinLocalRestFrame( cellContainer& _cells, std::vector< int >& _allParticlesList, const double scaleFactor, bool& again, const double nexttime );
     
@@ -208,7 +208,12 @@ private:
     void scatt22ForRates(   cellContainer& _cells,std::vector< int >& _allParticlesList,  const interpolation22& theI22, const int NumberOfCellsAveraged );
     void scatt22ForRatesUtility(scattering22& scatt22_obj, const int iscat, const int jscat, const interpolation22& theI22,  cellContainer& _cells,std::vector< int >& _allParticlesList, const int NumberOfCellsAveraged );
     void NumbersInCell(  std::vector< int >& ThisCell, double & NumberGluonsInCell, double & NumberUpsInCell, double & NumberAntiupsInCell, double & NumberDownsInCell, double & NumberAntisdownsInCell, double &NumberStrangesInCell, double & NumberAntiStrangesInCell);
-
+    
+    void analyzeCentralCell(int cellindex ,std::vector< int >& _allParticlesList, int etaSliceIndex, int IX, int IY, const double volume, int nCellsAVG, double time );
+    void analyzeIndependent(const double nexttime);
+    void collectParticlesInCellWithNeighbors(int cellindex, std::vector< int >& _allParticlesListForAMY, int etaSliceIndex, int IX, int IY, double &  particleListAMYVolume, int & nCellsAVG);
+    void collectParticlesInCell(int cellindex, std::vector< int >& _allParticlesListForAMY,double &  particleListAMYVolume,  int & nCellsAVG);
+    void calculateThermodynamicAverages(std::vector< int >& _allParticlesListForAMY, double cellVolumeLab, double & TstarAMY, lorentz & LorentzBoost);
     
     
     double getLambdaFromRates(int _F1,int _F2, ratesManager& rates);

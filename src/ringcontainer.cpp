@@ -358,8 +358,8 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
         }
         gamma = 1 / sqrt( 1.0 - pow( getAveraged_v_z(), 2 ) - pow( getAveraged_v_r(), 2 ) );
         
-        md2g = pow( 0.197, 3 ) * 16 * M_PI / (volume/gamma) * ( ns_casc::Ncolor * invEg + Particle::N_light_flavor * invEq );
-        md2q = pow( 0.197, 3 ) * 2 * M_PI / (volume/gamma) * 8.0 / 3.0 * ( invEg + invEq );
+        md2g = pow( 0.197, 3 ) * 16 * M_PI / (volume) * ( ns_casc::Ncolor * invEg + Particle::N_light_flavor * invEq );
+        md2q = pow( 0.197, 3 ) * 2 * M_PI / (volume) * 8.0 / 3.0 * ( invEg + invEq );
 
         //all w/o alpha_s
         //md2g = 16 * pi * int (d^3p/(2pi)^3/E) (n_c f_g + n_f f_q)
@@ -380,9 +380,10 @@ void ringContainer::prepareAverages( const double _dz, const int _Ntest )
  
         // Obtain the effective temperature like in AMY, https://arxiv.org/abs/hep-ph/0209353v3, Eq. (1.7) and (1.6) and (A9)
         // Boost-Gamma factor canceled out
-        double IGluon =     0.5 *  ( (numberOfGluons / ( _Ntest * volume) )  /  gG ) * pow( 0.197, 3 );   //GeV^3
-        double IQuark =     0.5 *  ( (numberOfQuarks / ( _Ntest * volume) )  / ( ns_casc::Ncolor * Particle::N_light_flavor * 2 * 2 ) ) * pow( 0.197, 3 ); //GeV^3
-            
+        double IGluon =     0.5 *  ( (numberOfGluons / ( _Ntest * volume * gamma) )  /  gG ) * pow( 0.197, 3 );   //GeV^3
+        double IQuark =     0.5 *  ( (numberOfQuarks / ( _Ntest * volume * gamma) )  / ( ns_casc::Ncolor * Particle::N_light_flavor * 2 * 2 ) ) * pow( 0.197, 3 ); //GeV^3
+          
+        //Calculated in LAB frame, but is a LORENTZ-INVARIANT quantitiy, therefore it's easier to calc in the LAB frame
         double JGluon =     pow( 0.197, 3 )/ (volume) * invEg; //GeV^2
         double JQuark =     pow( 0.197, 3 )/ (volume) * invEq; //GeV^2
         
