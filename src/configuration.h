@@ -290,6 +290,9 @@ class config : public configBase
   /** @brief Interface for config::minNumberForTemperature */
   double getMinNumberForTemperature() const { return minNumberForTemperature; }
 
+  /** @brief Interface for config::scaleNumberParticles */
+  double getScalingFactorForParticles() const { return scaleNumberParticles; }
+
   /** ------------------------------------ */
   
   /** -------- offline reconstruction options ------- */ 
@@ -624,6 +627,9 @@ class config : public configBase
   /** @brief Minimum number necessary for calculating temperature */
   double minNumberForTemperature;
   
+  /** @brief Scaling factor for number of particles filled in cells for testing AMY temperature and flow. Only for testing purposes. */
+  double scaleNumberParticles;
+
   /** ------------------------------- */
 
   /** -------- offline reconstruction options ------- */ 

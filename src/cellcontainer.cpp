@@ -188,6 +188,23 @@ void cellContainer::writeAveragesToParticle( Particle& _particle ) const
   
 }
 
+void cellContainer::addParticleForAMY( Particle particleToAdd )
+{
+  ++numberOfParticles;
+  p_cell += particleToAdd.Mom;
+
+  if ( particleToAdd.FLAVOR == gluon )
+  {
+    inverseE_gluons += 1.0 / particleToAdd.Mom.E();
+    ++numberOfGluons;
+  }
+  else
+  {
+    inverseE_quarks += 1.0 / particleToAdd.Mom.E();
+    ++numberOfQuarks;
+  }
+}
+
 void cellContainer::getCellInformationForAMY( double &T_AMY, VectorTXYZ &beta_LRF, const double minNumberForTemperature )
 {
   const double numberOfParticles = numberOfGluons + numberOfQuarks;

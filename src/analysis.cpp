@@ -235,7 +235,7 @@ analysis::analysis( config* const c ):
  
   
   //--------------------------------------
-  string name_fug, name_temp, mfpName, centralDensitiesName, oscarName_jet, oscarName_background;
+  string name_fug, name_temp, mfpName, centralDensitiesName, centralCellName, peripheralCellName, oscarName_jet, oscarName_background;
   if ( studyJpsi )
     name_fug = filename_prefix + "_jpsi_fugacity";
   else
@@ -252,9 +252,17 @@ analysis::analysis( config* const c ):
     mfpName = "/dev/null";
   
   if( studyCentralDensity )
+  {
     centralDensitiesName = filename_prefix + "_central_density";
+    centralCellName = filename_prefix + "_central_cell";
+    peripheralCellName = filename_prefix + "_peripheral_cell";
+  }
   else
+  {
     centralDensitiesName = "/dev/null";
+    centralCellName = "/dev/null";
+    peripheralCellName = "/dev/null";
+  }
   
   // movie output
   if( theConfig->doOutput_movieOutputBackground() )
@@ -271,6 +279,8 @@ analysis::analysis( config* const c ):
   printTempInTube.open( name_temp.c_str(), ios::out );
   mfpJetsOutputFile.open( mfpName.c_str(), ios::out );
   centralDensitiesOutputFile.open( centralDensitiesName.c_str(), ios::out );
+  centralCellOutputFile.open( centralCellName.c_str(), ios::out );
+  peripheralCellOutputFile.open( peripheralCellName.c_str(), ios::out );
   oscarBackground.open( oscarName_background.c_str(), ios::out );
   oscarJets.open( oscarName_jet.c_str(), ios::out );
   //--------------------------------------
@@ -3135,8 +3145,60 @@ void analysis::printCentralDensities(const double _time)
   centralRingsCopyFromCascade.clear();
 }
 
+void analysis::printCentralCell(const double _time)
+{
+  double T_AMY;
+  VectorTXYZ boostLRF;
 
+  const int index_central = int( IY / 2.0 ) * IX + int( IX / 2.0 );
+  
+  // cout << cellsInCentralEtaIndex[index_central].corner.x_min << "\t" << cellsInCentralEtaIndex[index_central].corner.x_max << "\t" << cellsInCentralEtaIndex[index_central].corner.y_min << "\t" << cellsInCentralEtaIndex[index_central].corner.y_max << endl;
+  // cout << cellsInCentralEtaIndex[index_central-IX].corner.x_min << "\t" << cellsInCentralEtaIndex[index_central-IX].corner.x_max << "\t" << cellsInCentralEtaIndex[index_central-IX].corner.y_min << "\t" << cellsInCentralEtaIndex[index_central-IX].corner.y_max << endl;
+  // cout << cellsInCentralEtaIndex[index_central-1].corner.x_min << "\t" << cellsInCentralEtaIndex[index_central-1].corner.x_max << "\t" << cellsInCentralEtaIndex[index_central-1].corner.y_min << "\t" << cellsInCentralEtaIndex[index_central-1].corner.y_max << endl;
+  // cout << cellsInCentralEtaIndex[index_central-IX-1].corner.x_min << "\t" << cellsInCentralEtaIndex[index_central-IX-1].corner.x_max << "\t" << cellsInCentralEtaIndex[index_central-IX-1].corner.y_min << "\t" << cellsInCentralEtaIndex[index_central-IX-1].corner.y_max << endl;
 
+  centralCellOutputFile << _time << "\t";
+
+  cellsInCentralEtaIndex[index_central].getCellInformationForAMY( T_AMY, boostLRF, 0.0 );
+  centralCellOutputFile << T_AMY << "\t" << cellsInCentralEtaIndex[index_central].numberOfGluons + cellsInCentralEtaIndex[index_central].numberOfQuarks << "\t";
+
+  cellsInCentralEtaIndex[index_central-1].getCellInformationForAMY( T_AMY, boostLRF, 0.0 );
+  centralCellOutputFile << T_AMY << "\t" << cellsInCentralEtaIndex[index_central-1].numberOfGluons + cellsInCentralEtaIndex[index_central-1].numberOfQuarks << "\t";
+
+  cellsInCentralEtaIndex[index_central-IX].getCellInformationForAMY( T_AMY, boostLRF, 0.0 );
+  centralCellOutputFile << T_AMY << "\t" << cellsInCentralEtaIndex[index_central-IX].numberOfGluons + cellsInCentralEtaIndex[index_central-IX].numberOfQuarks << "\t";
+
+  cellsInCentralEtaIndex[index_central-IX-1].getCellInformationForAMY( T_AMY, boostLRF, 0.0 );
+  centralCellOutputFile << T_AMY << "\t" << cellsInCentralEtaIndex[index_central-IX-1].numberOfGluons + cellsInCentralEtaIndex[index_central-IX-1].numberOfQuarks << endl;
+
+}
+
+void analysis::printPeripheralCell(const double _time)
+{
+  double T_AMY;
+  VectorTXYZ boostLRF;
+
+  const int index_peripheral_rb = int( IY / 3.0 ) * IX + int( 1.0 / 3.0 * IX );
+  const int index_peripheral_rt = int( 2.0 / 3.0 * IY ) * IX + int( 1.0 / 3.0 * IX );
+  const int index_peripheral_lb = int( IY / 3.0 ) * IX + int( 2.0 / 3.0 * IX );
+  const int index_peripheral_lt = int( 2.0 / 3.0 * IY ) * IX + int( 2.0 / 3.0 * IX );
+
+  // cout << cellsInCentralEtaIndex[index_peripheral_rb].corner.x_min << "\t" << cellsInCentralEtaIndex[index_peripheral_rb].corner.x_max << "\t" << cellsInCentralEtaIndex[index_peripheral_rb].corner.y_min << "\t" << cellsInCentralEtaIndex[index_peripheral_rb].corner.y_max << endl;
+  // cout << cellsInCentralEtaIndex[index_peripheral_rt].corner.x_min << "\t" << cellsInCentralEtaIndex[index_peripheral_rt].corner.x_max << "\t" << cellsInCentralEtaIndex[index_peripheral_rt].corner.y_min << "\t" << cellsInCentralEtaIndex[index_peripheral_rt].corner.y_max << endl;
+  // cout << cellsInCentralEtaIndex[index_peripheral_lt].corner.x_min << "\t" << cellsInCentralEtaIndex[index_peripheral_lt].corner.x_max << "\t" << cellsInCentralEtaIndex[index_peripheral_lt].corner.y_min << "\t" << cellsInCentralEtaIndex[index_peripheral_lt].corner.y_max << endl;
+  // cout << cellsInCentralEtaIndex[index_peripheral_lb].corner.x_min << "\t" << cellsInCentralEtaIndex[index_peripheral_lb].corner.x_max << "\t" << cellsInCentralEtaIndex[index_peripheral_lb].corner.y_min << "\t" << cellsInCentralEtaIndex[index_peripheral_lb].corner.y_max << endl;
+  
+  peripheralCellOutputFile << _time << "\t";
+
+  cellsInCentralEtaIndex[index_peripheral_rb].getCellInformationForAMY( T_AMY, boostLRF, 0.0 );
+  peripheralCellOutputFile << T_AMY << "\t" << cellsInCentralEtaIndex[index_peripheral_rb].numberOfGluons + cellsInCentralEtaIndex[index_peripheral_rb].numberOfQuarks << "\t";
+  cellsInCentralEtaIndex[index_peripheral_rt].getCellInformationForAMY( T_AMY, boostLRF, 0.0 );
+  peripheralCellOutputFile << T_AMY << "\t" << cellsInCentralEtaIndex[index_peripheral_rt].numberOfGluons + cellsInCentralEtaIndex[index_peripheral_rt].numberOfQuarks << "\t";
+  cellsInCentralEtaIndex[index_peripheral_lb].getCellInformationForAMY( T_AMY, boostLRF, 0.0 );
+  peripheralCellOutputFile << T_AMY << "\t" << cellsInCentralEtaIndex[index_peripheral_lb].numberOfGluons + cellsInCentralEtaIndex[index_peripheral_lb].numberOfQuarks << "\t";
+  cellsInCentralEtaIndex[index_peripheral_lt].getCellInformationForAMY( T_AMY, boostLRF, 0.0 );
+  peripheralCellOutputFile << T_AMY << "\t" << cellsInCentralEtaIndex[index_peripheral_lt].numberOfGluons + cellsInCentralEtaIndex[index_peripheral_lt].numberOfQuarks << endl;
+}
 
 
 // heavy quark stuff

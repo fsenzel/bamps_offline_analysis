@@ -119,6 +119,7 @@ config::config() :
  mfpAddedRangeVariation( 100.0 ),
  fixed_mfp_added( 1.0 ),
  minNumberForTemperature( 15.0 ),
+ scaleNumberParticles( 1.0 ),
 //  interpolationBorder(50),
  tau_min( -1.0 ),
  // ---- offline reconstruction options ----
@@ -391,6 +392,7 @@ void config::initializeProgramOptions()
   ("misc.mfpAddedRangeVariation", po::value<double>( &mfpAddedRangeVariation )->default_value( mfpAddedRangeVariation ), "Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be" )
   ("misc.tau_min", po::value<double>( &tau_min )->default_value( tau_min ), "Proper time after which added particles are allowed to scatter/radiate" )
   ("misc.min_number_for_temperature", po::value<double>( &minNumberForTemperature )->default_value( minNumberForTemperature ), "Minimum number of particles in a cell for calculating temperature" )
+  ("misc.scale_number_particles", po::value<double>( &scaleNumberParticles )->default_value( scaleNumberParticles ), "Scaling factor for number of particles filled in cells for testing AMY temperature and flow. Only for testing purposes." )
   ;
 
   

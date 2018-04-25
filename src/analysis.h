@@ -185,6 +185,8 @@ public:
   void mfpJetsOutput( const int step, const int jumpSteps );  
   
   void printCentralDensities( const double _time );
+  void printCentralCell( const double _time );
+  void printPeripheralCell( const double _time );
   
   void writePartclMovie( vector< ParticleOffline >& _particles, const int n_particles, fstream& _oscar, const int step, const int jumpSteps );
   
@@ -331,6 +333,8 @@ private:
   fstream oscarBackground;
   fstream oscarJets;
   fstream centralDensitiesOutputFile;
+  fstream centralCellOutputFile;
+  fstream peripheralCellOutputFile;
   fstream mfpJetsOutputFile;
   fstream progressLogFile;
   
