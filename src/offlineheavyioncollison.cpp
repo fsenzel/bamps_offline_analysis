@@ -1167,7 +1167,7 @@ void offlineHeavyIonCollision::cell_ID( double _time )
 {
   int nx, ny, nz, cell_id;
   double halfsize, eta;
-
+  
   halfsize = transLen / 2.0;
   int centralEtaIndex = static_cast<int>( etaBins.size() ) / 2;
 
@@ -1442,15 +1442,19 @@ void offlineHeavyIonCollision::analyzeIndependent(const double nexttime)
   dv = dx * dy * dz;
   for ( int j = IXY * etaSliceIndex; j < IXY * ( etaSliceIndex + 1 ); j++ )
   { 
+    particleListAMYVolume=0.;
+    allParticlesListForAMY.clear();
+    if(cells[j].size()>theConfig->getNumberParticlesMinForAvg())
+    {
+      allParticlesListForAMY.reserve( cells[j].size() );
+      collectParticlesInCell(j, allParticlesListForAMY, particleListAMYVolume, nCellsAVG);
+    }else 
+    {
+      allParticlesListForAMY.reserve( round(theConfig->getNumberParticlesMinForAvg()*9*1.01) );
+      collectParticlesInCellWithNeighbors(j, allParticlesListForAMY, etaSliceIndex, IX, IY, particleListAMYVolume, nCellsAVG);
+    } 
     
-    if ( ( cells[j].empty()) )
-    { 
-      continue;
-//       cells[j].resetStoredValues();     
-//       allParticlesListWithNeighbors.clear(); 
-//       allParticlesListWithNeighbors.reserve( cells[j].size() );
-    }
-    
+/*    
 //     cout << cells[j].size() << endl;
     
     allParticlesListForAMY.clear();
@@ -1463,6 +1467,7 @@ void offlineHeavyIonCollision::analyzeIndependent(const double nexttime)
     }  
       
 //     cout << "CZ " << cells[j].size() << endl;
+    nCellsAVG=0;
     if(cells[j].size() < theConfig->getNumberParticlesMinForAvg())
     {            
       collectParticlesInCellWithNeighbors(j, allParticlesListForAMY, etaSliceIndex, IX, IY, particleListAMYVolume, nCellsAVG);
@@ -1470,12 +1475,14 @@ void offlineHeavyIonCollision::analyzeIndependent(const double nexttime)
     else
     {
       collectParticlesInCell(j, allParticlesListForAMY, particleListAMYVolume, nCellsAVG);
-    }
-    if(nCellsAVG>0)
+    }*/
+    if(FPT_COMP_G(particleListAMYVolume,0.))
+    {  
+      //cout << "repeat comp " << nCellsAVG << "\t\t" << particleListAMYVolume << "\t" << allParticlesListForAMY.size() << endl;
 //     cout << allParticlesListForAMY.size() << "\t" << nCellsAVG << endl;
 //       cout << j<<"\t" << particleListAMYVolume<<endl;
-    analyzeCentralCell( j ,allParticlesListForAMY, etaSliceIndex, IX, IY, particleListAMYVolume, nCellsAVG , nexttime);
-      
+      analyzeCentralCell( j ,allParticlesListForAMY, etaSliceIndex, IX, IY, particleListAMYVolume, nCellsAVG , nexttime);
+    }   
   }
 }
 
@@ -2523,6 +2530,7 @@ void offlineHeavyIonCollision::collectParticlesInCellWithNeighbors(int cellindex
     nCellsAVG=0;
     particleListAMYVolume=-1;    
   }  
+//   cout << "collect " << particleListAMYVolume << "\t" << totalNumber << endl;
 }
 
 void offlineHeavyIonCollision::collectParticlesInCell(int cellindex, std::vector< int >& _allParticlesListForAMY, double &  particleListAMYVolume, int & nCellsAVG)
@@ -2538,22 +2546,29 @@ void offlineHeavyIonCollision::collectParticlesInCell(int cellindex, std::vector
   {     
     //TEST aim at particle number
     factor=cells[cellindex].size()/goal;
-  }
-  if(cells[cellindex].size()>goal)
-  {  
-    int count=0;
+    if(cells[cellindex].size()>goal)   //TODO
+    {  
+      int count=0;
+      for ( iIt = cells[cellindex].particleList.begin(); iIt != cells[cellindex].particleList.end(); iIt++ )
+      {
+        id = *iIt;
+        count++;
+        if(count == factor)
+        {
+          count=0;
+          _allParticlesListForAMY.push_back( id );
+        }     
+      }   
+    }     
+  }else //default case
+  {
     for ( iIt = cells[cellindex].particleList.begin(); iIt != cells[cellindex].particleList.end(); iIt++ )
     {
       id = *iIt;
-      count++;
-      if(count == factor)
-      {
-        count=0;
         _allParticlesListForAMY.push_back( id );
-      }
-      
     }   
-  }    
+  }
+   
 }
 
 
@@ -3277,34 +3292,75 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
   T_AMY=0;
   
   
+  
   fstream outfile( full_filename.c_str(), ios::out | ios::app);
   outfile.precision( 8 );
-
-    cout << IX << "\t" << (IX/2-2) << "\t" << (IX/2+2) << endl;
+  
+  //Central: IX/2-1
  
-    if( (n_x==(IX/2-3)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+    if( (n_x==(IX/2-1)) &&  (n_y==IY/2-1) && (etaSliceIndex==centralEtaIndex) )
     {
       if(volume>0)
       { 
+//         cout << volume << "\t" << _allParticlesList.size() << endl;
         //CALCULATE T* and Boost
         calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
-        cout << "T central left = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
-        outfile << time << "\t" << T_AMY << "\t" << LorentzBoost.gammaVal();
+        if(!std::isnan(LorentzBoost.gammaVal()) && !std::isinf(LorentzBoost.gammaVal()) && !std::isnan(T_AMY) && !std::isinf(T_AMY) && FPT_COMP_G( T_AMY, 0.0 ))
+        {
+          cout << "Particles: " << _allParticlesList.size() << "\t\tT central= " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+          outfile << time << "\t" << T_AMY << "\t" << LorentzBoost.gammaVal();
+        }else
+        {
+          //cout << time << "\tskip" << "\t#";
+          outfile << time << "\t#\t#";
+        }       
       }else
-        outfile << time << "\t" << "#\t#";
+        outfile << time << "\t#\t#";
     }
-    if( (n_x==(IX/2+1)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
+    //1.2fm apart
+    if( (n_x==(IX/2+3)) &&  (n_y==IY/2-1) && (etaSliceIndex==centralEtaIndex) )
+    {
+      if(volume>0)
+      {           
+        //CALCULATE T* and Boost
+        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+        if(!std::isnan(LorentzBoost.gammaVal()) && !std::isinf(LorentzBoost.gammaVal()) && !std::isnan(T_AMY) && !std::isinf(T_AMY) && FPT_COMP_G( T_AMY, 0.0 ))
+        {  
+          cout << "Particles: " << _allParticlesList.size() <<  "\t\tT central right = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+          outfile << "\t" << T_AMY << "\t" << LorentzBoost.gammaVal();
+        }else
+        {
+          cout << "ERROR  " << LorentzBoost.gammaVal() << "\t" << T_AMY << "\t"<< _allParticlesList.size() << endl;
+          //cout << time << "\tskip" << "\t#" << endl;
+          outfile << "\t#\t#";
+        }
+      }else
+      {
+        cout << "ERROR 2 " << _allParticlesList.size() << endl;
+        outfile <<  "\t#\t#";
+      }
+    }    
+    //2.4fm apart
+    if( (n_x==(IX/2+7)) &&  (n_y==IY/2-1) && (etaSliceIndex==centralEtaIndex) )
     {
       if(volume>0)
       { 
         //CALCULATE T* and Boost
         calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
-        cout << "T central righ t= " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
-        outfile << "\t" << T_AMY << "\t" << LorentzBoost.gammaVal() << endl;
+        if(!std::isnan(LorentzBoost.gammaVal()) && !std::isinf(LorentzBoost.gammaVal()) && !std::isnan(T_AMY) && !std::isinf(T_AMY) && FPT_COMP_G( T_AMY, 0.0 ))
+        {    
+          cout << "Particles: " << _allParticlesList.size() <<  "\t\tT  right = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+          outfile << "\t" << T_AMY << "\t" << LorentzBoost.gammaVal() << endl;
+        }else
+        {
+          //cout << time << "\tskip" << "\t#" << endl;
+          outfile << "\t#\t#" << endl;
+        }
       }else
-        outfile <<  "\t" << "#\t#" << endl;
-    }    
-
+        outfile <<  "\t#\t#" << endl;
+    }  
+    
+//     cout << "repeat " << volume << "\t" << _allParticlesList.size() << endl;
 //     if( (n_x==(IX/2+1*IX/8)) &&  (n_y==IY/2) && (etaSliceIndex==centralEtaIndex) )
 //     {
 //       if(volume>0)

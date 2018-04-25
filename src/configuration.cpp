@@ -132,7 +132,7 @@ config::config() :
     maxAllowedParentPT( 100000.0 ),
     analysisPhotonsNBinsV2(8),
     mfpCellAveraging( false ),
-    numberParticlesMinForAvg( 40 ),
+    numberParticlesMinForAvg( 30 ),
     useFormationTimesForPhotonproduction( true ),
     usedExternalField( 0.0),
 //  interpolationBorder(50),
@@ -398,6 +398,7 @@ void config::initializeProgramOptions()
     ("misc.minAllowedParentPT", po::value<double>( &minAllowedParentPT )->default_value( minAllowedParentPT ), "in GeV. Highest PT of the two parents must be greater than this parameter." )     
     ("misc.maxAllowedParentPT", po::value<double>( &maxAllowedParentPT )->default_value( maxAllowedParentPT ), "in GeV. Highest PT of the two parents must be smaller than this parameter." )
     ("misc.mfpCellAveraging", po::value<bool>( &mfpCellAveraging )->default_value( mfpCellAveraging ), "If the specific mean free path-calculation for 23-photonproduction should be averaged over 5 cells." )
+    ("misc.minPartNumberAvg", po::value<int>( &numberParticlesMinForAvg )->default_value( numberParticlesMinForAvg ), "For AMY T and Boost, this number of particles will be averaged, otherwise no scattering." )
     ("misc.useFormationTimePhotonproduction", po::value<bool>( &useFormationTimesForPhotonproduction )->default_value( useFormationTimesForPhotonproduction ), "If on, photons are only produced from formed particles. Default on." )    
     ("misc.analysisPhotonsNBinsV2", po::value<int>( &analysisPhotonsNBinsV2 )->default_value( analysisPhotonsNBinsV2 ), "Number of Bins for the V2-Pt Analysis.")
     ("misc.usedExternalField", po::value<double>( &usedExternalField )->default_value( usedExternalField ), "Externel Bfield used for online runs. Given as eB/mpi^2." )
