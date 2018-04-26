@@ -69,8 +69,8 @@ public:
   void prepareAverages();
   void writeAveragesToParticle( Particle& _particle ) const;
   
-  void getCellInformationForAMY( double &T_AMY, VectorTXYZ &beta_LRF, const double minNumberForTemperature );
-  void addParticleForAMY( Particle particleToAdd );
+  void getClusterInformation( double &T, VectorTXYZ &beta, const double minNumber );
+  void addParticleToCluster( Particle particleToAdd );
   
   double volume;
   int index;
@@ -96,14 +96,12 @@ public:
   double lambdaScaled;
 
 //  AMY
-//  Attention: These quantities can be stem from different neigbouring cells.
-//  
-  double numberOfParticles;
-  double numberOfGluons;
-  double numberOfQuarks;
-  double inverseE_gluons;
-  double inverseE_quarks;
-  VectorEPxPyPz p_cell;
+//  Attention: These quantities are not for single cell but cell + neighbour cells = cluster.
+  double number_gluon_cluster;
+  double number_quark_cluster;
+  double inverseE_gluons_cluster;
+  double inverseE_quarks_cluster;
+  VectorEPxPyPz p_cluster;
 
 private:
 

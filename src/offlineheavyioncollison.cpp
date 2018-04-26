@@ -1268,7 +1268,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
 
           if( ran2() < 1.0 / theConfig->getScalingFactorForParticles() )
           {
-            cells[j].addParticleForAMY( particles_atTimeNow[id] );
+            cells[j].addParticleToCluster( particles_atTimeNow[id] );
           }
         }
         
@@ -1283,7 +1283,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
             {
               if( ran2() < 1.0 / theConfig->getScalingFactorForParticles() )
               {
-                cells[j].addParticleForAMY( particles_atTimeNow[particle_id] );
+                cells[j].addParticleToCluster( particles_atTimeNow[particle_id] );
               }
             }
           }
@@ -1487,7 +1487,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               addedParticles[id].temperature = rings[nc].getEffectiveTemperature();
               
               // temperature and boost for AMY
-              cells[j].getCellInformationForAMY( addedParticles[id].temperatureAMY, addedParticles[id].v_cell, theConfig->getMinNumberForTemperature() );
+              cells[j].getClusterInformation( addedParticles[id].temperatureAMY, addedParticles[id].v_cell, theConfig->getMinNumberForTemperature() );
               
               if ( addedParticles[id].FLAVOR == gluon )
               {

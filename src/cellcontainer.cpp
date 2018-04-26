@@ -31,12 +31,11 @@ cellContainer::cellContainer() :
   sigma_22( 0 ),
   sigma_23( 0 ),
   lambdaScaled( 0 ),
-  numberOfParticles( 0.0 ),
-  numberOfGluons( 0.0 ),
-  numberOfQuarks( 0.0 ),
-  inverseE_gluons( 0.0 ),
-  inverseE_quarks( 0.0 ),
-  p_cell( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
+  number_gluon_cluster( 0.0 ),
+  number_quark_cluster( 0.0 ),
+  inverseE_gluons_cluster( 0.0 ),
+  inverseE_quarks_cluster( 0.0 ),
+  p_cluster( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
 {
   particleList.clear();
 }
@@ -61,13 +60,11 @@ void cellContainer::clear()
   md2g_scaled_23 = 0;
   md2q_scaled_23 = 0;
   lambdaScaled = 0;
-  numberOfParticles = 0.0;
-  numberOfGluons = 0.0;
-  numberOfQuarks = 0.0;
-  inverseE_gluons = 0.0;
-  inverseE_quarks = 0.0;
-  p_cell = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
-
+  number_gluon_cluster =  0.0;
+  number_quark_cluster =  0.0;
+  inverseE_gluons_cluster =  0.0;
+  inverseE_quarks_cluster =  0.0;
+  p_cluster = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
   averagesPrepared = false;
 }
 
@@ -86,12 +83,11 @@ void cellContainer::resetStoredValues()
   md2g_scaled_23 = 0;
   md2q_scaled_23 = 0;
   lambdaScaled = 0;
-  numberOfParticles = 0.0;
-  numberOfGluons = 0.0;
-  numberOfQuarks = 0.0;
-  inverseE_gluons = 0.0;
-  inverseE_quarks = 0.0;
-  p_cell = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+  number_gluon_cluster =  0.0;
+  number_quark_cluster =  0.0;
+  inverseE_gluons_cluster =  0.0;
+  inverseE_quarks_cluster =  0.0;
+  p_cluster = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
 
   rates.clear();
   averagesPrepared = false;
@@ -188,45 +184,44 @@ void cellContainer::writeAveragesToParticle( Particle& _particle ) const
   
 }
 
-void cellContainer::addParticleForAMY( Particle particleToAdd )
+void cellContainer::addParticleToCluster( Particle particleToAdd )
 {
-  ++numberOfParticles;
-  p_cell += particleToAdd.Mom;
+  p_cluster += particleToAdd.Mom;
 
   if ( particleToAdd.FLAVOR == gluon )
   {
-    inverseE_gluons += 1.0 / particleToAdd.Mom.E();
-    ++numberOfGluons;
+    inverseE_gluons_cluster += 1.0 / particleToAdd.Mom.E();
+    ++number_gluon_cluster;
   }
   else
   {
-    inverseE_quarks += 1.0 / particleToAdd.Mom.E();
-    ++numberOfQuarks;
+    inverseE_quarks_cluster += 1.0 / particleToAdd.Mom.E();
+    ++number_quark_cluster;
   }
 }
 
-void cellContainer::getCellInformationForAMY( double &T_AMY, VectorTXYZ &beta_LRF, const double minNumberForTemperature )
+void cellContainer::getClusterInformation( double &T, VectorTXYZ &beta, const double minNumber )
 {
-  const double numberOfParticles = numberOfGluons + numberOfQuarks;
+  const double number_cluster = number_gluon_cluster + number_quark_cluster;
 
-  if( numberOfParticles >= minNumberForTemperature )
+  if( number_cluster >= minNumber )
   {
-    beta_LRF = p_cell.NormalizeToE();
+    beta = p_cluster.NormalizeToE();
 
-    const double gamma = 1.0 / sqrt( 1 - beta_LRF.vec2() );
+    const double gamma = 1.0 / sqrt( 1 - beta.vec2() );
 
     // T* as calculated in JHEP 0301 (2003) 030, eqs. (1.6), (1.7)
     const double Cf = ( 4.0 / 3.0 );
     const double Ca = 3.0;
-    const double I = 0.5 * ( Cf * numberOfQuarks + Ca * numberOfGluons ) / gamma; // unitless, gamma comes from boost of volume in partice density
-    const double J = Cf * inverseE_quarks + Ca * inverseE_gluons; // 1 / GeV
+    const double I = 0.5 * ( Cf * number_quark_cluster + Ca * number_gluon_cluster ) / gamma; // unitless, gamma comes from boost of volume in partice density
+    const double J = Cf * inverseE_quarks_cluster + Ca * inverseE_gluons_cluster; // 1 / GeV
    
-    T_AMY = I / J;
+    T = I / J;
   }
   else
   {
-    beta_LRF = VectorTXYZ( 1.0, 0.0, 0.0, 0.0 );
-    T_AMY = 0.0;
+    beta = VectorTXYZ( 1.0, 0.0, 0.0, 0.0 );
+    T = 0.0;
   }
 }
 
