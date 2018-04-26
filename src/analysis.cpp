@@ -4271,14 +4271,14 @@ void analysis::printCentralEtaCells( const int step )
     VectorTXYZ boostLRF;
     double T_AMY;
 
-    cellsInCentralEtaIndex[i].getClusterInformation( T_AMY, boostLRF, theConfig->getMinNumberForTemperature() );
+    cellsInCentralEtaIndex[i].getClusterInformation( T_AMY, boostLRF, theConfig->getMinNumberCluster() );
     
     file << ( cellsInCentralEtaIndex[i].corner.x_max - cellsInCentralEtaIndex[i].corner.x_min ) / 2.0 + cellsInCentralEtaIndex[i].corner.x_min << "\t";
     file << ( cellsInCentralEtaIndex[i].corner.y_max - cellsInCentralEtaIndex[i].corner.y_min ) / 2.0 + cellsInCentralEtaIndex[i].corner.y_min << "\t";
     file << cellsInCentralEtaIndex[i].corner.etaIndex << "\t";
     file << cellsInCentralEtaIndex[i].number_gluon_cluster << "\t" << cellsInCentralEtaIndex[i].number_quark_cluster << "\t";
     file << T_AMY << "\t";
-    file << sqrt( boostLRF.vec2() ) << "\t";
+    file << 1.0 / ( 1.0 - sqrt( boostLRF.vec2() ) ) << "\t";
     file << boostLRF.X() / sqrt( boostLRF.X2() + boostLRF.Y2() ) << "\t";
     file << boostLRF.Y() / sqrt( boostLRF.X2() + boostLRF.Y2() ) << "\t";
     file << sqrt( boostLRF.X2() + boostLRF.Y2() ) << "\t";

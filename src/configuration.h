@@ -287,8 +287,8 @@ class config : public configBase
   /** @brief Interface for config::tau_min */
   double getTauMin() const { return tau_min; }
 
-  /** @brief Interface for config::minNumberForTemperature */
-  double getMinNumberForTemperature() const { return minNumberForTemperature; }
+  /** @brief Interface for config::minNumberCluster */
+  double getMinNumberCluster() const { return minNumberCluster; }
 
   /** @brief Interface for config::scaleNumberParticles */
   double getScalingFactorForParticles() const { return scaleNumberParticles; }
@@ -624,8 +624,8 @@ class config : public configBase
   /** @brief Proper time after which partons are allowed to scatter / radiate */
   double tau_min;
 
-  /** @brief Minimum number necessary for calculating temperature */
-  double minNumberForTemperature;
+  /** @brief Minimum number of particles in cell cluster necessary for calculating temperature and flow for AMY */
+  double minNumberCluster;
   
   /** @brief Scaling factor for number of particles filled in cells for testing AMY temperature and flow. Only for testing purposes. */
   double scaleNumberParticles;

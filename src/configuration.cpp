@@ -118,7 +118,7 @@ config::config() :
  jetMfpComputationSwitch(computeMfpLastTimestep),
  mfpAddedRangeVariation( 100.0 ),
  fixed_mfp_added( 1.0 ),
- minNumberForTemperature( 15.0 ),
+ minNumberCluster( 30.0 ),
  scaleNumberParticles( 1.0 ),
 //  interpolationBorder(50),
  tau_min( -1.0 ),
@@ -391,7 +391,7 @@ void config::initializeProgramOptions()
   ("misc.fixed_mfp_added", po::value<double>( &fixed_mfp_added )->default_value( fixed_mfp_added ), "Mean free path of added particles set by hand. Does not depend on energy of particle" )
   ("misc.mfpAddedRangeVariation", po::value<double>( &mfpAddedRangeVariation )->default_value( mfpAddedRangeVariation ), "Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be" )
   ("misc.tau_min", po::value<double>( &tau_min )->default_value( tau_min ), "Proper time after which added particles are allowed to scatter/radiate" )
-  ("misc.min_number_for_temperature", po::value<double>( &minNumberForTemperature )->default_value( minNumberForTemperature ), "Minimum number of particles in a cell for calculating temperature" )
+  ("misc.min_number_cluster", po::value<double>( &minNumberCluster )->default_value( minNumberCluster ), "Minimum number of particles in a cell cluster for calculating temperature and flow used in 1<->2 processes" )
   ("misc.scale_number_particles", po::value<double>( &scaleNumberParticles )->default_value( scaleNumberParticles ), "Scaling factor for number of particles filled in cells for testing AMY temperature and flow. Only for testing purposes." )
   ;
 
