@@ -1639,13 +1639,13 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
       }*/
       allParticlesListForAMY.clear();
       allParticlesListForSpecificRates.clear();
-      if(cells[j].size()>theConfig->getNumberParticlesMinForAvg())
-      {
-        allParticlesListForAMY.reserve( cells[j].size() );
-        collectParticlesInCell(j, allParticlesListForAMY, particleListAMYVolume, nCellsAVG);
-        allParticlesListForSpecificRates.reserve( cells[j].size() );       
-        collectParticlesInCell(j, allParticlesListForSpecificRates, particleListRatesVolume, nCellsAVGSpecificRates);
-      }else 
+//       if(cells[j].size()>theConfig->getNumberParticlesMinForAvg())
+//       {
+//         allParticlesListForAMY.reserve( cells[j].size() );
+//         collectParticlesInCell(j, allParticlesListForAMY, particleListAMYVolume, nCellsAVG);
+//         allParticlesListForSpecificRates.reserve( cells[j].size() );       
+//         collectParticlesInCell(j, allParticlesListForSpecificRates, particleListRatesVolume, nCellsAVGSpecificRates);
+//       }else 
       {
         allParticlesListForAMY.reserve( round(theConfig->getNumberParticlesMinForAvg()*9*1.01) );
         collectParticlesInCellWithNeighbors(j, allParticlesListForAMY, etaSliceIndex, IX, IY, particleListAMYVolume, nCellsAVG);
@@ -2530,7 +2530,6 @@ void offlineHeavyIonCollision::collectParticlesInCellWithNeighbors(int cellindex
     nCellsAVG=0;
     particleListAMYVolume=-1;    
   }  
-//   cout << "collect " << particleListAMYVolume << "\t" << totalNumber << endl;
 }
 
 void offlineHeavyIonCollision::collectParticlesInCell(int cellindex, std::vector< int >& _allParticlesListForAMY, double &  particleListAMYVolume, int & nCellsAVG)
