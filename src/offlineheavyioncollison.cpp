@@ -3070,10 +3070,13 @@ int offlineHeavyIonCollision::emission12_offlineParticles_utility( emission12& e
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
 
-    addedParticles.push_back( tempParticle );
-    newIndex = addedParticles.size() - 1;
+    if( tempParticle.Mom.Perp() >= theConfig->getMinimumPT() )
+    {
+      addedParticles.push_back( tempParticle );
+      newIndex = addedParticles.size() - 1;
 
-    addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );          
+      addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );
+    }
   }
 
   return newIndex;
