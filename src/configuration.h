@@ -251,7 +251,6 @@ class config : public configBase
   double getAnalysisTubeRadius() const {return analysisTubeRadius;}
   double getAnalysisTubedEta() const {return analysisTubedEta;}
   
-  
   /** ------------------------------- */
   
   /** -------- heavy quark options ------- */ 
@@ -757,7 +756,7 @@ class config : public configBase
   int numberOfAddedEvents;
   /** @brief Minimum p_T [GeV] of the added particles */
   double minimumPT;
-  
+
   
   // the following parameters are read at runtime from the offline data recorded by the original run, 
   // see config::readAndPrepareInitialSettings
