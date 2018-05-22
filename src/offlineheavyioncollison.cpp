@@ -2466,11 +2466,16 @@ void offlineHeavyIonCollision::collectParticlesInCellWithNeighbors(int cellindex
   int n_y = (cellindex-n_z*IXY) / IX;
   int n_x = (cellindex-n_z*IXY) - (n_y*IX);
   bool testWithSpecificNumbers =false;//default: false
-
-  if(n_x > 1 && n_x < (IX-1) && n_y >1 && n_y < (IY-1))
-  {
+  
+  //must be odd
+  int rowCells=7;
+  
+  //For 3x3: if(n_x > 1 && n_x < (IX-1) && n_y >1 && n_y < (IY-1))
+    
+  if( ( n_x > (rowCells-1)/2 ) && ( n_x < (IX-(rowCells-1)/2) ) && (n_y >(rowCells-1)/2) && (n_y < (IY-(rowCells-1)/2)) )
+  {    
     particleListAMYVolume=dv*9.;
-    nCellsAVG=9;
+    nCellsAVG=rowCells*rowCells;
     
     int factor=1; 
     if(testWithSpecificNumbers)
@@ -2491,14 +2496,15 @@ void offlineHeavyIonCollision::collectParticlesInCellWithNeighbors(int cellindex
       factor=sizeTot/goal;
     }
    
-    int count=0;
+
+   int count=0;
     //cells in the middle
-    for(int loop_y=0;loop_y<=2;loop_y++)
+    for(int loop_y=0;loop_y<=(rowCells-1);loop_y++)
     {
-      for(int loop_x=0;loop_x<=2;loop_x++)
+      for(int loop_x=0;loop_x<=(rowCells-1);loop_x++)
       {
-        int n_loop_x=(n_x-1)+loop_x;
-        int n_loop_y=(n_y-1)+loop_y;
+        int n_loop_x=(n_x-(rowCells-1)/2)+loop_x;
+        int n_loop_y=(n_y-(rowCells-1)/2)+loop_y;
         int CELLINDEX_LOOP= n_loop_x + IX*n_loop_y + IXY*etaSliceIndex;
         
 //         cout << loop_x << "\t" << loop_y<<"\t" << CELLINDEX_LOOP << endl;
@@ -2506,8 +2512,7 @@ void offlineHeavyIonCollision::collectParticlesInCellWithNeighbors(int cellindex
 //         cout << cells[CELLINDEX_LOOP].particleList.size() << endl;
         totalNumber+=cells[CELLINDEX_LOOP].size();
         for ( iIt = cells[CELLINDEX_LOOP].particleList.begin(); iIt != cells[CELLINDEX_LOOP].particleList.end(); iIt++ )
-        {
-         
+        {       
           id = *iIt;
           
           count++;
@@ -2530,6 +2535,7 @@ void offlineHeavyIonCollision::collectParticlesInCellWithNeighbors(int cellindex
     nCellsAVG=0;
     particleListAMYVolume=-1;    
   }  
+   
 }
 
 void offlineHeavyIonCollision::collectParticlesInCell(int cellindex, std::vector< int >& _allParticlesListForAMY, double &  particleListAMYVolume, int & nCellsAVG)
@@ -3217,12 +3223,20 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons( cellCon
 }
 
 
-void offlineHeavyIonCollision::calculateThermodynamicAverages(vector< int >& _allParticlesListForAMY,double cellVolumeLab, double  &TStarGEV, lorentz & LorentzBoost )
+void offlineHeavyIonCollision::calculateThermodynamicAverages(vector< int >& _allParticlesListForAMY,double cellVolumeLab, double  &TStarGEV, lorentz & LorentzBoost, double & energyDensity,double &  particleDensity, double & gluonDensity, double & quarkDensity, double & md2g, double & md2q)
 {
   int iscat;
   double gG = 2 * ( pow( ns_casc::Ncolor, 2 ) - 1 ); //16
   double gQ = 2.0 * ns_casc::Ncolor * Particle::N_light_flavor; //18
   
+  energyDensity=0.;
+  particleDensity=0.;
+  gluonDensity=0.;
+  quarkDensity=0.;
+  md2g=0.;
+  md2q=0.;
+  
+
   VectorEPxPyPz sumofMomentaIncell;
   VectorXYZ boostbetaVector;
   
@@ -3230,12 +3244,30 @@ void offlineHeavyIonCollision::calculateThermodynamicAverages(vector< int >& _al
   double inverseE_quarks=0.;
   int numberOfGluons=0;
   int numberOfQuarks=0;
+  int numberOfParticles=0;
+  double E=0;
+  double px=0;
+  double py=0;
+  double pz=0;
+  
+  double pxy=0;
+  double pyz=0;
+  double pxz=0;
+  
+  double pxx=0;
+  double pyy=0;
+  double pzz=0;
   
   for ( int i = 0; i < static_cast<int>( _allParticlesListForAMY.size() ) ; i++ )
-  {
+  {    
+/*    if(particles_atTimeNow[iscat].free)
+    {
+      continue;      
+    } */ 
+    ++numberOfParticles;
     iscat = _allParticlesListForAMY[i]; 
     sumofMomentaIncell += particles_atTimeNow[iscat].Mom;
-    double oneOverE = 1 / particles_atTimeNow[iscat].Mom.E();
+    double oneOverE = 1. / particles_atTimeNow[iscat].Mom.E();
     if (particles_atTimeNow[iscat].FLAVOR == gluon )
     {
         inverseE_gluons += oneOverE;
@@ -3246,6 +3278,19 @@ void offlineHeavyIonCollision::calculateThermodynamicAverages(vector< int >& _al
         inverseE_quarks += oneOverE;
         ++numberOfQuarks;
     }
+        
+    E += particles_atTimeNow[iscat].Mom.E();
+    px+= particles_atTimeNow[iscat].Mom.Px();
+    py+= particles_atTimeNow[iscat].Mom.Py();
+    pz+= particles_atTimeNow[iscat].Mom.Pz();
+
+    pxx+= particles_atTimeNow[iscat].Mom.Px()*particles_atTimeNow[iscat].Mom.Px()/particles_atTimeNow[iscat].Mom.E();
+    pyy+= particles_atTimeNow[iscat].Mom.Py()*particles_atTimeNow[iscat].Mom.Py()/particles_atTimeNow[iscat].Mom.E();
+    pzz+= particles_atTimeNow[iscat].Mom.Pz()*particles_atTimeNow[iscat].Mom.Pz()/particles_atTimeNow[iscat].Mom.E();
+
+    pxy+= particles_atTimeNow[iscat].Mom.Px()*particles_atTimeNow[iscat].Mom.Py()/particles_atTimeNow[iscat].Mom.E();
+    pxz+= particles_atTimeNow[iscat].Mom.Px()*particles_atTimeNow[iscat].Mom.Pz()/particles_atTimeNow[iscat].Mom.E();
+    pyz+= particles_atTimeNow[iscat].Mom.Py()*particles_atTimeNow[iscat].Mom.Pz()/particles_atTimeNow[iscat].Mom.E();   
     
   }
   boostbetaVector =  sumofMomentaIncell.NormalizeToE();
@@ -3263,6 +3308,31 @@ void offlineHeavyIonCollision::calculateThermodynamicAverages(vector< int >& _al
       invEq = inverseE_quarks / ( 2.0 * gQ * testpartcl);  //Sum 1/E *1/36/testparticles
   }
 
+  //LAB TMUNU [GeV/fm^3]
+  double T00,T01,T02,T03,T12,T13,T23,T11,T22,T33;
+  T00=E   / ( testpartcl * cellVolumeLab );
+  T01=px  / ( testpartcl * cellVolumeLab );
+  T02=py  / ( testpartcl * cellVolumeLab );
+  T03=pz  / ( testpartcl * cellVolumeLab );
+  T12=pxy / ( testpartcl * cellVolumeLab );
+  T13=pxz / ( testpartcl * cellVolumeLab );
+  T23=pyz / ( testpartcl * cellVolumeLab );
+  T11=pxx / ( testpartcl * cellVolumeLab );
+  T22=pyy / ( testpartcl * cellVolumeLab );
+  T33=pzz / ( testpartcl * cellVolumeLab );
+  
+
+  double L00,L01,L02,L03;
+  L00=gamma;
+  L01=-gamma*boostbetaVector.X();
+  L02=-gamma*boostbetaVector.Y();
+  L03=-gamma*boostbetaVector.Z();
+  
+  //LRF energy density
+  energyDensity = L00*L00*T00       +   L01*L01*T11     +   L02*L02*T22   +   L03*L03*T33
+                    + 2*L00*L01*T01   +   2*L00*L02*T02   +   2*L00*L03*T03
+                    + 2*L01*L02*T12   +   2*L01*L03*T13   +   2*L02*L03*T23;//GeV/fm^3
+
   // Obtain the effective temperature like in AMY, https://arxiv.org/abs/hep-ph/0209353v3, Eq. (1.7) and (1.6) and (A9)
   // Boost-Gamma factor important, because n not Lorentz invariant, and we need n_LRF here, because T is defined in the LRF
   double IGluon =     0.5 *  ( (numberOfGluons / ( testpartcl * cellVolumeLab * gamma) )  /  gG ) * pow( 0.197, 3 );   //GeV^3        ~ LRF density
@@ -3274,6 +3344,13 @@ void offlineHeavyIonCollision::calculateThermodynamicAverages(vector< int >& _al
   
   TStarGEV =   (IGluon + IQuark)/(JGluon + JQuark); 
 
+  md2g = pow( 0.197, 3 ) * 16 * M_PI / cellVolumeLab * ( ns_casc::Ncolor * invEg + Particle::N_light_flavor * invEq );
+  md2q = pow( 0.197, 3 ) * 2 * M_PI / cellVolumeLab * 8.0 / 3.0 * ( invEg + invEq );
+
+  particleDensity = numberOfParticles / ( testpartcl * cellVolumeLab * gamma );
+  gluonDensity = numberOfGluons / ( testpartcl * cellVolumeLab * gamma );
+  quarkDensity = numberOfQuarks / ( testpartcl * cellVolumeLab * gamma );
+    
 }
 
 
@@ -3289,6 +3366,9 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
   int centralEtaIndex = static_cast<int>( etaBins.size() ) / 2;
   string full_filename = theConfig->getStandardOutputDirectoryName() + "/" +theConfig->getJobName() + "_T_AMY_Central" +  ".dat";
   T_AMY=0;
+  
+  
+  double energyDensity,particleDensity,gluonDensity, quarkDensity, md2g, md2q;
   
   
   
@@ -3308,18 +3388,28 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
       { 
 //         cout << volume << "\t" << _allParticlesList.size() << endl;
         //CALCULATE T* and Boost
-        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost,energyDensity,particleDensity,gluonDensity, quarkDensity, md2g, md2q ); 
         if(!std::isnan(LorentzBoost.gammaVal()) && !std::isinf(LorentzBoost.gammaVal()) && !std::isnan(T_AMY) && !std::isinf(T_AMY) && FPT_COMP_G( T_AMY, 0.0 ))
         {
           cout << "Particles: " << _allParticlesList.size() << "\t\tT central= " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
-          outfile << time << "\t" << _allParticlesList.size() << "\t" << T_AMY << "\t" << LorentzBoost.gammaVal();
+          outfile << time                             << "\t" 
+                  << _allParticlesList.size()         << "\t" 
+                  << T_AMY                            << "\t" 
+                  << LorentzBoost.gammaVal()          << "\t" 
+                  << energyDensity                    << "\t"
+                  << particleDensity                  << "\t"
+                  << gluonDensity                     << "\t"
+                  << quarkDensity                     << "\t"
+                  << md2g                             << "\t"
+                  << md2q                             << "\t"
+                  ;
         }else
         {
           //cout << time << "\tskip" << "\t#";
-          outfile << time << "\t#\t#";
+          outfile << time << "\t#\t#\t#\t#\t#\t#\t#\t#\t#";
         }       
       }else
-        outfile << time << "\t#\t#";
+        outfile << time << "\t#\t#\t#\t#\t#\t#\t#\t#\t#";
     }
     //1.2fm apart
     if( (n_x==(IX/2+3)) &&  (n_y==IY/2-1) && (etaSliceIndex==centralEtaIndex) )
@@ -3327,41 +3417,61 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
       if(volume>0)
       {           
         //CALCULATE T* and Boost
-        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost,energyDensity,particleDensity,gluonDensity, quarkDensity, md2g, md2q );
         if(!std::isnan(LorentzBoost.gammaVal()) && !std::isinf(LorentzBoost.gammaVal()) && !std::isnan(T_AMY) && !std::isinf(T_AMY) && FPT_COMP_G( T_AMY, 0.0 ))
         {  
           cout << "Particles: " << _allParticlesList.size() <<  "\t\tT central right = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
-          outfile <<  "\t" << _allParticlesList.size() << "\t" << T_AMY << "\t" << LorentzBoost.gammaVal();
+          
+          outfile << "\tmid"                             << "\t" 
+                  << _allParticlesList.size()         << "\t" 
+                  << T_AMY                            << "\t" 
+                  << LorentzBoost.gammaVal()          << "\t" 
+                  << energyDensity                    << "\t"
+                  << particleDensity                  << "\t"
+                  << gluonDensity                     << "\t"
+                  << quarkDensity                     << "\t"
+                  << md2g                             << "\t"
+                  << md2q                             << "\t"
+                  ;          
+
         }else
         {
-          cout << "ERROR  " << LorentzBoost.gammaVal() << "\t" << T_AMY << "\t"<< _allParticlesList.size() << endl;
-          //cout << time << "\tskip" << "\t#" << endl;
-          outfile << "\t#\t#\t#";
-        }
+          //cout << time << "\tskip" << "\t#";
+          outfile << "\tmid" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#";
+        }       
       }else
-      {
-        cout << "ERROR 2 " << _allParticlesList.size() << endl;
-        outfile <<  "\t#\t#\t#";
-      }
-    }    
+        outfile << "\tmid" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#";
+    }   
     //2.4fm apart
     if( (n_x==(IX/2+7)) &&  (n_y==IY/2-1) && (etaSliceIndex==centralEtaIndex) )
     {
       if(volume>0)
-      { 
+      {           
         //CALCULATE T* and Boost
-        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost ); 
+        calculateThermodynamicAverages(_allParticlesList, volume, T_AMY, LorentzBoost,energyDensity,particleDensity,gluonDensity, quarkDensity, md2g, md2q );
         if(!std::isnan(LorentzBoost.gammaVal()) && !std::isinf(LorentzBoost.gammaVal()) && !std::isnan(T_AMY) && !std::isinf(T_AMY) && FPT_COMP_G( T_AMY, 0.0 ))
-        {    
-          cout << "Particles: " << _allParticlesList.size() <<  "\t\tT  right = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
-          outfile << "\t" <<  _allParticlesList.size() << "\t" << T_AMY << "\t" << LorentzBoost.gammaVal()<<endl;
+        {  
+          cout << "Particles: " << _allParticlesList.size() <<  "\t\tT central right = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
+
+          outfile << "\tout"                             << "\t" 
+                  << _allParticlesList.size()         << "\t" 
+                  << T_AMY                            << "\t" 
+                  << LorentzBoost.gammaVal()          << "\t" 
+                  << energyDensity                    << "\t"
+                  << particleDensity                  << "\t"
+                  << gluonDensity                     << "\t"
+                  << quarkDensity                     << "\t"
+                  << md2g                             << "\t"
+                  << md2q                             << endl;
+                  ;          
+
         }else
         {
-          //cout << time << "\tskip" << "\t#" << endl;
-          outfile << "\t#\t#\t#" << endl;
-        }
+          //cout << time << "\tskip" << "\t#";
+          outfile << "\tout" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#" << endl;
+        }       
       }else
-        outfile <<  "\t#\t#\t#" << endl;
+        outfile << "\tout" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#"<<endl;
     }  
     
 //     cout << "repeat " << volume << "\t" << _allParticlesList.size() << endl;
@@ -3459,10 +3569,13 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
   
   lorentz LorentzBoost;
   
+  //not used here
+  double energyDensity,particleDensity,gluonDensity, quarkDensity, md2g, md2q ;
+  
   if(volume>0)
   {
     //CALCULATE T* and Boost
-    calculateThermodynamicAverages(_allParticlesListBackground, volume, temperature, LorentzBoost );
+    calculateThermodynamicAverages(_allParticlesListBackground, volume, temperature, LorentzBoost , energyDensity,particleDensity,gluonDensity, quarkDensity, md2g, md2q );
     //From rings we would use:
     //temperature = particles_atTimeNow[iscat].temperatureAMY; //GeV
     VectorEPxPyPz momentumLRF;

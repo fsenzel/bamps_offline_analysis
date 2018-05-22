@@ -214,7 +214,7 @@ private:
     void collectParticlesInCellWithNeighbors(int cellindex, std::vector< int >& _allParticlesListForAMY, int etaSliceIndex, int IX, int IY, double &  particleListAMYVolume, int & nCellsAVG);
     void collectParticlesInCellWithNeighborsForSpecificRates(int cellindex, std::vector< int >& _allParticlesListForAMY, int etaSliceIndex, int IX, int IY, double &  particleListAMYVolume, int & nCellsAVG);
     void collectParticlesInCell(int cellindex, std::vector< int >& _allParticlesListForAMY,double &  particleListAMYVolume,  int & nCellsAVG);
-    void calculateThermodynamicAverages(std::vector< int >& _allParticlesListForAMY, double cellVolumeLab, double & TstarAMY, lorentz & LorentzBoost);
+    void calculateThermodynamicAverages(std::vector< int >& _allParticlesListForAMY, double cellVolumeLab, double & TstarAMY, lorentz & LorentzBoost,double & energyDensity,double &  particleDensity, double & gluonDensity, double & quarkDensity, double & md2g, double & md2q);
     
     
     double getLambdaFromRates(int _F1,int _F2, ratesManager& rates);

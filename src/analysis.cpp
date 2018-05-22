@@ -2080,6 +2080,8 @@ void analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
       rapidityRanges.push_back(yRange);
       yRange.reset( 0, 0.7 );//1                 // LHC
       rapidityRanges.push_back(yRange);
+      yRange.reset( 0, 0.8 );//1                 // LHC 2018 !?
+      rapidityRanges.push_back(yRange);      
       studyPhotons=true;
       break;
     
