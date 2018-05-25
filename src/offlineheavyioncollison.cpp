@@ -3406,10 +3406,10 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
         }else
         {
           //cout << time << "\tskip" << "\t#";
-          outfile << time << "\t#\t#\t#\t#\t#\t#\t#\t#\t#";
+          outfile << time << "\t#\t#\t#\t#\t#\t#\t#\t#\t#\t";
         }       
       }else
-        outfile << time << "\t#\t#\t#\t#\t#\t#\t#\t#\t#";
+        outfile << time << "\t#\t#\t#\t#\t#\t#\t#\t#\t#\t";
     }
     //1.2fm apart
     if( (n_x==(IX/2+3)) &&  (n_y==IY/2-1) && (etaSliceIndex==centralEtaIndex) )
@@ -3422,7 +3422,7 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
         {  
           cout << "Particles: " << _allParticlesList.size() <<  "\t\tT central right = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
           
-          outfile << "\tmid"                             << "\t" 
+          outfile << "mid"                            << "\t" 
                   << _allParticlesList.size()         << "\t" 
                   << T_AMY                            << "\t" 
                   << LorentzBoost.gammaVal()          << "\t" 
@@ -3437,10 +3437,10 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
         }else
         {
           //cout << time << "\tskip" << "\t#";
-          outfile << "\tmid" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#";
+          outfile << "mid" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#\t";
         }       
       }else
-        outfile << "\tmid" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#";
+        outfile << "mid" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#\t";
     }   
     //2.4fm apart
     if( (n_x==(IX/2+7)) &&  (n_y==IY/2-1) && (etaSliceIndex==centralEtaIndex) )
@@ -3453,7 +3453,7 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
         {  
           cout << "Particles: " << _allParticlesList.size() <<  "\t\tT central right = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
 
-          outfile << "\tout"                             << "\t" 
+          outfile << "out"                             << "\t" 
                   << _allParticlesList.size()         << "\t" 
                   << T_AMY                            << "\t" 
                   << LorentzBoost.gammaVal()          << "\t" 
@@ -3468,10 +3468,10 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
         }else
         {
           //cout << time << "\tskip" << "\t#";
-          outfile << "\tout" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#" << endl;
+          outfile << "out" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#" << endl;
         }       
       }else
-        outfile << "\tout" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#"<<endl;
+        outfile << "out" << "\t#\t#\t#\t#\t#\t#\t#\t#\t#"<<endl;
     }  
     
 //     cout << "repeat " << volume << "\t" << _allParticlesList.size() << endl;
