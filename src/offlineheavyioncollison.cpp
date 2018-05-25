@@ -2468,13 +2468,13 @@ void offlineHeavyIonCollision::collectParticlesInCellWithNeighbors(int cellindex
   bool testWithSpecificNumbers =false;//default: false
   
   //must be odd
-  int rowCells=7;
+  int rowCells=3;
   
   //For 3x3: if(n_x > 1 && n_x < (IX-1) && n_y >1 && n_y < (IY-1))
     
   if( ( n_x > (rowCells-1)/2 ) && ( n_x < (IX-(rowCells-1)/2) ) && (n_y >(rowCells-1)/2) && (n_y < (IY-(rowCells-1)/2)) )
   {    
-    particleListAMYVolume=dv*9.;
+    particleListAMYVolume=dv*rowCells*rowCells;
     nCellsAVG=rowCells*rowCells;
     
     int factor=1; 
