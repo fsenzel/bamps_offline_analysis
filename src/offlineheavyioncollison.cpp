@@ -3392,16 +3392,16 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
         if(!std::isnan(LorentzBoost.gammaVal()) && !std::isinf(LorentzBoost.gammaVal()) && !std::isnan(T_AMY) && !std::isinf(T_AMY) && FPT_COMP_G( T_AMY, 0.0 ))
         {
           cout << "Particles: " << _allParticlesList.size() << "\t\tT central= " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
-          outfile << time                             << "\t" 
-                  << _allParticlesList.size()         << "\t" 
-                  << T_AMY                            << "\t" 
-                  << LorentzBoost.gammaVal()          << "\t" 
-                  << energyDensity                    << "\t"
-                  << particleDensity                  << "\t"
-                  << gluonDensity                     << "\t"
-                  << quarkDensity                     << "\t"
-                  << md2g                             << "\t"
-                  << md2q                             << "\t"
+          outfile << time                             << "\t"   //0
+                  << _allParticlesList.size()         << "\t"   //1
+                  << T_AMY                            << "\t"   //2
+                  << LorentzBoost.gammaVal()          << "\t"   //3
+                  << energyDensity                    << "\t"   //4
+                  << particleDensity                  << "\t"   //5            
+                  << gluonDensity                     << "\t"   //6
+                  << quarkDensity                     << "\t"   //7
+                  << md2g                             << "\t"   //8
+                  << md2q                             << "\t"   //9
                   ;
         }else
         {
@@ -3422,16 +3422,16 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
         {  
           cout << "Particles: " << _allParticlesList.size() <<  "\t\tT central right = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
           
-          outfile << "mid"                            << "\t" 
-                  << _allParticlesList.size()         << "\t" 
-                  << T_AMY                            << "\t" 
-                  << LorentzBoost.gammaVal()          << "\t" 
-                  << energyDensity                    << "\t"
-                  << particleDensity                  << "\t"
-                  << gluonDensity                     << "\t"
-                  << quarkDensity                     << "\t"
-                  << md2g                             << "\t"
-                  << md2q                             << "\t"
+          outfile << "mid"                            << "\t" //10
+                  << _allParticlesList.size()         << "\t" //11
+                  << T_AMY                            << "\t" //12
+                  << LorentzBoost.gammaVal()          << "\t" //13
+                  << energyDensity                    << "\t" //14
+                  << particleDensity                  << "\t" //15
+                  << gluonDensity                     << "\t" //16
+                  << quarkDensity                     << "\t" //17
+                  << md2g                             << "\t" //18
+                  << md2q                             << "\t" //19
                   ;          
 
         }else
@@ -3453,16 +3453,16 @@ void offlineHeavyIonCollision::analyzeCentralCell( int cellindex ,std::vector< i
         {  
           cout << "Particles: " << _allParticlesList.size() <<  "\t\tT central right = " << T_AMY << "\t\t\t nCellsAVG = " << nCellsAVG << endl;
 
-          outfile << "out"                             << "\t" 
-                  << _allParticlesList.size()         << "\t" 
-                  << T_AMY                            << "\t" 
-                  << LorentzBoost.gammaVal()          << "\t" 
-                  << energyDensity                    << "\t"
-                  << particleDensity                  << "\t"
-                  << gluonDensity                     << "\t"
-                  << quarkDensity                     << "\t"
-                  << md2g                             << "\t"
-                  << md2q                             << endl;
+          outfile << "out"                            << "\t" //20 
+                  << _allParticlesList.size()         << "\t" //21
+                  << T_AMY                            << "\t" //22
+                  << LorentzBoost.gammaVal()          << "\t" //23
+                  << energyDensity                    << "\t" //24
+                  << particleDensity                  << "\t" //25
+                  << gluonDensity                     << "\t" //26
+                  << quarkDensity                     << "\t" //27
+                  << md2g                             << "\t" //28
+                  << md2q                             << endl;//29
                   ;          
 
         }else
@@ -3575,7 +3575,7 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_AMYphotons( cell
   if(volume>0)
   {
     //CALCULATE T* and Boost
-    calculateThermodynamicAverages(_allParticlesListBackground, volume, temperature, LorentzBoost , energyDensity,particleDensity,gluonDensity, quarkDensity, md2g, md2q );
+    calculateThermodynamicAverages(_allParticlesListBackground, volume, temperature, LorentzBoost , energyDensity,particleDensity,gluonDensity, quarkDensity, md2g, md2q );  //md2 without any a_s
     //From rings we would use:
     //temperature = particles_atTimeNow[iscat].temperatureAMY; //GeV
     VectorEPxPyPz momentumLRF;
@@ -4784,7 +4784,7 @@ void offlineHeavyIonCollision::scatt22_amongBackgroundParticles_photons_utility_
     //Compute LRF temperature, encoded in md2g
     xt = particles_atTimeNow[iscat].Pos.Perp();
     ringIndex = rings.getIndex( xt );
-    double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
+    double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperatureFirstOverZerothMoment();
     temperature = effectiveTemperatureFromRings;//Doesn't do anything here.
     
     double Nf=3.0;
@@ -5340,12 +5340,14 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
 
     xt = particles_atTimeNow[iscat].Pos.Perp();
     ringIndex = rings.getIndex( xt );
-    double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperature();
+    double effectiveTemperatureFromRings = rings[ringIndex].getEffectiveTemperatureFirstOverZerothMoment();
     
+    //just for numerical safety
     if(effectiveTemperatureFromRings>2.5)
     {
       effectiveTemperatureFromRings = 2.5;
     }
+    
     //[lambda]=fm
     /*
     lambda = theMFP.getMeanFreePath( particles_atTimeNow[iscat].Mom.E(), particles_atTimeNow[iscat].FLAVOR, effectiveTemperatureFromRings, rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
@@ -5394,15 +5396,9 @@ void offlineHeavyIonCollision::scatt23_amongBackgroundParticles_photons_utility_
       double Nf=3.0;
       double scaled_LRF_md2g_wo_as = ( 8.0/M_PI*pow(effectiveTemperatureFromRings,2.0)*(Ncolor+Nf) ) / s;
       double scaled_LRF_md2q_wo_as = 1.0/9.0 * scaled_LRF_md2g_wo_as ;
-      
-      //WARNING: Decide, which Debye mass should be used. Either scaled_LRF_md2g_wo_as or md2g_wo_as/s
-      
+          
       //WARNING: Decide, which Debye mass should be used. Either LRF_md2g_wo_as or md2g_wo_as
-      if (theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScale2piT)
-      {
-        md2_wo_as_gluon_use  = md2g_wo_as/s;
-        md2_wo_as_quark_use = md2q_wo_as/s;      
-      }else if (theConfig->getDebyeModePhotons()==LatticeDebye || theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScaleMD2)  
+      if (theConfig->getDebyeModePhotons()==LatticeDebye || theConfig->getDebyeModePhotons()==HTLDebyepQCDrunningCouplingScaleMD2)  
       {
         md2_wo_as_gluon_use  = scaled_LRF_md2g_wo_as;
         md2_wo_as_quark_use  = scaled_LRF_md2g_wo_as;           
