@@ -185,8 +185,8 @@ public:
   void mfpJetsOutput( const int step, const int jumpSteps );  
   
   void printCentralDensities( const double _time );
-  void printCentralCell( const double _time );
-  void printPeripheralCell( const double _time );
+  void printCentralCell( const double _time, const double _Ntest, const bool _calcTviaEdens );
+  void printPeripheralCell( const double _time, const double _Ntest, const bool _calcTviaEdens );
   
   void writePartclMovie( vector< ParticleOffline >& _particles, const int n_particles, fstream& _oscar, const int step, const int jumpSteps );
   
@@ -252,7 +252,6 @@ private:
   time_t start;
   
   string filename_prefix;
-
 
   OUTPUT_SCHEME outputScheme;
   

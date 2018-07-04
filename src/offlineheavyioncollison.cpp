@@ -517,8 +517,8 @@ void offlineHeavyIonCollision::mainFramework()
       dt = dt_backup;
     }
     theAnalysis->printCentralDensities( simulationTime );
-    theAnalysis->printCentralCell( simulationTime );
-    theAnalysis->printPeripheralCell( simulationTime );
+    theAnalysis->printCentralCell( simulationTime, theConfig->getTestparticles(), theConfig->isCalculateTviaEnergyDensity() );
+    theAnalysis->printPeripheralCell( simulationTime, theConfig->getTestparticles(), theConfig->isCalculateTviaEnergyDensity() );
     
     
 //     // just error checking if masses and flavors are correct
@@ -1236,6 +1236,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         gluonListAdded.reserve( cellsAdded[j].size() );
         allParticlesListAdded.reserve( cellsAdded[j].size() );
         
+        cells[j].addVolumeToCluster( dv );
+        
         //------------------------- check whether all particles in this cell are free --------------------
         free = true;
         for ( iIt = cells[j].particleList.begin(); iIt != cells[j].particleList.end(); iIt++ )
@@ -1279,12 +1281,20 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         {
           if( neighbour_id >= IXY * etaSliceIndex && neighbour_id < IXY * ( etaSliceIndex + 1 ) )
           {
+            bool added_particle_from_neighbour = false;
+            
             for ( auto const& particle_id: cells[neighbour_id].particleList )
             {
               if( ran2() < 1.0 / theConfig->getScalingFactorForParticles() )
               {
                 cells[j].addParticleToCluster( particles_atTimeNow[particle_id] );
+                added_particle_from_neighbour = true;
               }
+            }
+
+            if( added_particle_from_neighbour )
+            {
+              cells[j].addVolumeToCluster( dv );
             }
           }
         }
@@ -1487,7 +1497,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               addedParticles[id].temperature = rings[nc].getEffectiveTemperature();
               
               // temperature and boost for AMY
-              cells[j].getClusterInformation( addedParticles[id].temperatureAMY, addedParticles[id].v_cell, theConfig->getMinNumberCluster() );
+              cells[j].getClusterInformation( addedParticles[id].temperatureAMY, addedParticles[id].v_cell, theConfig->getMinNumberCluster(), theConfig->getTestparticles(), theConfig->isCalculateTviaEnergyDensity() );
               
               if ( addedParticles[id].FLAVOR == gluon )
               {

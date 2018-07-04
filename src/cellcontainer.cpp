@@ -35,7 +35,14 @@ cellContainer::cellContainer() :
   number_quark_cluster( 0.0 ),
   inverseE_gluons_cluster( 0.0 ),
   inverseE_quarks_cluster( 0.0 ),
-  p_cluster( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
+  p_cluster( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
+  pxx_cluster( 0.0 ),
+  pyy_cluster( 0.0 ),
+  pzz_cluster( 0.0 ),
+  pxy_cluster( 0.0 ),
+  pxz_cluster( 0.0 ),
+  pyz_cluster( 0.0 ),
+  volume_cluster( 0.0 )
 {
   particleList.clear();
 }
@@ -65,6 +72,13 @@ void cellContainer::clear()
   inverseE_gluons_cluster =  0.0;
   inverseE_quarks_cluster =  0.0;
   p_cluster = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+  pxx_cluster =  0.0;
+  pyy_cluster =  0.0;
+  pzz_cluster =  0.0;
+  pxy_cluster =  0.0;
+  pxz_cluster =  0.0;
+  pyz_cluster =  0.0;
+  volume_cluster = 0.0;
   averagesPrepared = false;
 }
 
@@ -88,6 +102,13 @@ void cellContainer::resetStoredValues()
   inverseE_gluons_cluster =  0.0;
   inverseE_quarks_cluster =  0.0;
   p_cluster = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+  pxx_cluster =  0.0;
+  pyy_cluster =  0.0;
+  pzz_cluster =  0.0;
+  pxy_cluster =  0.0;
+  pxz_cluster =  0.0;
+  pyz_cluster =  0.0;
+  volume_cluster = 0.0;
 
   rates.clear();
   averagesPrepared = false;
@@ -187,6 +208,12 @@ void cellContainer::writeAveragesToParticle( Particle& _particle ) const
 void cellContainer::addParticleToCluster( Particle particleToAdd )
 {
   p_cluster += particleToAdd.Mom;
+  pxx_cluster += particleToAdd.Mom.Px() * particleToAdd.Mom.Px() /  particleToAdd.Mom.E();
+  pyy_cluster += particleToAdd.Mom.Py() * particleToAdd.Mom.Py() /  particleToAdd.Mom.E();
+  pzz_cluster += particleToAdd.Mom.Pz() * particleToAdd.Mom.Pz() /  particleToAdd.Mom.E();
+  pxy_cluster += particleToAdd.Mom.Px() * particleToAdd.Mom.Py() /  particleToAdd.Mom.E();
+  pxz_cluster += particleToAdd.Mom.Px() * particleToAdd.Mom.Pz() /  particleToAdd.Mom.E();
+  pyz_cluster += particleToAdd.Mom.Py() * particleToAdd.Mom.Pz() /  particleToAdd.Mom.E();
 
   if ( particleToAdd.FLAVOR == gluon )
   {
@@ -200,7 +227,7 @@ void cellContainer::addParticleToCluster( Particle particleToAdd )
   }
 }
 
-void cellContainer::getClusterInformation( double &T, VectorTXYZ &beta, const double minNumber )
+void cellContainer::getClusterInformation( double &T, VectorTXYZ &beta, const double minNumber, const double Ntest, const bool calcTviaEdens )
 {
   const double number_cluster = number_gluon_cluster + number_quark_cluster;
 
@@ -210,13 +237,46 @@ void cellContainer::getClusterInformation( double &T, VectorTXYZ &beta, const do
 
     const double gamma = 1.0 / sqrt( 1 - beta.vec2() );
 
-    // T* as calculated in JHEP 0301 (2003) 030, eqs. (1.6), (1.7)
-    const double Cf = ( 4.0 / 3.0 );
-    const double Ca = 3.0;
-    const double I = 0.5 * ( Cf * number_quark_cluster + Ca * number_gluon_cluster ) / gamma; // unitless, gamma comes from boost of volume in partice density
-    const double J = Cf * inverseE_quarks_cluster + Ca * inverseE_gluons_cluster; // 1 / GeV
-   
-    T = I / J;
+    if( !calcTviaEdens )
+    {
+      // T* as calculated in JHEP 0301 (2003) 030, eqs. (1.6), (1.7)
+      const double Cf = ( 4.0 / 3.0 );
+      const double Ca = 3.0;
+      const double I = 0.5 * ( Cf * number_quark_cluster + Ca * number_gluon_cluster ) / gamma; // unitless, gamma comes from boost of volume in partice density
+      const double J = Cf * inverseE_quarks_cluster + Ca * inverseE_gluons_cluster; // 1 / GeV
+     
+      T = I / J;
+    }
+    else
+    {
+      // Temperature calculated via the quartic root of the energy density
+      
+      const double gG = 2 * ( pow( ns_casc::Ncolor, 2 ) - 1 ); //16
+      const double gQ = 2.0 * ns_casc::Ncolor * Particle::N_light_flavor; //18
+
+      const double T00 = p_cluster.E()   / ( Ntest * volume_cluster );
+      const double T01 = p_cluster.Px()  / ( Ntest * volume_cluster );
+      const double T02 = p_cluster.Py()  / ( Ntest * volume_cluster );
+      const double T03 = p_cluster.Pz()  / ( Ntest * volume_cluster );
+      const double T11 = pxx_cluster / ( Ntest * volume_cluster );
+      const double T22 = pyy_cluster / ( Ntest * volume_cluster );
+      const double T33 = pzz_cluster / ( Ntest * volume_cluster );
+      const double T12 = pxy_cluster / ( Ntest * volume_cluster );
+      const double T13 = pxz_cluster / ( Ntest * volume_cluster );
+      const double T23 = pyz_cluster / ( Ntest * volume_cluster );    
+    
+      const double L00 = gamma;
+      const double L01 = -gamma * beta.X();
+      const double L02 = -gamma * beta.Y();
+      const double L03 = -gamma * beta.Z();
+      
+      //LRF energy density
+      const double energyDensity = L00*L00*T00       +   L01*L01*T11     +   L02*L02*T22   +   L03*L03*T33
+                                  + 2*L00*L01*T01   +   2*L00*L02*T02   +   2*L00*L03*T03
+                                  + 2*L01*L02*T12   +   2*L01*L03*T13   +   2*L02*L03*T23;//GeV/fm^3
+      
+      T = sqrt( sqrt( energyDensity * pow( 0.197, 3.0 ) * M_PI * M_PI / ( 3.0 * ( gG + 2.0 * gQ ) ) ) );
+    }
   }
   else
   {

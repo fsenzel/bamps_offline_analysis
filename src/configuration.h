@@ -293,6 +293,8 @@ class config : public configBase
   /** @brief Interface for config::scaleNumberParticles */
   double getScalingFactorForParticles() const { return scaleNumberParticles; }
 
+  /** @brief Interface for config::calculateTviaEnergyDensity */
+  bool isCalculateTviaEnergyDensity() const { return calculateTviaEnergyDensity; }
   /** ------------------------------------ */
   
   /** -------- offline reconstruction options ------- */ 
@@ -630,6 +632,9 @@ class config : public configBase
   /** @brief Scaling factor for number of particles filled in cells for testing AMY temperature and flow. Only for testing purposes. */
   double scaleNumberParticles;
 
+  /** @brief Whether temperature is calculated via quartic root of energy density instead of Tstar by AMY. */
+  bool calculateTviaEnergyDensity;
+  
   /** ------------------------------- */
 
   /** -------- offline reconstruction options ------- */ 

@@ -18,7 +18,7 @@
 #include "ratesmanager.h"
 #include "coordinateBins.h"
 #include "particle.h"
-
+#include "globalsettings.h"
 
 
 class cornerCoordinates
@@ -45,12 +45,6 @@ public:
 };
 
 
-
-
-
-
-
-
 class cellContainer
 {
 public:
@@ -69,10 +63,10 @@ public:
   void prepareAverages();
   void writeAveragesToParticle( Particle& _particle ) const;
   
-  void getClusterInformation( double &T, VectorTXYZ &beta, const double minNumber );
+  void getClusterInformation( double &T, VectorTXYZ &beta, const double minNumber, const double Ntest, const bool calcTviaEdens );
   void addParticleToCluster( Particle particleToAdd );
-  
-  double volume;
+  void addVolumeToCluster( const double dV ) { volume_cluster += dV; };
+
   int index;
   cornerCoordinates corner;
 
@@ -102,6 +96,13 @@ public:
   double inverseE_gluons_cluster;
   double inverseE_quarks_cluster;
   VectorEPxPyPz p_cluster;
+  double pxx_cluster;
+  double pyy_cluster;
+  double pzz_cluster;
+  double pxy_cluster;
+  double pxz_cluster;
+  double pyz_cluster;
+  double volume_cluster;
 
 private:
 

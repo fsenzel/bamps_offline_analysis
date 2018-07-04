@@ -120,6 +120,7 @@ config::config() :
  fixed_mfp_added( 1.0 ),
  minNumberCluster( 30.0 ),
  scaleNumberParticles( 1.0 ),
+ calculateTviaEnergyDensity( false ),
 //  interpolationBorder(50),
  tau_min( -1.0 ),
  // ---- offline reconstruction options ----
@@ -393,6 +394,7 @@ void config::initializeProgramOptions()
   ("misc.tau_min", po::value<double>( &tau_min )->default_value( tau_min ), "Proper time after which added particles are allowed to scatter/radiate" )
   ("misc.min_number_cluster", po::value<double>( &minNumberCluster )->default_value( minNumberCluster ), "Minimum number of particles in a cell cluster for calculating temperature and flow used in 1<->2 processes" )
   ("misc.scale_number_particles", po::value<double>( &scaleNumberParticles )->default_value( scaleNumberParticles ), "Scaling factor for number of particles filled in cells for testing AMY temperature and flow. Only for testing purposes." )
+  ("misc.T_via_Edens", po::value<bool>( &calculateTviaEnergyDensity )->default_value( calculateTviaEnergyDensity ), "Whether temperature is calculated via quartic root of energy density instead of Tstar by AMY." )
   ;
 
   

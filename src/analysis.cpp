@@ -3137,7 +3137,7 @@ void analysis::printCentralDensities(const double _time)
     << centralRingsCopyFromCascade[i].getGluonDensity() << sep << centralRingsCopyFromCascade[i].getQuarkDensity() << sep
     << centralRingsCopyFromCascade[i].getEffectiveTemperature() << sep << centralRingsCopyFromCascade[i].getAveraged_md2g() << sep 
     << centralRingsCopyFromCascade[i].getAveraged_md2q() << sep << centralRingsCopyFromCascade[i].getEffectiveTemperatureAMY() << sep
-    << centralRingsCopyFromCascade[i].getEffectiveTemperatureByDebyeMass();
+    << centralRingsCopyFromCascade[i].getEffectiveTemperatureByDebyeMass() << sep << centralRingsCopyFromCascade[i].getEffectiveTemperatureByEnergyDensity();
     ; 
   }
   centralDensitiesOutputFile << endl;
@@ -3145,7 +3145,7 @@ void analysis::printCentralDensities(const double _time)
   centralRingsCopyFromCascade.clear();
 }
 
-void analysis::printCentralCell(const double _time)
+void analysis::printCentralCell(const double _time, const double _Ntest, const bool _calcTviaEdens )
 {
   double T_AMY, gamma;
   VectorTXYZ boostLRF;
@@ -3159,25 +3159,25 @@ void analysis::printCentralCell(const double _time)
 
   centralCellOutputFile << _time << "\t";
 
-  cellsInCentralEtaIndex[index_central].getClusterInformation( T_AMY, boostLRF, 0.0 );
+  cellsInCentralEtaIndex[index_central].getClusterInformation( T_AMY, boostLRF, 0.0, _Ntest, _calcTviaEdens );
   gamma = 1.0 / sqrt( 1.0 - boostLRF.vec2() );
   centralCellOutputFile << T_AMY << "\t" << gamma << "\t" << cellsInCentralEtaIndex[index_central].number_gluon_cluster + cellsInCentralEtaIndex[index_central].number_quark_cluster << "\t";
 
-  cellsInCentralEtaIndex[index_central-1].getClusterInformation( T_AMY, boostLRF, 0.0 );
+  cellsInCentralEtaIndex[index_central-1].getClusterInformation( T_AMY, boostLRF, 0.0, _Ntest, _calcTviaEdens );
   gamma = 1.0 / sqrt( 1.0 - boostLRF.vec2() );
   centralCellOutputFile << T_AMY << "\t" << gamma << "\t" << cellsInCentralEtaIndex[index_central-1].number_gluon_cluster + cellsInCentralEtaIndex[index_central-1].number_quark_cluster << "\t";
 
-  cellsInCentralEtaIndex[index_central-IX].getClusterInformation( T_AMY, boostLRF, 0.0 );
+  cellsInCentralEtaIndex[index_central-IX].getClusterInformation( T_AMY, boostLRF, 0.0, _Ntest, _calcTviaEdens );
   gamma = 1.0 / sqrt( 1.0 - boostLRF.vec2() );
   centralCellOutputFile << T_AMY << "\t" << gamma << "\t" << cellsInCentralEtaIndex[index_central-IX].number_gluon_cluster + cellsInCentralEtaIndex[index_central-IX].number_quark_cluster << "\t";
 
-  cellsInCentralEtaIndex[index_central-IX-1].getClusterInformation( T_AMY, boostLRF, 0.0 );
+  cellsInCentralEtaIndex[index_central-IX-1].getClusterInformation( T_AMY, boostLRF, 0.0, _Ntest, _calcTviaEdens );
   gamma = 1.0 / sqrt( 1.0 - boostLRF.vec2() );
   centralCellOutputFile << T_AMY << "\t" << gamma << "\t" << cellsInCentralEtaIndex[index_central-IX-1].number_gluon_cluster + cellsInCentralEtaIndex[index_central-IX-1].number_quark_cluster << endl;
 
 }
 
-void analysis::printPeripheralCell(const double _time)
+void analysis::printPeripheralCell(const double _time, const double _Ntest, const bool _calcTviaEdens )
 {
   double T_AMY, gamma;
   VectorTXYZ boostLRF;
@@ -3194,19 +3194,19 @@ void analysis::printPeripheralCell(const double _time)
   
   peripheralCellOutputFile << _time << "\t";
 
-  cellsInCentralEtaIndex[index_peripheral_rb].getClusterInformation( T_AMY, boostLRF, 0.0 );
+  cellsInCentralEtaIndex[index_peripheral_rb].getClusterInformation( T_AMY, boostLRF, 0.0, _Ntest, _calcTviaEdens );
   gamma = 1.0 / sqrt( 1.0 - boostLRF.vec2() );
   peripheralCellOutputFile << T_AMY << "\t" << gamma << "\t" << cellsInCentralEtaIndex[index_peripheral_rb].number_gluon_cluster + cellsInCentralEtaIndex[index_peripheral_rb].number_quark_cluster << "\t";
 
-  cellsInCentralEtaIndex[index_peripheral_rt].getClusterInformation( T_AMY, boostLRF, 0.0 );
+  cellsInCentralEtaIndex[index_peripheral_rt].getClusterInformation( T_AMY, boostLRF, 0.0, _Ntest, _calcTviaEdens );
   gamma = 1.0 / sqrt( 1.0 - boostLRF.vec2() );
   peripheralCellOutputFile << T_AMY << "\t" << gamma << "\t" << cellsInCentralEtaIndex[index_peripheral_rt].number_gluon_cluster + cellsInCentralEtaIndex[index_peripheral_rt].number_quark_cluster << "\t";
 
-  cellsInCentralEtaIndex[index_peripheral_lb].getClusterInformation( T_AMY, boostLRF, 0.0 );
+  cellsInCentralEtaIndex[index_peripheral_lb].getClusterInformation( T_AMY, boostLRF, 0.0, _Ntest, _calcTviaEdens );
   gamma = 1.0 / sqrt( 1.0 - boostLRF.vec2() );
   peripheralCellOutputFile << T_AMY << "\t" << gamma << "\t" << cellsInCentralEtaIndex[index_peripheral_lb].number_gluon_cluster + cellsInCentralEtaIndex[index_peripheral_lb].number_quark_cluster << "\t";
 
-  cellsInCentralEtaIndex[index_peripheral_lt].getClusterInformation( T_AMY, boostLRF, 0.0 );
+  cellsInCentralEtaIndex[index_peripheral_lt].getClusterInformation( T_AMY, boostLRF, 0.0, _Ntest, _calcTviaEdens );
   gamma = 1.0 / sqrt( 1.0 - boostLRF.vec2() );
   peripheralCellOutputFile << T_AMY << "\t" << gamma << "\t" << cellsInCentralEtaIndex[index_peripheral_lt].number_gluon_cluster + cellsInCentralEtaIndex[index_peripheral_lt].number_quark_cluster << endl;
 }
@@ -4271,7 +4271,7 @@ void analysis::printCentralEtaCells( const int step )
     VectorTXYZ boostLRF;
     double T_AMY;
 
-    cellsInCentralEtaIndex[i].getClusterInformation( T_AMY, boostLRF, theConfig->getMinNumberCluster() );
+    cellsInCentralEtaIndex[i].getClusterInformation( T_AMY, boostLRF, theConfig->getMinNumberCluster(), theConfig->getTestparticles(), theConfig->isCalculateTviaEnergyDensity() );
     
     file << ( cellsInCentralEtaIndex[i].corner.x_max - cellsInCentralEtaIndex[i].corner.x_min ) / 2.0 + cellsInCentralEtaIndex[i].corner.x_min << "\t";
     file << ( cellsInCentralEtaIndex[i].corner.y_max - cellsInCentralEtaIndex[i].corner.y_min ) / 2.0 + cellsInCentralEtaIndex[i].corner.y_min << "\t";

@@ -410,6 +410,20 @@ double ringContainer::getEffectiveTemperatureByDebyeMass() const
   return sqrt( md2g * M_PI / ( 8.0 * ( ns_casc::Ncolor + Particle::N_light_flavor ) ) );
 }
 
+double ringContainer::getEffectiveTemperatureByEnergyDensity() const
+{
+  if ( !averagesPrepared )
+  {
+    std::string errMsg = "ringContainer: averaged quantity requested without prior call to prepareAverages()";
+    throw eRingContainer_error( errMsg );
+  }
+  
+  double gG = 2 * ( pow( ns_casc::Ncolor, 2 ) - 1 );
+  double gQ = 2.0 * ns_casc::Ncolor * Particle::N_light_flavor;
+
+  return sqrt( sqrt( energyDensity * pow( 0.197, 3.0 ) * M_PI * M_PI / ( 3.0 * ( gG + 2.0 * gQ ) ) ) );
+}
+
 
 double ringContainer::transformEnergyToComovingFrame(VectorEPxPyPz & P) const
 {

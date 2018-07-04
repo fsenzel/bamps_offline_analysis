@@ -77,6 +77,9 @@ public:
   
   // temperature calculated by sqrt of Debye mass (sqrt of 0th moment of distribution function)
   double getEffectiveTemperatureByDebyeMass() const;
+
+  // temperature calculated by quartic root of energy density (quartic root of 2th moment of distribution function)
+  double getEffectiveTemperatureByEnergyDensity() const;
   
   double transformEnergyToComovingFrame( VectorEPxPyPz & P ) const;
   
