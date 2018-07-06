@@ -96,6 +96,10 @@ public:
   double inverseE_gluons_cluster;
   double inverseE_quarks_cluster;
   VectorEPxPyPz p_cluster;
+  double E_cluster;
+  double px_cluster;
+  double py_cluster;
+  double pz_cluster;
   double pxx_cluster;
   double pyy_cluster;
   double pzz_cluster;

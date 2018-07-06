@@ -36,6 +36,10 @@ cellContainer::cellContainer() :
   inverseE_gluons_cluster( 0.0 ),
   inverseE_quarks_cluster( 0.0 ),
   p_cluster( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
+  E_cluster( 0.0 ),
+  px_cluster( 0.0 ),
+  py_cluster( 0.0 ),
+  pz_cluster( 0.0 ),
   pxx_cluster( 0.0 ),
   pyy_cluster( 0.0 ),
   pzz_cluster( 0.0 ),
@@ -72,6 +76,10 @@ void cellContainer::clear()
   inverseE_gluons_cluster =  0.0;
   inverseE_quarks_cluster =  0.0;
   p_cluster = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+  E_cluster = 0.0;
+  px_cluster = 0.0;
+  py_cluster = 0.0;
+  pz_cluster = 0.0;
   pxx_cluster =  0.0;
   pyy_cluster =  0.0;
   pzz_cluster =  0.0;
@@ -102,6 +110,10 @@ void cellContainer::resetStoredValues()
   inverseE_gluons_cluster =  0.0;
   inverseE_quarks_cluster =  0.0;
   p_cluster = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+  E_cluster = 0.0;
+  px_cluster = 0.0;
+  py_cluster = 0.0;
+  pz_cluster = 0.0;
   pxx_cluster =  0.0;
   pyy_cluster =  0.0;
   pzz_cluster =  0.0;
@@ -208,6 +220,10 @@ void cellContainer::writeAveragesToParticle( Particle& _particle ) const
 void cellContainer::addParticleToCluster( Particle particleToAdd )
 {
   p_cluster += particleToAdd.Mom;
+  E_cluster += particleToAdd.Mom.E();
+  px_cluster += particleToAdd.Mom.Px();
+  py_cluster += particleToAdd.Mom.Py();
+  pz_cluster += particleToAdd.Mom.Pz();
   pxx_cluster += particleToAdd.Mom.Px() * particleToAdd.Mom.Px() /  particleToAdd.Mom.E();
   pyy_cluster += particleToAdd.Mom.Py() * particleToAdd.Mom.Py() /  particleToAdd.Mom.E();
   pzz_cluster += particleToAdd.Mom.Pz() * particleToAdd.Mom.Pz() /  particleToAdd.Mom.E();
@@ -233,6 +249,7 @@ void cellContainer::getClusterInformation( double &T, VectorTXYZ &beta, const do
 
   if( number_cluster >= minNumber )
   {
+    // Attention: p_cluster is now normalized to E and becomes beta.
     beta = p_cluster.NormalizeToE();
 
     const double gamma = 1.0 / sqrt( 1 - beta.vec2() );
@@ -254,10 +271,10 @@ void cellContainer::getClusterInformation( double &T, VectorTXYZ &beta, const do
       const double gG = 2 * ( pow( ns_casc::Ncolor, 2 ) - 1 ); //16
       const double gQ = 2.0 * ns_casc::Ncolor * Particle::N_light_flavor; //18
 
-      const double T00 = p_cluster.E()   / ( Ntest * volume_cluster );
-      const double T01 = p_cluster.Px()  / ( Ntest * volume_cluster );
-      const double T02 = p_cluster.Py()  / ( Ntest * volume_cluster );
-      const double T03 = p_cluster.Pz()  / ( Ntest * volume_cluster );
+      const double T00 = E_cluster / ( Ntest * volume_cluster );
+      const double T01 = px_cluster / ( Ntest * volume_cluster );
+      const double T02 = py_cluster / ( Ntest * volume_cluster );
+      const double T03 = pz_cluster / ( Ntest * volume_cluster );
       const double T11 = pxx_cluster / ( Ntest * volume_cluster );
       const double T22 = pyy_cluster / ( Ntest * volume_cluster );
       const double T33 = pzz_cluster / ( Ntest * volume_cluster );
