@@ -1651,7 +1651,7 @@ void analysis::computeV2RAA( string name, const double _outputTime )
   v2RAA theV2RAA( theConfig, name, filename_prefix, rapidityRanges );
   
   double pt_min_v2RAA = theConfig->getMinimumPT();
-  if ( theConfig->getInitialStateType() == pythiaShowerInitialState )
+  if ( theConfig->getInitialStateType() == inclusivePythiaShowerInitialState || theConfig->getInitialStateType() == exclusivePythiaShowerInitialState )
     pt_min_v2RAA = theConfig->getPtCutoff();
   
   double pt_max_v2RAA, nbins_v2RAA;
@@ -1755,9 +1755,50 @@ void analysis::computeV2RAA( string name, const double _outputTime )
 }
 
 
+v2RAA::v2RAA( string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg,
+              const double Nevents_arg, const double Ntest_arg,
+              const double pt_min_arg, const double pt_max_arg, const int n_g_arg,
+              const double pt_min_background_arg, const double pt_max_background_arg, const int n_g_background_arg,
+              const OUTPUT_SCHEME outputScheme_arg, const bool studyNonPromptJpsiInsteadOfElectrons_arg,
+              const double numberElectronStat_arg, const double JPsiTestParticles_arg ):
+        name( name_arg ),
+        filename_prefix( filename_prefix_arg ),
+        rapidityRanges( rapidityRanges_arg ),
+        pt_min( pt_min_arg ),
+        pt_max( pt_max_arg ),
+        n_g( n_g_arg ),
+        pt_min_background( pt_min_background_arg ),
+        pt_max_background( pt_max_background_arg ),
+        n_g_background( n_g_background_arg ),
+        Ntest( Ntest_arg ),
+        Nevents( Nevents_arg),
+        outputScheme( outputScheme_arg ),
+        studyNonPromptJpsiInsteadOfElectrons( studyNonPromptJpsiInsteadOfElectrons_arg ),
+        numberElectronStat( numberElectronStat_arg ),
+        JPsiTestParticles( JPsiTestParticles_arg )
+{
+  eta_bins = rapidityRanges.size();
+}
 
-v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg, const double pt_min_arg, const double pt_max_arg, const int n_g_arg, const double pt_min_background_arg, const double pt_max_background_arg, const int n_g_background_arg ):
-    theConfig( c ), name( name_arg ), filename_prefix( filename_prefix_arg ), rapidityRanges( rapidityRanges_arg ), pt_min( pt_min_arg ), pt_max( pt_max_arg ), n_g( n_g_arg ), pt_min_background( pt_min_arg ), pt_max_background( pt_max_arg ), n_g_background( n_g_arg )
+
+v2RAA::v2RAA( config * const c, string name_arg, string filename_prefix_arg, std::vector<analysisRapidityRange> rapidityRanges_arg,
+              const double pt_min_arg, const double pt_max_arg, const int n_g_arg, const double pt_min_background_arg,
+              const double pt_max_background_arg, const int n_g_background_arg ):
+    name( name_arg ),
+    filename_prefix( filename_prefix_arg ),
+    rapidityRanges( rapidityRanges_arg ),
+    pt_min( pt_min_arg ),
+    pt_max( pt_max_arg ),
+    n_g( n_g_arg ),
+    pt_min_background( pt_min_background_arg ),
+    pt_max_background( pt_max_background_arg ),
+    n_g_background( n_g_background_arg ),
+    Ntest( c->getTestparticles() ),
+    Nevents( c->getNaddedEvents() ),
+    outputScheme( c->getOutputScheme() ),
+    studyNonPromptJpsiInsteadOfElectrons( c->isStudyNonPromptJpsiInsteadOfElectrons() ),
+    numberElectronStat( c->getNumberElectronStat() ),
+    JPsiTestParticles( c->getJpsiTestparticles() )
 {
   eta_bins = rapidityRanges.size();
 }
@@ -1854,7 +1895,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     eta = _particles[i].Mom.Pseudorapidity(_particles[i].m);
     
     // for some scenarios however explicitly the rapidity is measured. So substitute eta by the rapidity:
-    if( ( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() &&
+    if( ( studyNonPromptJpsiInsteadOfElectrons &&
           ( _flavTypeToComputeFor == charm ||
             _flavTypeToComputeFor == bottom ||
             _flavTypeToComputeFor == heavy_quark ||
@@ -1875,7 +1916,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     FLAVOR_TYPE mother_flav;
     if( _flavTypeToComputeFor == c_electron || _flavTypeToComputeFor == b_electron )
     {
-      int mother_id = i / theConfig->getNumberElectronStat();
+      int mother_id = i / numberElectronStat;
       mother_flav = addedParticlesCopy[mother_id].FLAVOR;
     }
 
@@ -2034,16 +2075,16 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     {
       const double delta_eta = 2.0 * ( rapidityRanges[i].yright - rapidityRanges[i].yleft );
       
-      double nInBin = double( ptBinsNmb[i][k] ) / theConfig->getTestparticles() / dpt / delta_eta;
+      double nInBin = double( ptBinsNmb[i][k] ) / Ntest / dpt / delta_eta;
       
       if( _v2type == v2jets )
-        nInBin = nInBin / theConfig->getNaddedEvents();
+        nInBin = nInBin / Nevents;
       
       if( Particle::mapToGenericFlavorType( _flavTypeToComputeFor ) == jpsi )
-        nInBin = nInBin / theConfig->getJpsiTestparticles();
+        nInBin = nInBin / JPsiTestParticles;
       
       if( Particle::mapToGenericFlavorType( _flavTypeToComputeFor ) == electron_gen )
-        nInBin = nInBin / theConfig->getNumberElectronStat();
+        nInBin = nInBin / numberElectronStat;
       
       print_yield.width( 15 );
       print_yield << nInBin;
@@ -2072,7 +2113,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
         const double delta_eta = 2.0 * ( rapidityRanges[i].yright - rapidityRanges[i].yleft );
         
         print_pt_angleDependence.width( 15 );
-        print_pt_angleDependence << double( ptBinsAngleDep[i][j][k] ) / theConfig->getTestparticles() / dpt / delta_eta;
+        print_pt_angleDependence << double( ptBinsAngleDep[i][j][k] ) / Ntest / dpt / delta_eta;
       }
       print_pt_angleDependence << endl;
     }    
@@ -2081,14 +2122,14 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   }
   
     //CMS pt cut for non prompt jpsi: 6.5GeV < pt < 30 GeV, y cut: |y|<2.4
-  if( theConfig->isStudyNonPromptJpsiInsteadOfElectrons() && _flavTypeToComputeFor == electron_gen && ( theConfig->getOutputScheme() == cms_hq_nonPromptJpsi || theConfig->getOutputScheme() == alice_hq_nonPromptJpsi ) )
+  if( studyNonPromptJpsiInsteadOfElectrons && _flavTypeToComputeFor == electron_gen && ( outputScheme == cms_hq_nonPromptJpsi || outputScheme == alice_hq_nonPromptJpsi ) )
   {
     string filename_yield_nonPromptJpsi;
     string text;
     
     double eta_jpsi, pt_min_jpsi, pt_max_jpsi;
     
-    if( theConfig->getOutputScheme() == cms_hq_nonPromptJpsi )
+    if( outputScheme == cms_hq_nonPromptJpsi )
     {
       filename_yield_nonPromptJpsi = filename_prefix + "_nonPromptJpsiCMScuts_yield_" + name;
       text = "# with same acceptance cuts as for CMS:  6.5GeV < pt < 30 GeV,  |y|<2.4";
@@ -2096,7 +2137,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
       pt_min_jpsi = 6.5;
       pt_max_jpsi = 30.0;
     }
-    else if( theConfig->getOutputScheme() == alice_hq_nonPromptJpsi )
+    else if( outputScheme == alice_hq_nonPromptJpsi )
     {
       filename_yield_nonPromptJpsi = filename_prefix + "_nonPromptJpsiALICEcuts_yield_" + name;
       text = "# with same acceptance cuts as for ALICE:  2GeV < pt < 30 GeV,  |y|<0.9";
@@ -2129,7 +2170,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
     
     print_nonPromptJpsi << pt_sum / double( count_jpsi ) << "\t";
     
-    print_nonPromptJpsi << double( count_jpsi ) / theConfig->getTestparticles() / theConfig->getNaddedEvents() / theConfig->getNumberElectronStat() / delta_eta_jpsi << endl;
+    print_nonPromptJpsi << double( count_jpsi ) / Ntest / Nevents / numberElectronStat / delta_eta_jpsi << endl;
   }
   
 }

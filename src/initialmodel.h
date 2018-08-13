@@ -18,11 +18,20 @@
 #include <boost/smart_ptr.hpp>
 
 #include "particle.h"
-#include "configuration.h"
 #include "woodsaxon.h"
 #include "rangen_distr.h"
 #include "vegas.h"
 
+/** @brief Enumeration type for possible initial state models */
+enum INITIAL_STATE_TYPE { miniJetsInitialState = 0,
+                          pythiaInitialState = 1,
+                          cgcInitialState = 2,
+                          mcatnloInitialState = 3,
+                          onlyJpsiInitialState = 4,
+                          fixedPartonInitialState = 5,
+                          fixedPythiaShowerInitialState = 6,
+                          inclusivePythiaShowerInitialState = 7,
+                          exclusivePythiaShowerInitialState = 8 };
 
 typedef boost::shared_ptr<ranGen_Distr> tPointerToRanGen;
 
@@ -76,7 +85,7 @@ public:
   /** 
    * @brief constructor 
    */
-  initialModelWS( const config& _config);
+  initialModelWS( const double _A, const double _Aatomic, const double _B, const double _Batomic );
 
   /** 
    * @brief destructor 

@@ -1,30 +1,21 @@
-#include <iostream>
-#include <math.h>
 #include "hadronization_hq.h"
-#include "particle.h"
-#include "random.h"
-#include "configuration.h"
 
-using namespace ns_casc;
 using namespace std;
 
-
-void hadronization_hq::heavyQuarkFragmentation()
+std::vector<ParticleOffline> hadronization_hq::heavyQuarkFragmentation( vector<ParticleOffline> particlesToHadronize )
 {
   double z;
   int flav;
   
-  addedParticlesCopy=addedParticles; // copy all added particles, perform hadronization here (important to have a second instant for initial hadronization, simulating pp collisions)
-
-  for ( int i = 0; i < addedParticles.size(); i++ )
+  for ( int i = 0; i < particlesToHadronize.size(); i++ )
   {
-    flav = addedParticlesCopy[i].FLAVOR;
+    flav = particlesToHadronize[i].FLAVOR;
     if ( flav >= 7 && flav <= 10 )
     {
       z = getFragmentationZ( flav );
-      addedParticlesCopy[i].Mom.Px() *= z;
-      addedParticlesCopy[i].Mom.Py() *= z;
-      addedParticlesCopy[i].Mom.Pz() *= z;
+      particlesToHadronize[i].Mom.Px() *= z;
+      particlesToHadronize[i].Mom.Py() *= z;
+      particlesToHadronize[i].Mom.Pz() *= z;
       
       // D+ = c dbar, D0 = c ubar, D0bar = cbar u, D- = cbar d
       // B+ = bbar u, B0 = bbar d, B0bar = b dbar, B- = b ubar 
@@ -35,39 +26,41 @@ void hadronization_hq::heavyQuarkFragmentation()
       if( flav == 7 )
       {
         if( ran2() < fraction)
-          addedParticlesCopy[i].FLAVOR = dmeson_plus;
+          particlesToHadronize[i].FLAVOR = dmeson_plus;
         else
-          addedParticlesCopy[i].FLAVOR = dmeson_zero;
+          particlesToHadronize[i].FLAVOR = dmeson_zero;
       }
       else if( flav == 8 )
       {
         if( ran2() < fraction)
-          addedParticlesCopy[i].FLAVOR = dmeson_minus;
+          particlesToHadronize[i].FLAVOR = dmeson_minus;
         else
-          addedParticlesCopy[i].FLAVOR = dmeson_zero_bar;
+          particlesToHadronize[i].FLAVOR = dmeson_zero_bar;
       }
       else if( flav == 9 )
       {
         if( ran2() < fraction)
-          addedParticlesCopy[i].FLAVOR = bmeson_zero_bar;
+          particlesToHadronize[i].FLAVOR = bmeson_zero_bar;
         else
-          addedParticlesCopy[i].FLAVOR = bmeson_minus;
+          particlesToHadronize[i].FLAVOR = bmeson_minus;
       }
       else if( flav == 10 )
       {
         if( ran2() < fraction)
-          addedParticlesCopy[i].FLAVOR = bmeson_zero;
+          particlesToHadronize[i].FLAVOR = bmeson_zero;
         else
-          addedParticlesCopy[i].FLAVOR = bmeson_plus;
+          particlesToHadronize[i].FLAVOR = bmeson_plus;
       }
       
       // Just leave the mass of the meson as the mass of the heavy quark to avoid any energy gain due to the larger mass. For the final eta distribution this has no effect anyhow since only the direction counts. However, the rapidity y distribution depends on the energy and therefore also on the heavy meson mass. If this is artificially increased here, it leads to an strange strong increase at y=0. However, previous results on RAA (and also v2) seems to not depend on this effect since it is done both initially and finally.
 //       // give mesons there actual mass. However, by breaking energy conservation
-//       addedParticlesCopy[i].m = ParticlePrototype::getMass( addedParticlesCopy[i].FLAVOR );
+//       particlesToHadronize[i].m = ParticlePrototype::getMass( addedParticlesCopy[i].FLAVOR );
         
-      addedParticlesCopy[i].Mom.E() = sqrt( addedParticlesCopy[i].Mom.vec2() + pow( addedParticlesCopy[i].m, 2.0 ) );
+      particlesToHadronize[i].Mom.E() = sqrt( particlesToHadronize[i].Mom.vec2() + pow( particlesToHadronize[i].m, 2.0 ) );
     }
   }
+  
+  return particlesToHadronize;
 }
 
 

@@ -1,30 +1,11 @@
-#include <iostream>
-#include <math.h>
-#include <iomanip>
 #include "mesonDecay.h"
-#include "particle.h"
-#include "configuration.h"
-#include "configBAMPS.h"
 
-#include "Pythia8/Pythia.h"
 using namespace Pythia8;
-
-using namespace ns_casc;
 using namespace std;
-
 
 mesonDecay::mesonDecay( const int numberElectronStat_arg, const bool muonsInsteadOfElectrons_arg, const bool nonPromptJpsiInsteadOfElectrons_arg ) :
   numberElectronStat(numberElectronStat_arg), muonsInsteadOfElectrons(muonsInsteadOfElectrons_arg), nonPromptJpsiInsteadOfElectrons(nonPromptJpsiInsteadOfElectrons_arg)
 {
-  /**
-  * Reserve memory for the Particle vector.
-  */
-  addedPartcl_electron.reserve( addedParticlesCopy.size() * numberElectronStat );
-  /**
-  * Now the addedPartcl_electron vector is re-sized to hold the needed number of particles (this is NOT done when reserving memory!).
-  * The particles are initialised with the standard constructor, actual attributes such as momentum etc. MUST be set later!
-  */
-  addedPartcl_electron.resize( addedParticlesCopy.size() * numberElectronStat );
 }
 
 // void mesonDecay::decayToElectronsToyModel()
@@ -64,11 +45,19 @@ mesonDecay::mesonDecay( const int numberElectronStat_arg, const bool muonsInstea
 
 
 // use PYTHIA for Meson decay
-void mesonDecay::decayToElectronsPythia()
+std::vector<ParticleOffline> mesonDecay::decayToElectronsPythia( std::vector<ParticleOffline> hadronsToDecay )
 {
-  double p_tmp[4];
-  int id, k_e;
-  double mm,ee;
+  vector<ParticleOffline> decayElectrons;
+  
+  /**
+  * Reserve memory for the Particle vector.
+  */
+  decayElectrons.reserve( hadronsToDecay.size() * numberElectronStat );
+  /**
+  * Now the addedPartcl_electron vector is re-sized to hold the needed number of particles (this is NOT done when reserving memory!).
+  * The particles are initialised with the standard constructor, actual attributes such as momentum etc. MUST be set later!
+  */
+  decayElectrons.resize( hadronsToDecay.size() * numberElectronStat );
 
   // give correct xml directory to pythia object, only possible via constructor
   string xmlpath = PYTHIA_XML_DIR;
@@ -89,8 +78,7 @@ void mesonDecay::decayToElectronsPythia()
  
   // Initialize.
   pythia.init();
-  
-  
+    
   // switch off all decay channels for charmed mesons except decay to electrons
   if( nonPromptJpsiInsteadOfElectrons ) // only decay to muons
     setPythiaDecayChannelsNonPromptJpsi( pythia );
@@ -101,31 +89,32 @@ void mesonDecay::decayToElectronsPythia()
   
 //   pythia.particleData.listChanged();
 //   pythia.particleData.list(443);
-  
 
-  for ( int i = 0; i < addedParticlesCopy.size(); i++ )
+  double p_tmp[4];
+
+  for ( int i = 0; i < hadronsToDecay.size(); i++ )
   {
-    if ( ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == dmeson_gen || ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == bmeson_gen ) // d or b meson
+    if ( ParticlePrototype::mapToGenericFlavorType( hadronsToDecay[i].FLAVOR ) == dmeson_gen || ParticlePrototype::mapToGenericFlavorType( hadronsToDecay[i].FLAVOR ) == bmeson_gen ) // d or b meson
     {
       // each d meson decays to numberElectronStat electrons
-      for(int k = 0; k < numberElectronStat; k++)
+      for( int k = 0; k < numberElectronStat; k++ )
       {      
-        k_e = ( i ) * numberElectronStat + k ;
+        int k_e = ( i ) * numberElectronStat + k ;
         // do not copy all particle properties, just E, p, M, Flavor (see below))
 //         addedPartcl_electron[k_e]=addedParticlesCopy[i]; // copy all added particles, perform decay here (important to have a second instant for initial electrons, simulating pp collisions)
         
         //Reset event record to allow for new event.
         event.reset();
         
-        id = addedParticlesCopy[i].FLAVOR;
+        int id = hadronsToDecay[i].FLAVOR;
 
         // mass from Pythia
-        mm = pdt.mSel(id);
+        double mm = pdt.mSel(id);
         //calculate energy with new mass
-        ee = sqrt( addedParticlesCopy[i].Mom.Perp2() + mm*mm );
+        double ee = sqrt( hadronsToDecay[i].Mom.Perp2() + mm*mm );
         // Store the particle in the event record.
         // definition from event.h: int append(int id, int status, int color, int anticolor, double px, double py, double pz, double e, double m = 0.)
-        event.append(  id, 1, 0,   0, addedParticlesCopy[i].Mom.Px(), addedParticlesCopy[i].Mom.Py(),  addedParticlesCopy[i].Mom.Pz(), ee, mm); // add particle to event, status=1 ensures that no message about non vanishing total charge pops up
+        event.append(  id, 1, 0,   0, hadronsToDecay[i].Mom.Px(), hadronsToDecay[i].Mom.Py(),  hadronsToDecay[i].Mom.Pz(), ee, mm); // add particle to event, status=1 ensures that no message about non vanishing total charge pops up
 
         // Generate events. Quit if failure.
         if (!pythia.next()) 
@@ -141,10 +130,9 @@ void mesonDecay::decayToElectronsPythia()
 //         }
         
         // for theta analysis
-        p_tmp[1] = addedParticlesCopy[i].Mom.Px();
-        p_tmp[2] = addedParticlesCopy[i].Mom.Py();
-        p_tmp[3] = addedParticlesCopy[i].Mom.Pz();
-        
+        p_tmp[1] = hadronsToDecay[i].Mom.Px();
+        p_tmp[2] = hadronsToDecay[i].Mom.Py();
+        p_tmp[3] = hadronsToDecay[i].Mom.Pz();        
         
         bool found_electron = false; // just for error checking if there are 2 electrons
         // Loop over all particles from this decay and search for the electron
@@ -156,29 +144,29 @@ void mesonDecay::decayToElectronsPythia()
             if( event[j].isFinal() && !found_electron && ( event[j].mother1()==1 || event[j].mother2()==1 ) )
             {
               if( event[j].id() > 0) // electron
-                addedPartcl_electron[k_e].FLAVOR = electron;
+                decayElectrons[k_e].FLAVOR = electron;
               else
-                addedPartcl_electron[k_e].FLAVOR = positron;
+                decayElectrons[k_e].FLAVOR = positron;
               
-              addedPartcl_electron[k_e].m = event[j].m();
-              addedPartcl_electron[k_e].Mom = VectorEPxPyPz( event[i].e(),
+              decayElectrons[k_e].m = event[j].m();
+              decayElectrons[k_e].Mom = VectorEPxPyPz( event[i].e(),
                                                              event[i].px(),
                                                              event[i].py(),
                                                              event[i].pz() );
-              addedPartcl_electron[k_e].Mom.SetEbyM( event[j].m() );
+              decayElectrons[k_e].Mom.SetEbyM( event[j].m() );
               
               found_electron = true;
             }
             else if( event[j].isFinal() && found_electron && ( event[j].mother1()==1 || event[j].mother2()==1 ) )
             {
-              cout << "error in meson decay to electron. Additional electron found for particle ID " << addedParticlesCopy[i].FLAVOR << "  (411&421 D meson, 511&521 B meson)" << endl;
+              cout << "error in meson decay to electron. Additional electron found for particle ID " << hadronsToDecay[i].FLAVOR << "  (411&421 D meson, 511&521 B meson)" << endl;
               // List event
 //               event.list();
             }
           }
         }
         
-        if( !found_electron && !( ParticlePrototype::mapToGenericFlavorType( addedParticlesCopy[i].FLAVOR ) == dmeson_gen && nonPromptJpsiInsteadOfElectrons ) )
+        if( !found_electron && !( ParticlePrototype::mapToGenericFlavorType( hadronsToDecay[i].FLAVOR ) == dmeson_gen && nonPromptJpsiInsteadOfElectrons ) )
         {
           cout << "error in meson decay to electron. No electron found" << endl;
           // List event
