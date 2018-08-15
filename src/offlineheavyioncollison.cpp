@@ -1772,6 +1772,9 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           case 4: // thermalMfpGluon
             lambda = theMFP.getMeanFreePath( 3.0 * rings[ringIndex].getEffectiveTemperature(), gluon, rings[ringIndex].getEffectiveTemperature(), rings[ringIndex].getGluonDensity(), rings[ringIndex].getQuarkDensity(), fm );
             break;
+          case 5: // screening via Debye mass
+            lambda = 1.0 / sqrt( coupling::get_constant_coupling() * addedParticles[jscat].md2g ) * 0.197; // fm
+            break;
           default: 
             std::string errMsg = "Error in scattOfflinePartclWithAddedPartcl: wrong mfp determination type.";
             throw eHIC_error( errMsg );

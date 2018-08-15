@@ -252,7 +252,7 @@ void config::processProgramOptions()
 
   if ( vm.count("misc.jet_mfp_computation") )
   {
-    if ( vm["misc.jet_mfp_computation"].as<int>() < 5 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
+    if ( vm["misc.jet_mfp_computation"].as<int>() < 6 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
     {
       jetMfpComputationSwitch = static_cast<JET_MFP_COMPUTATION_TYPE>( vm["misc.jet_mfp_computation"].as<int>() );
     }
@@ -388,7 +388,7 @@ void config::initializeProgramOptions()
   misc_options.add_options()
   ("misc.repeat_timesteps", po::value<bool>( &switch_repeatTimesteps )->default_value( switch_repeatTimesteps ), "repeat timesteps in cases where the probability has been > 1" ) 
 //   ("misc.interpolation_border", po::value<double>( &interpolationBorder )->default_value( interpolationBorder ), "X where interpolation of MFP is done for E > X*T")
-  ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "treatment for the mean free path of added particles ( 0 = computeMfpLastTimestep, 1 = computeMfpIteration, 2 = computeMfpInterpolation, 3 = fixedMfp, 4 = thermalMfpGluon)")
+  ("misc.jet_mfp_computation", po::value<int>()->default_value( jetMfpComputationSwitch ), "treatment for the mean free path of added particles ( 0 = computeMfpLastTimestep, 1 = computeMfpIteration, 2 = computeMfpInterpolation, 3 = fixedMfp, 4 = thermalMfpGluon, 5 = screening via md2g )")
   ("misc.fixed_mfp_added", po::value<double>( &fixed_mfp_added )->default_value( fixed_mfp_added ), "Mean free path of added particles set by hand. Does not depend on energy of particle" )
   ("misc.mfpAddedRangeVariation", po::value<double>( &mfpAddedRangeVariation )->default_value( mfpAddedRangeVariation ), "Range in % in respect to the old mean free path, in which the new value of the mean free path is expected to be" )
   ;
@@ -506,6 +506,12 @@ void config::checkOptionsForSanity()
   if( finiteFormationTime && switch_32 )
   {
     string errMsg = "Option 'finiteFormationTime' can (at the moment) only be set if 3->2 processes are switched off.";
+    throw eConfig_error( errMsg );
+  }
+
+  if( fudge_factor_lpm_23 < 0.0 && jetMfpComputationSwitch != 5 )
+  {
+    string errMsg = "Theta-LPM can only be switched off if kt is screened via Debye mass.";
     throw eConfig_error( errMsg );
   }
 
