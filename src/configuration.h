@@ -269,6 +269,16 @@ class config : public configBase
   bool isHqCorrelationsOutput() const {return hqCorrelationsOutput;}
   /** ------------------------------------ */
 
+  /** ---- lpm parameters ---- */
+  
+  /** @brief Interface for config::finiteFormationTime */
+  bool isFiniteFormationTime() const { return finiteFormationTime; }
+  
+  /** @brief Interface for config::scatterDuringFormTime */
+  bool isScatterDuringFormTime() const { return scatterDuringFormTime; }
+  
+  /** ------------------------------- */
+
   /** -------- miscellaneous options ------- */ 
   bool repeatTimesteps() const { return switch_repeatTimesteps; }
 
@@ -394,6 +404,7 @@ class config : public configBase
    
    po::options_description initial_state_options;   
    po::options_description offline_options;
+   po::options_description lpm_parameters;
    /** ------ boost::program_options objects ------- */ 
 
    
@@ -584,6 +595,16 @@ class config : public configBase
   bool hqCorrelationsOutput;
   /** ------------------------------------ */
   
+  /** ---- lpm parameters ---- */
+
+  /** @brief Whether 2->3 process happens instantaneously */
+  bool finiteFormationTime;
+
+  /** @brief Whether partons in formation time may scatter in order to modify formation time */
+  bool scatterDuringFormTime;
+
+  /** ------------------------------- */
+
   /** -------- miscellaneous options ------- */ 
   // provided by base class:
 

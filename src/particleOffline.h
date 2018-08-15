@@ -19,7 +19,6 @@
 
 #include "particle.h"
 
-
 /**
  * @brief Provides properties of a particle needed in the offline reconstruction of BAMPS events.
  *
@@ -43,7 +42,11 @@ public:
     lastInt( ),    
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
-    rate_added_32( 0.0 )
+    rate_added_32( 0.0 ),
+    isCoherent( false ),
+    tInitCoherent( -1.0 ),
+    indexMother( -1 ),
+    uniqueidMother( 1 )
   {};
     
   ParticleOffline( const Particle& _particle ) : 
@@ -59,7 +62,11 @@ public:
     lastInt( ),    
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
-    rate_added_32( 0.0 )
+    rate_added_32( 0.0 ),
+    isCoherent( false ),
+    tInitCoherent( -1.0 ),
+    indexMother( -1 ),
+    uniqueidMother( 1 )
   {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
@@ -101,6 +108,10 @@ public:
   /** @brief vector which holds information in which event this medium particle is already in added particles list */
   std::vector< bool > isAlreadyInAddedParticles;
 
+  bool isCoherent;
+  int indexMother;
+  int uniqueidMother;
+  double tInitCoherent;
     
   static int mapToPDGCodes( const FLAVOR_TYPE _flav )
   {

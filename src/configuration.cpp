@@ -113,6 +113,9 @@ config::config() :
  jpsi_formationTime(0.0),
  jpsi_testparticles(1),
  hqCorrelationsOutput(false),
+ //  ---- lpm parameters ----
+ finiteFormationTime( false ),
+ scatterDuringFormTime( false ),
 // ---- miscellaneous options ----
  switch_repeatTimesteps(true),
  jetMfpComputationSwitch(computeMfpLastTimestep),
@@ -375,6 +378,12 @@ void config::initializeProgramOptions()
   ("heavy_quark.hqCorrelationsOutput", po::value<bool>( &hqCorrelationsOutput )->default_value( hqCorrelationsOutput ), "whether correlation analysis of heavy quark pairs is done")
   ;
   
+  // Add some lpm parameters
+  lpm_parameters.add_options()
+  ("lpm.finiteFormationTime", po::value<bool>( &finiteFormationTime )->default_value( finiteFormationTime ), "Whether 2->3 process happens instantaneously" )
+  ("lpm.scatterDuringFormTime", po::value<bool>( &scatterDuringFormTime )->default_value( scatterDuringFormTime ), "Whether partons in formation time may scatter in order to modify formation time" )
+  ;
+
   // Add some miscellaneous options
   misc_options.add_options()
   ("misc.repeat_timesteps", po::value<bool>( &switch_repeatTimesteps )->default_value( switch_repeatTimesteps ), "repeat timesteps in cases where the probability has been > 1" ) 
@@ -410,10 +419,10 @@ void config::groupProgramOptions()
   command_line_options.add(offline_options);
   
   // Add some groups that are meant to be provided via a configuration file
-  config_file_options.add(initial_state_options).add(offline_options);
+  config_file_options.add(initial_state_options).add(offline_options).add(lpm_parameters);
   
   // Add option groups that are to be printed in a detailed help message
-  visible_options.add(initial_state_options).add(offline_options);
+  visible_options.add(initial_state_options).add(offline_options).add(lpm_parameters);
 }
 
 
@@ -487,6 +496,19 @@ void config::checkOptionsForSanity()
     string errMsg = "Heavy quark shower initial state, but number of heavy flavors is set to 0.";
     throw eConfig_error( errMsg );
   }
+
+  if( !finiteFormationTime && scatterDuringFormTime )
+  {
+    string errMsg = "Option 'scatterDuringFormTime' can only be set if finite formation time is chosen.";
+    throw eConfig_error( errMsg );
+  }
+
+  if( finiteFormationTime && switch_32 )
+  {
+    string errMsg = "Option 'finiteFormationTime' can (at the moment) only be set if 3->2 processes are switched off.";
+    throw eConfig_error( errMsg );
+  }
+
 }
 
 void config::processHeavyQuarkOptions()
@@ -571,6 +593,7 @@ void config::printUsedConfigurationParameters()
   printOptionsDescriptionToIniFormat( initial_state_options, output );
   printOptionsDescriptionToIniFormat( output_options, output );
   printOptionsDescriptionToIniFormat( parameters23, output );
+  printOptionsDescriptionToIniFormat( lpm_parameters, output );
   printOptionsDescriptionToIniFormat( misc_options, output );
   if( Particle::N_heavy_flavor > 0 )
     printOptionsDescriptionToIniFormat( heavy_quark_options, output );

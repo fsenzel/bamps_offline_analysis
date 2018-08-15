@@ -65,6 +65,7 @@ namespace
   coordinateEtaBins etaBins;
 
   long ncoll, ncoll32, ncoll23, ncoll22, ncolle;
+  int nCoherentState;
 
   double randomShiftEta, randomShiftX, randomShiftY;
   //  bool dodo1;
@@ -85,9 +86,6 @@ namespace ns_heavy_quarks
   int jpsicreation = 0;
   int charmAnnihil = 0;
 }
-
-
-
 
 offlineHeavyIonCollision::offlineHeavyIonCollision( config* const _config, offlineOutputInterface* const _offlineInterface, analysis* const _analysis ) :
     theConfig( _config ), stoptime_last( 0 ), stoptime( 5.0 ), currentNumber( 0 ), numberEvolvingParticles( _config->getN_init() ),
@@ -228,6 +226,7 @@ void offlineHeavyIonCollision::mainFramework()
   int ncoll23_backup = 0;
   int ncoll32_backup = 0;
   int ncolle_backup = 0;
+  int nCoherentState_backup = 0;
   int charmAnnihil_backup = 0;
   int jpsicreation_backup = 0;
   int jpsi_dissociation_from_temperature_backup = 0;
@@ -391,6 +390,7 @@ void offlineHeavyIonCollision::mainFramework()
     ncoll23_backup = ncoll23;
     ncoll32_backup = ncoll32;
     ncolle_backup = ncolle;
+    nCoherentState_backup = nCoherentState;
     charmAnnihil_backup = ns_heavy_quarks::charmAnnihil;
     jpsicreation_backup = ns_heavy_quarks::jpsicreation;
     jpsi_dissociation_from_temperature_backup = ns_heavy_quarks::jpsi_dissociation_from_temperature;
@@ -465,6 +465,7 @@ void offlineHeavyIonCollision::mainFramework()
       ncoll23 = ncoll23_backup;
       ncoll32 = ncoll32_backup;
       ncolle = ncolle_backup;
+      nCoherentState = nCoherentState_backup;
       ns_heavy_quarks::charmAnnihil = charmAnnihil_backup;
       ns_heavy_quarks::jpsicreation = jpsicreation_backup;
       ns_heavy_quarks::jpsi_dissociation_from_temperature = jpsi_dissociation_from_temperature_backup;
@@ -483,7 +484,7 @@ void offlineHeavyIonCollision::mainFramework()
     removeDeadParticles();
     if( theConfig->doOutput_progressLog() )
     {
-      theAnalysis->registerProgressInformationForOutput( simulationTime, dt, addedParticles.size(), particles_atTimeNow.size(), ncoll, ncoll22, ncoll23, ncoll32 );
+      theAnalysis->registerProgressInformationForOutput( simulationTime, dt, addedParticles.size(), nCoherentState, particles_atTimeNow.size(), ncoll, ncoll22, ncoll23, ncoll32 );
     }
     
     if ( doAnalysisStep )
@@ -1641,6 +1642,41 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
     }
   }
   
+  // check for partons that are not longer in formation time
+  if( theConfig->isFiniteFormationTime() )
+  {
+    // cout << "# time next = " << sep << nexttime << endl; 
+    // cout << "# id daughter" << sep << "id mother" << sep << "t_formed" << endl;
+
+    for( int i = 0; i < addedParticles.size(); i++ )
+    {
+      if( addedParticles[i].isCoherent && addedParticles[i].indexMother != -1 )
+      {
+        const double t_formed = getFormationTimeCoherentState( addedParticles[addedParticles[i].indexMother], addedParticles[i] );
+      
+        // cout << addedParticles[i].unique_id << sep << addedParticles[addedParticles[i].indexMother].unique_id << sep << t_formed << endl;
+      
+        // check if particles are still in formation time
+        if( nexttime < t_formed )
+        {
+          addedParticles[i].Propagate( nexttime );
+          addedParticles[addedParticles[i].indexMother].Propagate( nexttime );
+        }
+        else
+        {
+          addedParticles[i].isCoherent = addedParticles[addedParticles[i].indexMother].isCoherent = false;
+          addedParticles[i].tInitCoherent = addedParticles[addedParticles[i].indexMother].tInitCoherent = -1.0;
+          addedParticles[i].uniqueidMother = 1;
+          addedParticles[i].indexMother = -1;
+        
+          nCoherentState -= 2;
+        // deltaE += particlesInFormTime[i].getInitialOmega();
+        // theAnalysis.analyseGluonEmission( particlesInFormTime[i] );
+        }
+      }          
+    }
+  }
+  
   formGeomCopy.clear();
   
   // J/psi dissociation: if temperature in cell is higher than Td = 2 Tc, decay J/psi to two charm quarks
@@ -1693,7 +1729,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
 
     pt_addedParticle = addedParticles[jscat].Mom.Perp();
     
-    if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead )
+    if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead || ( addedParticles[jscat].isCoherent && !theConfig->isScatterDuringFormTime() ) )
     {
       continue; // jump to next particle in the list
     }
@@ -1814,7 +1850,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         }
         
 
-        if( theConfig->doScattering_23() )
+        if( theConfig->doScattering_23() && !addedParticles[jscat].isCoherent )
         {
           if ( lambda > 0 )
           {
@@ -1965,7 +2001,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         }
       }
     }
-    
+    // TODO: Needs all rate calculation needs to be revised for stochastic LPM.
     // add 3->2 rate of this timestep calculated in scatt32_offlineWithAddedParticles and reset it afterwards
     rate_added_sum += addedParticles[jscat].rate_added_32;
     addedParticles[jscat].rate_added_32 = 0.0;
@@ -2203,7 +2239,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
       while ( !( F1 == gluon || F2 == gluon || F3 == gluon ) );
       
       pt_addedParticle = addedParticles[kscat].Mom.Perp();
-      if ( pt_addedParticle < theConfig->getMinimumPT() )
+      if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[kscat].isCoherent )
       {
         continue; //go to next particle triplet 
       }
@@ -2710,6 +2746,15 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
 
+
+    if( theConfig->isFiniteFormationTime() )
+    {
+      addedParticles[jscat].isCoherent = tempParticle.isCoherent = true;
+      addedParticles[jscat].tInitCoherent = tempParticle.tInitCoherent = TT;
+      tempParticle.uniqueidMother = addedParticles[jscat].unique_id;
+      tempParticle.indexMother = jscat;
+      nCoherentState += 2;
+    }
   //   if ( sqrt( pow( tempParticle.PX, 2) + pow( tempParticle.PY, 2) ) > 3.0 )
   //   {
       addedParticles.push_back( tempParticle );
@@ -4341,4 +4386,18 @@ double offlineHeavyIonCollision::addVelocities( const double vx_1, const double 
 }
 
 
+double offlineHeavyIonCollision::getFormationTimeCoherentState( const ParticleOffline _mother, const ParticleOffline _daughter ) const
+{
+  if( _mother.unique_id != _daughter.uniqueidMother )
+  {
+    throw eHIC_error( "Wrong mother was associated in coherent state. Unrecoverable error!" );
+  }
+
+  const double kt2 = _daughter.Mom.TransverseMomentumToVectorSquared( _mother.Mom );
+
+  if( kt2 == 0.0 )
+    return std::numeric_limits<double>::infinity();
+  else
+    return _daughter.tInitCoherent + ( _daughter.Mom.E() / kt2 * ns_casc::InvGevToFm ); // fm
+}
 // kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;

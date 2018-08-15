@@ -218,6 +218,7 @@ public:
            const double _time, 
            const double _dt, 
            const int _nAddedParticles,
+           const int _nAddedInCoherentState,
            const int _nMediumParticles, 
            const int _nColl, 
            const int _nColl22,

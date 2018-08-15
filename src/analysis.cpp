@@ -1322,6 +1322,11 @@ void analysis::onePartclCorrelations()
   {
 //     if(addedParticles[i].T <= time)
 //     {
+    if( addedParticles[i].isCoherent )
+    {
+      continue;
+    }
+
     eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
 
     if ( fabs( eta ) <= eta_max )
@@ -1456,6 +1461,11 @@ void analysis::twoPartclCorrelations()
   {
 //     if(addedParticles[i].T <= time)
 //     {
+    if( addedParticles[i].isCoherent )
+    {
+      continue;
+    }
+
     eta = addedParticles[i].Mom.Pseudorapidity( addedParticles[i].m );
 
     if ( fabs( eta ) <= eta_max )
@@ -1608,6 +1618,11 @@ void analysis::twoPartclCorrelations()
 
   for ( int j = 0;j < addedParticles.size();j++ )
   {
+    if( addedParticles[j].isCoherent )
+    {
+      continue;
+    }
+
     eta = addedParticles[j].Mom.Pseudorapidity( addedParticles[j].m );
 
     VectorXYZ V = VectorXYZ( 0.0, 1.0, 0.0 );
@@ -1878,6 +1893,11 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   // compute v2 and bin it into pt bins
   for ( int i = 0; i < n_particles; i++ )
   {
+    if( _particles[i].isCoherent )
+    {
+      continue;
+    }
+
     pt = _particles[i].Mom.Pt();
     xt = _particles[i].Pos.Pt();
 
@@ -2278,6 +2298,11 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
   // loop over all particles and bin them according to their pt
   for ( int j = 0; j < n_particles; j++ )
   {
+    if( _particles[j].isCoherent )
+    {
+      continue;
+    }
+
     pt = _particles[j].Mom.Pt();
     y = _particles[j].Mom.Rapidity();
     
@@ -2433,6 +2458,11 @@ void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Pa
 
   for ( int j = 0; j < n_particles; j++ )
   {
+    if( _particles[j].isCoherent )
+    {
+      continue;
+    }
+
     y = _particles[j].Mom.Rapidity();
 
     if ( _particles[j].FLAVOR == _flavTypeToComputeFor )
@@ -2757,16 +2787,19 @@ void analysis::particleOutput( const int step )
 
   for ( int i = 0; i < addedParticles.size(); i++ )
   {
-    file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep 
-         << addedParticles[i].Pos.T() << sep << addedParticles[i].Pos.X() << sep
-         << addedParticles[i].Pos.Y() << sep << addedParticles[i].Pos.Z() << sep 
-         << addedParticles[i].Mom.E() << sep << addedParticles[i].Mom.Px() << sep 
-         << addedParticles[i].Mom.Py() << sep << addedParticles[i].Mom.Pz() << sep 
-      //         << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep 
-      //         << addedParticles[i].N_EVENT_pp << endl;
-         << addedParticles[i].md2g << sep 
-         << addedParticles[i].X_traveled << sep 
-         << addedParticles[i].N_EVENT_pp << endl;
+    if( !addedParticles[i].isCoherent )
+    {
+      file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep 
+           << addedParticles[i].Pos.T() << sep << addedParticles[i].Pos.X() << sep
+           << addedParticles[i].Pos.Y() << sep << addedParticles[i].Pos.Z() << sep 
+           << addedParticles[i].Mom.E() << sep << addedParticles[i].Mom.Px() << sep 
+           << addedParticles[i].Mom.Py() << sep << addedParticles[i].Mom.Pz() << sep 
+        //         << addedParticles[i].md2g << sep << addedParticles[i].md2q << sep 
+        //         << addedParticles[i].N_EVENT_pp << endl;
+           << addedParticles[i].md2g << sep 
+           << addedParticles[i].X_traveled << sep 
+           << addedParticles[i].N_EVENT_pp << endl;
+    }
   }
   file.close();
   
@@ -4482,7 +4515,7 @@ void analysis::printJpsiEvolution()
 }
 
 
-void analysis::registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles, const int _nMediumParticles, const int _nColl, const int _nColl22, const int _nColl23, const int _nColl32 )
+void analysis::registerProgressInformationForOutput( const double _time, const double _dt, const int _nAddedParticles, const int _nAddedInCoherentState, const int _nMediumParticles, const int _nColl, const int _nColl22, const int _nColl23, const int _nColl32 )
 {
   if( progressLogFile.good() )
   {
@@ -4490,6 +4523,7 @@ void analysis::registerProgressInformationForOutput( const double _time, const d
     progressLogFile << _time << sep;
     progressLogFile << _dt << sep;
     progressLogFile << _nAddedParticles << sep;
+    progressLogFile << _nAddedInCoherentState << sep;
     progressLogFile << _nMediumParticles << sep;
     progressLogFile << _nColl << sep;
     progressLogFile << _nColl22 << sep;
