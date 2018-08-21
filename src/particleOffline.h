@@ -43,11 +43,14 @@ public:
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
-    isCoherent( false ),
+    statusCoherent( 0 ),
     tInitCoherent( -1.0 ),
     indexMother( -1 ),
-    uniqueidMother( 1 )
-  {};
+    uniqueidMother( 1 ),
+    MomCoherent( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
+    flavorCoherent( gluon ),
+    mCoherent( 0.0 )
+    {};
     
   ParticleOffline( const Particle& _particle ) : 
     Particle( _particle ), 
@@ -63,10 +66,13 @@ public:
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
-    isCoherent( false ),
+    statusCoherent( 0 ),
     tInitCoherent( -1.0 ),
     indexMother( -1 ),
-    uniqueidMother( 1 )
+    uniqueidMother( 1 ),
+    MomCoherent( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
+    flavorCoherent( gluon ),
+    mCoherent( 0.0 )
   {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
@@ -108,11 +114,15 @@ public:
   /** @brief vector which holds information in which event this medium particle is already in added particles list */
   std::vector< bool > isAlreadyInAddedParticles;
 
-  bool isCoherent;
+  int statusCoherent; // 0 = not coherent, 1 = emitting parton (mother), 2 = emitted parton (daughter)
   int indexMother;
   int uniqueidMother;
   double tInitCoherent;
-    
+  
+  VectorEPxPyPz MomCoherent;
+  FLAVOR_TYPE flavorCoherent;
+  double mCoherent;
+
   static int mapToPDGCodes( const FLAVOR_TYPE _flav )
   {
     switch ( _flav )
@@ -150,6 +160,46 @@ public:
     }      
   }
     
+  /**
+   * Overwriting function of base class ParticlePrototype in order to consider partons in coherent state
+   * This is a shortcut for
+   *   Pos += Mom * ( T - Pos.T )/ Mom.E
+   *
+   * @param[in] time final time
+   */
+  void Propagate( const double time)
+  {
+    if( statusCoherent == 0 )
+      Pos += Mom * (( time - Pos.T() ) / Mom.E());
+    else
+      Pos += MomCoherent * (( time - Pos.T() ) / MomCoherent.E());
+    
+    Pos.T() = time; // necessary due to rounding errors
+  };
+
+  /**
+   * Overwriting function of base class ParticlePrototype in order to consider partons in coherent state
+   * This is a shortcut for
+   *   Pos += Mom * ( T - Pos.T )/ Mom.E
+   *
+   * @param[in] time final time
+   * @param[out] distance The given parameter is increased by the
+   *   traveled distance
+   */
+  void Propagate( const double time, double & distance)
+  {
+    VectorTXYZ Dist;
+    
+    if( statusCoherent == 0 )
+      Dist = Mom * (( time - Pos.T() ) / Mom.E());
+    else
+      Dist = MomCoherent * (( time - Pos.T() ) / MomCoherent.E());
+
+    Pos += Dist;
+    Pos.T() = time; // necessary due to rounding errors
+    distance += sqrt( Dist.vec2() );
+  };
+
 private:
 };
 

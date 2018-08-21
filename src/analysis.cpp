@@ -1322,7 +1322,7 @@ void analysis::onePartclCorrelations()
   {
 //     if(addedParticles[i].T <= time)
 //     {
-    if( addedParticles[i].isCoherent )
+    if( addedParticles[i].statusCoherent == 2 )
     {
       continue;
     }
@@ -1461,7 +1461,7 @@ void analysis::twoPartclCorrelations()
   {
 //     if(addedParticles[i].T <= time)
 //     {
-    if( addedParticles[i].isCoherent )
+    if( addedParticles[i].statusCoherent == 2 )
     {
       continue;
     }
@@ -1618,7 +1618,7 @@ void analysis::twoPartclCorrelations()
 
   for ( int j = 0;j < addedParticles.size();j++ )
   {
-    if( addedParticles[j].isCoherent )
+    if( addedParticles[j].statusCoherent == 2 )
     {
       continue;
     }
@@ -1893,7 +1893,7 @@ void v2RAA::computeFor( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Particle
   // compute v2 and bin it into pt bins
   for ( int i = 0; i < n_particles; i++ )
   {
-    if( _particles[i].isCoherent )
+    if( _particles[i].statusCoherent == 2 )
     {
       continue;
     }
@@ -2298,7 +2298,7 @@ void analysis::ptDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<P
   // loop over all particles and bin them according to their pt
   for ( int j = 0; j < n_particles; j++ )
   {
-    if( _particles[j].isCoherent )
+    if( _particles[j].statusCoherent == 2 )
     {
       continue;
     }
@@ -2458,7 +2458,7 @@ void analysis::yDistribution( const FLAVOR_TYPE _flavTypeToComputeFor, vector<Pa
 
   for ( int j = 0; j < n_particles; j++ )
   {
-    if( _particles[j].isCoherent )
+    if( _particles[j].statusCoherent == 2 )
     {
       continue;
     }
@@ -2787,7 +2787,7 @@ void analysis::particleOutput( const int step )
 
   for ( int i = 0; i < addedParticles.size(); i++ )
   {
-    if( !addedParticles[i].isCoherent )
+    if( addedParticles[i].statusCoherent != 2 )
     {
       file << i << sep << addedParticles[i].unique_id << sep << addedParticles[i].cell_id << sep << addedParticles[i].FLAVOR << sep 
            << addedParticles[i].Pos.T() << sep << addedParticles[i].Pos.X() << sep

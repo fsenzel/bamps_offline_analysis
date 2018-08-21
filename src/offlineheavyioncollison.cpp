@@ -603,6 +603,7 @@ void offlineHeavyIonCollision::mainFramework()
   cout << "average dt = " << dt_sum / n_dt << endl;
   cout << "last dt = " << dt << endl;
   cout << "number of agains: = " << n_again << endl;
+  cout << "number of particles still in coherent state = " << nCoherentState << endl;
 }
 
 
@@ -1496,7 +1497,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
                 
                     // velocity of added particle in lab frame
                     VectorTXYZ v_jet = addedParticles[id].Mom * (1.0/addedParticles[id].Mom.E());
-          //           double velocity_lab = sqrt( 1.0 - pow( addedParticles[id].m ,2.0) / pow( addedParticles[id].E ,2.0) );
+                    //  double velocity_lab = sqrt( 1.0 - pow( addedParticles[id].m ,2.0) / pow( addedParticles[id].E ,2.0) );
                     
                     // Compute velocity of added particle in rest frame of fluid. The general expression for adding two velocities is not symmetric in v1 and v2. Therefore compute both cases and take average.
                     double velocity_rest_1 = addVelocities( v_cell.X(), v_cell.Y(), v_cell.Z(), v_jet.X(), v_jet.Y(), v_jet.Z() );
@@ -1650,7 +1651,8 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
 
     for( int i = 0; i < addedParticles.size(); i++ )
     {
-      if( addedParticles[i].isCoherent && addedParticles[i].indexMother != -1 )
+      // check if parton is daughter in coherent state
+      if( addedParticles[i].statusCoherent == 2 )
       {
         const double t_formed = getFormationTimeCoherentState( addedParticles[addedParticles[i].indexMother], addedParticles[i] );
       
@@ -1664,10 +1666,22 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         }
         else
         {
-          addedParticles[i].isCoherent = addedParticles[addedParticles[i].indexMother].isCoherent = false;
+          addedParticles[i].statusCoherent = addedParticles[addedParticles[i].indexMother].statusCoherent = 0;
+
+          addedParticles[i].FLAVOR = addedParticles[i].flavorCoherent;
+          addedParticles[i].Mom = addedParticles[i].MomCoherent;
+          addedParticles[i].m = addedParticles[i].mCoherent;
+
+          addedParticles[addedParticles[i].indexMother].FLAVOR = addedParticles[addedParticles[i].indexMother].flavorCoherent;
+          addedParticles[addedParticles[i].indexMother].Mom = addedParticles[addedParticles[i].indexMother].MomCoherent;
+          addedParticles[addedParticles[i].indexMother].m = addedParticles[addedParticles[i].indexMother].mCoherent;
+
+          addedParticles[i].flavorCoherent = addedParticles[addedParticles[i].indexMother].flavorCoherent = gluon;
+          addedParticles[i].MomCoherent = addedParticles[addedParticles[i].indexMother].MomCoherent = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+          addedParticles[i].mCoherent = addedParticles[addedParticles[i].indexMother].mCoherent = 0.0;
           addedParticles[i].tInitCoherent = addedParticles[addedParticles[i].indexMother].tInitCoherent = -1.0;
-          addedParticles[i].uniqueidMother = 1;
-          addedParticles[i].indexMother = -1;
+          addedParticles[i].uniqueidMother = addedParticles[addedParticles[i].indexMother].uniqueidMother = 1;
+          addedParticles[i].indexMother = addedParticles[addedParticles[i].indexMother].indexMother = -1;
         
           nCoherentState -= 2;
         // deltaE += particlesInFormTime[i].getInitialOmega();
@@ -1727,13 +1741,15 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
     
     rate_added_sum = 0;
 
-    pt_addedParticle = addedParticles[jscat].Mom.Perp();
-    
-    if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead || ( addedParticles[jscat].isCoherent && !theConfig->isScatterDuringFormTime() ) )
+    if( addedParticles[jscat].statusCoherent == 0 )
+      pt_addedParticle = addedParticles[jscat].Mom.Perp();
+    else
+      pt_addedParticle = addedParticles[jscat].MomCoherent.Perp();
+
+    if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead || ( addedParticles[jscat].statusCoherent > 0 && !theConfig->isScatterDuringFormTime() ) )
     {
       continue; // jump to next particle in the list
     }
-    
     
     if( theConfig->doScattering_23() )
     {
@@ -1799,10 +1815,18 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
       F1 = particles_atTimeNow[iscat].FLAVOR;
       M1 = particles_atTimeNow[iscat].m;
 
-      F2 = addedParticles[jscat].FLAVOR;
-      M2 = addedParticles[jscat].m;
-
-      s = (particles_atTimeNow[iscat].Mom + addedParticles[jscat].Mom).M2();
+      if( addedParticles[jscat].statusCoherent == 0 )
+      {
+        F2 = addedParticles[jscat].FLAVOR;
+        M2 = addedParticles[jscat].m;
+        s = (particles_atTimeNow[iscat].Mom + addedParticles[jscat].Mom).M2();
+      }
+      else
+      {
+        F2 = addedParticles[jscat].flavorCoherent;
+        M2 = addedParticles[jscat].mCoherent;
+        s = (particles_atTimeNow[iscat].Mom + addedParticles[jscat].MomCoherent).M2();
+      }
 
       xt = ( particles_atTimeNow[iscat].Pos.Perp() + addedParticles[jscat].Pos.Perp() ) / 2;
       ringIndex = rings.getIndex( xt );
@@ -1826,12 +1850,23 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         
         if( theConfig->doScattering_22() )
         {
-          scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, addedParticles[jscat].Mom,
+          if( addedParticles[jscat].statusCoherent == 0 )
+          {
+            scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, addedParticles[jscat].Mom,
                                        F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
                                       theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
                                       theConfig->isConstantCrossSecGQ(),
                                       theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-          
+          }
+          else
+          {
+            scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, addedParticles[jscat].MomCoherent,
+                                       F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
+                                      theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
+                                      theConfig->isConstantCrossSecGQ(),
+                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+          }
+
           switch( theConfig->getCrossSectionMethod() )
           {
             case csMethod_pQCD:
@@ -1852,8 +1887,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           cs22 = probab22 = 0.0;
         }
         
-
-        if( theConfig->doScattering_23() && !addedParticles[jscat].isCoherent )
+        if( theConfig->doScattering_23() && addedParticles[jscat].statusCoherent == 0 )
         {
           if ( lambda > 0 )
           {
@@ -2242,7 +2276,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
       while ( !( F1 == gluon || F2 == gluon || F3 == gluon ) );
       
       pt_addedParticle = addedParticles[kscat].Mom.Perp();
-      if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[kscat].isCoherent )
+      if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[kscat].statusCoherent > 0 )
       {
         continue; //go to next particle triplet 
       }
@@ -2685,32 +2719,52 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
   if ( pt_out1 > pt_out2 && !theConfig->isJetTagged() )
   {
-    addedParticles[jscat].FLAVOR = F1;
-    addedParticles[jscat].Mom = P1new;
-    ParticleOffline tempParticle = particles_atTimeNow[iscat];
-    tempParticle.FLAVOR = F2;
-    tempParticle.Mom = P2new;
-    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
-    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    if( !theConfig->isFiniteFormationTime() )
+    {
+      addedParticles[jscat].FLAVOR = F1;
+      addedParticles[jscat].Mom = P1new;
+    }
+    {
+      addedParticles[jscat].flavorCoherent = F1;
+      addedParticles[jscat].MomCoherent = P1new;
+      addedParticles[jscat].statusCoherent = 1;
+      addedParticles[jscat].tInitCoherent = TT;
+    }
+    
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
+      ParticleOffline tempParticle = particles_atTimeNow[iscat];
+      tempParticle.FLAVOR = F2;
+      tempParticle.Mom = P2new;
+      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
+      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+      tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
   }
   else
   {
-    addedParticles[jscat].FLAVOR = F2;
-    addedParticles[jscat].Mom = P2new;
-    ParticleOffline tempParticle = particles_atTimeNow[iscat];
-    tempParticle.FLAVOR = F1;
-    tempParticle.Mom = P1new;
-    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
-    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    if( !theConfig->isFiniteFormationTime() )
+    {
+      addedParticles[jscat].FLAVOR = F2;
+      addedParticles[jscat].Mom = P2new;
+    }
+    {
+      addedParticles[jscat].flavorCoherent = F2;
+      addedParticles[jscat].MomCoherent = P2new;
+      addedParticles[jscat].statusCoherent = 1;
+      addedParticles[jscat].tInitCoherent = TT;
+    }
+ 
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
+      ParticleOffline tempParticle = particles_atTimeNow[iscat];
+      tempParticle.FLAVOR = F1;
+      tempParticle.Mom = P1new;
+      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
+      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+      tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
@@ -2720,14 +2774,31 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   if( theConfig->getNlightFlavorsAdded() >= 0 )
   {
     ParticleOffline tempParticle;
-    tempParticle.FLAVOR = gluon;
-    tempParticle.Mom = P3new;
+    
+    if( !theConfig->isFiniteFormationTime() )
+    {
+      tempParticle.FLAVOR = gluon;
+      tempParticle.Mom = P3new;
+      tempParticle.m = 0.0;
+    }
+    else
+    {
+      tempParticle.flavorCoherent = gluon;
+      tempParticle.MomCoherent = P3new;
+      tempParticle.mCoherent = 0.0;  
+      tempParticle.statusCoherent = 2;
+
+      tempParticle.tInitCoherent = TT;
+      tempParticle.uniqueidMother = addedParticles[jscat].unique_id;
+      tempParticle.indexMother = jscat;
+      nCoherentState += 2;
+    }
+    
     tempParticle.Pos = VectorTXYZ(TT,leftX + dx * ran2(),leftY + dy * ran2(),leftZ + deltaZ * ran2());
     tempParticle.PosInit = tempParticle.lastInt = tempParticle.Pos;
     tempParticle.MomInit = tempParticle.Mom;
     tempParticle.MomInit.E() = -tempParticle.MomInit.E(); // negative to indicate creation via 2->3 process
 
-    tempParticle.m = 0.0;
     tempParticle.md2g = ( particles_atTimeNow[iscat].md2g + addedParticles[jscat].md2g ) / 2.0;
     tempParticle.md2q = ( particles_atTimeNow[iscat].md2q + addedParticles[jscat].md2q ) / 2.0;
     tempParticle.temperature = ( particles_atTimeNow[iscat].temperature + addedParticles[jscat].temperature ) / 2.0;
@@ -2749,15 +2820,6 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
 
-
-    if( theConfig->isFiniteFormationTime() )
-    {
-      addedParticles[jscat].isCoherent = tempParticle.isCoherent = true;
-      addedParticles[jscat].tInitCoherent = tempParticle.tInitCoherent = TT;
-      tempParticle.uniqueidMother = addedParticles[jscat].unique_id;
-      tempParticle.indexMother = jscat;
-      nCoherentState += 2;
-    }
   //   if ( sqrt( pow( tempParticle.PX, 2) + pow( tempParticle.PY, 2) ) > 3.0 )
   //   {
       addedParticles.push_back( tempParticle );
@@ -2790,9 +2852,16 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   F1 = particles_atTimeNow[iscat].FLAVOR;
   M1 = particles_atTimeNow[iscat].m;
 
-  F2 = addedParticles[jscat].FLAVOR;
-  M2 = addedParticles[jscat].m;
-
+  if( addedParticles[jscat].statusCoherent == 0 )
+  {
+    F2 = addedParticles[jscat].FLAVOR;
+    M2 = addedParticles[jscat].m;
+  }
+  else
+  {
+    F2 = addedParticles[jscat].flavorCoherent;
+    M2 = addedParticles[jscat].mCoherent;
+  }
 
   ncoll++;
   ncoll22++;
@@ -2847,34 +2916,54 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
   if ( ( pt_out1 > pt_out2 && !theConfig->isJetTagged() ) || ( theConfig->isJetTagged() && ( identical_particle_position_flipped || qqbar_position_flipped ) ) )
   {
-    addedParticles[jscat].FLAVOR = F1;
-    addedParticles[jscat].m = M1;
-    addedParticles[jscat].Mom = P1new;
-    ParticleOffline tempParticle = particles_atTimeNow[iscat];
-    tempParticle.FLAVOR = F2;
-    tempParticle.Mom = P2new;
-    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
-    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    if( addedParticles[jscat].statusCoherent == 0 )
+    {
+      addedParticles[jscat].FLAVOR = F1;
+      addedParticles[jscat].m = M1;
+      addedParticles[jscat].Mom = P1new;
+    }
+    else
+    {
+      addedParticles[jscat].flavorCoherent = F1;
+      addedParticles[jscat].mCoherent = M1;
+      addedParticles[jscat].MomCoherent = P1new;
+    }
+    
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
+      ParticleOffline tempParticle = particles_atTimeNow[iscat];
+      tempParticle.FLAVOR = F2;
+      tempParticle.Mom = P2new;
+      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
+      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+      tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
   }
   else
   {
-    addedParticles[jscat].FLAVOR = F2;
-    addedParticles[jscat].m = M2;
-    addedParticles[jscat].Mom = P2new;
-    ParticleOffline tempParticle = particles_atTimeNow[iscat];
-    tempParticle.FLAVOR = F1;
-    tempParticle.Mom = P1new;
-    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
-    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    if( addedParticles[jscat].statusCoherent == 0 )
+    {
+      addedParticles[jscat].FLAVOR = F2;
+      addedParticles[jscat].m = M2;
+      addedParticles[jscat].Mom = P2new;
+    }
+    else
+    {
+      addedParticles[jscat].flavorCoherent = F2;
+      addedParticles[jscat].mCoherent = M2;
+      addedParticles[jscat].MomCoherent = P2new;
+    }
+
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
+      ParticleOffline tempParticle = particles_atTimeNow[iscat];
+      tempParticle.FLAVOR = F1;
+      tempParticle.Mom = P1new;
+      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
+      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+      tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
@@ -4396,11 +4485,11 @@ double offlineHeavyIonCollision::getFormationTimeCoherentState( const ParticleOf
     throw eHIC_error( "Wrong mother was associated in coherent state. Unrecoverable error!" );
   }
 
-  const double kt2 = _daughter.Mom.TransverseMomentumToVectorSquared( _mother.Mom );
+  const double kt2 = _daughter.MomCoherent.TransverseMomentumToVectorSquared( _mother.MomCoherent );
 
   if( kt2 == 0.0 )
     return std::numeric_limits<double>::infinity();
   else
-    return _daughter.tInitCoherent + ( _daughter.Mom.E() / kt2 * ns_casc::InvGevToFm ); // fm
+    return _daughter.tInitCoherent + ( _daughter.MomCoherent.E() / kt2 * ns_casc::InvGevToFm ); // fm
 }
 // kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;
