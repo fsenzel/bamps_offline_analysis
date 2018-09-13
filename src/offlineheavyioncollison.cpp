@@ -1666,8 +1666,6 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
         }
         else
         {
-          addedParticles[i].statusCoherent = addedParticles[addedParticles[i].indexMother].statusCoherent = 0;
-
           addedParticles[i].FLAVOR = addedParticles[i].flavorCoherent;
           addedParticles[i].Mom = addedParticles[i].MomCoherent;
           addedParticles[i].m = addedParticles[i].mCoherent;
@@ -1676,6 +1674,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
           addedParticles[addedParticles[i].indexMother].Mom = addedParticles[addedParticles[i].indexMother].MomCoherent;
           addedParticles[addedParticles[i].indexMother].m = addedParticles[addedParticles[i].indexMother].mCoherent;
 
+          addedParticles[i].statusCoherent = addedParticles[addedParticles[i].indexMother].statusCoherent = 0;
           addedParticles[i].flavorCoherent = addedParticles[addedParticles[i].indexMother].flavorCoherent = gluon;
           addedParticles[i].MomCoherent = addedParticles[addedParticles[i].indexMother].MomCoherent = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
           addedParticles[i].mCoherent = addedParticles[addedParticles[i].indexMother].mCoherent = 0.0;
@@ -2724,6 +2723,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       addedParticles[jscat].FLAVOR = F1;
       addedParticles[jscat].Mom = P1new;
     }
+    else
     {
       addedParticles[jscat].flavorCoherent = F1;
       addedParticles[jscat].MomCoherent = P1new;
@@ -2750,6 +2750,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       addedParticles[jscat].FLAVOR = F2;
       addedParticles[jscat].Mom = P2new;
     }
+    else
     {
       addedParticles[jscat].flavorCoherent = F2;
       addedParticles[jscat].MomCoherent = P2new;
