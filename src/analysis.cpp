@@ -903,9 +903,11 @@ void analysis::finalOutput( const double _stoptime )
   
   if ( dndyOutput )
     print_dndy( "final" );
+  
   if( studyScatteredMediumParticles )
   {
     scatteredMediumParticlesOutput( nTimeSteps );
+    recoiledMediumParticlesOutput( nTimeSteps );
     mediumParticlesOutput( nTimeSteps );
   }
 
@@ -4501,6 +4503,52 @@ void analysis::registerProgressInformationForOutput( const double _time, const d
     string errMsg = "error when attempting to write progress information log";
     throw eAnalysis_error( errMsg );
   }
+}
+
+
+void analysis::recoiledMediumParticlesOutput( const int step )
+{
+  string name;
+  stringstream ss;
+
+  if( step == 0 )
+    name = "initial";
+  else
+    if( step == nTimeSteps )
+      name = "final";
+    else
+    {
+      ss << step;
+      name = "step" + ss.str();
+    }
+
+  //creates filename, for example: "./output/run32_step1.f1", "./output/run32_initial.f1" or the likes
+  string filename = filename_prefix + "_" + name + "_recoiledMediumParticles.f1";
+  fstream file( filename.c_str(), ios::out | ios::trunc );
+
+  //---- print header if file is empty ----
+  time_t end;
+  time( &end );
+
+  file.seekp( 0, ios::end );
+  long size = file.tellp();
+  file.seekp( 0, ios::beg );
+  if( size == 0 )
+    printHeader( file, all, end );
+  //---------------------------------------
+
+  for( int i = 0; i < recoiledMediumParticles.size(); i++ )
+  {
+    file << i << sep << recoiledMediumParticles[i].unique_id << sep << recoiledMediumParticles[i].cell_id 
+         << sep << recoiledMediumParticles[i].FLAVOR << sep 
+         << recoiledMediumParticles[i].Pos.T() << sep << recoiledMediumParticles[i].Pos.X() << sep
+         << recoiledMediumParticles[i].Pos.Y() << sep << recoiledMediumParticles[i].Pos.Z() << sep 
+         << recoiledMediumParticles[i].Mom.E() << sep << recoiledMediumParticles[i].Mom.Px() << sep 
+         << recoiledMediumParticles[i].Mom.Py() << sep << recoiledMediumParticles[i].Mom.Pz() << sep 
+         << recoiledMediumParticles[i].md2g << sep << recoiledMediumParticles[i].md2q << sep 
+         << recoiledMediumParticles[i].N_EVENT_pp << endl;
+  }
+  file.close();
 }
 
 

@@ -239,6 +239,7 @@ public:
   //--------------------//
   //for jet background analysis
   void scatteredMediumParticlesOutput( const int step );
+  void recoiledMediumParticlesOutput( const int step );
   void mediumParticlesOutput( const int step );
   //--------------------//
 private:
