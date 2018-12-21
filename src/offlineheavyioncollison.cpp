@@ -4419,11 +4419,7 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
       const double t_formed = addedParticles[i].getFormationTimeCoherentState( addedParticles[addedParticles[i].indexMother] );
     
       // check if parton is still in formation time
-      if( nexttime < t_formed )
-      {
-        addedParticles[i].Propagate( nexttime );
-      }
-      else
+      if( t_formed <= nexttime )
       {
         if( !theConfig->isSuppressByNscatt() || ran2() < ( 1.0 / addedParticles[i].NscattDuringTau ) )
         {
