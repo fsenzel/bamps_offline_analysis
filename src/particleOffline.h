@@ -51,9 +51,7 @@ public:
     tInitEmission( -1.0 ),
     indexMother( -1 ),
     uniqueidMother( 1 ),
-    MomCoherent( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
-    flavorCoherent( gluon ),
-    mCoherent( 0.0 )
+    deltaMomMother( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
     {};
     
   ParticleOffline( const Particle& _particle ) : 
@@ -74,9 +72,7 @@ public:
     tInitEmission( -1.0 ),
     indexMother( -1 ),
     uniqueidMother( 1 ),
-    MomCoherent( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
-    flavorCoherent( gluon ),
-    mCoherent( 0.0 )
+    deltaMomMother( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
   {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
@@ -121,11 +117,9 @@ public:
   LPM_STATUS_TYPE statusCoherent; // // 0 = not coherent, 1 = coherent
   int indexMother;
   int uniqueidMother;
+  double NscattDuringTau;
   double tInitEmission;
-  
-  VectorEPxPyPz MomCoherent;
-  FLAVOR_TYPE flavorCoherent;
-  double mCoherent;
+  VectorEPxPyPz deltaMomMother;
 
   static int mapToPDGCodes( const FLAVOR_TYPE _flav )
   {
@@ -163,46 +157,6 @@ public:
         break;
     }      
   }
-    
-  /**
-   * Overwriting function of base class ParticlePrototype in order to consider partons in coherent state
-   * This is a shortcut for
-   *   Pos += Mom * ( T - Pos.T )/ Mom.E
-   *
-   * @param[in] time final time
-   */
-  void Propagate( const double time)
-  {
-    if( statusCoherent == 0 )
-      Pos += Mom * (( time - Pos.T() ) / Mom.E());
-    else
-      Pos += MomCoherent * (( time - Pos.T() ) / MomCoherent.E());
-    
-    Pos.T() = time; // necessary due to rounding errors
-  };
-
-  /**
-   * Overwriting function of base class ParticlePrototype in order to consider partons in coherent state
-   * This is a shortcut for
-   *   Pos += Mom * ( T - Pos.T )/ Mom.E
-   *
-   * @param[in] time final time
-   * @param[out] distance The given parameter is increased by the
-   *   traveled distance
-   */
-  void Propagate( const double time, double & distance)
-  {
-    VectorTXYZ Dist;
-    
-    if( statusCoherent == 0 )
-      Dist = Mom * (( time - Pos.T() ) / Mom.E());
-    else
-      Dist = MomCoherent * (( time - Pos.T() ) / MomCoherent.E());
-
-    Pos += Dist;
-    Pos.T() = time; // necessary due to rounding errors
-    distance += sqrt( Dist.vec2() );
-  };
 
   double getFormationTimeCoherentState( const ParticleOffline _mother ) const
   {

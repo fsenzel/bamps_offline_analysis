@@ -277,6 +277,9 @@ class config : public configBase
   /** @brief Interface for config::scatterDuringFormTime */
   bool isScatterDuringFormTime() const { return scatterDuringFormTime; }
 
+  /** @brief Interface for config::suppressByNscatt */
+  bool isSuppressByNscatt() const { return suppressByNscatt; }
+
   /** @brief Interface for config::fudgeFactorLPM_quark */
   double getFudgeFactorLPM_quark() const { return fudgeFactorLPM_quark; }
 
@@ -609,10 +612,13 @@ class config : public configBase
   /** @brief Whether partons in formation time may scatter in order to modify formation time */
   bool scatterDuringFormTime;
 
+  /** @brief Whether gluon emissions are suppressed in order to account for coherent scatterings */
+  bool suppressByNscatt;
+
   double fudgeFactorLPM_quark;
 
   double fudgeFactorLPM_gluon;
-  
+
   /** ------------------------------- */
 
   /** -------- miscellaneous options ------- */ 

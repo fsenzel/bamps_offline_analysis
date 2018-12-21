@@ -116,6 +116,7 @@ config::config() :
  //  ---- lpm parameters ----
  finiteFormationTime( false ),
  scatterDuringFormTime( false ),
+ suppressByNscatt( true ),
  fudgeFactorLPM_quark( 1.0 ),
  fudgeFactorLPM_gluon( 1.0 ),
 // ---- miscellaneous options ----
@@ -384,6 +385,7 @@ void config::initializeProgramOptions()
   lpm_parameters.add_options()
   ("lpm.finiteFormationTime", po::value<bool>( &finiteFormationTime )->default_value( finiteFormationTime ), "Whether 2->3 process happens instantaneously" )
   ("lpm.scatterDuringFormTime", po::value<bool>( &scatterDuringFormTime )->default_value( scatterDuringFormTime ), "Whether partons in formation time may scatter in order to modify formation time" )
+  ("lpm.suppressByNscatt", po::value<bool>( &suppressByNscatt )->default_value( suppressByNscatt ), "Whether gluon emissions are suppressed in order to account for coherent scatterings" )
   ("lpm.fudgeFactorLPM_quark", po::value<double>( &fudgeFactorLPM_quark )->default_value( fudgeFactorLPM_quark ), "fudge factor for screening kt for gluon emission off parent quark" )
   ("lpm.fudgeFactorLPM_gluon", po::value<double>( &fudgeFactorLPM_gluon )->default_value( fudgeFactorLPM_gluon ), "fudge factor for screening kt for gluon emission off parent gluon" )
   ;
@@ -498,6 +500,12 @@ void config::checkOptionsForSanity()
   if ( ( initialPartonFlavor == charm || initialPartonFlavor == bottom || initialPartonFlavor == anti_charm || initialPartonFlavor == anti_bottom )  && N_heavy_flavors_input == 0 )
   {
     string errMsg = "Heavy quark shower initial state, but number of heavy flavors is set to 0.";
+    throw eConfig_error( errMsg );
+  }
+
+  if( finiteFormationTime && !jet_tagged )
+  {
+    string errMsg = "Option 'finiteFormation' can only be set if also tagged jets are used.";
     throw eConfig_error( errMsg );
   }
 

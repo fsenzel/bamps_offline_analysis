@@ -1646,53 +1646,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
   // check for partons that are not longer in formation time
   if( theConfig->isFiniteFormationTime() )
   {
-    // cout << "# time next = " << sep << nexttime << endl; 
-    // cout << "# id daughter" << sep << "id mother" << sep << "t_formed" << endl;
-
-    for( int i = 0; i < addedParticles.size(); i++ )
-    {
-      // check if parton is daughter in coherent state
-      if( addedParticles[i].statusCoherent == coherent )
-      {
-        if( addedParticles[addedParticles[i].indexMother].unique_id != addedParticles[i].uniqueidMother )
-        {
-          throw eHIC_error( "Wrong mother was associated in coherent state. Unrecoverable error!" );
-        }
-        
-        const double t_formed = addedParticles[i].getFormationTimeCoherentState( addedParticles[addedParticles[i].indexMother] );
-      
-        // cout << addedParticles[i].unique_id << sep << addedParticles[addedParticles[i].indexMother].unique_id << sep << t_formed << endl;
-      
-        // check if particles are still in formation time
-        if( nexttime < t_formed )
-        {
-          addedParticles[i].Propagate( nexttime );
-          addedParticles[addedParticles[i].indexMother].Propagate( nexttime );
-        }
-        else
-        {
-          addedParticles[i].FLAVOR = addedParticles[i].flavorCoherent;
-          addedParticles[i].Mom = addedParticles[i].MomCoherent;
-          addedParticles[i].m = addedParticles[i].mCoherent;
-
-          addedParticles[addedParticles[i].indexMother].FLAVOR = addedParticles[addedParticles[i].indexMother].flavorCoherent;
-          addedParticles[addedParticles[i].indexMother].Mom = addedParticles[addedParticles[i].indexMother].MomCoherent;
-          addedParticles[addedParticles[i].indexMother].m = addedParticles[addedParticles[i].indexMother].mCoherent;
-
-          addedParticles[i].statusCoherent = addedParticles[addedParticles[i].indexMother].statusCoherent = not_coherent;
-          addedParticles[i].flavorCoherent = addedParticles[addedParticles[i].indexMother].flavorCoherent = gluon;
-          addedParticles[i].MomCoherent = addedParticles[addedParticles[i].indexMother].MomCoherent = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
-          addedParticles[i].mCoherent = addedParticles[addedParticles[i].indexMother].mCoherent = 0.0;
-          addedParticles[i].tInitEmission = addedParticles[addedParticles[i].indexMother].tInitEmission = -1.0;
-          addedParticles[i].uniqueidMother = addedParticles[addedParticles[i].indexMother].uniqueidMother = 1;
-          addedParticles[i].indexMother = addedParticles[addedParticles[i].indexMother].indexMother = -1;
-        
-          nCoherentState -= 2;
-        // deltaE += particlesInFormTime[i].getInitialOmega();
-        // theAnalysis.analyseGluonEmission( particlesInFormTime[i] );
-        }
-      }          
-    }
+    checkForFormedLPMGluons( nexttime );
   }
   
   formGeomCopy.clear();
@@ -1745,12 +1699,9 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
     
     rate_added_sum = 0;
 
-    if( addedParticles[jscat].statusCoherent == 0 )
-      pt_addedParticle = addedParticles[jscat].Mom.Perp();
-    else
-      pt_addedParticle = addedParticles[jscat].MomCoherent.Perp();
+    pt_addedParticle = addedParticles[jscat].Mom.Perp();
 
-    if ( ( pt_addedParticle < theConfig->getMinimumPT() && addedParticles[jscat].statusCoherent == not_coherent ) || addedParticles[jscat].dead || ( addedParticles[jscat].statusCoherent != not_coherent && !theConfig->isScatterDuringFormTime() ) )
+    if ( ( pt_addedParticle < theConfig->getMinimumPT() && addedParticles[jscat].statusCoherent == not_coherent ) || addedParticles[jscat].dead || ( addedParticles[jscat].statusCoherent == coherent && !theConfig->isScatterDuringFormTime() ) )
     {
       continue; // jump to next particle in the list
     }
@@ -1834,18 +1785,10 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
       F1 = particles_atTimeNow[iscat].FLAVOR;
       M1 = particles_atTimeNow[iscat].m;
 
-      if( addedParticles[jscat].statusCoherent == not_coherent )
-      {
-        F2 = addedParticles[jscat].FLAVOR;
-        M2 = addedParticles[jscat].m;
-        s = (particles_atTimeNow[iscat].Mom + addedParticles[jscat].Mom).M2();
-      }
-      else
-      {
-        F2 = addedParticles[jscat].flavorCoherent;
-        M2 = addedParticles[jscat].mCoherent;
-        s = (particles_atTimeNow[iscat].Mom + addedParticles[jscat].MomCoherent).M2();
-      }
+      F2 = addedParticles[jscat].FLAVOR;
+      M2 = addedParticles[jscat].m;
+
+      s = (particles_atTimeNow[iscat].Mom + addedParticles[jscat].Mom).M2();
 
       xt = ( particles_atTimeNow[iscat].Pos.Perp() + addedParticles[jscat].Pos.Perp() ) / 2;
       ringIndex = rings.getIndex( xt );
@@ -1869,22 +1812,11 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         
         if( theConfig->doScattering_22() )
         {
-          if( addedParticles[jscat].statusCoherent == not_coherent )
-          {
-            scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, addedParticles[jscat].Mom,
+          scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, addedParticles[jscat].Mom,
                                        F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
                                       theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
                                       theConfig->isConstantCrossSecGQ(),
                                       theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-          }
-          else
-          {
-            scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, addedParticles[jscat].MomCoherent,
-                                       F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
-                                      theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
-                                      theConfig->isConstantCrossSecGQ(),
-                                      theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
-          }
 
           switch( theConfig->getCrossSectionMethod() )
           {
@@ -2736,23 +2668,14 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   double pt_out1 = P1new.Perp();
   double pt_out2 = P2new.Perp();
 
+  VectorEPxPyPz delta_mom_mother;
   //<<---------------------------------------------
   // set new properties for added particle
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
   if ( pt_out1 > pt_out2 && !theConfig->isJetTagged() )
   {
-    if( !theConfig->isFiniteFormationTime() )
-    {
-      addedParticles[jscat].FLAVOR = F1;
-      addedParticles[jscat].Mom = P1new;
-    }
-    else
-    {
-      addedParticles[jscat].flavorCoherent = F1;
-      addedParticles[jscat].MomCoherent = P1new;
-      addedParticles[jscat].statusCoherent = coherent;
-      addedParticles[jscat].tInitEmission = TT;
-    }
+    addedParticles[jscat].FLAVOR = F1;
+    addedParticles[jscat].Mom = P1new;
     
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
@@ -2773,12 +2696,17 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       addedParticles[jscat].FLAVOR = F2;
       addedParticles[jscat].Mom = P2new;
     }
-    else
+    else // do not change emitting parton since gluon can still be suppressed later
     {
-      addedParticles[jscat].flavorCoherent = F2;
-      addedParticles[jscat].MomCoherent = P2new;
-      addedParticles[jscat].statusCoherent = coherent;
-      addedParticles[jscat].tInitEmission = TT;
+      // ensure that higher energy gluon is tracked when emitted from a gluon (to be consistent with AMY)
+      if( ( addedParticles[jscat].FLAVOR == gluon ) && ( P3new.E() > P2new.E() ) )
+      {
+        VectorEPxPyPz tmp = P2new;
+        P2new = P3new;
+        P3new = tmp;
+      }
+
+      delta_mom_mother = addedParticles[jscat].Mom - P2new;
     }
  
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
@@ -2799,23 +2727,19 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   {
     ParticleOffline tempParticle;
     
-    if( !theConfig->isFiniteFormationTime() )
-    {
-      tempParticle.FLAVOR = gluon;
-      tempParticle.Mom = P3new;
-      tempParticle.m = 0.0;
-    }
-    else
-    {
-      tempParticle.flavorCoherent = gluon;
-      tempParticle.MomCoherent = P3new;
-      tempParticle.mCoherent = 0.0;  
-      tempParticle.statusCoherent = coherent;
+    tempParticle.FLAVOR = gluon;
+    tempParticle.Mom = P3new;
+    tempParticle.m = 0.0;
 
+    if( theConfig->isFiniteFormationTime() )
+    {
+      tempParticle.statusCoherent = coherent;
+      tempParticle.NscattDuringTau = 1.0;
+      tempParticle.deltaMomMother = delta_mom_mother;
       tempParticle.tInitEmission = TT;
       tempParticle.uniqueidMother = addedParticles[jscat].unique_id;
       tempParticle.indexMother = jscat;
-      nCoherentState += 2;
+      nCoherentState += 1;
     }
     
     tempParticle.Pos = VectorTXYZ(TT,leftX + dx * ran2(),leftY + dy * ran2(),leftZ + deltaZ * ran2());
@@ -2876,20 +2800,17 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   F1 = particles_atTimeNow[iscat].FLAVOR;
   M1 = particles_atTimeNow[iscat].m;
 
-  if( addedParticles[jscat].statusCoherent == not_coherent )
-  {
-    F2 = addedParticles[jscat].FLAVOR;
-    M2 = addedParticles[jscat].m;
-  }
-  else
-  {
-    F2 = addedParticles[jscat].flavorCoherent;
-    M2 = addedParticles[jscat].mCoherent;
-  }
+  F2 = addedParticles[jscat].FLAVOR;
+  M2 = addedParticles[jscat].m;
 
   ncoll++;
   ncoll22++;
   addedParticles[jscat].coll_id = ncoll;
+
+  if( addedParticles[jscat].statusCoherent == coherent )
+  {
+    addedParticles[jscat].NscattDuringTau += 1.0;
+  }
 
   Tmax = std::max( particles_atTimeNow[iscat].Pos.T(), addedParticles[jscat].Pos.T() );
   TT = ( nexttime - Tmax ) * ran2() + Tmax;
@@ -2940,18 +2861,9 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
   if ( ( pt_out1 > pt_out2 && !theConfig->isJetTagged() ) || ( theConfig->isJetTagged() && ( identical_particle_position_flipped || qqbar_position_flipped ) ) )
   {
-    if( addedParticles[jscat].statusCoherent == not_coherent )
-    {
-      addedParticles[jscat].FLAVOR = F1;
-      addedParticles[jscat].m = M1;
-      addedParticles[jscat].Mom = P1new;
-    }
-    else
-    {
-      addedParticles[jscat].flavorCoherent = F1;
-      addedParticles[jscat].mCoherent = M1;
-      addedParticles[jscat].MomCoherent = P1new;
-    }
+    addedParticles[jscat].FLAVOR = F1;
+    addedParticles[jscat].m = M1;
+    addedParticles[jscat].Mom = P1new;
     
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
@@ -2967,18 +2879,9 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   }
   else
   {
-    if( addedParticles[jscat].statusCoherent == not_coherent )
-    {
-      addedParticles[jscat].FLAVOR = F2;
-      addedParticles[jscat].m = M2;
-      addedParticles[jscat].Mom = P2new;
-    }
-    else
-    {
-      addedParticles[jscat].flavorCoherent = F2;
-      addedParticles[jscat].mCoherent = M2;
-      addedParticles[jscat].MomCoherent = P2new;
-    }
+    addedParticles[jscat].FLAVOR = F2;
+    addedParticles[jscat].m = M2;
+    addedParticles[jscat].Mom = P2new;
 
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
@@ -4499,6 +4402,58 @@ double offlineHeavyIonCollision::addVelocities( const double vx_1, const double 
     result_scalar += result[i] * result[i];
   
   return sqrt( result_scalar );
+}
+
+void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
+{
+  for( int i = 0; i < addedParticles.size(); i++ )
+  {
+    // check if parton is daughter in coherent state
+    if( addedParticles[i].statusCoherent == coherent )
+    {
+      if( addedParticles[addedParticles[i].indexMother].unique_id != addedParticles[i].uniqueidMother )
+      {
+        throw eHIC_error( "Wrong mother was associated in coherent state. Unrecoverable error!" );
+      }
+      
+      const double t_formed = addedParticles[i].getFormationTimeCoherentState( addedParticles[addedParticles[i].indexMother] );
+    
+      // check if parton is still in formation time
+      if( nexttime < t_formed )
+      {
+        addedParticles[i].Propagate( nexttime );
+      }
+      else
+      {
+        if( !theConfig->isSuppressByNscatt() || ran2() < ( 1.0 / addedParticles[i].NscattDuringTau ) )
+        {
+          // emission is formed
+          addedParticles[addedParticles[i].indexMother].Mom = addedParticles[addedParticles[i].indexMother].Mom - addedParticles[i].deltaMomMother;
+          addedParticles[addedParticles[i].indexMother].Mom.E() = sqrt( addedParticles[addedParticles[i].indexMother].Mom.vec2() );
+          
+          if( addedParticles[addedParticles[i].indexMother].Mom.E() < 0.0 )
+          {
+            deadParticleList.push_back( addedParticles[i].indexMother );
+            addedParticles[addedParticles[i].indexMother].dead = true;
+          }
+
+          addedParticles[i].statusCoherent = not_coherent;
+          addedParticles[i].tInitEmission = -1.0;
+          addedParticles[i].uniqueidMother = 1;
+          addedParticles[i].indexMother = -1;
+          addedParticles[i].deltaMomMother = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+        }
+        else
+        {
+          // emission is suppressed
+          deadParticleList.push_back( i );
+          addedParticles[i].dead = true;
+        }
+     
+        nCoherentState -= 1;
+      }
+    }          
+  }
 }
 
 // kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;
