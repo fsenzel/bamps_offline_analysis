@@ -1790,6 +1790,21 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           case 5: // screening via Debye mass
             lambda = 1.0 / sqrt( coupling::get_constant_coupling() * addedParticles[jscat].md2g ) * 0.197; // fm
             break;
+          case 6: // screening by CoM energy, lambda will be set later
+            if( ParticleOffline::mapToGenericFlavorType( addedParticles[jscat].FLAVOR ) == light_quark || ParticleOffline::mapToGenericFlavorType( addedParticles[jscat].FLAVOR ) == anti_light_quark )
+            {
+              lambda = 1.0 / theConfig->getFudgeFactorLPM_quark();
+            }
+            else if( ParticleOffline::mapToGenericFlavorType( addedParticles[jscat].FLAVOR ) == gluon )
+            {
+              lambda = 1.0 / theConfig->getFudgeFactorLPM_gluon();
+            }
+            else
+            {
+              std::string errMsg = "Error in scattOfflinePartclWithAddedPartcl: wrong flavor for screening via CoM energy.";
+              throw eHIC_error( errMsg );  
+            }
+            break;
           default: 
             std::string errMsg = "Error in scattOfflinePartclWithAddedPartcl: wrong mfp determination type.";
             throw eHIC_error( errMsg );
@@ -1890,7 +1905,10 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
         {
           if ( lambda > 0 )
           {
-            lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
+            if( theConfig->getJetMfpComputationType() != screeningByCoMEnergy )
+              lambda_scaled = lambda * sqrt( s ) / 0.197; // lambda in fm, sqrt(s) in GeV, lambda_scaled dimensionless
+            else
+              lambda_scaled = lambda;
           }
           else
           {

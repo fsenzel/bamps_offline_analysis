@@ -116,6 +116,8 @@ config::config() :
  //  ---- lpm parameters ----
  finiteFormationTime( false ),
  scatterDuringFormTime( false ),
+ fudgeFactorLPM_quark( 1.0 ),
+ fudgeFactorLPM_gluon( 1.0 ),
 // ---- miscellaneous options ----
  switch_repeatTimesteps(true),
  jetMfpComputationSwitch(computeMfpLastTimestep),
@@ -252,7 +254,7 @@ void config::processProgramOptions()
 
   if ( vm.count("misc.jet_mfp_computation") )
   {
-    if ( vm["misc.jet_mfp_computation"].as<int>() < 6 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
+    if ( vm["misc.jet_mfp_computation"].as<int>() < 7 && vm["misc.jet_mfp_computation"].as<int>() >= 0 )
     {
       jetMfpComputationSwitch = static_cast<JET_MFP_COMPUTATION_TYPE>( vm["misc.jet_mfp_computation"].as<int>() );
     }
@@ -382,6 +384,8 @@ void config::initializeProgramOptions()
   lpm_parameters.add_options()
   ("lpm.finiteFormationTime", po::value<bool>( &finiteFormationTime )->default_value( finiteFormationTime ), "Whether 2->3 process happens instantaneously" )
   ("lpm.scatterDuringFormTime", po::value<bool>( &scatterDuringFormTime )->default_value( scatterDuringFormTime ), "Whether partons in formation time may scatter in order to modify formation time" )
+  ("lpm.fudgeFactorLPM_quark", po::value<double>( &fudgeFactorLPM_quark )->default_value( fudgeFactorLPM_quark ), "fudge factor for screening kt for gluon emission off parent quark" )
+  ("lpm.fudgeFactorLPM_gluon", po::value<double>( &fudgeFactorLPM_gluon )->default_value( fudgeFactorLPM_gluon ), "fudge factor for screening kt for gluon emission off parent gluon" )
   ;
 
   // Add some miscellaneous options
@@ -509,12 +513,17 @@ void config::checkOptionsForSanity()
     throw eConfig_error( errMsg );
   }
 
-  if( fudge_factor_lpm_23 < 0.0 && jetMfpComputationSwitch != 5 )
+  if( fudge_factor_lpm_23 < 0.0 && !( jetMfpComputationSwitch == 5 || jetMfpComputationSwitch == 6 ) )
   {
-    string errMsg = "Theta-LPM can only be switched off if kt is screened via Debye mass.";
+    string errMsg = "Theta-LPM can only be switched off if kt is screened either via Debye mass or via CoM energy.";
     throw eConfig_error( errMsg );
   }
 
+  if( fudge_factor_lpm_23 > 0.0 && ( fudgeFactorLPM_quark != 1.0 || fudgeFactorLPM_gluon != 1.0 ) )
+  {
+    string errMsg = "Different Xlpm for quarks and gluon can only be if kt is screened via CoM energy.";
+    throw eConfig_error( errMsg );
+  }
 }
 
 void config::processHeavyQuarkOptions()

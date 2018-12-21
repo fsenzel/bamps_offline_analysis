@@ -36,7 +36,7 @@
 enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
 
 /** @brief Enumeration type for different variants of computing the mean free path of added particles */
-enum JET_MFP_COMPUTATION_TYPE { computeMfpLastTimestep, computeMfpIteration, computeMfpInterpolation, fixedMfp, thermalMfpGluon, screeningByDebyeMass };
+enum JET_MFP_COMPUTATION_TYPE { computeMfpLastTimestep, computeMfpIteration, computeMfpInterpolation, fixedMfp, thermalMfpGluon, screeningByDebyeMass, screeningByCoMEnergy };
 
 /** @brief Enumeration type for different output schemes to decide which kind of output is printed 
  * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
@@ -276,6 +276,12 @@ class config : public configBase
   
   /** @brief Interface for config::scatterDuringFormTime */
   bool isScatterDuringFormTime() const { return scatterDuringFormTime; }
+
+  /** @brief Interface for config::fudgeFactorLPM_quark */
+  double getFudgeFactorLPM_quark() const { return fudgeFactorLPM_quark; }
+
+  /** @brief Interface for config::fudgeFactorLPM_gluon */
+  double getFudgeFactorLPM_gluon() const { return fudgeFactorLPM_gluon; }
   
   /** ------------------------------- */
 
@@ -603,6 +609,10 @@ class config : public configBase
   /** @brief Whether partons in formation time may scatter in order to modify formation time */
   bool scatterDuringFormTime;
 
+  double fudgeFactorLPM_quark;
+
+  double fudgeFactorLPM_gluon;
+  
   /** ------------------------------- */
 
   /** -------- miscellaneous options ------- */ 
