@@ -188,8 +188,6 @@ private:
   
   double addVelocities( const double vx_1, const double vy_1, const double vz_1, const double vx_2, const double vy_2, const double vz_2 );
 
-  double getFormationTimeCoherentState( const ParticleOffline _mother, const ParticleOffline _daughter ) const;
-
 };
 
 

@@ -1654,7 +1654,12 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
       // check if parton is daughter in coherent state
       if( addedParticles[i].statusCoherent == 2 )
       {
-        const double t_formed = getFormationTimeCoherentState( addedParticles[addedParticles[i].indexMother], addedParticles[i] );
+        if( addedParticles[addedParticles[i].indexMother].unique_id != addedParticles[i].uniqueidMother )
+        {
+          throw eHIC_error( "Wrong mother was associated in coherent state. Unrecoverable error!" );
+        }
+        
+        const double t_formed = addedParticles[i].getFormationTimeCoherentState( addedParticles[addedParticles[i].indexMother] );
       
         // cout << addedParticles[i].unique_id << sep << addedParticles[addedParticles[i].indexMother].unique_id << sep << t_formed << endl;
       
@@ -1678,7 +1683,7 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
           addedParticles[i].flavorCoherent = addedParticles[addedParticles[i].indexMother].flavorCoherent = gluon;
           addedParticles[i].MomCoherent = addedParticles[addedParticles[i].indexMother].MomCoherent = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
           addedParticles[i].mCoherent = addedParticles[addedParticles[i].indexMother].mCoherent = 0.0;
-          addedParticles[i].tInitCoherent = addedParticles[addedParticles[i].indexMother].tInitCoherent = -1.0;
+          addedParticles[i].tInitEmission = addedParticles[addedParticles[i].indexMother].tInitEmission = -1.0;
           addedParticles[i].uniqueidMother = addedParticles[addedParticles[i].indexMother].uniqueidMother = 1;
           addedParticles[i].indexMother = addedParticles[addedParticles[i].indexMother].indexMother = -1;
         
@@ -2746,7 +2751,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       addedParticles[jscat].flavorCoherent = F1;
       addedParticles[jscat].MomCoherent = P1new;
       addedParticles[jscat].statusCoherent = 1;
-      addedParticles[jscat].tInitCoherent = TT;
+      addedParticles[jscat].tInitEmission = TT;
     }
     
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
@@ -2773,7 +2778,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       addedParticles[jscat].flavorCoherent = F2;
       addedParticles[jscat].MomCoherent = P2new;
       addedParticles[jscat].statusCoherent = 1;
-      addedParticles[jscat].tInitCoherent = TT;
+      addedParticles[jscat].tInitEmission = TT;
     }
  
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
@@ -2807,7 +2812,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       tempParticle.mCoherent = 0.0;  
       tempParticle.statusCoherent = 2;
 
-      tempParticle.tInitCoherent = TT;
+      tempParticle.tInitEmission = TT;
       tempParticle.uniqueidMother = addedParticles[jscat].unique_id;
       tempParticle.indexMother = jscat;
       nCoherentState += 2;
@@ -4496,19 +4501,4 @@ double offlineHeavyIonCollision::addVelocities( const double vx_1, const double 
   return sqrt( result_scalar );
 }
 
-
-double offlineHeavyIonCollision::getFormationTimeCoherentState( const ParticleOffline _mother, const ParticleOffline _daughter ) const
-{
-  if( _mother.unique_id != _daughter.uniqueidMother )
-  {
-    throw eHIC_error( "Wrong mother was associated in coherent state. Unrecoverable error!" );
-  }
-
-  const double kt2 = _daughter.MomCoherent.TransverseMomentumToVectorSquared( _mother.MomCoherent );
-
-  if( kt2 == 0.0 )
-    return std::numeric_limits<double>::infinity();
-  else
-    return _daughter.tInitCoherent + ( _daughter.MomCoherent.E() / kt2 * ns_casc::InvGevToFm ); // fm
-}
 // kate: indent-mode cstyle; space-indent on; indent-width 2; replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;  replace-tabs on;

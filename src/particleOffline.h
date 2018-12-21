@@ -16,8 +16,10 @@
 #define PARTICLEOFFLINE_H
 
 #include <vector>
+#include <limits>
 
 #include "particle.h"
+#include "globalsettings.h"
 
 /**
  * @brief Provides properties of a particle needed in the offline reconstruction of BAMPS events.
@@ -44,7 +46,7 @@ public:
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
     statusCoherent( 0 ),
-    tInitCoherent( -1.0 ),
+    tInitEmission( -1.0 ),
     indexMother( -1 ),
     uniqueidMother( 1 ),
     MomCoherent( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
@@ -67,7 +69,7 @@ public:
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
     statusCoherent( 0 ),
-    tInitCoherent( -1.0 ),
+    tInitEmission( -1.0 ),
     indexMother( -1 ),
     uniqueidMother( 1 ),
     MomCoherent( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
@@ -117,7 +119,7 @@ public:
   int statusCoherent; // 0 = not coherent, 1 = emitting parton (mother), 2 = emitted parton (daughter)
   int indexMother;
   int uniqueidMother;
-  double tInitCoherent;
+  double tInitEmission;
   
   VectorEPxPyPz MomCoherent;
   FLAVOR_TYPE flavorCoherent;
@@ -198,6 +200,18 @@ public:
     Pos += Dist;
     Pos.T() = time; // necessary due to rounding errors
     distance += sqrt( Dist.vec2() );
+  };
+
+  double getFormationTimeCoherentState( const ParticleOffline _mother ) const
+  {
+    const double kt2 = this->Mom.TransverseMomentumToVectorSquared( _mother.Mom );
+
+    if( kt2 == 0.0 )
+      return std::numeric_limits<double>::infinity();
+    else
+    {
+      return this->tInitEmission + ( this->Mom.E() / kt2 * ns_casc::InvGevToFm ); // fm
+    }
   };
 
 private:
