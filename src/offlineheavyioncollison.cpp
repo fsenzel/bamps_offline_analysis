@@ -4431,6 +4431,17 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
           {
             deadParticleList.push_back( addedParticles[i].indexMother );
             addedParticles[addedParticles[i].indexMother].dead = true;
+
+            // remove also all other daughters of dead mother
+            for( int j = 0; j < addedParticles.size(); j++ )
+            {
+              if( addedParticles[j].statusCoherent == coherent && addedParticles[j].uniqueidMother == addedParticles[addedParticles[i].indexMother].unique_id )
+              {
+                deadParticleList.push_back( j );
+                addedParticles[j].dead = true;
+                nCoherentState -= 1;
+              }
+            }
           }
 
           addedParticles[i].statusCoherent = not_coherent;
