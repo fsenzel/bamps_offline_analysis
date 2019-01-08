@@ -3491,8 +3491,7 @@ void offlineHeavyIonCollision::removeDeadParticles( )
     deadParticleList.pop_back();
   }
 
-  list<int>::iterator it;
-  for ( it = deadParticleList.begin(); it != deadParticleList.end(); it++ )
+  for ( list<int>::iterator it = deadParticleList.begin(); it != deadParticleList.end(); it++ )
   {
     lastIndex = addedParticles.size() - 1;
 
@@ -3511,6 +3510,15 @@ void offlineHeavyIonCollision::removeDeadParticles( )
 //           addedParticles[*jIt].collisionPartner = *it;
 //         }
 //       }
+    }
+
+    // change index of mother if moved particle was mother
+    for( auto &jt : addedParticles )
+    {
+      if( jt.statusCoherent == coherent && jt.uniqueidMother == addedParticles.back().unique_id )
+      {
+        jt.indexMother = ( *it );
+      }
     }
     addedParticles.pop_back();
 
