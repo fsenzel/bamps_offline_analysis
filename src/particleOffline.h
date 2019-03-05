@@ -51,7 +51,8 @@ public:
     tInitEmission( -1.0 ),
     indexMother( -1 ),
     uniqueidMother( 1 ),
-    deltaMomMother( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
+    deltaMomMother( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
+    MomAtEmission( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
     {};
     
   ParticleOffline( const Particle& _particle ) : 
@@ -72,7 +73,8 @@ public:
     tInitEmission( -1.0 ),
     indexMother( -1 ),
     uniqueidMother( 1 ),
-    deltaMomMother( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
+    deltaMomMother( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
+    MomAtEmission( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
   {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
@@ -120,6 +122,7 @@ public:
   double NscattDuringTau;
   double tInitEmission;
   VectorEPxPyPz deltaMomMother;
+  VectorEPxPyPz MomAtEmission;
 
   static int mapToPDGCodes( const FLAVOR_TYPE _flav )
   {

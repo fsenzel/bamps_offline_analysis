@@ -2736,6 +2736,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       tempParticle.statusCoherent = coherent;
       tempParticle.NscattDuringTau = 1.0;
       tempParticle.deltaMomMother = delta_mom_mother;
+      tempParticle.MomAtEmission = P3new;
       tempParticle.tInitEmission = TT;
       tempParticle.uniqueidMother = addedParticles[jscat].unique_id;
       tempParticle.indexMother = jscat;
@@ -4429,7 +4430,17 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
       // check if parton is still in formation time
       if( t_formed <= nexttime )
       {
-        if( !theConfig->isSuppressByNscatt() || ran2() < ( 1.0 / addedParticles[i].NscattDuringTau ) )
+        double probabLPM = ( 1.0 / addedParticles[i].NscattDuringTau );
+
+        if( theConfig->isCouplingRunning() )
+        {
+          const double kt2_initial = addedParticles[i].MomAtEmission.TransverseMomentumToVectorSquared( addedParticles[addedParticles[i].indexMother] .Mom );
+          const double kt2_final = addedParticles[i].Mom.TransverseMomentumToVectorSquared( addedParticles[addedParticles[i].indexMother] .Mom );
+
+          probabLPM = probabLPM / coupling::get_coupling( kt2_initial ) * coupling::get_coupling( kt2_final );
+        }
+
+        if( !theConfig->isSuppressByNscatt() || ran2() < probabLPM )
         {
           // emission is formed
           addedParticles[addedParticles[i].indexMother].Mom = addedParticles[addedParticles[i].indexMother].Mom - addedParticles[i].deltaMomMother;
