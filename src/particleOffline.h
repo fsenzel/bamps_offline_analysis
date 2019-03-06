@@ -21,8 +21,6 @@
 #include "particle.h"
 #include "globalsettings.h"
 
-enum LPM_STATUS_TYPE { not_coherent = 0, coherent = 1 };
-
 /**
  * @brief Provides properties of a particle needed in the offline reconstruction of BAMPS events.
  *
@@ -47,7 +45,7 @@ public:
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
-    statusCoherent( not_coherent ),
+    isCoherent( false ),
     tInitEmission( -1.0 ),
     indexMother( -1 ),
     uniqueidMother( 1 ),
@@ -69,7 +67,7 @@ public:
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
     rate_added_32( 0.0 ),
-    statusCoherent( not_coherent ),
+    isCoherent( false ),
     tInitEmission( -1.0 ),
     indexMother( -1 ),
     uniqueidMother( 1 ),
@@ -116,7 +114,7 @@ public:
   /** @brief vector which holds information in which event this medium particle is already in added particles list */
   std::vector< bool > isAlreadyInAddedParticles;
 
-  LPM_STATUS_TYPE statusCoherent; // // 0 = not coherent, 1 = coherent
+  bool isCoherent;
   int indexMother;
   int uniqueidMother;
   double NscattDuringTau;

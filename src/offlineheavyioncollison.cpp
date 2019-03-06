@@ -1701,7 +1701,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
 
     pt_addedParticle = addedParticles[jscat].Mom.Perp();
 
-    if ( ( pt_addedParticle < theConfig->getMinimumPT() && addedParticles[jscat].statusCoherent == not_coherent ) || addedParticles[jscat].dead || ( addedParticles[jscat].statusCoherent == coherent && !theConfig->isScatterDuringFormTime() ) )
+    if ( ( pt_addedParticle < theConfig->getMinimumPT() && !addedParticles[jscat].isCoherent ) || addedParticles[jscat].dead || ( addedParticles[jscat].isCoherent && !theConfig->isScatterDuringFormTime() ) )
     {
       continue; // jump to next particle in the list
     }
@@ -1838,7 +1838,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           cs22 = probab22 = 0.0;
         }
         
-        if( theConfig->doScattering_23() && addedParticles[jscat].statusCoherent == not_coherent )
+        if( theConfig->doScattering_23() && !addedParticles[jscat].isCoherent )
         {
           if ( lambda > 0 )
           {
@@ -2230,7 +2230,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
       while ( !( F1 == gluon || F2 == gluon || F3 == gluon ) );
       
       pt_addedParticle = addedParticles[kscat].Mom.Perp();
-      if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[kscat].statusCoherent > 0 )
+      if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[kscat].isCoherent )
       {
         continue; //go to next particle triplet 
       }
@@ -2733,7 +2733,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
 
     if( theConfig->isFiniteFormationTime() )
     {
-      tempParticle.statusCoherent = coherent;
+      tempParticle.isCoherent = true;
       tempParticle.NscattDuringTau = 1.0;
       tempParticle.deltaMomMother = delta_mom_mother;
       tempParticle.MomAtEmission = P3new;
@@ -2808,7 +2808,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   ncoll22++;
   addedParticles[jscat].coll_id = ncoll;
 
-  if( addedParticles[jscat].statusCoherent == coherent )
+  if( addedParticles[jscat].isCoherent )
   {
     addedParticles[jscat].NscattDuringTau += 1.0;
   }
@@ -3516,7 +3516,7 @@ void offlineHeavyIonCollision::removeDeadParticles( )
     // change index of mother if moved particle was mother
     for( auto &jt : addedParticles )
     {
-      if( jt.statusCoherent == coherent && jt.uniqueidMother == addedParticles.back().unique_id )
+      if( jt.isCoherent && jt.uniqueidMother == addedParticles.back().unique_id )
       {
         jt.indexMother = ( *it );
       }
@@ -4418,7 +4418,7 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
   for( int i = 0; i < addedParticles.size(); i++ )
   {
     // check if parton is daughter in coherent state
-    if( addedParticles[i].statusCoherent == coherent )
+    if( addedParticles[i].isCoherent )
     {
       if( addedParticles[addedParticles[i].indexMother].unique_id != addedParticles[i].uniqueidMother )
       {
@@ -4454,7 +4454,7 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
             // remove also all other daughters of dead mother
             for( int j = 0; j < addedParticles.size(); j++ )
             {
-              if( addedParticles[j].statusCoherent == coherent && addedParticles[j].uniqueidMother == addedParticles[addedParticles[i].indexMother].unique_id )
+              if( addedParticles[j].isCoherent && addedParticles[j].uniqueidMother == addedParticles[addedParticles[i].indexMother].unique_id )
               {
                 deadParticleList.push_back( j );
                 addedParticles[j].dead = true;
@@ -4463,7 +4463,7 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
             }
           }
 
-          addedParticles[i].statusCoherent = not_coherent;
+          addedParticles[i].isCoherent = false;
           addedParticles[i].tInitEmission = -1.0;
           addedParticles[i].uniqueidMother = 1;
           addedParticles[i].indexMother = -1;
