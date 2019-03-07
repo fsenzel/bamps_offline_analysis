@@ -128,8 +128,9 @@ void initialModel_PYTHIAShower::populateParticleVector( std::vector< Particle >&
 
     if( shower_type == fixed_shower || shower_type == fixed_parton )
     {
-      initialPartonPair[0].Mom = VectorEPxPyPz( ptCutOff, ptCutOff, 0.0, 0.0 );
-      initialPartonPair[1].Mom = VectorEPxPyPz( ptCutOff, -ptCutOff, 0.0, 0.0 );
+      const double phi = ran2() * 2.0 * M_PI;
+      initialPartonPair[0].Mom = VectorEPxPyPz( ptCutOff, cos(phi) * ptCutOff, sin(phi) * ptCutOff, 0.0 );
+      initialPartonPair[1].Mom = VectorEPxPyPz( ptCutOff, -cos(phi) * ptCutOff, -sin(phi) * ptCutOff, 0.0 );
 
       switch ( initial_parton_flavor )
       {
