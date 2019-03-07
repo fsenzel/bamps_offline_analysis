@@ -4444,8 +4444,7 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
         {
           // emission is formed
           addedParticles[addedParticles[i].indexMother].Mom = addedParticles[addedParticles[i].indexMother].Mom - addedParticles[i].deltaMomMother;
-          addedParticles[addedParticles[i].indexMother].Mom.E() = sqrt( addedParticles[addedParticles[i].indexMother].Mom.vec2() );
-          
+         
           if( addedParticles[addedParticles[i].indexMother].Mom.E() < 0.0 )
           {
             deadParticleList.push_back( addedParticles[i].indexMother );
@@ -4462,12 +4461,17 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
               }
             }
           }
+          else
+          {
+            addedParticles[addedParticles[i].indexMother].Mom.E() = sqrt( addedParticles[addedParticles[i].indexMother].Mom.vec2() );
+          }
 
           addedParticles[i].isCoherent = false;
           addedParticles[i].tInitEmission = -1.0;
           addedParticles[i].uniqueidMother = 1;
           addedParticles[i].indexMother = -1;
           addedParticles[i].deltaMomMother = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+          addedParticles[i].MomAtEmission = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
         }
         else
         {
