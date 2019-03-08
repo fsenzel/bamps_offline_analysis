@@ -19,6 +19,7 @@ SET( SOURCES_lib
   offlineheavyioncollison.cpp
   offlineoutput.cpp
   particleOffline.cpp
+  particleInFormTime.cpp
   pythia6425.f
   pythiashower_event.f90
 )

@@ -1539,6 +1539,16 @@ void offlineHeavyIonCollision::scattering( const double nexttime, bool& again )
               }
             }
             
+            if( theConfig->isScatterDuringFormTime() )
+            {
+              scatt22_addedParticlesInFormTime( allParticlesList, cellsAdded[j], allParticlesListAdded, again, nexttime);
+
+              if( again )
+              {
+                return;
+              }
+            }
+
             if( theConfig->isScatt_offlineWithAddedParticles() )
             {
               analysisRingStructure tempRing( theAnalysis->rings.size(), theAnalysis->rings.getCentralRadius(), theAnalysis->rings.getDeltaR() );
@@ -1701,7 +1711,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
 
     pt_addedParticle = addedParticles[jscat].Mom.Perp();
 
-    if ( ( pt_addedParticle < theConfig->getMinimumPT() && !addedParticles[jscat].isCoherent ) || addedParticles[jscat].dead || ( addedParticles[jscat].isCoherent && !theConfig->isScatterDuringFormTime() ) )
+    if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[jscat].dead )
     {
       continue; // jump to next particle in the list
     }
@@ -1838,7 +1848,7 @@ void offlineHeavyIonCollision::scatt2223_offlineWithAddedParticles( cellContaine
           cs22 = probab22 = 0.0;
         }
         
-        if( theConfig->doScattering_23() && !addedParticles[jscat].isCoherent )
+        if( theConfig->doScattering_23() )
         {
           if ( lambda > 0 )
           {
@@ -2118,6 +2128,148 @@ void offlineHeavyIonCollision::scatt22_amongAddedParticles( cellContainer& _cell
 }
 
 
+void offlineHeavyIonCollision::scatt22_addedParticlesInFormTime( std::vector< int >& _allParticlesList, cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, bool& again, const double nexttime )
+{
+  // TODO: at the moment the gluons in formation time may only scatter with the particles from the same cell as the mother.
+  scattering22 scatt22_object( &theI22 );
+
+  for( auto &jscat : _allParticlesListAdded )
+  {
+    if( addedParticles[jscat].dead )
+    {
+      continue; // jump to next particle in the list
+    }
+    
+    for( auto &daughter : addedParticles[jscat].coherent_daughters )
+    {
+      daughter.md2g = addedParticles[jscat].md2g;
+      daughter.md2q = addedParticles[jscat].md2q;
+
+      for ( int i = 0; i < static_cast<int>( _allParticlesList.size() ); i++ )
+      {
+        const int iscat = _allParticlesList[i];
+        
+        if ( particles_atTimeNow[iscat].dead ) // The last statement to check again whether jscat is dead is necessary since jscat could be deleted in the scattering (Jpsi dissociation which is not "real" since we use more testparticles for Jpsi in which case the Jpsi is deleted) before but the scatterings with all remaining jscat would be carried out.
+        {
+          continue; // jump to next particle from _cell.particleList
+        }
+        
+        FLAVOR_TYPE F1 = particles_atTimeNow[iscat].FLAVOR;
+        double M1 = particles_atTimeNow[iscat].m;
+
+        FLAVOR_TYPE F2 = daughter.FLAVOR;
+        double M2 = daughter.m;
+
+        double probab22, cs22;
+        const double s = (particles_atTimeNow[iscat].Mom + daughter.Mom).M2();
+
+        if ( s < 1.1*lambda2 )
+        {
+          probab22 = -1.0;
+          cs22 = 0.0; //1/GeV^2
+        }
+        else
+        {
+          const double Vrel = VelRel(particles_atTimeNow[iscat].Mom, daughter.Mom, M1, M2);
+
+          //factor as (alpha_s) is not included in definitions of partcl[jscat].md2g, it will be multiplied in the scattering routines
+          const double md2g_wo_as = ( particles_atTimeNow[iscat].md2g + daughter.md2g ) / 2.0;
+          const double md2q_wo_as = ( particles_atTimeNow[iscat].md2q + daughter.md2q ) / 2.0;
+          
+          scatt22_object.setParameter( particles_atTimeNow[iscat].Mom, daughter.Mom,
+                                         F1, F2, M1, M2, s, md2g_wo_as , md2q_wo_as,
+                                        theConfig->getKggQQb(), theConfig->getKgQgQ(), theConfig->getKappa_gQgQ(), 
+                                        theConfig->isConstantCrossSecGQ(),
+                                        theConfig->getConstantCrossSecValueGQ(), theConfig->isIsotropicCrossSecGQ(), theConfig->getKfactor_light() ); // md2g, md2q are debye masses without the factor alpha_s which is multiplied in scattering22.cpp
+
+          int initialStateIndex = -1;
+          switch( theConfig->getCrossSectionMethod() )
+          {
+            case csMethod_pQCD:
+              cs22 = scatt22_object.getXSection22( initialStateIndex );
+              break;
+            case csMethod_constCS:
+              cs22 = theConfig->getInputCrossSectionValue() / pow(0.197,2) / 10.0;//1/GeV^2
+              break;
+            default:
+              string errMsg = "Unknown cross-section type in scatt2223_offlineWithAddedParticles... Unrecoverable error!";
+              throw eHIC_error( errMsg );
+          }
+            
+          probab22 = pow( 0.197, 2.0 ) * cs22 * Vrel * dt / ( dv * testpartcl );
+          
+          if ( probab22 > 1.0 )
+          {
+            again = true;
+            dt = 0.5 / ( probab22 / dt );
+            return;
+          }
+        
+          if ( ran2() < probab22 )
+          {
+            bool identical_particle_position_flipped = false; // is only important if jet is tagged and if both particles are identical
+            bool qqbar_position_flipped = false; // is only important if jet is tagged and if outgoing particle is quark and anti-quark. Then use not always the second particle, which is the anti-quark, but randomize.
+
+            daughter.NscattDuringTau += 1.0;
+
+            const double Tmax = std::max( particles_atTimeNow[iscat].Pos.T(), daughter.Pos.T() );
+            const double TT = ( nexttime - Tmax ) * ran2() + Tmax;
+            daughter.Propagate( TT );
+
+            double t_hat;
+            int typ;
+            if ( theConfig->isIsotropicCrossSection() == false )
+            {
+              // determine type of scattering, momentum transfer t_hat, new flavor and new masses for pQCD cross-sections
+              scatt22_object.getMomentaAndMasses22( F1, F2, M1, M2, t_hat, typ );
+            }
+            else
+            {
+              // determine type of scattering, momentum transfer t_hat, new flavor and new masses for isotropic processes
+              scatt22_object.getMomentaAndMasses22_isotropic( F1, F2, M1, M2, t_hat );
+            }
+  
+            // translate momemtum transfer t_hat into actual momenta of outgoing
+            // particles
+            VectorEPxPyPz P1new, P2new;
+            scatt22_object.setNewMomenta22( P1new, P2new, particles_atTimeNow[iscat].Pos, daughter.Pos, t_hat );
+            
+            // if tagged jet and identical particles, and large momentum transfer, the u channel is active which flips both particles. Since this is only an effect for identical particles and we cannot distinguish them anyhow, we take the particle which is going in the same direction as the incoming added particle. So for large t_hat we have to choose the other outgoing particle.
+            if( F1 == F2 )
+            {
+              double s = ( P1new + P2new ).M2();
+              if( fabs( t_hat ) > s / 2.0 )
+                identical_particle_position_flipped = true;
+            }
+            
+            // process gg->qqbar is at the moment forbidden for gluons in formation time
+            if( typ == 222  )
+            {
+              continue;
+            }
+          
+            //<<---------------------------------------------
+            // set new properties for added particle
+            // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
+            if( identical_particle_position_flipped || qqbar_position_flipped )
+            {
+              daughter.FLAVOR = F1;
+              daughter.m = M1;
+              daughter.Mom = P1new;
+            }
+            else
+            {
+              daughter.FLAVOR = F2;
+              daughter.m = M2;
+              daughter.Mom = P2new;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 
 void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList, cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded, int& n32, bool& again, const double nexttime )
 {
@@ -2230,7 +2382,7 @@ void offlineHeavyIonCollision::scatt32_offlineWithAddedParticles( cellContainer&
       while ( !( F1 == gluon || F2 == gluon || F3 == gluon ) );
       
       pt_addedParticle = addedParticles[kscat].Mom.Perp();
-      if ( pt_addedParticle < theConfig->getMinimumPT() || addedParticles[kscat].isCoherent )
+      if ( pt_addedParticle < theConfig->getMinimumPT() )
       {
         continue; //go to next particle triplet 
       }
@@ -2731,18 +2883,6 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.Mom = P3new;
     tempParticle.m = 0.0;
 
-    if( theConfig->isFiniteFormationTime() )
-    {
-      tempParticle.isCoherent = true;
-      tempParticle.NscattDuringTau = 1.0;
-      tempParticle.deltaMomMother = delta_mom_mother;
-      tempParticle.MomAtEmission = P3new;
-      tempParticle.tInitEmission = TT;
-      tempParticle.uniqueidMother = addedParticles[jscat].unique_id;
-      tempParticle.indexMother = jscat;
-      nCoherentState += 1;
-    }
-    
     tempParticle.Pos = VectorTXYZ(TT,leftX + dx * ran2(),leftY + dy * ran2(),leftZ + deltaZ * ran2());
     tempParticle.PosInit = tempParticle.lastInt = tempParticle.Pos;
     tempParticle.MomInit = tempParticle.Mom;
@@ -2769,6 +2909,15 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
     tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
 
+    if( theConfig->isFiniteFormationTime() )
+    {
+      ParticleInFormTime tmpParticleInFormTime( tempParticle, TT, delta_mom_mother, P3new );
+      tmpParticleInFormTime.Propagate( nexttime );
+      addedParticles[jscat].coherent_daughters.push_back( tmpParticleInFormTime );
+      nCoherentState += 1;
+    }
+    else
+    {
   //   if ( sqrt( pow( tempParticle.PX, 2) + pow( tempParticle.PY, 2) ) > 3.0 )
   //   {
       addedParticles.push_back( tempParticle );
@@ -2776,6 +2925,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
 
       addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );
 //   }
+    }
   }
   
   return newIndex;
@@ -2807,11 +2957,6 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   ncoll++;
   ncoll22++;
   addedParticles[jscat].coll_id = ncoll;
-
-  if( addedParticles[jscat].isCoherent )
-  {
-    addedParticles[jscat].NscattDuringTau += 1.0;
-  }
 
   Tmax = std::max( particles_atTimeNow[iscat].Pos.T(), addedParticles[jscat].Pos.T() );
   TT = ( nexttime - Tmax ) * ran2() + Tmax;
@@ -3513,14 +3658,6 @@ void offlineHeavyIonCollision::removeDeadParticles( )
 //       }
     }
 
-    // change index of mother if moved particle was mother
-    for( auto &jt : addedParticles )
-    {
-      if( jt.isCoherent && jt.uniqueidMother == addedParticles.back().unique_id )
-      {
-        jt.indexMother = ( *it );
-      }
-    }
     addedParticles.pop_back();
 
     while ( addedParticles.back().dead )
@@ -4417,25 +4554,25 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
 {
   for( int i = 0; i < addedParticles.size(); i++ )
   {
-    // check if parton is daughter in coherent state
-    if( addedParticles[i].isCoherent )
+    // check if parton has daughter in coherent state
+    for( auto it = begin( addedParticles[i].coherent_daughters ); it != end( addedParticles[i].coherent_daughters ); )
     {
-      if( addedParticles[addedParticles[i].indexMother].unique_id != addedParticles[i].uniqueidMother )
+      if( (*it).FLAVOR != gluon )
       {
-        throw eHIC_error( "Wrong mother was associated in coherent state. Unrecoverable error!" );
+        throw std::runtime_error( "At the moment only gluons are allowed as partons in formation time. Unrecoverable error!");
       }
-      
-      const double t_formed = addedParticles[i].getFormationTimeCoherentState( addedParticles[addedParticles[i].indexMother] );
-    
+
+      const double t_formed = (*it).getFormationTimeCoherentState( addedParticles[i] );
+  
       // check if parton is still in formation time
       if( t_formed <= nexttime )
       {
-        double probabLPM = ( 1.0 / addedParticles[i].NscattDuringTau );
+        double probabLPM = ( 1.0 / (*it).NscattDuringTau );
 
         if( theConfig->isCouplingRunning() )
         {
-          const double kt2_initial = addedParticles[i].MomAtEmission.TransverseMomentumToVectorSquared( addedParticles[addedParticles[i].indexMother] .Mom );
-          const double kt2_final = addedParticles[i].Mom.TransverseMomentumToVectorSquared( addedParticles[addedParticles[i].indexMother] .Mom );
+          const double kt2_initial = (*it).getMomAtEmission().TransverseMomentumToVectorSquared( addedParticles[i].Mom );
+          const double kt2_final = (*it).Mom.TransverseMomentumToVectorSquared( addedParticles[i].Mom );
 
           probabLPM = probabLPM / coupling::get_coupling( kt2_initial ) * coupling::get_coupling( kt2_final );
         }
@@ -4443,46 +4580,31 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
         if( !theConfig->isSuppressByNscatt() || ran2() < probabLPM )
         {
           // emission is formed
-          addedParticles[addedParticles[i].indexMother].Mom = addedParticles[addedParticles[i].indexMother].Mom - addedParticles[i].deltaMomMother;
+          addedParticles[i].Mom = addedParticles[i].Mom - (*it).getDeltaMomMother();
          
-          if( addedParticles[addedParticles[i].indexMother].Mom.E() < 0.0 )
+          if( addedParticles[i].Mom.E() < 0.0 )
           {
-            deadParticleList.push_back( addedParticles[i].indexMother );
-            addedParticles[addedParticles[i].indexMother].dead = true;
-
-            // remove also all other daughters of dead mother
-            for( int j = 0; j < addedParticles.size(); j++ )
-            {
-              if( addedParticles[j].isCoherent && addedParticles[j].uniqueidMother == addedParticles[addedParticles[i].indexMother].unique_id )
-              {
-                deadParticleList.push_back( j );
-                addedParticles[j].dead = true;
-                nCoherentState -= 1;
-              }
-            }
+            deadParticleList.push_back( i );
+            addedParticles[i].dead = true;
           }
           else
           {
-            addedParticles[addedParticles[i].indexMother].Mom.E() = sqrt( addedParticles[addedParticles[i].indexMother].Mom.vec2() );
+            addedParticles[i].Mom.E() = sqrt( addedParticles[i].Mom.vec2() );
           }
 
-          addedParticles[i].isCoherent = false;
-          addedParticles[i].tInitEmission = -1.0;
-          addedParticles[i].uniqueidMother = 1;
-          addedParticles[i].indexMother = -1;
-          addedParticles[i].deltaMomMother = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
-          addedParticles[i].MomAtEmission = VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 );
+          (*it).Propagate( nexttime );
+          addedParticles.push_back( ( *it ) );
         }
-        else
-        {
-          // emission is suppressed
-          deadParticleList.push_back( i );
-          addedParticles[i].dead = true;
-        }
-     
+
         nCoherentState -= 1;
+        it = addedParticles[i].coherent_daughters.erase( it );
       }
-    }          
+      else
+      {
+        (*it).Propagate( nexttime );
+        ++it;
+      }
+    }
   }
 }
 

@@ -19,6 +19,7 @@
 #include <limits>
 
 #include "particle.h"
+#include "particleInFormTime.h"
 #include "globalsettings.h"
 
 /**
@@ -44,13 +45,7 @@ public:
     lastInt( ),    
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
-    rate_added_32( 0.0 ),
-    isCoherent( false ),
-    tInitEmission( -1.0 ),
-    indexMother( -1 ),
-    uniqueidMother( 1 ),
-    deltaMomMother( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
-    MomAtEmission( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
+    rate_added_32( 0.0 )
     {};
     
   ParticleOffline( const Particle& _particle ) : 
@@ -66,14 +61,8 @@ public:
     lastInt( ),    
     rate( 0 ), ratev( 0 ),
     isAlreadyInAddedParticles( 0 ),
-    rate_added_32( 0.0 ),
-    isCoherent( false ),
-    tInitEmission( -1.0 ),
-    indexMother( -1 ),
-    uniqueidMother( 1 ),
-    deltaMomMother( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) ),
-    MomAtEmission( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
-  {};
+    rate_added_32( 0.0 )
+    {};
     
   /** @brief counter for unique particle IDs of added particles (static) */
   static long int unique_id_counter_added;
@@ -114,13 +103,7 @@ public:
   /** @brief vector which holds information in which event this medium particle is already in added particles list */
   std::vector< bool > isAlreadyInAddedParticles;
 
-  bool isCoherent;
-  int indexMother;
-  int uniqueidMother;
-  double NscattDuringTau;
-  double tInitEmission;
-  VectorEPxPyPz deltaMomMother;
-  VectorEPxPyPz MomAtEmission;
+  std::vector< ParticleInFormTime > coherent_daughters;
 
   static int mapToPDGCodes( const FLAVOR_TYPE _flav )
   {
@@ -158,18 +141,6 @@ public:
         break;
     }      
   }
-
-  double getFormationTimeCoherentState( const ParticleOffline _mother ) const
-  {
-    const double kt2 = this->Mom.TransverseMomentumToVectorSquared( _mother.Mom );
-
-    if( kt2 == 0.0 )
-      return std::numeric_limits<double>::infinity();
-    else
-    {
-      return this->tInitEmission + ( this->Mom.E() / kt2 * ns_casc::InvGevToFm ); // fm
-    }
-  };
 
 private:
 };

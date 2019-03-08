@@ -157,6 +157,7 @@ private:
         const double scaleFactor, bool& again, const double nexttime, analysisRingStructure& _analysisRings );
   
   void scatt22_amongAddedParticles( cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, const double scaleFactor, bool& again, const double nexttime );
+  void scatt22_addedParticlesInFormTime( std::vector< int >& _allParticlesList, cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, bool& again, const double nexttime );
 
   void scatt32_offlineWithAddedParticles( cellContainer& _cell, std::vector< int >& _allParticlesList, std::vector< int >& _gluonList,
                                    cellContainer& _cellAdded, std::vector< int >& _allParticlesListAdded, std::vector< int >& _gluonListAdded,
