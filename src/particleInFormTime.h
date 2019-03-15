@@ -32,11 +32,12 @@ public:
   //   MomAtEmission( VectorEPxPyPz( 0.0, 0.0, 0.0, 0.0 ) )
   //   {};
     
-  ParticleInFormTime( const Particle& _particle, const double _tInitEmission, const VectorEPxPyPz _deltaMomMother, const VectorEPxPyPz _momAtEmission ) : 
+  ParticleInFormTime( const Particle& _particle, const double _tInitEmission, const VectorEPxPyPz _deltaMomMother, const VectorEPxPyPz _momAtEmission, const VectorEPxPyPz _momMotherAtEmission ) : 
     Particle( _particle ), 
     tInitEmission( _tInitEmission ),
     deltaMomMother( _deltaMomMother ),
     MomAtEmission( _momAtEmission ),
+    MomMotherAtEmission( _momMotherAtEmission ),
     NscattDuringTau( 1.0 )
   {};
     
@@ -44,6 +45,7 @@ public:
 
   VectorEPxPyPz getDeltaMomMother() const { return deltaMomMother; };
   VectorEPxPyPz getMomAtEmission() const { return MomAtEmission; };
+  VectorEPxPyPz getMomMotherAtEmission() const { return MomMotherAtEmission; };
 
   double getFormationTimeCoherentState( const Particle _mother ) const
   {
@@ -62,6 +64,7 @@ private:
   double tInitEmission;
   VectorEPxPyPz deltaMomMother;
   VectorEPxPyPz MomAtEmission;
+  VectorEPxPyPz MomMotherAtEmission;
   
 };
 

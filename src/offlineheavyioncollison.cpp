@@ -2911,7 +2911,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
 
     if( theConfig->isFiniteFormationTime() )
     {
-      ParticleInFormTime tmpParticleInFormTime( tempParticle, TT, delta_mom_mother, P3new );
+      ParticleInFormTime tmpParticleInFormTime( tempParticle, TT, delta_mom_mother, P3new, addedParticles[jscat].Mom );
       tmpParticleInFormTime.Propagate( nexttime );
       addedParticles[jscat].coherent_daughters.push_back( tmpParticleInFormTime );
       nCoherentState += 1;
@@ -4571,7 +4571,7 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
 
         if( theConfig->isCouplingRunning() )
         {
-          const double kt2_initial = (*it).getMomAtEmission().TransverseMomentumToVectorSquared( addedParticles[i].Mom );
+          const double kt2_initial = (*it).getMomAtEmission().TransverseMomentumToVectorSquared( (*it).getMomMotherAtEmission() );
           const double kt2_final = (*it).Mom.TransverseMomentumToVectorSquared( addedParticles[i].Mom );
 
           probabLPM = probabLPM / coupling::get_coupling( kt2_initial ) * coupling::get_coupling( kt2_final );
