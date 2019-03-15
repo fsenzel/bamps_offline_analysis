@@ -266,6 +266,19 @@ void config::processProgramOptions()
     }
   }
   
+  if ( vm.count("lpm.nonEikonalLPMmethod") )
+  {
+    if ( vm["lpm.nonEikonalLPMmethod"].as<int>() < 2 || vm["lpm.nonEikonalLPMmethod"].as<int>() >= 0 )
+    {
+      nonEikonalLPMmethod = static_cast<LPM_NONEIKONAL_TYPE>( vm["lpm.nonEikonalLPMmethod"].as<int>() );
+    }
+    else
+    {
+      string errMsg = "parameter \"lpm.nonEikonalLPMmethod\" out of range";
+      throw eConfig_error( errMsg );      
+    }
+  }
+
   if ( vm.count("heavy_quark.shadowing_model") )
   {
     if ( vm["heavy_quark.shadowing_model"].as<int>() < 4 && vm["heavy_quark.shadowing_model"].as<int>() >= 0 )
@@ -388,6 +401,7 @@ void config::initializeProgramOptions()
   ("lpm.suppressByNscatt", po::value<bool>( &suppressByNscatt )->default_value( suppressByNscatt ), "Whether gluon emissions are suppressed in order to account for coherent scatterings" )
   ("lpm.fudgeFactorLPM_quark", po::value<double>( &fudgeFactorLPM_quark )->default_value( fudgeFactorLPM_quark ), "fudge factor for screening kt for gluon emission off parent quark" )
   ("lpm.fudgeFactorLPM_gluon", po::value<double>( &fudgeFactorLPM_gluon )->default_value( fudgeFactorLPM_gluon ), "fudge factor for screening kt for gluon emission off parent gluon" )
+  ("lpm.nonEikonalLPMmethod", po::value<int>()->default_value( nonEikonalLPMmethod ), "Method for dealing with non eikonal stochastic LPM (0 = subtract 3-vector after emission is formed, 1 = subtract energy after emission is formed )" )
   ;
 
   // Add some miscellaneous options

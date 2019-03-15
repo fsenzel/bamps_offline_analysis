@@ -38,6 +38,8 @@ enum PDF_SOURCE_TYPE { builtInGRV, LHAPDF };
 /** @brief Enumeration type for different variants of computing the mean free path of added particles */
 enum JET_MFP_COMPUTATION_TYPE { computeMfpLastTimestep, computeMfpIteration, computeMfpInterpolation, fixedMfp, thermalMfpGluon, screeningByDebyeMass, screeningByCoMEnergy };
 
+enum LPM_NONEIKONAL_TYPE{ subtract_deltaMom_after_formed = 0, subtract_deltaE_after_formed = 1 };
+
 /** @brief Enumeration type for different output schemes to decide which kind of output is printed 
  * set output studies according to the output scheme here in analysis::handle_output_studies( OUTPUT_SCHEME _outputScheme )
 */
@@ -286,6 +288,9 @@ class config : public configBase
   /** @brief Interface for config::fudgeFactorLPM_gluon */
   double getFudgeFactorLPM_gluon() const { return fudgeFactorLPM_gluon; }
   
+  /** @brief Interface for config::nonEikonalLPMmethod */
+  LPM_NONEIKONAL_TYPE getNonEikonalLPMmethod() const { return nonEikonalLPMmethod; }
+
   /** ------------------------------- */
 
   /** -------- miscellaneous options ------- */ 
@@ -618,6 +623,9 @@ class config : public configBase
   double fudgeFactorLPM_quark;
 
   double fudgeFactorLPM_gluon;
+
+  /** @brief Method for dealing with non eikonal stochastic LPM */
+  LPM_NONEIKONAL_TYPE nonEikonalLPMmethod;
 
   /** ------------------------------- */
 

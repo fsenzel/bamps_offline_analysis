@@ -4580,17 +4580,31 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
         if( !theConfig->isSuppressByNscatt() || ran2() < probabLPM )
         {
           // emission is formed
-          addedParticles[i].Mom = addedParticles[i].Mom - (*it).getDeltaMomMother();
-         
-          if( addedParticles[i].Mom.E() < 0.0 )
+          
+          if( theConfig->getNonEikonalLPMmethod() == subtract_deltaMom_after_formed )
           {
-            deadParticleList.push_back( i );
-            addedParticles[i].dead = true;
-          }
-          else
-          {
+            addedParticles[i].Mom = addedParticles[i].Mom - (*it).getDeltaMomMother();
             addedParticles[i].Mom.E() = sqrt( addedParticles[i].Mom.vec2() );
           }
+          else if( theConfig->getNonEikonalLPMmethod() == subtract_deltaE_after_formed )
+          {
+            const VectorEPxPyPz newMom = addedParticles[i].Mom - (*it).getDeltaMomMother();
+
+            if( newMom.E() < 0.0 )
+            {
+              deadParticleList.push_back( i );
+              addedParticles[i].dead = true;
+            }
+            else
+            {
+              addedParticles[i].Mom = VectorEPxPyPz( newMom.E(), 
+                                                     newMom.Px() * ( newMom.E() / sqrt( newMom.vec2() ) ),
+                                                     newMom.Py() * ( newMom.E() / sqrt( newMom.vec2() ) ),
+                                                     newMom.Pz() * ( newMom.E() / sqrt( newMom.vec2() ) ) );
+            }
+          }
+          else
+            throw eOfflineOutput_error( "Unknown non-eikonal method. Unrecoverable error!");
 
           (*it).Propagate( nexttime );
           addedParticles.push_back( ( *it ) );
