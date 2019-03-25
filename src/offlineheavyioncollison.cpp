@@ -2833,14 +2833,16 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     addedParticles[jscat].FLAVOR = F1;
     addedParticles[jscat].Mom = P1new;
     
+    ParticleOffline tempParticle = particles_atTimeNow[iscat];
+    tempParticle.FLAVOR = F2;
+    tempParticle.Mom = P2new;
+    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+    
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
-      ParticleOffline tempParticle = particles_atTimeNow[iscat];
-      tempParticle.FLAVOR = F2;
-      tempParticle.Mom = P2new;
-      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
-      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-      tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
@@ -2869,15 +2871,16 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
 
       delta_mom_mother = addedParticles[jscat].Mom - P2new;
     }
- 
+
+    ParticleOffline tempParticle = particles_atTimeNow[iscat];
+    tempParticle.FLAVOR = F1;
+    tempParticle.Mom = P1new;
+    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
-      ParticleOffline tempParticle = particles_atTimeNow[iscat];
-      tempParticle.FLAVOR = F1;
-      tempParticle.Mom = P1new;
-      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ???
-      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-      tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
@@ -3024,15 +3027,16 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     addedParticles[jscat].FLAVOR = F1;
     addedParticles[jscat].m = M1;
     addedParticles[jscat].Mom = P1new;
+
+    ParticleOffline tempParticle = particles_atTimeNow[iscat];
+    tempParticle.FLAVOR = F2;
+    tempParticle.Mom = P2new;
+    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
     
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
-      ParticleOffline tempParticle = particles_atTimeNow[iscat];
-      tempParticle.FLAVOR = F2;
-      tempParticle.Mom = P2new;
-      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
-      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-      tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
@@ -3048,14 +3052,14 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
     addedParticles[jscat].m = M2;
     addedParticles[jscat].Mom = P2new;
 
+    ParticleOffline tempParticle = particles_atTimeNow[iscat];
+    tempParticle.FLAVOR = F1;
+    tempParticle.Mom = P1new;
+    tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
+    tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
-      ParticleOffline tempParticle = particles_atTimeNow[iscat];
-      tempParticle.FLAVOR = F1;
-      tempParticle.Mom = P1new;
-      tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
-      tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-      tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
