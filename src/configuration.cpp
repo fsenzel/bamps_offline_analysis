@@ -43,6 +43,9 @@ std::vector<ParticleOffline> ns_casc::addedParticlesCopy;
 // std::vector<ParticleHFelectron> ns_casc::addedPartcl_electron;
 std::vector<ParticleOffline> ns_casc::addedPartcl_electron;
 std::vector<ParticleOffline> ns_casc::scatteredMediumParticles;
+std::vector<ParticleOffline> ns_casc::recoiledMediumParticles;
+std::vector<ParticleOffline> ns_casc::scatteredMediumParticlesCopy;
+std::vector<ParticleOffline> ns_casc::recoiledMediumParticlesCopy;
 
 
 double dt = 0.1;
@@ -66,6 +69,7 @@ config::config() :
  scatt_amongOfflineParticles(false),
  scatt_amongAddedParticles(false),
  scatt_furtherOfflineParticles( false ),
+ with_recoil( false ),
  jet_tagged( false ),
 // ---- initial state options ----
  initialStateType(miniJetsInitialState),
@@ -339,6 +343,7 @@ void config::initializeProgramOptions()
   ("simulation.scatt_amongOffline", po::value<bool>( &scatt_amongOfflineParticles )->default_value( scatt_amongOfflineParticles ), "whether offline particles are allowed to scatter with other offline particles")
   ("simulation.scatt_amongAdded", po::value<bool>( &scatt_amongAddedParticles )->default_value( scatt_amongAddedParticles ), "whether added particles are allowed to scatter with other added particles")
   ("simulation.scatt_furtherOffline", po::value<bool>( &scatt_furtherOfflineParticles )->default_value( scatt_furtherOfflineParticles ), "whether scattered offline particles are allowed to scatter further with other added particles")
+  ("simulation.with_recoil", po::value<bool>( &with_recoil )->default_value( with_recoil ), "whether recoiled offline particles are saved")
   ("simulation.jet_tagged", po::value<bool>( &jet_tagged )->default_value( jet_tagged ), "whether the added particles are treated as tagges jets")
   ;
   
@@ -499,7 +504,7 @@ void config::checkOptionsForSanity()
     throw eConfig_error( errMsg );
   }
   
-  if ( scatt_furtherOfflineParticles && !jet_tagged )
+  if ( ( with_recoil || scatt_furtherOfflineParticles ) && !jet_tagged )
   {
     string errMsg = "If recoiled particles are further evolved, jets must be tagged.";
     throw eConfig_error( errMsg );

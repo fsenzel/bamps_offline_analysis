@@ -81,7 +81,9 @@ namespace ns_casc
 //   extern std::vector<ParticleHFelectron> addedPartcl_electron;
   extern std::vector<ParticleOffline> addedPartcl_electron;
   extern std::vector<ParticleOffline> scatteredMediumParticles;
-
+  extern std::vector<ParticleOffline> recoiledMediumParticles;
+  extern std::vector<ParticleOffline> scatteredMediumParticlesCopy;
+  extern std::vector<ParticleOffline> recoiledMediumParticlesCopy;
 }
 //--------------------------------------------------------//
 
@@ -140,6 +142,9 @@ class config : public configBase
 
   /** @brief Interface for config::scatt_furtherOfflineParticles */
   bool isScatt_furtherOfflineParticles() const {return scatt_furtherOfflineParticles;}
+
+  /** @brief Interface for config::with_recoil */
+  bool isWithRecoil() const {return with_recoil;}
 
   /** @brief Interface for config::N_light_flavors_input */
   int getNlightFlavorsAdded() const {return N_light_flavors_input;}
@@ -456,6 +461,10 @@ class config : public configBase
 
   /** @brief Whether scattered offline particles are allowed to scatter again with other added particles */
   bool scatt_furtherOfflineParticles;
+
+  /** @brief Whether recoiled offline particles are saved */
+  bool with_recoil;
+
   /** ------------------------------- */
 
   /** ---- initial state options ---- */ 

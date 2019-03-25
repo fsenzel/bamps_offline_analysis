@@ -383,6 +383,8 @@ void offlineHeavyIonCollision::mainFramework()
     cellsAddedCopy = cellsAdded;
     edgeCellCopy = edgeCell;
     edgeCellAddedCopy = edgeCellAdded;
+    scatteredMediumParticlesCopy = scatteredMediumParticles;
+    recoiledMediumParticlesCopy = recoiledMediumParticles;
     //--------------------------------------
 
     ncoll_backup = ncoll;
@@ -459,6 +461,8 @@ void offlineHeavyIonCollision::mainFramework()
       cellsAdded = cellsAddedCopy;
       edgeCell = edgeCellCopy;
       edgeCellAdded = edgeCellAddedCopy;
+      scatteredMediumParticles = scatteredMediumParticlesCopy;
+      recoiledMediumParticles = recoiledMediumParticlesCopy;
       
       ncoll = ncoll_backup;
       ncoll22 = ncoll22_backup;
@@ -2789,7 +2793,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   double leftY = _cell.corner.y_min;
   double leftX = _cell.corner.x_min;
 
-  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+  if(  theConfig->isWithRecoil() || ( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] ) )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
@@ -2840,6 +2844,11 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
+
+    if( theConfig->isWithRecoil() )
+    {
+      recoiledMediumParticles.push_back( tempParticle );
+    }
   }
   else
   {
@@ -2871,6 +2880,11 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
+
+    if( theConfig->isWithRecoil() )
+    {
+      recoiledMediumParticles.push_back( tempParticle );
     }
   }
 
@@ -2942,7 +2956,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   bool identical_particle_position_flipped = false; // is only important if jet is tagged and if both particles are identical
   bool qqbar_position_flipped = false; // is only important if jet is tagged and if outgoing particle is quark and anti-quark. Then use not always the second particle, which is the anti-quark, but randomize.
 
-  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
+  if( theConfig->isWithRecoil() || ( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] ) )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
@@ -3022,6 +3036,11 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
+
+    if( theConfig->isWithRecoil() )
+    {
+      recoiledMediumParticles.push_back( tempParticle );
+    }
   }
   else
   {
@@ -3039,6 +3058,11 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
       tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
+    }
+
+    if( theConfig->isWithRecoil() )
+    {
+      recoiledMediumParticles.push_back( tempParticle );
     }
   }
   
@@ -3252,13 +3276,13 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
   FLAVOR_TYPE F1, F2, F3;
   int typ;
 
-  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+  if(  theConfig->isWithRecoil() || ( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] ) )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
   }
   
-  if( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] )
+  if(  theConfig->isWithRecoil() || ( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] ) )
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[jscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[kscat].N_EVENT_pp;
@@ -3322,6 +3346,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
     }
     
+    if( theConfig->isWithRecoil() )
+    {
+      recoiledMediumParticles.push_back( tempParticle );
+    }
+
     ParticleOffline tempParticle2 = particles_atTimeNow[jscat];
     tempParticle2.FLAVOR = F2;
     tempParticle2.Mom = P2new;
@@ -3333,6 +3362,12 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
     }
+
+    if( theConfig->isWithRecoil() )
+    {
+      recoiledMediumParticles.push_back( tempParticle );
+    }
+
   }
   else if ( absorbedGluon == 2 ) 
   {
@@ -3370,6 +3405,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
         addedParticles.push_back( tempParticle );
         particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
       }
+
+      if( theConfig->isWithRecoil() )
+      {
+        recoiledMediumParticles.push_back( tempParticle );
+      }
     }
   }
   else // ( absorbedGluon == 1 ) 
@@ -3406,6 +3446,11 @@ int offlineHeavyIonCollision::scatt32_offlineWithAddedParticles_utility( scatter
       {
         addedParticles.push_back( tempParticle );
         particles_atTimeNow[jscat].isAlreadyInAddedParticles[addedParticles[kscat].N_EVENT_pp] = true;
+      }
+
+      if( theConfig->isWithRecoil() )
+      {
+        recoiledMediumParticles.push_back( tempParticle );
       }
     }
   }
