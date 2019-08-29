@@ -46,6 +46,8 @@ cellContainer::cellContainer() :
   pxy_cluster( 0.0 ),
   pxz_cluster( 0.0 ),
   pyz_cluster( 0.0 ),
+  pz2overE2_cluster( 0.0 ),
+  pt2overpz2_cluster( 0.0 ),
   volume_cluster( 0.0 )
 {
   particleList.clear();
@@ -86,6 +88,8 @@ void cellContainer::clear()
   pxy_cluster =  0.0;
   pxz_cluster =  0.0;
   pyz_cluster =  0.0;
+  pz2overE2_cluster = 0.0;
+  pt2overpz2_cluster = 0.0;
   volume_cluster = 0.0;
   averagesPrepared = false;
 }
@@ -120,6 +124,8 @@ void cellContainer::resetStoredValues()
   pxy_cluster =  0.0;
   pxz_cluster =  0.0;
   pyz_cluster =  0.0;
+  pz2overE2_cluster = 0.0;
+  pt2overpz2_cluster = 0.0;
   volume_cluster = 0.0;
 
   rates.clear();
@@ -230,6 +236,8 @@ void cellContainer::addParticleToCluster( Particle particleToAdd )
   pxy_cluster += particleToAdd.Mom.Px() * particleToAdd.Mom.Py() /  particleToAdd.Mom.E();
   pxz_cluster += particleToAdd.Mom.Px() * particleToAdd.Mom.Pz() /  particleToAdd.Mom.E();
   pyz_cluster += particleToAdd.Mom.Py() * particleToAdd.Mom.Pz() /  particleToAdd.Mom.E();
+  pz2overE2_cluster += pow( particleToAdd.Mom.Pz() /  particleToAdd.Mom.E(), 2.0 );
+  pt2overpz2_cluster += pow( particleToAdd.Mom.Perp() /  particleToAdd.Mom.Pz(), 2.0 );
 
   if ( particleToAdd.FLAVOR == gluon )
   {

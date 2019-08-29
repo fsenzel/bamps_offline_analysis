@@ -106,6 +106,8 @@ public:
   double pxy_cluster;
   double pxz_cluster;
   double pyz_cluster;
+  double pz2overE2_cluster;
+  double pt2overpz2_cluster;
   double volume_cluster;
 
 private:

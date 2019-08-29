@@ -4282,6 +4282,9 @@ void analysis::printCentralEtaCells( const int step )
     file << boostLRF.X() / sqrt( boostLRF.X2() + boostLRF.Y2() ) << "\t";
     file << boostLRF.Y() / sqrt( boostLRF.X2() + boostLRF.Y2() ) << "\t";
     file << sqrt( boostLRF.X2() + boostLRF.Y2() ) << "\t";
+    file << cellsInCentralEtaIndex[i].number_gluon_cluster / cellsInCentralEtaIndex[i].volume_cluster << "\t" << cellsInCentralEtaIndex[i].number_quark_cluster / cellsInCentralEtaIndex[i].volume_cluster << "\t";
+    file << cellsInCentralEtaIndex[i].pz2overE2_cluster / ( cellsInCentralEtaIndex[i].number_gluon_cluster + cellsInCentralEtaIndex[i].number_quark_cluster ) << "\t";
+    file << cellsInCentralEtaIndex[i].pt2overpz2_cluster / ( cellsInCentralEtaIndex[i].number_gluon_cluster + cellsInCentralEtaIndex[i].number_quark_cluster ) << "\t";
     file << endl;
   }
 
