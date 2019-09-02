@@ -59,6 +59,9 @@ public:
     }
   };
 
+  std::vector<Particle> scatteredPartners;
+  std::vector<Particle> recoiledPartners;
+
 private:
 
   double tInitEmission;

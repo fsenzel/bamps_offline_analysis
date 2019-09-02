@@ -2220,6 +2220,11 @@ void offlineHeavyIonCollision::scatt22_addedParticlesInFormTime( std::vector< in
             const double TT = ( nexttime - Tmax ) * ran2() + Tmax;
             daughter.Propagate( TT );
 
+            // add scattered parton to list of daughter in formation time
+            daughter.scatteredPartners.push_back( particles_atTimeNow[iscat] );
+            daughter.scatteredPartners.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+            daughter.scatteredPartners.back().N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+
             double t_hat;
             int typ;
             if ( theConfig->isIsotropicCrossSection() == false )
@@ -2260,12 +2265,28 @@ void offlineHeavyIonCollision::scatt22_addedParticlesInFormTime( std::vector< in
               daughter.FLAVOR = F1;
               daughter.m = M1;
               daughter.Mom = P1new;
+
+              ParticleOffline tempParticle = particles_atTimeNow[iscat];
+              tempParticle.FLAVOR = F2;
+              tempParticle.Mom = P2new;
+              tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
+              tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+              tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+              daughter.recoiledPartners.push_back( tempParticle );
             }
             else
             {
               daughter.FLAVOR = F2;
               daughter.m = M2;
               daughter.Mom = P2new;
+
+              ParticleOffline tempParticle = particles_atTimeNow[iscat];
+              tempParticle.FLAVOR = F1;
+              tempParticle.Mom = P1new;
+              tempParticle.unique_id = particles_atTimeNow[iscat].unique_id; // necessary ?
+              tempParticle.N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+              tempParticle.N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+              daughter.recoiledPartners.push_back( tempParticle );
             }
           }
         }
@@ -2793,12 +2814,6 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   double leftY = _cell.corner.y_min;
   double leftX = _cell.corner.x_min;
 
-  if(  theConfig->isWithRecoil() || ( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] ) )
-  {
-    scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
-    scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
-  }
-
   F1 = particles_atTimeNow[iscat].FLAVOR;
   F2 = addedParticles[jscat].FLAVOR;
 
@@ -2825,6 +2840,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
   double pt_out2 = P2new.Perp();
 
   VectorEPxPyPz delta_mom_mother;
+  ParticleOffline recoiledMediumParticle;
   //<<---------------------------------------------
   // set new properties for added particle
   // consider outgoing particle with highest pt if it not a tagged jet (charm, bottom, jpsi, etc)
@@ -2842,15 +2858,11 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     
     if( theConfig->isScatt_furtherOfflineParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] )
     {
-
       addedParticles.push_back( tempParticle );
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
 
-    if( theConfig->isWithRecoil() )
-    {
-      recoiledMediumParticles.push_back( tempParticle );
-    }
+    recoiledMediumParticle = tempParticle;
   }
   else
   {
@@ -2885,10 +2897,7 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
       particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] = true;
     }
 
-    if( theConfig->isWithRecoil() )
-    {
-      recoiledMediumParticles.push_back( tempParticle );
-    }
+    recoiledMediumParticle = tempParticle;
   }
 
   int newIndex = -1;
@@ -2930,6 +2939,13 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
     {
       ParticleInFormTime tmpParticleInFormTime( tempParticle, TT, delta_mom_mother, P3new, addedParticles[jscat].Mom );
       tmpParticleInFormTime.Propagate( nexttime );
+
+      tmpParticleInFormTime.scatteredPartners.push_back( particles_atTimeNow[iscat] );
+      tmpParticleInFormTime.scatteredPartners.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+      tmpParticleInFormTime.scatteredPartners.back().N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+            
+      tmpParticleInFormTime.recoiledPartners.push_back( recoiledMediumParticle );
+
       addedParticles[jscat].coherent_daughters.push_back( tmpParticleInFormTime );
       nCoherentState += 1;
     }
@@ -2942,6 +2958,17 @@ int offlineHeavyIonCollision::scatt23_offlineWithAddedParticles_utility( scatter
 
       addedParticles[newIndex].Propagate( nexttime, addedParticles[newIndex].X_traveled );
 //   }
+      if( theConfig->isWithRecoil() || ( theConfig->doOutput_scatteredMediumParticles() && !particles_atTimeNow[iscat].isAlreadyInAddedParticles[addedParticles[jscat].N_EVENT_pp] ) )
+      {
+        scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
+        scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+        scatteredMediumParticles.back().N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
+      }
+
+      if( theConfig->isWithRecoil() )
+      {
+        recoiledMediumParticles.push_back( recoiledMediumParticle );
+      }
     }
   }
   
@@ -2963,6 +2990,7 @@ void offlineHeavyIonCollision::scatt22_offlineWithAddedParticles_utility( scatte
   {
     scatteredMediumParticles.push_back( particles_atTimeNow[iscat] );
     scatteredMediumParticles.back().N_EVENT_pp = addedParticles[jscat].N_EVENT_pp;
+    scatteredMediumParticles.back().N_EVENT_AA = addedParticles[jscat].N_EVENT_AA;
   }
 
   F1 = particles_atTimeNow[iscat].FLAVOR;
@@ -4657,6 +4685,19 @@ void offlineHeavyIonCollision::checkForFormedLPMGluons( const double nexttime )
 
           (*it).Propagate( nexttime );
           addedParticles.push_back( ( *it ) );
+
+          if( theConfig->isWithRecoil() )
+          {
+            for( auto &partonToAdd : (*it).scatteredPartners )
+            {
+              scatteredMediumParticles.push_back( partonToAdd );
+            }
+
+            for( auto &partonToAdd : (*it).recoiledPartners )
+            {
+              recoiledMediumParticles.push_back( partonToAdd );
+            }
+          }
         }
 
         nCoherentState -= 1;
